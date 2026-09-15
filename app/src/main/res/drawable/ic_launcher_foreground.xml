@@ -1,0 +1,43 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Bible Base Pages -->
+    <path
+        android:pathData="M30,36 C30,36 40,34 54,38 C68,34 78,36 78,36 L78,68 C78,68 68,66 54,70 C40,66 30,68 30,68 Z"
+        android:fillColor="#F8F9FA" />
+    <!-- Center Spine & Shadow -->
+    <path
+        android:pathData="M53,38 L55,38 L55,70 L53,70 Z"
+        android:fillColor="#CFD8DC" />
+    <path
+        android:pathData="M30,68 C40,66 54,70 54,70 C54,70 68,66 78,68 L78,72 C68,70 54,74 54,74 C40,70 30,72 30,72 Z"
+        android:fillColor="#ECEFF1" />
+    <!-- Gold Cover / Edge Trim -->
+    <path
+        android:pathData="M28,69 C38,67 54,71 54,71 C54,71 70,67 80,69 L80,74 C70,72 54,76 54,76 C38,72 28,74 28,74 Z"
+        android:fillColor="#E5A93C" />
+    <!-- Page text lines left page -->
+    <path
+        android:pathData="M35,44 L49,43 M35,49 L49,48 M35,54 L49,53 M35,59 L47,58"
+        android:strokeColor="#B0BEC5"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round" />
+    <!-- Page text lines right page -->
+    <path
+        android:pathData="M59,43 L73,44 M59,48 L73,49 M59,53 L73,54 M59,58 L71,59"
+        android:strokeColor="#B0BEC5"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round" />
+    <!-- Golden Ribbon Bookmark -->
+    <path
+        android:pathData="M51,37 L57,37 L57,64 L54,61 L51,64 Z"
+        android:fillColor="#F6C343" />
+    <!-- Cross in radiant gold on top of book center -->
+    <path
+        android:pathData="M54,24 L54,34 M49,27 L59,27"
+        android:strokeColor="#F6C343"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round" />
+</vector>

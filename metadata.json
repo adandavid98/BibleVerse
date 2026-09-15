@@ -1,0 +1,6 @@
+{
+  "name": "Versículos Bíblicos",
+  "description": "Versículos fundamentales y más significativos de la Biblia con recordatorios diarios, favoritos, notas, modo nocturno, resaltador y exportación.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
