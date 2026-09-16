@@ -7,7 +7,10 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.data.initial.InitialVersesData
+import com.example.data.model.BibleBookEntity
+import com.example.data.model.BibleReaderVerseEntity
 import com.example.data.model.VerseEntity
+import com.example.data.model.VerseHighlightEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
