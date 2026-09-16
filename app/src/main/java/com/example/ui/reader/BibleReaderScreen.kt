@@ -225,7 +225,7 @@ fun BibleReaderScreen(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, bottom = 18.dp),
+                    .padding(start = 16.dp, end = 16.dp, bottom = 18.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
