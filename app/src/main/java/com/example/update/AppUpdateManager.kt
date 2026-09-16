@@ -21,7 +21,7 @@ object AppUpdateManager {
 
     private const val PREFS_NAME = "bible_app_update_prefs"
     private const val KEY_GITHUB_REPO = "github_repo_owner_name"
-    const val DEFAULT_REPO = "adandavid9805/versiculos-biblicos"
+    const val DEFAULT_REPO = "adandavid98/BibleVerse"
 
     private val httpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()

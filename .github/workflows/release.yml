@@ -55,10 +55,20 @@ jobs:
 
       - name: Build Android APK
         run: |
-          # Ensure a usable debug keystore exists if release signing is not set
-          if [ ! -f "debug.keystore" ] && [ -f "debug.keystore.base64" ]; then
-            base64 -d debug.keystore.base64 > debug.keystore || true
+          # Ensure a usable debug keystore exists as required by signingConfig 'debugConfig'
+          if [ -f "debug.keystore.base64" ]; then
+            echo "Decoding debug.keystore from base64..."
+            base64 -d debug.keystore.base64 > debug.keystore 2>/dev/null || true
           fi
+
+          if [ ! -f "debug.keystore" ]; then
+            echo "Generating debug.keystore with keytool..."
+            keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+          # Also ensure ~/.android/debug.keystore exists
+          mkdir -p ~/.android
+          cp -f debug.keystore ~/.android/debug.keystore 2>/dev/null || true
 
           # Find gradle executable (gradlew or installed gradle)
           if [ -f "./gradlew" ]; then
