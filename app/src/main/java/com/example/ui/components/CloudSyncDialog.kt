@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudSync
@@ -82,7 +83,10 @@ fun CloudSyncDialog(
     onUploadFirestore: () -> Unit,
     onDownloadFirestore: () -> Unit,
     onPerformBackup: () -> Unit,
-    onPerformRestore: (String) -> Unit
+    onPerformRestore: (String) -> Unit,
+    permanentSha1: String = "44:99:64:CA:F2:A6:54:72:7E:84:80:7C:25:2C:E4:FB:68:BD:96:03",
+    currentWebClientId: String? = null,
+    onSaveWebClientId: (String) -> Unit = {}
 ) {
     val clipboardManager = LocalClipboardManager.current
     var showManualSection by remember { mutableStateOf(false) }
@@ -93,6 +97,12 @@ fun CloudSyncDialog(
     var showEmailLogin by remember { mutableStateOf(false) }
     var emailInput by remember { mutableStateOf("") }
     var passwordInput by remember { mutableStateOf("") }
+
+    // Google / Firebase configuration inputs
+    var showConfigSection by remember { mutableStateOf(false) }
+    var customClientIdInput by remember(currentWebClientId) { mutableStateOf(currentWebClientId ?: "") }
+    var sha1Copied by remember { mutableStateOf(false) }
+    var clientIdSaved by remember { mutableStateOf(false) }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -341,6 +351,95 @@ fun CloudSyncDialog(
                                         shape = RoundedCornerShape(10.dp)
                                     ) {
                                         Text("Entrar / Crear Cuenta")
+                                    }
+                                }
+                            }
+
+                            // Botón 4: Ajustes de Conexión Google & Firebase (SHA-1 / Client ID)
+                            TextButton(
+                                onClick = { showConfigSection = !showConfigSection },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Icon(Icons.Filled.Key, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(if (showConfigSection) "Ocultar Ajustes de Google / SHA-1" else "⚙️ Configurar Google Sign-In (SHA-1 / Client ID)")
+                            }
+
+                            if (showConfigSection) {
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(12.dp),
+                                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        Text(
+                                            text = "1. Huella SHA-1 de esta App (Para Firebase Console)",
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Text(
+                                            text = permanentSha1,
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Medium
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        OutlinedButton(
+                                            onClick = {
+                                                clipboardManager.setText(AnnotatedString(permanentSha1))
+                                                sha1Copied = true
+                                            },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            shape = RoundedCornerShape(8.dp)
+                                        ) {
+                                            Icon(
+                                                if (sha1Copied) Icons.Filled.CheckCircle else Icons.Filled.ContentCopy,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Text(if (sha1Copied) "¡Huella SHA-1 Copiada!" else "Copiar Huella SHA-1")
+                                        }
+
+                                        Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+                                        Text(
+                                            text = "2. Google Web Client ID (OAuth 2.0)",
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        OutlinedTextField(
+                                            value = customClientIdInput,
+                                            onValueChange = {
+                                                customClientIdInput = it
+                                                clientIdSaved = false
+                                            },
+                                            label = { Text("Web Client ID (.apps.googleusercontent.com)", fontSize = 11.sp) },
+                                            singleLine = true,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                        Button(
+                                            onClick = {
+                                                if (customClientIdInput.isNotBlank()) {
+                                                    onSaveWebClientId(customClientIdInput.trim())
+                                                    clientIdSaved = true
+                                                }
+                                            },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            shape = RoundedCornerShape(8.dp)
+                                        ) {
+                                            Text(if (clientIdSaved) "¡Client ID Guardado con Éxito!" else "Guardar Client ID")
+                                        }
+
+                                        Text(
+                                            text = "Pasos: 1) En Firebase Console > Configuración del Proyecto > Tus Apps, agrega la huella SHA-1. 2) En Authentication > Sign-in method activa Google. 3) Pega aquí el ID de cliente web si no lo detecta automáticamente.",
+                                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
                                 }
                             }

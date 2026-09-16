@@ -16,9 +16,13 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +34,12 @@ import java.security.MessageDigest
 import java.util.UUID
 
 object FirebaseSyncManager {
+
+    const val PERMANENT_KEYSTORE_SHA1 = "44:99:64:CA:F2:A6:54:72:7E:84:80:7C:25:2C:E4:FB:68:BD:96:03"
+    const val PERMANENT_KEYSTORE_SHA256 = "51:CC:D0:49:AD:C0:CF:FB:C9:EB:53:C6:18:DC:A6:B4:5D:49:B4:30:8A:F2:0B:6D:76:D1:F7:FB:E8:C5:7F:D2"
+    const val DEFAULT_WEB_CLIENT_ID = "233274499940-sq9d6u2vdoe4pu0pk72i5k997c3m2h6q.apps.googleusercontent.com"
+    private const val PREFS_FIREBASE_AUTH = "bible_firebase_auth_prefs"
+    private const val KEY_CUSTOM_WEB_CLIENT_ID = "custom_firebase_web_client_id"
 
     private const val TAG = "FirebaseSyncManager"
     private const val COLLECTION_USERS = "users"
@@ -110,6 +120,32 @@ object FirebaseSyncManager {
         return auth?.currentUser?.toUserState()
     }
 
+    fun getSavedWebClientId(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREFS_FIREBASE_AUTH, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_CUSTOM_WEB_CLIENT_ID, null)?.trim()?.ifBlank { null }
+    }
+
+    fun saveWebClientId(context: Context, clientId: String) {
+        val prefs = context.getSharedPreferences(PREFS_FIREBASE_AUTH, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_CUSTOM_WEB_CLIENT_ID, clientId.trim()).apply()
+    }
+
+    fun resolveServerClientId(context: Context, explicitClientId: String? = null): String? {
+        if (!explicitClientId.isNullOrBlank()) {
+            return explicitClientId.trim()
+        }
+        val fromPrefs = getSavedWebClientId(context)
+        if (!fromPrefs.isNullOrBlank()) {
+            return fromPrefs
+        }
+        val resId = context.resources.getIdentifier("default_web_client_id", "string", context.packageName)
+        if (resId != 0) {
+            val fromRes = context.getString(resId).trim()
+            if (fromRes.isNotBlank()) return fromRes
+        }
+        return DEFAULT_WEB_CLIENT_ID
+    }
+
     /**
      * Signs in with Google using Android Credential Manager.
      */
@@ -119,6 +155,15 @@ object FirebaseSyncManager {
     ): Result<FirebaseUserState> = withContext(Dispatchers.IO) {
         val auth = getOrInitAuth(context)
             ?: return@withContext Result.failure(IllegalStateException("No se pudo iniciar el servicio de autenticación de Firebase en este dispositivo."))
+
+        val effectiveClientId = resolveServerClientId(context, serverClientId)
+        if (effectiveClientId.isNullOrBlank()) {
+            return@withContext Result.failure(
+                IllegalStateException(
+                    "Falta el 'Web Client ID' de Google. Agrégalo en Ajustes de Nube > Configuración o habilita Google Sign-In en Firebase Console y descarga el nuevo google-services.json."
+                )
+            )
+        }
 
         try {
             val credentialManager = CredentialManager.create(context)
@@ -132,10 +177,7 @@ object FirebaseSyncManager {
                 .setFilterByAuthorizedAccounts(false)
                 .setAutoSelectEnabled(false)
                 .setNonce(hashedNonce)
-
-            if (!serverClientId.isNullOrBlank()) {
-                googleIdOptionBuilder.setServerClientId(serverClientId.trim())
-            }
+                .setServerClientId(effectiveClientId)
 
             val request = GetCredentialRequest.Builder()
                 .addCredentialOption(googleIdOptionBuilder.build())
@@ -158,17 +200,35 @@ object FirebaseSyncManager {
                     _currentUserState.value = userState
                     Result.success(userState)
                 } else {
-                    Result.failure(Exception("No se pudo obtener el perfil de usuario de Google"))
+                    Result.failure(Exception("No se pudo obtener el perfil de usuario de Google."))
                 }
             } else {
-                Result.failure(Exception("Credencial no compatible con Google ID Token"))
+                Result.failure(Exception("Credencial no compatible con Google ID Token."))
             }
         } catch (e: GetCredentialCancellationException) {
             Result.failure(Exception("Inicio de sesión con Google cancelado."))
         } catch (e: GoogleIdTokenParsingException) {
-            Result.failure(Exception("Error procesando token: ${e.message}"))
+            Result.failure(Exception("Error al procesar credencial de Google: ${e.message}"))
         } catch (e: GetCredentialException) {
-            Result.failure(Exception(e.message ?: "Error en Credential Manager"))
+            val msg = e.message ?: ""
+            val errorText = when {
+                msg.contains("10") || msg.contains("DEVELOPER_ERROR", ignoreCase = true) ->
+                    "Error de configuración (Código 10): Asegúrate de haber registrado la huella digital SHA-1 ($PERMANENT_KEYSTORE_SHA1) en Firebase Console."
+                msg.contains("12500") || msg.contains("SIGN_IN_FAILED", ignoreCase = true) ->
+                    "Error 12500: Verifica que el proveedor Google esté activo en Firebase Authentication."
+                msg.contains("No credential", ignoreCase = true) || msg.contains("cancelled", ignoreCase = true) ->
+                    "No se seleccionó ninguna cuenta de Google o se canceló el selector."
+                else -> "Error en Credential Manager: ${e.localizedMessage ?: e.message}"
+            }
+            Result.failure(Exception(errorText))
+        } catch (e: FirebaseAuthException) {
+            val msg = e.message ?: ""
+            val formatted = when {
+                msg.contains("disabled", ignoreCase = true) || e.errorCode.contains("OPERATION_NOT_ALLOWED") ->
+                    "El proveedor Google está deshabilitado en Firebase Console. Actívalo en Authentication > Sign-in method."
+                else -> "Error de Firebase Auth: ${e.localizedMessage ?: msg}"
+            }
+            Result.failure(Exception(formatted))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -196,13 +256,15 @@ object FirebaseSyncManager {
         }
 
         try {
-            // Try signing in first
+            // Intentar inicio de sesión primero
             val res = try {
                 auth.signInWithEmailAndPassword(trimmedEmail, trimmedPass).await()
-            } catch (e: Exception) {
-                // If user not found, try creating account automatically
-                Log.d(TAG, "Sign in falló, intentando crear cuenta nueva: ${e.message}")
+            } catch (e: FirebaseAuthInvalidUserException) {
+                // Usuario no existe todavía: crear cuenta automáticamente
+                Log.d(TAG, "Usuario no existe, creando cuenta nueva: ${e.message}")
                 auth.createUserWithEmailAndPassword(trimmedEmail, trimmedPass).await()
+            } catch (e: FirebaseAuthInvalidCredentialsException) {
+                return@withContext Result.failure(Exception("Contraseña incorrecta para este correo o formato inválido."))
             }
 
             val user = res.user
@@ -211,6 +273,16 @@ object FirebaseSyncManager {
             val userState = user.toUserState()
             _currentUserState.value = userState
             Result.success(userState)
+        } catch (e: FirebaseAuthException) {
+            val msg = e.message ?: ""
+            val formatted = when {
+                msg.contains("disabled", ignoreCase = true) ->
+                    "El inicio con Correo/Contraseña está deshabilitado en Firebase Console. Habilítalo en Authentication > Sign-in method."
+                msg.contains("email address is already in use", ignoreCase = true) ->
+                    "Este correo ya está registrado con otra contraseña."
+                else -> "Error de autenticación: ${e.localizedMessage ?: msg}"
+            }
+            Result.failure(Exception(formatted))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -236,6 +308,14 @@ object FirebaseSyncManager {
             )
             _currentUserState.value = userState
             Result.success(userState)
+        } catch (e: FirebaseAuthException) {
+            val msg = e.message ?: ""
+            val formatted = if (msg.contains("disabled", ignoreCase = true)) {
+                "La autenticación anónima está deshabilitada en Firebase Console. Actívala en Authentication > Sign-in method > Anónimo."
+            } else {
+                "Error en autenticación anónima: ${e.localizedMessage ?: msg}"
+            }
+            Result.failure(Exception(formatted))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -326,6 +406,16 @@ object FirebaseSyncManager {
             batch.commit().await()
             _syncOperationState.value = CloudSyncState.Success("$uploadCount elementos respaldados en la nube.")
             Result.success(uploadCount)
+        } catch (e: FirebaseFirestoreException) {
+            val msg = when (e.code) {
+                FirebaseFirestoreException.Code.PERMISSION_DENIED ->
+                    "Permiso denegado en Firestore. Asegúrate de configurar las Reglas de Seguridad en Firebase Console para permitir lectura y escritura a usuarios autenticados."
+                FirebaseFirestoreException.Code.UNAVAILABLE ->
+                    "Servicio de Firestore no disponible. Revisa tu conexión a internet."
+                else -> "Error de base de datos Firestore (${e.code}): ${e.localizedMessage ?: e.message}"
+            }
+            _syncOperationState.value = CloudSyncState.Error(msg)
+            Result.failure(Exception(msg))
         } catch (e: Exception) {
             _syncOperationState.value = CloudSyncState.Error(e.localizedMessage ?: "Error al subir a Firestore")
             Result.failure(e)
@@ -407,6 +497,16 @@ object FirebaseSyncManager {
 
             _syncOperationState.value = CloudSyncState.Success("$restoredCount versículos restaurados desde tu cuenta.")
             Result.success(restoredCount)
+        } catch (e: FirebaseFirestoreException) {
+            val msg = when (e.code) {
+                FirebaseFirestoreException.Code.PERMISSION_DENIED ->
+                    "Permiso denegado al leer Firestore. Revisa las Reglas de Seguridad en Firebase Console."
+                FirebaseFirestoreException.Code.UNAVAILABLE ->
+                    "Servicio de Firestore no disponible. Revisa tu conexión a internet."
+                else -> "Error de base de datos Firestore (${e.code}): ${e.localizedMessage ?: e.message}"
+            }
+            _syncOperationState.value = CloudSyncState.Error(msg)
+            Result.failure(Exception(msg))
         } catch (e: Exception) {
             _syncOperationState.value = CloudSyncState.Error(e.localizedMessage ?: "Error al descargar de Firestore")
             Result.failure(e)

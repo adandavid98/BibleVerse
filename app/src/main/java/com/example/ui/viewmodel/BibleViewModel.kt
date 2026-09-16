@@ -601,6 +601,21 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    val permanentSha1: String = FirebaseSyncManager.PERMANENT_KEYSTORE_SHA1
+    val permanentSha256: String = FirebaseSyncManager.PERMANENT_KEYSTORE_SHA256
+
+    fun getSavedFirebaseWebClientId(context: Context): String? {
+        return FirebaseSyncManager.getSavedWebClientId(context)
+    }
+
+    fun saveFirebaseWebClientId(context: Context, clientId: String) {
+        FirebaseSyncManager.saveWebClientId(context, clientId)
+    }
+
+    fun getResolvedFirebaseWebClientId(context: Context): String? {
+        return FirebaseSyncManager.resolveServerClientId(context)
+    }
+
     fun signInWithGoogle(context: Context, serverClientId: String? = null) {
         viewModelScope.launch {
             _syncStatusMessage.value = "Conectando con cuenta de Google..."
@@ -610,7 +625,7 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
                 // Auto-sync after successful sign-in
                 syncWithFirestore()
             }.onFailure { err ->
-                _syncStatusMessage.value = "Aviso Google: ${err.message}"
+                _syncStatusMessage.value = "${err.message}"
             }
         }
     }

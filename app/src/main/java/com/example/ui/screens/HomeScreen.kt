@@ -380,7 +380,10 @@ fun HomeScreen(
             onUploadFirestore = { viewModel.uploadToFirestore() },
             onDownloadFirestore = { viewModel.downloadFromFirestore() },
             onPerformBackup = { viewModel.performCloudBackup() },
-            onPerformRestore = { viewModel.performCloudRestore(it) }
+            onPerformRestore = { viewModel.performCloudRestore(it) },
+            permanentSha1 = viewModel.permanentSha1,
+            currentWebClientId = viewModel.getResolvedFirebaseWebClientId(context),
+            onSaveWebClientId = { id -> viewModel.saveFirebaseWebClientId(context, id) }
         )
     }
 

@@ -69,8 +69,10 @@ jobs:
             keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           fi
 
-          # Verify certificate fingerprint in logs for transparency
-          keytool -list -v -keystore debug.keystore -storepass android | grep -E "Alias name|SHA256" || true
+          # Verify certificate fingerprint in logs for transparency (copy this SHA1 to Firebase Console)
+          echo "=== CERTIFICATE FINGERPRINTS FOR FIREBASE ==="
+          keytool -list -v -keystore debug.keystore -storepass android | grep -E "Alias name|SHA1|SHA256" || true
+          echo "============================================="
 
           # Also ensure ~/.android/debug.keystore exists
           mkdir -p ~/.android
