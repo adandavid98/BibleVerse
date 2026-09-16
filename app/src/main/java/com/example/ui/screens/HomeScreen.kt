@@ -139,6 +139,8 @@ fun HomeScreen(
     val showUpdateDialog by viewModel.showUpdateDialog.collectAsStateWithLifecycle()
     val updateInfo by viewModel.updateInfo.collectAsStateWithLifecycle()
     val updateDownloadStatus by viewModel.updateDownloadStatus.collectAsStateWithLifecycle()
+    val firebaseUserState by viewModel.firebaseUserState.collectAsStateWithLifecycle()
+    val firebaseSyncOperation by viewModel.firebaseSyncOperation.collectAsStateWithLifecycle()
 
     // Notify user of sync / export messages
     LaunchedEffect(uiState.syncStatusMessage) {
@@ -331,7 +333,14 @@ fun HomeScreen(
         CloudSyncDialog(
             syncId = uiState.cloudSyncId,
             lastSyncTime = uiState.lastSyncTime,
+            userState = firebaseUserState,
+            syncOperation = firebaseSyncOperation,
             onDismiss = { viewModel.showSyncDialog(false) },
+            onSignInGoogle = { viewModel.signInWithGoogle(context) },
+            onSignInAnonymous = { viewModel.signInAnonymously() },
+            onSignOut = { viewModel.signOutFirebase(context) },
+            onUploadFirestore = { viewModel.uploadToFirestore() },
+            onDownloadFirestore = { viewModel.downloadFromFirestore() },
             onPerformBackup = { viewModel.performCloudBackup() },
             onPerformRestore = { viewModel.performCloudRestore(it) }
         )

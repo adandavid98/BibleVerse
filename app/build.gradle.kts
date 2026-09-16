@@ -20,11 +20,11 @@ android {
 
     val appVersionName = project.findProperty("versionName") as String?
         ?: System.getenv("APP_VERSION_NAME")
-        ?: "1.0.2"
+        ?: "1.0.4"
 
     val appVersionCode = (project.findProperty("versionCode") as String?)?.toIntOrNull()
         ?: System.getenv("APP_VERSION_CODE")?.toIntOrNull()
-        ?: 2
+        ?: 4
 
     versionCode = appVersionCode
     versionName = appVersionName
@@ -110,15 +110,14 @@ dependencies {
   // implementation(libs.coil.compose)
   implementation(libs.converter.moshi)
   implementation(libs.firebase.ai)
-  // Uncomment to use Firestore:
-  // implementation(libs.firebase.firestore)
+  // Firestore for cloud sync
+  implementation(libs.firebase.firestore)
 
-  // Uncomment ALL FOUR of the following dependencies together to use Firebase Auth and Google
-  // Sign-In via Credential Manager:
-  // implementation(libs.firebase.auth)
-  // implementation(libs.androidx.credentials)
-  // implementation(libs.androidx.credentials.play.services)
-  // implementation(libs.googleid)
+  // Firebase Auth and Google Sign-In via Credential Manager:
+  implementation(libs.firebase.auth)
+  implementation(libs.androidx.credentials)
+  implementation(libs.androidx.credentials.play.services)
+  implementation(libs.googleid)
   implementation(libs.firebase.appcheck.recaptcha)
   implementation(libs.firebase.appcheck.debug)
   implementation(libs.kotlinx.coroutines.android)

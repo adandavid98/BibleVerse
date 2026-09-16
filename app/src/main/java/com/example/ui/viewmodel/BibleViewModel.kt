@@ -11,6 +11,9 @@ import com.example.BuildConfig
 import com.example.export.ExportManager
 import com.example.service.NotificationHelper
 import com.example.sync.CloudSyncManager
+import com.example.sync.CloudSyncState
+import com.example.sync.FirebaseSyncManager
+import com.example.sync.FirebaseUserState
 import com.example.ui.theme.AppReadingTheme
 import com.example.update.AppUpdateInfo
 import com.example.update.AppUpdateManager
@@ -94,6 +97,10 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _autoCheckUpdates = MutableStateFlow(AppUpdateManager.isAutoCheckEnabled(application))
     val autoCheckUpdates: StateFlow<Boolean> = _autoCheckUpdates.asStateFlow()
+
+    // Firebase Auth & Firestore State
+    val firebaseUserState: StateFlow<FirebaseUserState?> = FirebaseSyncManager.currentUserState
+    val firebaseSyncOperation: StateFlow<CloudSyncState> = FirebaseSyncManager.syncOperationState
 
     init {
         val db = BibleDatabase.getDatabase(application, viewModelScope)
@@ -468,6 +475,83 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
                 _syncStatusMessage.value = "Sincronización completada: $merged versículo(s) actualizados."
             } catch (e: Exception) {
                 _syncStatusMessage.value = "Error en formato de sincronización: ${e.message}"
+            }
+        }
+    }
+
+    fun signInWithGoogle(context: Context, serverClientId: String? = null) {
+        viewModelScope.launch {
+            _syncStatusMessage.value = "Conectando con cuenta de Google..."
+            val result = FirebaseSyncManager.signInWithGoogle(context, serverClientId)
+            result.onSuccess { user ->
+                _syncStatusMessage.value = "Sesión iniciada como ${user.displayName ?: user.email}"
+                // Auto-sync after successful sign-in
+                syncWithFirestore()
+            }.onFailure { err ->
+                _syncStatusMessage.value = "Aviso Google: ${err.message}"
+            }
+        }
+    }
+
+    fun signInAnonymously() {
+        viewModelScope.launch {
+            _syncStatusMessage.value = "Conectando con nube de Firebase..."
+            val result = FirebaseSyncManager.signInAnonymously()
+            result.onSuccess {
+                _syncStatusMessage.value = "Conectado a la nube. Sincronizando..."
+                syncWithFirestore()
+            }.onFailure { err ->
+                _syncStatusMessage.value = "Error conectando a la nube: ${err.message}"
+            }
+        }
+    }
+
+    fun signOutFirebase(context: Context) {
+        val app = getApplication<Application>()
+        viewModelScope.launch {
+            FirebaseSyncManager.signOut(context)
+            _syncStatusMessage.value = "Sesión cerrada en la nube"
+        }
+    }
+
+    fun uploadToFirestore() {
+        val app = getApplication<Application>()
+        viewModelScope.launch {
+            val result = FirebaseSyncManager.uploadToFirestore(uiState.value.verses)
+            result.onSuccess { count ->
+                CloudSyncManager.recordSyncSuccess(app)
+                _lastSyncTime.value = CloudSyncManager.getLastSyncTime(app)
+                _syncStatusMessage.value = "¡$count elementos respaldados con éxito en tu cuenta!"
+            }.onFailure { err ->
+                _syncStatusMessage.value = "Error al respaldar en la nube: ${err.message}"
+            }
+        }
+    }
+
+    fun downloadFromFirestore() {
+        val app = getApplication<Application>()
+        viewModelScope.launch {
+            val result = FirebaseSyncManager.downloadFromFirestore(repository, uiState.value.verses)
+            result.onSuccess { count ->
+                CloudSyncManager.recordSyncSuccess(app)
+                _lastSyncTime.value = CloudSyncManager.getLastSyncTime(app)
+                _syncStatusMessage.value = "¡$count versículos y notas restaurados desde la nube!"
+            }.onFailure { err ->
+                _syncStatusMessage.value = "Error al restaurar desde la nube: ${err.message}"
+            }
+        }
+    }
+
+    fun syncWithFirestore() {
+        // First download any newer records from the cloud, then upload any local additions
+        val app = getApplication<Application>()
+        viewModelScope.launch {
+            val downloadRes = FirebaseSyncManager.downloadFromFirestore(repository, uiState.value.verses)
+            val uploadRes = FirebaseSyncManager.uploadToFirestore(uiState.value.verses)
+            if (downloadRes.isSuccess || uploadRes.isSuccess) {
+                CloudSyncManager.recordSyncSuccess(app)
+                _lastSyncTime.value = CloudSyncManager.getLastSyncTime(app)
+                _syncStatusMessage.value = "Sincronización en la nube completada."
             }
         }
     }

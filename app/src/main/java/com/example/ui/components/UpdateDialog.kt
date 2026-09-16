@@ -243,19 +243,26 @@ fun UpdateDialog(
                     }
 
                     is UpdateDownloadStatus.ReadyToInstall -> {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
-                                .padding(10.dp)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(10.dp))
+                                .padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "¡APK descargado! Listo para instalar.",
+                                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                             Text(
-                                text = "¡APK descargado! Listo para instalar.",
-                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.primary
+                                text = "Nota: Si tu teléfono dice \"conflicto de paquete\", se debe a que la versión instalada actualmente tiene una firma de prueba previa distinta. Desinstala la app anterior e instala esta nueva versión una sola vez para que las futuras actualizaciones se instalen directo sin conflicto.",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
