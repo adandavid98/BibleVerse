@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,12 +24,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FormatColorReset
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
@@ -36,6 +40,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,6 +54,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,8 +68,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.data.bible.BibleCatalog
+import com.example.data.bible.BibleContextEngine
+import com.example.data.bible.ContextGenerationResult
+import com.example.data.bible.ContextSource
+import com.example.data.bible.GeminiVerseContextService
 import com.example.data.model.VerseEntity
 import com.example.ui.theme.BibleHighlightColors
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -74,22 +86,38 @@ fun VerseDetailDialog(
     onFavoriteToggle: () -> Unit,
     onHighlightSelected: (String) -> Unit,
     onSaveNotes: (String) -> Unit,
-    onSaveVerseEdit: (reference: String, text: String, context: String, topic: String) -> Unit,
+    onSaveVerseEdit: (reference: String, text: String, context: String, topic: String, bibleVersion: String) -> Unit,
     onShare: () -> Unit,
     onExportPdf: () -> Unit,
-    onDelete: (() -> Unit)? = null
+    onDelete: (() -> Unit)? = null,
+    onEnrichContextAi: (() -> Unit)? = null
 ) {
+    val coroutineScope = rememberCoroutineScope()
     var notesText by remember(verse.id) { mutableStateOf(verse.notes) }
     var isNotesModified by remember(verse.id) { mutableStateOf(false) }
     val currentHighlightColor = BibleHighlightColors.getColorFromHex(verse.highlightColor)
 
     // Edit mode state
     var isEditingVerse by remember(verse.id) { mutableStateOf(false) }
+    var isGeneratingAiInEdit by remember(verse.id) { mutableStateOf(false) }
+    var editContextSourceBadge by remember(verse.id) { mutableStateOf<String?>(null) }
     var editReference by remember(verse.id, isEditingVerse) { mutableStateOf(verse.reference) }
     var editTopic by remember(verse.id, isEditingVerse) { mutableStateOf(verse.topic) }
+    var editBibleVersion by remember(verse.id, isEditingVerse) { mutableStateOf(verse.bibleVersion.ifBlank { "RVR1960" }) }
     var editText by remember(verse.id, isEditingVerse) { mutableStateOf(verse.text.removeSurrounding("«", "»")) }
     var editContext by remember(verse.id, isEditingVerse) { mutableStateOf(verse.context) }
     var editErrorMessage by remember(verse.id, isEditingVerse) { mutableStateOf<String?>(null) }
+    var showVersionModal by remember { mutableStateOf(false) }
+
+    if (showVersionModal) {
+        BibleVersionSelectionDialog(
+            currentVersionCode = editBibleVersion,
+            onVersionSelected = { newVersion ->
+                editBibleVersion = newVersion.code
+            },
+            onDismiss = { showVersionModal = false }
+        )
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -128,11 +156,35 @@ fun VerseDetailDialog(
                             ),
                             color = MaterialTheme.colorScheme.onBackground
                         )
-                        Text(
-                            text = if (isEditingVerse) "Modifica el texto o contexto teológico" else "${verse.testament} • ${verse.topic}",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
+                        if (isEditingVerse) {
+                            Text(
+                                text = "Modifica la traducción, texto o contexto teológico",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        } else {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = MaterialTheme.colorScheme.primaryContainer
+                                ) {
+                                    Text(
+                                        text = verse.bibleVersion.ifBlank { "RVR1960" },
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                                Text(
+                                    text = "${verse.testament} • ${verse.topic}",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                        }
                     }
 
                     Row {
@@ -243,6 +295,66 @@ fun VerseDetailDialog(
                             )
                         }
 
+                        // Bible Version Selector Card
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable { showVersionModal = true }
+                                .testTag("card_edit_bible_version"),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                            ),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Versión de Traducción Bíblica:",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Surface(
+                                            shape = RoundedCornerShape(6.dp),
+                                            color = MaterialTheme.colorScheme.primary
+                                        ) {
+                                            Text(
+                                                text = editBibleVersion,
+                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                                color = MaterialTheme.colorScheme.onPrimary,
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                        Text(
+                                            text = BibleCatalog.findVersion(editBibleVersion).name,
+                                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+                                OutlinedButton(
+                                    onClick = { showVersionModal = true },
+                                    shape = RoundedCornerShape(8.dp),
+                                    modifier = Modifier.testTag("btn_edit_change_version")
+                                ) {
+                                    Text("Cambiar", fontSize = 12.sp)
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Icon(Icons.Filled.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
+                                }
+                            }
+                        }
+
                         // Biblical Text
                         OutlinedTextField(
                             value = editText,
@@ -256,10 +368,151 @@ fun VerseDetailDialog(
                             shape = RoundedCornerShape(12.dp)
                         )
 
+                        // Panel de Contexto Inteligente (Híbrido)
+                        Card(
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.AutoAwesome,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Text(
+                                            text = "Regenerar Contexto",
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+
+                                    if (editContextSourceBadge != null) {
+                                        Surface(
+                                            shape = RoundedCornerShape(6.dp),
+                                            color = if (editContextSourceBadge!!.contains("IA")) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                MaterialTheme.colorScheme.secondaryContainer
+                                            }
+                                        ) {
+                                            Text(
+                                                text = editContextSourceBadge!!,
+                                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                                color = if (editContextSourceBadge!!.contains("IA")) {
+                                                    MaterialTheme.colorScheme.onPrimary
+                                                } else {
+                                                    MaterialTheme.colorScheme.onSecondaryContainer
+                                                },
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Button(
+                                        onClick = {
+                                            isGeneratingAiInEdit = true
+                                            coroutineScope.launch {
+                                                val parts = editReference.split(" ")
+                                                val bName = verse.book.ifBlank { parts.dropLast(1).joinToString(" ").ifBlank { "Salmos" } }
+                                                val cv = verse.chapterVerse.ifBlank { parts.lastOrNull() ?: "1:1" }
+                                                val cvParts = cv.split(":")
+                                                val ch = cvParts.getOrNull(0)?.filter { it.isDigit() }?.toIntOrNull() ?: 1
+                                                val vs = cvParts.getOrNull(1) ?: "1"
+
+                                                val res = GeminiVerseContextService.generateContext(
+                                                    book = bName,
+                                                    chapter = ch,
+                                                    verse = vs,
+                                                    verseText = editText,
+                                                    bibleVersion = editBibleVersion
+                                                )
+                                                when (res) {
+                                                    is ContextGenerationResult.Success -> {
+                                                        editContext = res.contextText
+                                                        editContextSourceBadge = if (res.source == ContextSource.AI_GEMINI) "✨ IA (Gemini)" else "Catálogo Local"
+                                                    }
+                                                    is ContextGenerationResult.Error -> {
+                                                        editContext = res.fallbackContext
+                                                        editContextSourceBadge = "Catálogo Local"
+                                                    }
+                                                }
+                                                isGeneratingAiInEdit = false
+                                            }
+                                        },
+                                        enabled = !isGeneratingAiInEdit,
+                                        shape = RoundedCornerShape(8.dp),
+                                        modifier = Modifier
+                                            .weight(1.3f)
+                                            .testTag("btn_detail_enrich_ai")
+                                    ) {
+                                        if (isGeneratingAiInEdit) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(14.dp),
+                                                strokeWidth = 2.dp,
+                                                color = MaterialTheme.colorScheme.onPrimary
+                                            )
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Text("Generando...", fontSize = 11.sp)
+                                        } else {
+                                            Icon(Icons.Filled.AutoAwesome, contentDescription = null, modifier = Modifier.size(14.dp))
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text("Llenar con IA", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+
+                                    OutlinedButton(
+                                        onClick = {
+                                            val parts = editReference.split(" ")
+                                            val bName = verse.book.ifBlank { parts.dropLast(1).joinToString(" ").ifBlank { "Salmos" } }
+                                            val cv = verse.chapterVerse.ifBlank { parts.lastOrNull() ?: "1:1" }
+                                            val cvParts = cv.split(":")
+                                            val ch = cvParts.getOrNull(0)?.filter { it.isDigit() }?.toIntOrNull() ?: 1
+                                            val vs = cvParts.getOrNull(1) ?: "1"
+                                            editContext = BibleContextEngine.getLocalContext(bName, ch, vs, editText)
+                                            editContextSourceBadge = "Catálogo Local"
+                                        },
+                                        enabled = !isGeneratingAiInEdit,
+                                        shape = RoundedCornerShape(8.dp),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .testTag("btn_detail_local_context")
+                                    ) {
+                                        Icon(Icons.Filled.MenuBook, contentDescription = null, modifier = Modifier.size(14.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("Local", fontSize = 11.sp)
+                                    }
+                                }
+                            }
+                        }
+
                         // Theological and Moral Context
                         OutlinedTextField(
                             value = editContext,
-                            onValueChange = { editContext = it },
+                            onValueChange = { 
+                                editContext = it
+                                editContextSourceBadge = "Personalizado"
+                            },
                             label = { Text("Contexto Teológico y Moral *") },
                             placeholder = { Text("Explica el significado histórico, moral y teológico del pasaje...") },
                             modifier = Modifier
@@ -306,7 +559,8 @@ fun VerseDetailDialog(
                                         editReference.trim(),
                                         editText.trim(),
                                         editContext.trim(),
-                                        editTopic.trim()
+                                        editTopic.trim(),
+                                        editBibleVersion.trim()
                                     )
                                     isEditingVerse = false
                                 }
@@ -430,22 +684,43 @@ fun VerseDetailDialog(
                                     ),
                                     color = MaterialTheme.colorScheme.secondary
                                 )
-                                TextButton(
-                                    onClick = { isEditingVerse = true },
-                                    modifier = Modifier.testTag("btn_edit_context")
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Edit,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(15.dp),
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = "Editar contexto",
-                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    if (onEnrichContextAi != null) {
+                                        TextButton(
+                                            onClick = { onEnrichContextAi() },
+                                            modifier = Modifier.testTag("btn_enrich_verse_ai")
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.AutoAwesome,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(15.dp),
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(
+                                                text = "Profundizar IA",
+                                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
+                                    TextButton(
+                                        onClick = { isEditingVerse = true },
+                                        modifier = Modifier.testTag("btn_edit_context")
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Edit,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(15.dp),
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = "Editar",
+                                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
                                 }
                             }
                             Spacer(modifier = Modifier.height(8.dp))

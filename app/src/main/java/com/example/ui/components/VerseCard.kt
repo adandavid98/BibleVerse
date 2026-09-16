@@ -104,6 +104,21 @@ fun VerseCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Surface(
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Text(
+                            text = verse.bibleVersion.ifBlank { "RVR1960" },
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 10.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Surface(
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
                         shape = RoundedCornerShape(8.dp)
                     ) {

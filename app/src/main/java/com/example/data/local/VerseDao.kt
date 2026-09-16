@@ -34,6 +34,7 @@ interface VerseDao {
            OR context LIKE '%' || :query || '%' 
            OR topic LIKE '%' || :query || '%' 
            OR notes LIKE '%' || :query || '%'
+           OR bibleVersion LIKE '%' || :query || '%'
         ORDER BY orderIndex ASC, id ASC
     """)
     fun searchVerses(query: String): Flow<List<VerseEntity>>

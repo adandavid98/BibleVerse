@@ -66,6 +66,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -112,6 +113,8 @@ import com.example.ui.components.VerseCard
 import com.example.ui.components.VerseDetailDialog
 import com.example.ui.theme.AppReadingTheme
 import com.example.ui.theme.BibleHighlightColors
+import com.example.ui.components.BibleChatDialog
+import androidx.compose.material.icons.filled.AutoAwesome
 import com.example.ui.viewmodel.BibleUiState
 import com.example.ui.viewmodel.BibleViewModel
 import com.example.ui.viewmodel.VerseFilter
@@ -141,6 +144,9 @@ fun HomeScreen(
     val updateDownloadStatus by viewModel.updateDownloadStatus.collectAsStateWithLifecycle()
     val firebaseUserState by viewModel.firebaseUserState.collectAsStateWithLifecycle()
     val firebaseSyncOperation by viewModel.firebaseSyncOperation.collectAsStateWithLifecycle()
+    val showBibleChatDialog by viewModel.showBibleChatDialog.collectAsStateWithLifecycle()
+    val chatMessages by viewModel.chatMessages.collectAsStateWithLifecycle()
+    val isChatLoading by viewModel.isChatLoading.collectAsStateWithLifecycle()
 
     // Notify user of sync / export messages
     LaunchedEffect(uiState.syncStatusMessage) {
@@ -194,6 +200,17 @@ fun HomeScreen(
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = { viewModel.showBibleChat(true) },
+                        modifier = Modifier.testTag("btn_top_chat_ai")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.AutoAwesome,
+                            contentDescription = "Asistente Bíblico IA",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
                     IconButton(
                         onClick = { viewModel.showAddVerseDialog(true) },
                         modifier = Modifier.testTag("btn_top_add")
@@ -284,13 +301,30 @@ fun HomeScreen(
         },
         floatingActionButton = {
             if (selectedTab == 0 || selectedTab == 2) {
-                FloatingActionButton(
-                    onClick = { viewModel.showAddVerseDialog(true) },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.testTag("fab_add_verse")
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Añadir Versículo")
+                    SmallFloatingActionButton(
+                        onClick = { viewModel.showBibleChat(true) },
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.testTag("fab_bible_chat")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.AutoAwesome,
+                            contentDescription = "Consultar Asistente Bíblico IA"
+                        )
+                    }
+
+                    FloatingActionButton(
+                        onClick = { viewModel.showAddVerseDialog(true) },
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.testTag("fab_add_verse")
+                    ) {
+                        Icon(Icons.Filled.Add, contentDescription = "Añadir Versículo")
+                    }
                 }
             }
         }
@@ -314,8 +348,11 @@ fun HomeScreen(
     if (uiState.showAddDialog) {
         AddVerseDialog(
             onDismiss = { viewModel.showAddVerseDialog(false) },
-            onAddVerse = { book, chv, testm, txt, ctx, top, nts ->
-                viewModel.addCustomVerse(book, chv, testm, txt, ctx, top, nts)
+            onAddVerse = { book, chv, testm, txt, ctx, top, nts, bibleVer ->
+                viewModel.addCustomVerse(book, chv, testm, txt, ctx, top, nts, bibleVer)
+            },
+            onGenerateContext = { b, c, v, txt, ver, force, cb ->
+                viewModel.generateIntelligentContext(b, c, v, txt, ver, force, cb)
             }
         )
     }
@@ -372,8 +409,8 @@ fun HomeScreen(
             onSaveNotes = { notes ->
                 viewModel.updateNotes(verse.id, notes)
             },
-            onSaveVerseEdit = { ref, txt, ctx, top ->
-                viewModel.updateVerseDetails(verse.id, ref, txt, ctx, top)
+            onSaveVerseEdit = { ref, txt, ctx, top, bibleVer ->
+                viewModel.updateVerseDetails(verse.id, ref, txt, ctx, top, bibleVer)
             },
             onShare = { viewModel.shareVerse(verse) },
             onExportPdf = {
@@ -381,7 +418,25 @@ fun HomeScreen(
             },
             onDelete = if (verse.isCustom) {
                 { viewModel.deleteVerse(verse) }
-            } else null
+            } else null,
+            onEnrichContextAi = {
+                viewModel.enrichVerseContextWithAi(verse.id)
+            }
+        )
+    }
+
+    if (showBibleChatDialog) {
+        BibleChatDialog(
+            chatMessages = chatMessages,
+            isLoading = isChatLoading,
+            onSendMessage = { question ->
+                viewModel.sendBibleChatMessage(question)
+            },
+            onClearChat = { viewModel.clearBibleChat() },
+            onDismiss = { viewModel.showBibleChat(false) },
+            onAddSuggestedVerse = { reference ->
+                viewModel.openAddVerseForReference(reference)
+            }
         )
     }
 }
@@ -949,12 +1004,9 @@ fun SettingsTab(
             color = MaterialTheme.colorScheme.secondary
         )
 
-        val githubRepo by viewModel.githubRepo.collectAsStateWithLifecycle()
         val updateDownloadStatus by viewModel.updateDownloadStatus.collectAsStateWithLifecycle()
         val updateInfo by viewModel.updateInfo.collectAsStateWithLifecycle()
         val autoCheckUpdates by viewModel.autoCheckUpdates.collectAsStateWithLifecycle()
-        var showEditRepoDialog by remember { mutableStateOf(false) }
-        var tempRepoInput by remember(githubRepo) { mutableStateOf(githubRepo) }
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -985,7 +1037,7 @@ fun SettingsTab(
                         color = MaterialTheme.colorScheme.primaryContainer
                     ) {
                         Text(
-                            text = "GitHub Release",
+                            text = "Oficial",
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -993,7 +1045,7 @@ fun SettingsTab(
                     }
                 }
 
-                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
 
                 // Switch for automatic update checking on app start
                 Row(
@@ -1018,42 +1070,6 @@ fun SettingsTab(
                         onCheckedChange = { viewModel.setAutoCheckUpdates(it) },
                         modifier = Modifier.testTag("switch_auto_check_updates")
                     )
-                }
-
-                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
-
-                // Configured GitHub Repository
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Repositorio GitHub:",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = githubRepo,
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            tempRepoInput = githubRepo
-                            showEditRepoDialog = true
-                        },
-                        modifier = Modifier.testTag("btn_edit_repo")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Edit,
-                            contentDescription = "Cambiar Repositorio",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
                 }
 
                 // If update is available or status
@@ -1084,7 +1100,7 @@ fun SettingsTab(
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                     Text(
-                                        text = "Toca para ver novedades e instalar APK",
+                                        text = "Toca para ver novedades e instalar actualización",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -1113,7 +1129,7 @@ fun SettingsTab(
                     else -> {}
                 }
 
-                // Buttons: Check for updates & Open GitHub
+                // Button: Check for updates
                 Button(
                     onClick = { viewModel.checkForUpdates(silent = false) },
                     modifier = Modifier
@@ -1123,64 +1139,14 @@ fun SettingsTab(
                     if (updateDownloadStatus is UpdateDownloadStatus.Checking) {
                         Icon(Icons.Filled.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Comprobando en GitHub...")
+                        Text("Buscando actualizaciones...")
                     } else {
                         Icon(Icons.Filled.SystemUpdate, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Buscar Actualizaciones Ahora")
                     }
                 }
-
-                OutlinedButton(
-                    onClick = { viewModel.openGitHubReleaseInBrowser(context) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("btn_open_github_link")
-                ) {
-                    Icon(Icons.Filled.OpenInBrowser, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Descargar APK desde GitHub Releases")
-                }
             }
-        }
-
-        if (showEditRepoDialog) {
-            androidx.compose.material3.AlertDialog(
-                onDismissRequest = { showEditRepoDialog = false },
-                title = { Text("Configurar Repositorio GitHub") },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            text = "Ingresa 'usuario/repositorio' de GitHub donde subes tus tags o releases:",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        OutlinedTextField(
-                            value = tempRepoInput,
-                            onValueChange = { tempRepoInput = it },
-                            label = { Text("Repositorio (ej: usuario/mi-repo)") },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            if (tempRepoInput.isNotBlank()) {
-                                viewModel.setGitHubRepo(tempRepoInput)
-                            }
-                            showEditRepoDialog = false
-                        }
-                    ) {
-                        Text("Guardar")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showEditRepoDialog = false }) {
-                        Text("Cancelar")
-                    }
-                }
-            )
         }
     }
 }

@@ -305,6 +305,7 @@ object FirebaseSyncManager {
                     "highlightColor" to v.highlightColor,
                     "highlightedPhrases" to v.highlightedPhrases,
                     "isCustom" to v.isCustom,
+                    "bibleVersion" to v.bibleVersion,
                     "updatedAt" to v.updatedAt
                 )
                 batch.set(docRef, map, SetOptions.merge())
@@ -368,6 +369,7 @@ object FirebaseSyncManager {
                 val highlightColor = doc.getString("highlightColor") ?: ""
                 val highlightedPhrases = doc.getString("highlightedPhrases") ?: ""
                 val isCustom = doc.getBoolean("isCustom") ?: false
+                val bibleVersion = doc.getString("bibleVersion") ?: "RVR1960"
                 val updatedAt = doc.getLong("updatedAt") ?: System.currentTimeMillis()
 
                 if (existing != null) {
@@ -376,6 +378,7 @@ object FirebaseSyncManager {
                         notes = notes,
                         highlightColor = highlightColor,
                         highlightedPhrases = highlightedPhrases,
+                        bibleVersion = if (doc.contains("bibleVersion")) bibleVersion else existing.bibleVersion,
                         updatedAt = updatedAt
                     )
                     repository.updateVerse(updated)
@@ -394,6 +397,7 @@ object FirebaseSyncManager {
                         highlightColor = highlightColor,
                         highlightedPhrases = highlightedPhrases,
                         isCustom = true,
+                        bibleVersion = bibleVersion,
                         updatedAt = updatedAt
                     )
                     repository.insertVerse(newCustom)

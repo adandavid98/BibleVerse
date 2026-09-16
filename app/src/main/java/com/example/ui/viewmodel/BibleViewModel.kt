@@ -4,6 +4,12 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.data.bible.ChatMessage
+import com.example.data.bible.GeminiBibleChatService
+import com.example.data.bible.BibleContextEngine
+import com.example.data.bible.ContextGenerationResult
+import com.example.data.bible.ContextSource
+import com.example.data.bible.GeminiVerseContextService
 import com.example.data.local.BibleDatabase
 import com.example.data.model.VerseEntity
 import com.example.data.repository.VerseRepository
@@ -101,6 +107,23 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     // Firebase Auth & Firestore State
     val firebaseUserState: StateFlow<FirebaseUserState?> = FirebaseSyncManager.currentUserState
     val firebaseSyncOperation: StateFlow<CloudSyncState> = FirebaseSyncManager.syncOperationState
+
+    // Context Generation State (Hybrid: Local Engine + Gemini AI)
+    private val _isGeneratingContext = MutableStateFlow(false)
+    val isGeneratingContext: StateFlow<Boolean> = _isGeneratingContext.asStateFlow()
+
+    private val _contextGenerationMessage = MutableStateFlow<String?>(null)
+    val contextGenerationMessage: StateFlow<String?> = _contextGenerationMessage.asStateFlow()
+
+    // Bible Theological Chatbot State
+    private val _showBibleChatDialog = MutableStateFlow(false)
+    val showBibleChatDialog: StateFlow<Boolean> = _showBibleChatDialog.asStateFlow()
+
+    private val _chatMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
+    val chatMessages: StateFlow<List<ChatMessage>> = _chatMessages.asStateFlow()
+
+    private val _isChatLoading = MutableStateFlow(false)
+    val isChatLoading: StateFlow<Boolean> = _isChatLoading.asStateFlow()
 
     init {
         val db = BibleDatabase.getDatabase(application, viewModelScope)
@@ -291,7 +314,8 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         text: String,
         context: String,
         topic: String,
-        notes: String
+        notes: String,
+        bibleVersion: String = "RVR1960"
     ) {
         viewModelScope.launch {
             val reference = "$book $chapterVerse".trim()
@@ -307,6 +331,7 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
                 notes = notes,
                 isCustom = true,
                 orderIndex = 999,
+                bibleVersion = bibleVersion.ifBlank { "RVR1960" },
                 createdAt = System.currentTimeMillis(),
                 updatedAt = System.currentTimeMillis()
             )
@@ -321,7 +346,8 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         reference: String,
         text: String,
         context: String,
-        topic: String
+        topic: String,
+        bibleVersion: String = "RVR1960"
     ) {
         viewModelScope.launch {
             val current = repository.getVerseByIdDirect(verseId)
@@ -332,6 +358,7 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
                     text = formattedText.trim(),
                     context = context.trim(),
                     topic = topic.trim().ifBlank { current.topic },
+                    bibleVersion = bibleVersion.ifBlank { current.bibleVersion },
                     updatedAt = System.currentTimeMillis()
                 )
                 repository.updateVerse(updated)
@@ -352,6 +379,101 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
                 repository.updateVerse(updated)
                 _selectedVerseForDetail.value = updated
                 _syncStatusMessage.value = "Contexto teológico actualizado con éxito"
+            }
+        }
+    }
+
+    /**
+     * Generates biblical context using the Hybrid approach:
+     * First checks / connects with Gemini 3.5 Flash AI,
+     * seamlessly falling back to the rich local theological engine if offline or key is missing.
+     */
+    fun generateIntelligentContext(
+        book: String,
+        chapter: Int,
+        verse: String,
+        verseText: String,
+        bibleVersion: String = "RVR1960",
+        forceLocal: Boolean = false,
+        onResult: (context: String, isAi: Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            _isGeneratingContext.value = true
+            _contextGenerationMessage.value = if (forceLocal) "Obteniendo contexto local..." else "Generando contexto inteligente con IA..."
+            try {
+                val result = GeminiVerseContextService.generateContext(
+                    book = book,
+                    chapter = chapter,
+                    verse = verse,
+                    verseText = verseText,
+                    bibleVersion = bibleVersion,
+                    forceLocalOnly = forceLocal
+                )
+                when (result) {
+                    is ContextGenerationResult.Success -> {
+                        val isAi = result.source == ContextSource.AI_GEMINI
+                        _contextGenerationMessage.value = when (result.source) {
+                            ContextSource.AI_GEMINI -> "Contexto generado con Inteligencia Artificial"
+                            ContextSource.LOCAL_EXACT -> "Contexto exacto precargado"
+                            ContextSource.LOCAL_ENGINE -> "Contexto del catálogo teológico local"
+                        }
+                        onResult(result.contextText, isAi)
+                    }
+                    is ContextGenerationResult.Error -> {
+                        _contextGenerationMessage.value = "Contexto teológico local aplicado"
+                        onResult(result.fallbackContext, false)
+                    }
+                }
+            } catch (e: Exception) {
+                val fallback = BibleContextEngine.getLocalContext(book, chapter, verse, verseText)
+                _contextGenerationMessage.value = "Contexto teológico local aplicado"
+                onResult(fallback, false)
+            } finally {
+                _isGeneratingContext.value = false
+            }
+        }
+    }
+
+    /**
+     * Re-analyzes or enriches the context of an existing verse using Gemini AI.
+     */
+    fun enrichVerseContextWithAi(verseId: Long) {
+        viewModelScope.launch {
+            val current = repository.getVerseByIdDirect(verseId) ?: return@launch
+            _isGeneratingContext.value = true
+            _syncStatusMessage.value = "Generando exégesis con IA..."
+            try {
+                val parts = current.reference.split(" ")
+                val book = current.book.ifBlank { parts.dropLast(1).joinToString(" ").ifBlank { "Salmos" } }
+                val chapterVerse = current.chapterVerse.ifBlank { parts.lastOrNull() ?: "1:1" }
+                val cvParts = chapterVerse.split(":")
+                val chapter = cvParts.getOrNull(0)?.filter { it.isDigit() }?.toIntOrNull() ?: 1
+                val verse = cvParts.getOrNull(1) ?: "1"
+
+                val result = GeminiVerseContextService.generateContext(
+                    book = book,
+                    chapter = chapter,
+                    verse = verse,
+                    verseText = current.text.removeSurrounding("«", "»"),
+                    bibleVersion = current.bibleVersion
+                )
+                val newContext = when (result) {
+                    is ContextGenerationResult.Success -> result.contextText
+                    is ContextGenerationResult.Error -> result.fallbackContext
+                }
+                if (newContext.isNotBlank()) {
+                    val updated = current.copy(
+                        context = newContext,
+                        updatedAt = System.currentTimeMillis()
+                    )
+                    repository.updateVerse(updated)
+                    _selectedVerseForDetail.value = updated
+                    _syncStatusMessage.value = "¡Contexto enriquecido con IA con éxito!"
+                }
+            } catch (e: Exception) {
+                _syncStatusMessage.value = "No se pudo conectar con la IA. Se mantuvo el contexto actual."
+            } finally {
+                _isGeneratingContext.value = false
             }
         }
     }
@@ -675,5 +797,47 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             "Búsqueda automática desactivada. Puedes buscar manualmente en Ajustes."
         }
+    }
+
+    // Bible Chatbot Actions
+    fun showBibleChat(show: Boolean) {
+        _showBibleChatDialog.value = show
+    }
+
+    fun sendBibleChatMessage(question: String) {
+        val text = question.trim()
+        if (text.isBlank() || _isChatLoading.value) return
+
+        val userMessage = ChatMessage(text = text, isUser = true)
+        val currentHistory = _chatMessages.value
+        _chatMessages.value = currentHistory + userMessage
+        _isChatLoading.value = true
+
+        viewModelScope.launch {
+            try {
+                val assistantReply = GeminiBibleChatService.askBibleQuestion(
+                    history = currentHistory,
+                    userQuestion = text
+                )
+                _chatMessages.value = _chatMessages.value + assistantReply
+            } catch (e: Exception) {
+                val errorMessage = ChatMessage(
+                    text = "Ocurrió un error al procesar la respuesta. Por favor intenta de nuevo.",
+                    isUser = false
+                )
+                _chatMessages.value = _chatMessages.value + errorMessage
+            } finally {
+                _isChatLoading.value = false
+            }
+        }
+    }
+
+    fun clearBibleChat() {
+        _chatMessages.value = emptyList()
+    }
+
+    fun openAddVerseForReference(reference: String) {
+        _showBibleChatDialog.value = false
+        _showAddDialog.value = true
     }
 }

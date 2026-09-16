@@ -73,6 +73,7 @@ object CloudSyncManager {
                     put("highlightColor", v.highlightColor)
                     put("highlightedPhrases", v.highlightedPhrases)
                     put("isCustom", v.isCustom)
+                    put("bibleVersion", v.bibleVersion)
                     put("updatedAt", v.updatedAt)
                 }
                 array.put(item)
@@ -105,6 +106,7 @@ object CloudSyncManager {
                     notes = if (obj.has("notes")) obj.getString("notes") else existing.notes,
                     highlightColor = if (obj.has("highlightColor")) obj.getString("highlightColor") else existing.highlightColor,
                     highlightedPhrases = if (obj.has("highlightedPhrases")) obj.getString("highlightedPhrases") else existing.highlightedPhrases,
+                    bibleVersion = if (obj.has("bibleVersion")) obj.getString("bibleVersion") else existing.bibleVersion,
                     updatedAt = incomingUpdatedAt
                 )
                 repository.updateVerse(updated)
@@ -124,6 +126,7 @@ object CloudSyncManager {
                     highlightColor = obj.optString("highlightColor", ""),
                     highlightedPhrases = obj.optString("highlightedPhrases", ""),
                     isCustom = true,
+                    bibleVersion = obj.optString("bibleVersion", "RVR1960"),
                     updatedAt = obj.optLong("updatedAt", System.currentTimeMillis())
                 )
                 repository.insertVerse(newCustom)

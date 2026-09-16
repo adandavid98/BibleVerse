@@ -111,7 +111,7 @@ fun UpdateDialog(
                                 color = MaterialTheme.colorScheme.onBackground
                             )
                             Text(
-                                text = "GitHub Releases",
+                                text = "Versión Oficial",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -246,22 +246,22 @@ fun UpdateDialog(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(10.dp))
-                                .padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                                .padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "¡APK descargado! Listo para instalar.",
-                                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.primary
+                                    text = "¡Descarga completa! Lista para instalar.",
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
                             Text(
-                                text = "Nota: Si tu teléfono dice \"conflicto de paquete\", se debe a que la versión instalada actualmente tiene una firma de prueba previa distinta. Desinstala la app anterior e instala esta nueva versión una sola vez para que las futuras actualizaciones se instalen directo sin conflicto.",
-                                style = MaterialTheme.typography.labelSmall,
+                                text = "⚠️ Si Android muestra \"App not installed as package conflicts with an existing package\":\nEsto ocurre porque la versión anterior en tu teléfono fue instalada con una clave/firma de prueba diferente. Para resolverlo definitivamente, desinstala la aplicación actual e instala este instalador descargado. A partir de entonces, todas las actualizaciones se instalarán automáticamente sin conflictos.",
+                                style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -318,22 +318,9 @@ fun UpdateDialog(
                             ) {
                                 Icon(Icons.Filled.CloudDownload, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Descargar e Instalar APK")
+                                Text("Descargar e Instalar Actualización")
                             }
                         }
-                    }
-
-                    // Direct Web Link / Fallback button
-                    OutlinedButton(
-                        onClick = onOpenInBrowser,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("btn_open_github_release"),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(Icons.Filled.OpenInBrowser, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Ver o Descargar desde GitHub")
                     }
 
                     Row(

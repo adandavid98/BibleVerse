@@ -20,6 +20,7 @@ data class VerseEntity(
     val highlightedPhrases: String = "", // custom highlighted terms or excerpts
     val isCustom: Boolean = false,
     val orderIndex: Int = 0,
+    val bibleVersion: String = "RVR1960",
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )
