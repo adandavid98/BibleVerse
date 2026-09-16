@@ -1,6 +1,7 @@
 package com.example.domain.usecase
 
 import com.example.data.bible.BibleCatalog
+import com.example.data.bible.WordsOfJesusCatalog
 import com.example.data.repository.BibleReaderRepository
 import com.example.domain.model.ReaderVerseUiModel
 import kotlinx.coroutines.flow.Flow
@@ -22,6 +23,7 @@ class GetChapterVersesWithHighlightsUseCase(
         return combine(versesFlow, highlightsFlow) { verses, highlights ->
             val highlightMap = highlights.associateBy { it.verseNumber }
             verses.map { verse ->
+                val isJesusSpoken = verse.isRedLetter || WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, verse.verseNumber)
                 ReaderVerseUiModel(
                     bookId = bookId,
                     bookName = bookName,
@@ -31,7 +33,7 @@ class GetChapterVersesWithHighlightsUseCase(
                     highlightColorHex = highlightMap[verse.verseNumber]?.colorHex,
                     isSelected = false,
                     sectionHeading = verse.sectionHeading,
-                    isRedLetter = verse.isRedLetter
+                    isRedLetter = isJesusSpoken
                 )
             }
         }

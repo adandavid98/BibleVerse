@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -138,19 +139,87 @@ class BibleReaderViewModel(
     private fun loadChapter(book: BibleBookEntity, chapter: Int, version: String) {
         currentChapterVersesJob?.cancel()
         currentChapterVersesJob = viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, currentBook = book, currentChapter = chapter) }
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    isLoadingMore = false,
+                    currentBook = book,
+                    currentChapter = chapter,
+                    selectedVerseNumbers = emptySet()
+                )
+            }
             getChapterVersesUseCase.ensureLoaded(book.id, chapter, version)
             getChapterVersesUseCase(book.id, chapter, version).collectLatest { versesList ->
-                val selectedSet = _uiState.value.selectedVerseNumbers
-                val updatedVerses = versesList.map { verse ->
-                    verse.copy(isSelected = selectedSet.contains(verse.verseNumber))
+                val isContinuous = _uiState.value.preferences.continuousScrollEnabled
+                val currentVerses = _uiState.value.verses
+
+                val updatedVerses = if (isContinuous && currentVerses.any { it.bookId != book.id || it.chapter != chapter }) {
+                    val otherVerses = currentVerses.filterNot { it.bookId == book.id && it.chapter == chapter }
+                    (otherVerses + versesList).sortedWith(compareBy({ it.bookId }, { it.chapter }, { it.verseNumber }))
+                } else {
+                    versesList
                 }
+
                 _uiState.update {
                     it.copy(
                         verses = updatedVerses,
                         isLoading = false
                     )
                 }
+            }
+        }
+    }
+
+    fun loadNextChapterContinuous() {
+        val currentVerses = _uiState.value.verses
+        if (currentVerses.isEmpty() || _uiState.value.isLoadingMore) return
+
+        val lastVerse = currentVerses.last()
+        val lastBookId = lastVerse.bookId
+        val lastChapter = lastVerse.chapter
+        val currentBook = _uiState.value.books.firstOrNull { it.id == lastBookId } ?: return
+
+        val nextBook: BibleBookEntity
+        val nextChapter: Int
+
+        if (lastChapter < currentBook.chaptersCount) {
+            nextBook = currentBook
+            nextChapter = lastChapter + 1
+        } else {
+            val candidateBook = _uiState.value.books.firstOrNull { it.orderIndex == currentBook.orderIndex + 1 } ?: return
+            nextBook = candidateBook
+            nextChapter = 1
+        }
+
+        // Avoid duplicate load if already in list
+        if (currentVerses.any { it.bookId == nextBook.id && it.chapter == nextChapter }) {
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingMore = true) }
+            val version = _uiState.value.preferences.bibleVersion
+            getChapterVersesUseCase.ensureLoaded(nextBook.id, nextChapter, version)
+            val newVerses = getChapterVersesUseCase(nextBook.id, nextChapter, version).first()
+
+            _uiState.update { state ->
+                val combined = (state.verses + newVerses)
+                    .distinctBy { "${it.bookId}_${it.chapter}_${it.verseNumber}" }
+                    .sortedWith(compareBy({ it.bookId }, { it.chapter }, { it.verseNumber }))
+                state.copy(
+                    verses = combined,
+                    isLoadingMore = false
+                )
+            }
+        }
+    }
+
+    fun updateVisibleBookAndChapter(bookId: Int, chapter: Int) {
+        val book = _uiState.value.books.firstOrNull { it.id == bookId } ?: return
+        if (book.id != _uiState.value.currentBook?.id || chapter != _uiState.value.currentChapter) {
+            _uiState.update { it.copy(currentBook = book, currentChapter = chapter) }
+            viewModelScope.launch {
+                preferencesRepository.updateLastPosition(book.id, chapter, 1)
             }
         }
     }
@@ -289,7 +358,16 @@ class BibleReaderViewModel(
     }
 
     fun updateContinuousScrollEnabled(enabled: Boolean) {
-        viewModelScope.launch { preferencesRepository.updateContinuousScrollEnabled(enabled) }
+        viewModelScope.launch {
+            preferencesRepository.updateContinuousScrollEnabled(enabled)
+            if (!enabled) {
+                val currentBook = _uiState.value.currentBook
+                val currentChapter = _uiState.value.currentChapter
+                if (currentBook != null) {
+                    loadChapter(currentBook, currentChapter, _uiState.value.preferences.bibleVersion)
+                }
+            }
+        }
     }
 
     class Factory(private val context: Context) : ViewModelProvider.Factory {

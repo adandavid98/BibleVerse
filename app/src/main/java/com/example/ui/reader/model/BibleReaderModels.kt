@@ -43,6 +43,7 @@ object HighlightPalette {
 
 data class BibleReaderUiState(
     val isLoading: Boolean = true,
+    val isLoadingMore: Boolean = false,
     val books: List<BibleBookEntity> = emptyList(),
     val currentBook: BibleBookEntity? = null,
     val currentChapter: Int = 1,

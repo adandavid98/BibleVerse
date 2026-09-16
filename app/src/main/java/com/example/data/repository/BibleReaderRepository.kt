@@ -98,7 +98,7 @@ class BibleReaderRepository(
             val networkVerses = BollsBibleApiService.fetchChapter(version, bookId, chapter)
             if (!networkVerses.isNullOrEmpty()) {
                 val entities = networkVerses.map { dto ->
-                    val isJesus = isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
+                    val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber) || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
                     val heading = detectSectionHeading(bookId, chapter, dto.verseNumber)
                     BibleReaderVerseEntity(
                         bookId = bookId,

@@ -43,6 +43,7 @@ import com.example.ui.reader.components.ReaderSettingsBottomSheet
 import com.example.ui.reader.components.ShareTemplateDialog
 import com.example.ui.reader.components.VerseActionBar
 import com.example.ui.reader.viewmodel.BibleReaderViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,20 +55,43 @@ fun BibleReaderScreen(
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
 
-    // Scroll to top or to specific selected verse
-    LaunchedEffect(uiState.currentBook?.id, uiState.currentChapter) {
-        if (uiState.targetScrollVerse == null) {
-            listState.scrollToItem(0)
-        }
-    }
-
+    // Scroll to specific target verse when selected from modal or navigation
     LaunchedEffect(uiState.targetScrollVerse, uiState.verses.size) {
         val target = uiState.targetScrollVerse
         if (target != null && uiState.verses.isNotEmpty()) {
-            val index = uiState.verses.indexOfFirst { it.verseNumber == target }
-            if (index >= 0) {
-                listState.animateScrollToItem(index)
+            val index = uiState.verses.indexOfFirst {
+                it.bookId == uiState.currentBook?.id && it.chapter == uiState.currentChapter && it.verseNumber == target
+            }
+            val scrollIndex = if (index >= 0) index else uiState.verses.indexOfFirst { it.verseNumber == target }
+            if (scrollIndex >= 0) {
+                listState.animateScrollToItem(scrollIndex)
                 viewModel.clearTargetScrollVerse()
+            }
+        }
+    }
+
+    // Trigger continuous scroll load when user approaches the end of loaded chapters
+    LaunchedEffect(listState, uiState.preferences.continuousScrollEnabled, uiState.verses.size) {
+        snapshotFlow {
+            val layoutInfo = listState.layoutInfo
+            val total = layoutInfo.totalItemsCount
+            val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            total > 0 && lastVisible >= total - 3
+        }.distinctUntilChanged().collect { shouldLoadMore ->
+            if (shouldLoadMore && uiState.preferences.continuousScrollEnabled && !uiState.isLoadingMore && !uiState.isLoading) {
+                viewModel.loadNextChapterContinuous()
+            }
+        }
+    }
+
+    // Dynamically update current visible book & chapter in top bar and selector as user scrolls
+    LaunchedEffect(listState, uiState.preferences.continuousScrollEnabled) {
+        snapshotFlow {
+            listState.layoutInfo.visibleItemsInfo.firstOrNull()?.index
+        }.distinctUntilChanged().collect { firstIndex ->
+            if (firstIndex != null && uiState.preferences.continuousScrollEnabled && firstIndex in uiState.verses.indices) {
+                val visibleVerse = uiState.verses[firstIndex]
+                viewModel.updateVisibleBookAndChapter(visibleVerse.bookId, visibleVerse.chapter)
             }
         }
     }
@@ -182,8 +206,24 @@ fun BibleReaderScreen(
                     contentPadding = PaddingValues(top = 12.dp, bottom = 110.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    itemsIndexed(uiState.verses, key = { _, v -> v.verseNumber }) { _, verse ->
+                    itemsIndexed(
+                        items = uiState.verses,
+                        key = { _, v -> "${v.bookId}_${v.chapter}_${v.verseNumber}" }
+                    ) { index, verse ->
+                        val prevVerse = if (index > 0) uiState.verses[index - 1] else null
+                        val isNewChapter = prevVerse != null && (prevVerse.chapter != verse.chapter || prevVerse.bookId != verse.bookId)
+
                         Column(modifier = Modifier.fillMaxWidth()) {
+                            if (isNewChapter) {
+                                ChapterBreakHeader(
+                                    bookName = verse.bookName,
+                                    chapter = verse.chapter,
+                                    fontFamily = selectedFontFamily,
+                                    themeText = themeText,
+                                    themeSecondary = themeSecondary
+                                )
+                            }
+
                             // Section Heading (Perícopa) in bold italic if present
                             if (!verse.sectionHeading.isNullOrBlank()) {
                                 Spacer(modifier = Modifier.height(14.dp))
@@ -210,6 +250,23 @@ fun BibleReaderScreen(
                                 redLettersEnabled = uiState.preferences.redLettersEnabled,
                                 onClick = { viewModel.toggleVerseSelection(verse.verseNumber) }
                             )
+                        }
+                    }
+
+                    if (uiState.isLoadingMore) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 18.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(26.dp),
+                                    color = themeAccent,
+                                    strokeWidth = 2.5.dp
+                                )
+                            }
                         }
                     }
 
@@ -420,12 +477,8 @@ private fun CompactVerseRow(
         else -> Color.Transparent
     }
 
-    // Words of Jesus in red
-    val finalTextColor = if (verse.isRedLetter && redLettersEnabled) {
-        if (isDarkTheme) Color(0xFFF87171) else Color(0xFFDC2626)
-    } else {
-        textColor
-    }
+    // Words of Jesus red color (Light mode: #DC2626, Dark mode: #F87171)
+    val jesusRedColor = if (isDarkTheme) Color(0xFFF87171) else Color(0xFFDC2626)
 
     Box(
         modifier = Modifier
@@ -448,16 +501,18 @@ private fun CompactVerseRow(
             ) {
                 append("${verse.verseNumber} ")
             }
-            // Verse Text
-            withStyle(
-                style = SpanStyle(
-                    color = finalTextColor,
-                    fontSize = fontSize,
-                    fontFamily = fontFamily
-                )
-            ) {
-                append(verse.text)
-            }
+
+            // Append verse content with accurate red letters
+            appendVerseContent(
+                builder = this,
+                text = verse.text,
+                isRedLetter = verse.isRedLetter,
+                redLettersEnabled = redLettersEnabled,
+                textColor = textColor,
+                jesusRedColor = jesusRedColor,
+                fontFamily = fontFamily,
+                fontSize = fontSize
+            )
         }
 
         Text(
@@ -465,6 +520,118 @@ private fun CompactVerseRow(
             lineHeight = lineHeight,
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
+
+@Composable
+private fun ChapterBreakHeader(
+    bookName: String,
+    chapter: Int,
+    fontFamily: FontFamily,
+    themeText: Color,
+    themeSecondary: Color
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 28.dp, bottom = 14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Divider(
+            color = themeSecondary.copy(alpha = 0.25f),
+            thickness = 1.dp,
+            modifier = Modifier.fillMaxWidth(0.9f)
+        )
+        Spacer(modifier = Modifier.height(14.dp))
+        Text(
+            text = "$bookName $chapter",
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold,
+                fontFamily = fontFamily
+            ),
+            color = themeText
+        )
+        Spacer(modifier = Modifier.height(14.dp))
+        Divider(
+            color = themeSecondary.copy(alpha = 0.25f),
+            thickness = 1.dp,
+            modifier = Modifier.fillMaxWidth(0.9f)
+        )
+    }
+}
+
+private fun appendVerseContent(
+    builder: androidx.compose.ui.text.AnnotatedString.Builder,
+    text: String,
+    isRedLetter: Boolean,
+    redLettersEnabled: Boolean,
+    textColor: Color,
+    jesusRedColor: Color,
+    fontFamily: FontFamily,
+    fontSize: androidx.compose.ui.unit.TextUnit
+) {
+    if (!isRedLetter || !redLettersEnabled) {
+        builder.withStyle(SpanStyle(color = textColor, fontSize = fontSize, fontFamily = fontFamily)) {
+            append(text)
+        }
+        return
+    }
+
+    // Check for quote marks: «...» or "..."
+    val hasGuillemets = text.contains("«") && text.contains("»")
+    if (hasGuillemets) {
+        val qStart = text.indexOf("«")
+        val qEnd = text.indexOf("»", qStart)
+        if (qStart >= 0 && qEnd > qStart) {
+            val before = text.substring(0, qStart)
+            val spoken = text.substring(qStart, qEnd + 1)
+            val after = text.substring(qEnd + 1)
+
+            if (before.isNotEmpty()) {
+                builder.withStyle(SpanStyle(color = textColor, fontSize = fontSize, fontFamily = fontFamily)) {
+                    append(before)
+                }
+            }
+            builder.withStyle(SpanStyle(color = jesusRedColor, fontSize = fontSize, fontFamily = fontFamily)) {
+                append(spoken)
+            }
+            if (after.isNotEmpty()) {
+                builder.withStyle(SpanStyle(color = textColor, fontSize = fontSize, fontFamily = fontFamily)) {
+                    append(after)
+                }
+            }
+            return
+        }
+    }
+
+    // Check for colon dialogue indicator (e.g. "diciendo: ", "les dijo: ", "respondió: ", etc.)
+    val colonIdx = text.indexOf(":")
+    if (colonIdx in 3..(text.length - 4)) {
+        val prefix = text.substring(0, colonIdx + 1)
+        val spoken = text.substring(colonIdx + 1)
+
+        val prefixLower = prefix.lowercase()
+        val isSpeechIntro = prefixLower.contains("dijo") ||
+                prefixLower.contains("diciendo") ||
+                prefixLower.contains("respondió") ||
+                prefixLower.contains("habló") ||
+                prefixLower.contains("preguntó") ||
+                prefixLower.contains("clamó")
+
+        if (isSpeechIntro) {
+            builder.withStyle(SpanStyle(color = textColor, fontSize = fontSize, fontFamily = fontFamily)) {
+                append(prefix)
+            }
+            builder.withStyle(SpanStyle(color = jesusRedColor, fontSize = fontSize, fontFamily = fontFamily)) {
+                append(spoken)
+            }
+            return
+        }
+    }
+
+    // Otherwise, the entire verse is Jesus speaking
+    builder.withStyle(SpanStyle(color = jesusRedColor, fontSize = fontSize, fontFamily = fontFamily)) {
+        append(text)
     }
 }
 
