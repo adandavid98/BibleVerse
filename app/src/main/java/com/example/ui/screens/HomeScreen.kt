@@ -1048,7 +1048,7 @@ fun SettingsTab(
                     }
                 }
 
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
 
                 // Switch for automatic update checking on app start
                 Row(

@@ -155,7 +155,7 @@ fun BibleChatDialog(
                     }
                 }
 
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 
                 // Messages list
                 Box(
@@ -291,7 +291,7 @@ fun BibleChatDialog(
                     }
                 }
 
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 
                 // Input bar
                 Row(
