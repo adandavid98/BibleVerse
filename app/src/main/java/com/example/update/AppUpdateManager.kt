@@ -21,6 +21,9 @@ object AppUpdateManager {
 
     private const val PREFS_NAME = "bible_app_update_prefs"
     private const val KEY_GITHUB_REPO = "github_repo_owner_name"
+    private const val KEY_IGNORED_VERSION = "ignored_update_version"
+    private const val KEY_POSTPONE_TIMESTAMP = "postpone_update_timestamp"
+    private const val KEY_AUTO_CHECK_ENABLED = "auto_check_updates_enabled"
     const val DEFAULT_REPO = "adandavid98/BibleVerse"
 
     private val httpClient: OkHttpClient by lazy {
@@ -41,6 +44,39 @@ object AppUpdateManager {
         val cleaned = repo.trim().removePrefix("https://github.com/").removeSuffix("/")
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putString(KEY_GITHUB_REPO, cleaned).apply()
+    }
+
+    fun isAutoCheckEnabled(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_AUTO_CHECK_ENABLED, true)
+    }
+
+    fun setAutoCheckEnabled(context: Context, enabled: Boolean) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_AUTO_CHECK_ENABLED, enabled).apply()
+    }
+
+    fun postponeUpdate(context: Context, hours: Int = 24) {
+        val postponeUntil = System.currentTimeMillis() + (hours * 3600 * 1000L)
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putLong(KEY_POSTPONE_TIMESTAMP, postponeUntil).apply()
+    }
+
+    fun ignoreVersion(context: Context, versionTag: String) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_IGNORED_VERSION, versionTag).apply()
+    }
+
+    fun shouldShowAutomaticPrompt(context: Context, versionTag: String): Boolean {
+        if (!isAutoCheckEnabled(context)) return false
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val ignored = prefs.getString(KEY_IGNORED_VERSION, null)
+        if (ignored.equals(versionTag, ignoreCase = true)) return false
+
+        val postponedUntil = prefs.getLong(KEY_POSTPONE_TIMESTAMP, 0L)
+        if (System.currentTimeMillis() < postponedUntil) return false
+
+        return true
     }
 
     /**

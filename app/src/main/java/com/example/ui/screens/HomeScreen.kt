@@ -24,8 +24,11 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -131,6 +134,7 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedTab by remember { mutableIntStateOf(0) }
+    val versesListState = rememberLazyListState()
 
     val showUpdateDialog by viewModel.showUpdateDialog.collectAsStateWithLifecycle()
     val updateInfo by viewModel.updateInfo.collectAsStateWithLifecycle()
@@ -150,10 +154,25 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                if (selectedTab != 0) {
+                                    selectedTab = 0
+                                    viewModel.onFilterSelected(VerseFilter.TODOS)
+                                }
+                                scope.launch {
+                                    versesListState.animateScrollToItem(0)
+                                }
+                            }
+                            .padding(horizontal = 6.dp, vertical = 4.dp)
+                            .testTag("top_bar_title_scroll_to_top")
+                    ) {
                         Icon(
                             imageVector = Icons.Filled.MenuBook,
-                            contentDescription = null,
+                            contentDescription = "Subir al inicio",
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -218,8 +237,14 @@ fun HomeScreen(
                 NavigationBarItem(
                     selected = selectedTab == 0,
                     onClick = {
-                        selectedTab = 0
-                        viewModel.onFilterSelected(VerseFilter.TODOS)
+                        if (selectedTab == 0) {
+                            scope.launch {
+                                versesListState.animateScrollToItem(0)
+                            }
+                        } else {
+                            selectedTab = 0
+                            viewModel.onFilterSelected(VerseFilter.TODOS)
+                        }
                     },
                     icon = { Icon(Icons.Filled.MenuBook, contentDescription = "Versículos") },
                     label = { Text("Versículos") },
@@ -275,7 +300,7 @@ fun HomeScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             when (selectedTab) {
-                0 -> VersesListTab(viewModel, uiState)
+                0 -> VersesListTab(viewModel, uiState, versesListState)
                 1 -> SearchTab(viewModel, uiState)
                 2 -> FavoritesAndNotesTab(viewModel, uiState)
                 3 -> SettingsTab(viewModel, uiState)
@@ -319,6 +344,8 @@ fun HomeScreen(
             onStartDownload = { viewModel.startUpdateDownload() },
             onInstallApk = { viewModel.installDownloadedApk(context) },
             onOpenInBrowser = { viewModel.openGitHubReleaseInBrowser(context) },
+            onPostpone = { viewModel.postponeUpdate(24) },
+            onIgnoreVersion = { viewModel.ignoreCurrentVersion() },
             onDismiss = { viewModel.setShowUpdateDialog(false) }
         )
     }
@@ -352,9 +379,14 @@ fun HomeScreen(
 @Composable
 fun VersesListTab(
     viewModel: BibleViewModel,
-    uiState: BibleUiState
+    uiState: BibleUiState,
+    listState: LazyListState = rememberLazyListState()
 ) {
+    val otCount = remember(uiState.verses) { uiState.verses.count { it.testament.contains("Antiguo", ignoreCase = true) } }
+    val ntCount = remember(uiState.verses) { uiState.verses.count { it.testament.contains("Nuevo", ignoreCase = true) } }
+
     LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -389,13 +421,13 @@ fun VersesListTab(
                 FilterChip(
                     selected = uiState.selectedFilter == VerseFilter.ANTIGUO,
                     onClick = { viewModel.onFilterSelected(VerseFilter.ANTIGUO) },
-                    label = { Text("Antiguo Testamento (31)") },
+                    label = { Text("Antiguo Testamento ($otCount)") },
                     modifier = Modifier.testTag("filter_ot")
                 )
                 FilterChip(
                     selected = uiState.selectedFilter == VerseFilter.NUEVO,
                     onClick = { viewModel.onFilterSelected(VerseFilter.NUEVO) },
-                    label = { Text("Nuevo Testamento (45)") },
+                    label = { Text("Nuevo Testamento ($ntCount)") },
                     modifier = Modifier.testTag("filter_nt")
                 )
             }
@@ -910,6 +942,7 @@ fun SettingsTab(
         val githubRepo by viewModel.githubRepo.collectAsStateWithLifecycle()
         val updateDownloadStatus by viewModel.updateDownloadStatus.collectAsStateWithLifecycle()
         val updateInfo by viewModel.updateInfo.collectAsStateWithLifecycle()
+        val autoCheckUpdates by viewModel.autoCheckUpdates.collectAsStateWithLifecycle()
         var showEditRepoDialog by remember { mutableStateOf(false) }
         var tempRepoInput by remember(githubRepo) { mutableStateOf(githubRepo) }
 
@@ -948,6 +981,33 @@ fun SettingsTab(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
+                }
+
+                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+
+                // Switch for automatic update checking on app start
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Buscar actualizaciones al abrir",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = if (autoCheckUpdates) "Avisa cuando haya una versión nueva" else "Solo buscar manualmente",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = autoCheckUpdates,
+                        onCheckedChange = { viewModel.setAutoCheckUpdates(it) },
+                        modifier = Modifier.testTag("switch_auto_check_updates")
+                    )
                 }
 
                 Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))

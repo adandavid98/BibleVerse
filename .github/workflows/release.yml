@@ -50,8 +50,11 @@ jobs:
           else
             TAG="v1.0.${{ github.run_number }}"
           fi
+          RAW_VERSION="${TAG#v}"
+          RAW_VERSION="${RAW_VERSION#V}"
           echo "VERSION_TAG=${TAG}" >> $GITHUB_ENV
-          echo "Version Tag is ${TAG}"
+          echo "APP_RAW_VERSION=${RAW_VERSION}" >> $GITHUB_ENV
+          echo "Version Tag is ${TAG}, Raw Version is ${RAW_VERSION}"
 
       - name: Build Android APK
         run: |
@@ -78,6 +81,10 @@ jobs:
             GRADLE_CMD="gradle"
           fi
           
+          # Export dynamic version from tag/run_number so APK matches GitHub release version
+          export APP_VERSION_NAME="${APP_RAW_VERSION}"
+          export APP_VERSION_CODE="${{ github.run_number }}"
+
           # Build APK (assembleDebug guarantees instant installability on any user phone without strict Play Store certificates)
           # Also attempts assembleRelease if keystore credentials are provided
           if [ -n "${{ secrets.STORE_PASSWORD }}" ] && [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
@@ -86,11 +93,11 @@ jobs:
             export KEYSTORE_PATH="$(pwd)/my-upload-key.jks"
             export STORE_PASSWORD="${{ secrets.STORE_PASSWORD }}"
             export KEY_PASSWORD="${{ secrets.KEY_PASSWORD }}"
-            $GRADLE_CMD assembleRelease --no-daemon
+            $GRADLE_CMD assembleRelease -PversionName="${APP_RAW_VERSION}" -PversionCode="${{ github.run_number }}" --no-daemon
             APK_PATH=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
           else
             echo "Building installable APK with debug signing for direct phone installation..."
-            $GRADLE_CMD assembleDebug --no-daemon
+            $GRADLE_CMD assembleDebug -PversionName="${APP_RAW_VERSION}" -PversionCode="${{ github.run_number }}" --no-daemon
             APK_PATH=$(find app/build/outputs/apk/debug -name "*.apk" | head -n 1)
           fi
 

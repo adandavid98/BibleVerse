@@ -92,6 +92,9 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     private val _githubRepo = MutableStateFlow(AppUpdateManager.getGitHubRepo(application))
     val githubRepo: StateFlow<String> = _githubRepo.asStateFlow()
 
+    private val _autoCheckUpdates = MutableStateFlow(AppUpdateManager.isAutoCheckEnabled(application))
+    val autoCheckUpdates: StateFlow<Boolean> = _autoCheckUpdates.asStateFlow()
+
     init {
         val db = BibleDatabase.getDatabase(application, viewModelScope)
         repository = VerseRepository(db.verseDao())
@@ -107,10 +110,12 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
             NotificationHelper.scheduleDailyReminder(application, _reminderHour.value, _reminderMinute.value)
         }
 
-        // Check for updates in background shortly after launch
+        // Check for updates in background shortly after launch (only if enabled)
         viewModelScope.launch {
             delay(3500)
-            checkForUpdates(silent = true)
+            if (AppUpdateManager.isAutoCheckEnabled(application)) {
+                checkForUpdates(silent = true)
+            }
         }
     }
 
@@ -159,7 +164,21 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         _displaySettings,
         _dialogState,
         _detailAndSync
-    ) { allVerses, filterParams, displayParams, dialogParams, detailSync ->
+    ) { allVersesRaw, filterParams, displayParams, dialogParams, detailSync ->
+        // In-memory deduplication safeguarding immediate UI presentation:
+        // preserve favorite, notes, highlight, and retain original canon ordering
+        val allVerses = allVersesRaw
+            .sortedWith(
+                compareByDescending<VerseEntity> { it.isFavorite }
+                    .thenByDescending { it.notes.isNotBlank() }
+                    .thenByDescending { it.highlightColor.isNotBlank() }
+                    .thenBy { it.id }
+            )
+            .distinctBy {
+                it.reference.trim().lowercase().replace("\\s+".toRegex(), " ")
+            }
+            .sortedWith(compareBy({ it.orderIndex }, { it.id }))
+
         val (query, filter, topic) = filterParams
         val (theme, fontScale) = displayParams
         val (showAdd, showExport, showSync) = dialogParams
@@ -472,7 +491,10 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
                 _updateInfo.value = info
                 if (info.isUpdateAvailable) {
                     _updateDownloadStatus.value = UpdateDownloadStatus.Available(info)
-                    _showUpdateDialog.value = true
+                    // If checked automatically in background (silent), respect postpone/ignore preferences
+                    if (!silent || AppUpdateManager.shouldShowAutomaticPrompt(app, info.tagName)) {
+                        _showUpdateDialog.value = true
+                    }
                 } else {
                     _updateDownloadStatus.value = UpdateDownloadStatus.UpToDate
                     if (!silent) {
@@ -530,5 +552,31 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setShowUpdateDialog(show: Boolean) {
         _showUpdateDialog.value = show
+    }
+
+    fun postponeUpdate(hours: Int = 24) {
+        val app = getApplication<Application>()
+        AppUpdateManager.postponeUpdate(app, hours)
+        _showUpdateDialog.value = false
+        _syncStatusMessage.value = "Te recordaremos sobre esta actualización más adelante."
+    }
+
+    fun ignoreCurrentVersion() {
+        val app = getApplication<Application>()
+        val tag = _updateInfo.value?.tagName ?: return
+        AppUpdateManager.ignoreVersion(app, tag)
+        _showUpdateDialog.value = false
+        _syncStatusMessage.value = "Se omitieron los avisos automáticos para la versión $tag."
+    }
+
+    fun setAutoCheckUpdates(enabled: Boolean) {
+        val app = getApplication<Application>()
+        AppUpdateManager.setAutoCheckEnabled(app, enabled)
+        _autoCheckUpdates.value = enabled
+        _syncStatusMessage.value = if (enabled) {
+            "Búsqueda automática de actualizaciones activada."
+        } else {
+            "Búsqueda automática desactivada. Puedes buscar manualmente en Ajustes."
+        }
     }
 }

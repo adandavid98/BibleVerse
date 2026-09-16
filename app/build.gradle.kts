@@ -17,8 +17,17 @@ android {
     applicationId = "com.aistudio.versiculosbiblia.vdbapp"
     minSdk = 24
     targetSdk = 36
-    versionCode = 1
-    versionName = "1.0"
+
+    val appVersionName = project.findProperty("versionName") as String?
+        ?: System.getenv("APP_VERSION_NAME")
+        ?: "1.0.2"
+
+    val appVersionCode = (project.findProperty("versionCode") as String?)?.toIntOrNull()
+        ?: System.getenv("APP_VERSION_CODE")?.toIntOrNull()
+        ?: 2
+
+    versionCode = appVersionCode
+    versionName = appVersionName
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }

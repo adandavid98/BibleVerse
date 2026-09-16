@@ -57,6 +57,8 @@ fun UpdateDialog(
     onStartDownload: () -> Unit,
     onInstallApk: () -> Unit,
     onOpenInBrowser: () -> Unit,
+    onPostpone: () -> Unit,
+    onIgnoreVersion: () -> Unit,
     onDismiss: () -> Unit
 ) {
     Dialog(
@@ -327,12 +329,24 @@ fun UpdateDialog(
                         Text("Ver o Descargar desde GitHub")
                     }
 
-                    TextButton(
-                        onClick = onDismiss,
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Recordar más tarde")
+                        TextButton(
+                            onClick = onIgnoreVersion,
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                        ) {
+                            Text("Omitir esta versión")
+                        }
+
+                        TextButton(
+                            onClick = onPostpone,
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                        ) {
+                            Text("Recordar en 24h")
+                        }
                     }
                 }
             }

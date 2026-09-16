@@ -14,8 +14,39 @@ class VerseRepository(private val verseDao: VerseDao) {
     val highlightedVerses: Flow<List<VerseEntity>> = verseDao.getHighlightedVerses()
     val versesWithNotes: Flow<List<VerseEntity>> = verseDao.getVersesWithNotes()
 
+    suspend fun deduplicateVerses() {
+        withContext(Dispatchers.IO) {
+            val all = verseDao.getAllVersesDirect()
+            if (all.isEmpty()) return@withContext
+
+            val groupedByRef = all.groupBy { 
+                it.reference.trim().lowercase().replace("\\s+".toRegex(), " ")
+            }
+            val idsToDelete = mutableListOf<Long>()
+
+            for ((_, group) in groupedByRef) {
+                if (group.size > 1) {
+                    // Preservar el elemento más completo (favorito, notas, resaltado, o menor ID)
+                    val sorted = group.sortedWith(
+                        compareByDescending<VerseEntity> { it.isFavorite }
+                            .thenByDescending { it.notes.isNotBlank() }
+                            .thenByDescending { it.highlightColor.isNotBlank() }
+                            .thenBy { it.id }
+                    )
+                    val duplicates = sorted.drop(1)
+                    idsToDelete.addAll(duplicates.map { it.id })
+                }
+            }
+
+            if (idsToDelete.isNotEmpty()) {
+                verseDao.deleteVersesByIds(idsToDelete)
+            }
+        }
+    }
+
     suspend fun checkAndSeedInitialData() {
         withContext(Dispatchers.IO) {
+            deduplicateVerses()
             val count = verseDao.getCount()
             if (count == 0) {
                 verseDao.insertVerses(InitialVersesData.verses)

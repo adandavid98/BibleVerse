@@ -19,6 +19,7 @@ class AppUpdateTest {
     fun testVersionComparison_sameVersion() {
         assertEquals(0, AppUpdateManager.compareVersions("v1.0", "1.0"))
         assertEquals(0, AppUpdateManager.compareVersions("1.0.0", "1.0"))
+        assertEquals(0, AppUpdateManager.compareVersions("v1.0.2", "1.0.2"))
     }
 
     @Test

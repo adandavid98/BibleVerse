@@ -47,6 +47,12 @@ interface VerseDao {
     @Query("SELECT COUNT(*) FROM verses")
     suspend fun getCount(): Int
 
+    @Query("SELECT * FROM verses ORDER BY id ASC")
+    suspend fun getAllVersesDirect(): List<VerseEntity>
+
+    @Query("DELETE FROM verses WHERE id IN (:ids)")
+    suspend fun deleteVersesByIds(ids: List<Long>)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertVerse(verse: VerseEntity): Long
 
