@@ -32,6 +32,8 @@ fun ReaderSettingsBottomSheet(
     onLineSpacingChange: (Float) -> Unit,
     onThemeModeChange: (ReaderThemeMode) -> Unit,
     onVersionChange: (String) -> Unit,
+    onRedLettersChange: (Boolean) -> Unit,
+    onContinuousScrollChange: (Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     ModalBottomSheet(
@@ -269,29 +271,94 @@ fun ReaderSettingsBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                BibleCatalog.versions.take(4).forEach { ver ->
-                    val isSelected = preferences.bibleVersion.equals(ver.code, ignoreCase = true)
+                listOf("RVR1960", "NVI", "NTV", "LBLA", "PDT", "BTX3").forEach { code ->
+                    val isSelected = preferences.bibleVersion.equals(code, ignoreCase = true)
                     Surface(
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(10.dp))
-                            .clickable { onVersionChange(ver.code) },
+                            .clickable { onVersionChange(code) },
                         color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
                         shape = RoundedCornerShape(10.dp)
                     ) {
                         Box(
-                            modifier = Modifier.padding(vertical = 10.dp),
+                            modifier = Modifier.padding(vertical = 8.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = ver.code,
-                                fontSize = 12.sp,
+                                text = code,
+                                fontSize = 11.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                 color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
                 }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+            Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 6. Red Letters Switch
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Palabras de Jesús en rojo",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFEF4444))
+                        )
+                    }
+                    Text(
+                        text = "Destaca las palabras y enseñanzas de Cristo",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = preferences.redLettersEnabled,
+                    onCheckedChange = onRedLettersChange
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // 7. Continuous Scroll Switch
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Desplazamiento continuo",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Flujo ininterrumpido de lectura entre capítulos",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = preferences.continuousScrollEnabled,
+                    onCheckedChange = onContinuousScrollChange
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))

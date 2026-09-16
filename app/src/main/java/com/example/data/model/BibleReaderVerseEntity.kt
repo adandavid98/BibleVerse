@@ -7,8 +7,8 @@ import androidx.room.PrimaryKey
 @Entity(
     tableName = "bible_reader_verses",
     indices = [
-        Index(value = ["bookId", "chapter", "verseNumber"], unique = true),
-        Index(value = ["bookId", "chapter"])
+        Index(value = ["bookId", "chapter", "verseNumber", "bibleVersion"], unique = true),
+        Index(value = ["bookId", "chapter", "bibleVersion"])
     ]
 )
 data class BibleReaderVerseEntity(
@@ -18,5 +18,7 @@ data class BibleReaderVerseEntity(
     val chapter: Int,
     val verseNumber: Int,
     val text: String,
-    val bibleVersion: String = "RVR1960"
+    val bibleVersion: String = "RVR1960",
+    val sectionHeading: String? = null,
+    val isRedLetter: Boolean = false
 )

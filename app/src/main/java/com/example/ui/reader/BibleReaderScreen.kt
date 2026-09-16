@@ -5,15 +5,16 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -22,12 +23,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,12 +54,25 @@ fun BibleReaderScreen(
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
 
-    // Scroll to top when book or chapter changes
+    // Scroll to top or to specific selected verse
     LaunchedEffect(uiState.currentBook?.id, uiState.currentChapter) {
-        listState.scrollToItem(0)
+        if (uiState.targetScrollVerse == null) {
+            listState.scrollToItem(0)
+        }
     }
 
-    // Color theme resolution
+    LaunchedEffect(uiState.targetScrollVerse, uiState.verses.size) {
+        val target = uiState.targetScrollVerse
+        if (target != null && uiState.verses.isNotEmpty()) {
+            val index = uiState.verses.indexOfFirst { it.verseNumber == target }
+            if (index >= 0) {
+                listState.animateScrollToItem(index)
+                viewModel.clearTargetScrollVerse()
+            }
+        }
+    }
+
+    // Colors matching theme
     val (themeBg, themeText, themeSecondary, themeAccent) = when (uiState.preferences.themeMode) {
         ReaderThemeMode.LIGHT -> Quad(
             Color(0xFFFFFFFF),
@@ -70,7 +87,7 @@ fun BibleReaderScreen(
             Color(0xFF9A3412)
         )
         ReaderThemeMode.DARK -> Quad(
-            Color(0xFF1E293B),
+            Color(0xFF121417),
             Color(0xFFF1F5F9),
             Color(0xFF94A3B8),
             Color(0xFF38BDF8)
@@ -130,17 +147,7 @@ fun BibleReaderScreen(
                     }
                 },
                 actions = {
-                    // Previous chapter
-                    IconButton(onClick = { viewModel.previousChapter() }) {
-                        Icon(Icons.Default.ChevronLeft, contentDescription = "Capítulo anterior", tint = themeText)
-                    }
-
-                    // Next chapter
-                    IconButton(onClick = { viewModel.nextChapter() }) {
-                        Icon(Icons.Default.ChevronRight, contentDescription = "Capítulo siguiente", tint = themeText)
-                    }
-
-                    // Reader Settings
+                    // Reader Settings Button
                     IconButton(onClick = { viewModel.openSettingsSheet() }) {
                         Icon(Icons.Default.FormatSize, contentDescription = "Ajustes de lectura", tint = themeText)
                     }
@@ -171,94 +178,140 @@ fun BibleReaderScreen(
                     state = listState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 20.dp),
-                    contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                        .padding(horizontal = 22.dp),
+                    contentPadding = PaddingValues(top = 12.dp, bottom = 110.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    // Chapter Heading
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 12.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = (uiState.currentBook?.name ?: "").uppercase(),
+                    itemsIndexed(uiState.verses, key = { _, v -> v.verseNumber }) { _, verse ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            // Section Heading (Perícopa) in bold italic if present
+                            if (!verse.sectionHeading.isNullOrBlank()) {
+                                Spacer(modifier = Modifier.height(14.dp))
+                                Text(
+                                    text = verse.sectionHeading,
+                                    fontFamily = selectedFontFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    fontStyle = FontStyle.Italic,
+                                    fontSize = (fontSize.value * 1.08f).sp,
+                                    color = themeText,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                            }
+
+                            // Compact verse text with superscript number & red letters
+                            CompactVerseRow(
+                                verse = verse,
                                 fontFamily = selectedFontFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
-                                letterSpacing = 2.sp,
-                                color = themeSecondary
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "CAPÍTULO ${uiState.currentChapter}",
-                                fontFamily = selectedFontFamily,
-                                fontWeight = FontWeight.Black,
-                                fontSize = 26.sp,
-                                color = themeText
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = uiState.preferences.bibleVersion,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = themeSecondary
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Divider(
-                                color = themeSecondary.copy(alpha = 0.3f),
-                                thickness = 1.dp,
-                                modifier = Modifier.width(60.dp)
+                                fontSize = fontSize,
+                                lineHeight = lineHeight,
+                                textColor = themeText,
+                                secondaryColor = themeSecondary,
+                                isDarkTheme = uiState.preferences.themeMode == ReaderThemeMode.DARK || uiState.preferences.themeMode == ReaderThemeMode.NIGHT,
+                                redLettersEnabled = uiState.preferences.redLettersEnabled,
+                                onClick = { viewModel.toggleVerseSelection(verse.verseNumber) }
                             )
                         }
                     }
 
-                    // Verses List
-                    items(uiState.verses, key = { it.verseNumber }) { verse ->
-                        VerseRow(
-                            verse = verse,
-                            fontFamily = selectedFontFamily,
-                            fontSize = fontSize,
-                            lineHeight = lineHeight,
-                            textColor = themeText,
-                            numberColor = themeAccent,
-                            onClick = { viewModel.toggleVerseSelection(verse.verseNumber) }
-                        )
-                    }
-
-                    // Chapter End Navigation Footer
+                    // Bottom spacer before bottom controls
                     item {
-                        Spacer(modifier = Modifier.height(20.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            OutlinedButton(
-                                onClick = { viewModel.previousChapter() },
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Icon(Icons.Default.ChevronLeft, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Capítulo Anterior", fontSize = 13.sp)
-                            }
-
-                            Button(
-                                onClick = { viewModel.nextChapter() },
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Text("Siguiente Capítulo", fontSize = 13.sp)
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Icon(Icons.Default.ChevronRight, contentDescription = null, modifier = Modifier.size(16.dp))
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(40.dp))
+                        Spacer(modifier = Modifier.height(30.dp))
                     }
                 }
             }
 
-            // Contextual Floating Action Bar
+            // Navigation buttons at the extremes & center pill (Matching screenshot layout)
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, bottom = 18.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Left extreme: Previous chapter button (pointing left)
+                Surface(
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(CircleShape)
+                        .shadow(6.dp, CircleShape)
+                        .clickable { viewModel.previousChapter() },
+                    shape = CircleShape,
+                    color = themeBg,
+                    border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.3f))
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Capítulo anterior",
+                            tint = themeText,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
+                // Center: Current Book & Chapter pill (Click opens selector modal)
+                Surface(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(24.dp))
+                        .shadow(8.dp, RoundedCornerShape(24.dp))
+                        .clickable { viewModel.openBookChapterSelector() },
+                    shape = RoundedCornerShape(24.dp),
+                    color = themeBg,
+                    border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.35f))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .background(themeAccent.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.PlayArrow,
+                                contentDescription = null,
+                                tint = themeAccent,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                        Text(
+                            text = "${(uiState.currentBook?.name ?: "LIBRO").uppercase()} ${uiState.currentChapter}",
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.5.sp,
+                            fontSize = 13.sp,
+                            color = themeText
+                        )
+                    }
+                }
+
+                // Right extreme: Next chapter button (pointing right)
+                Surface(
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(CircleShape)
+                        .shadow(6.dp, CircleShape)
+                        .clickable { viewModel.nextChapter() },
+                    shape = CircleShape,
+                    color = themeBg,
+                    border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.3f))
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            Icons.Default.ArrowForward,
+                            contentDescription = "Capítulo siguiente",
+                            tint = themeText,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+
+            // Contextual Floating Action Bar when verses are selected
             VerseActionBar(
                 selectedCount = uiState.selectedVerseNumbers.size,
                 onCopy = {
@@ -285,25 +338,26 @@ fun BibleReaderScreen(
                 },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 76.dp)
             )
         }
     }
 
-    // Modal Sheet: Book & Chapter Selector
+    // Modal Sheet: 3-step Book -> Chapter -> Verse Selector with Todo / AT / NT tabs
     if (uiState.isBookChapterSelectorOpen) {
         BookChapterSelectorSheet(
             books = uiState.books,
             currentBook = uiState.currentBook,
             currentChapter = uiState.currentChapter,
-            onSelectBookAndChapter = { book, chapter ->
-                viewModel.selectBookAndChapter(book, chapter)
+            currentVerse = uiState.targetScrollVerse ?: 1,
+            onSelectBookChapterVerse = { book, chapter, verse ->
+                viewModel.selectBookChapterVerse(book, chapter, verse)
             },
             onDismiss = { viewModel.closeBookChapterSelector() }
         )
     }
 
-    // Bottom Sheet: Reader Settings
+    // Bottom Sheet: Reader Settings (with Red letters & continuous scroll)
     if (uiState.isSettingsSheetOpen) {
         ReaderSettingsBottomSheet(
             preferences = uiState.preferences,
@@ -312,6 +366,8 @@ fun BibleReaderScreen(
             onLineSpacingChange = { viewModel.updateLineSpacing(it) },
             onThemeModeChange = { viewModel.updateThemeMode(it) },
             onVersionChange = { viewModel.updateBibleVersion(it) },
+            onRedLettersChange = { viewModel.updateRedLettersEnabled(it) },
+            onContinuousScrollChange = { viewModel.updateContinuousScrollEnabled(it) },
             onDismiss = { viewModel.closeSettingsSheet() }
         )
     }
@@ -333,19 +389,21 @@ fun BibleReaderScreen(
 }
 
 @Composable
-private fun VerseRow(
+private fun CompactVerseRow(
     verse: ReaderVerseUiModel,
     fontFamily: FontFamily,
     fontSize: androidx.compose.ui.unit.TextUnit,
     lineHeight: androidx.compose.ui.unit.TextUnit,
     textColor: Color,
-    numberColor: Color,
+    secondaryColor: Color,
+    isDarkTheme: Boolean,
+    redLettersEnabled: Boolean,
     onClick: () -> Unit
 ) {
     val highlightColor = remember(verse.highlightColorHex) {
         if (!verse.highlightColorHex.isNullOrBlank()) {
             try {
-                Color(android.graphics.Color.parseColor(verse.highlightColorHex)).copy(alpha = 0.45f)
+                Color(android.graphics.Color.parseColor(verse.highlightColorHex)).copy(alpha = 0.4f)
             } catch (e: Exception) {
                 null
             }
@@ -353,7 +411,7 @@ private fun VerseRow(
     }
 
     val selectionBorder = if (verse.isSelected) {
-        BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+        BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
     } else null
 
     val rowBg = when {
@@ -362,28 +420,38 @@ private fun VerseRow(
         else -> Color.Transparent
     }
 
+    // Words of Jesus in red
+    val finalTextColor = if (verse.isRedLetter && redLettersEnabled) {
+        if (isDarkTheme) Color(0xFFF87171) else Color(0xFFDC2626)
+    } else {
+        textColor
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(6.dp))
             .background(rowBg)
-            .then(if (selectionBorder != null) Modifier.border(selectionBorder, RoundedCornerShape(8.dp)) else Modifier)
+            .then(if (selectionBorder != null) Modifier.border(selectionBorder, RoundedCornerShape(6.dp)) else Modifier)
             .clickable { onClick() }
-            .padding(horizontal = 8.dp, vertical = 6.dp)
+            .padding(horizontal = 4.dp, vertical = 2.dp)
     ) {
         val annotatedText = buildAnnotatedString {
+            // Elegant superscript verse number
             withStyle(
                 style = SpanStyle(
-                    color = numberColor,
-                    fontWeight = FontWeight.Black,
-                    fontSize = (fontSize.value * 0.8f).sp
+                    color = secondaryColor.copy(alpha = 0.75f),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = (fontSize.value * 0.7f).sp,
+                    baselineShift = BaselineShift.Superscript
                 )
             ) {
-                append("${verse.verseNumber}  ")
+                append("${verse.verseNumber} ")
             }
+            // Verse Text
             withStyle(
                 style = SpanStyle(
-                    color = textColor,
+                    color = finalTextColor,
                     fontSize = fontSize,
                     fontFamily = fontFamily
                 )

@@ -40,8 +40,8 @@ interface BibleReaderDao {
     """)
     suspend fun getVersesSync(bookId: Int, chapter: Int, version: String): List<BibleReaderVerseEntity>
 
-    @Query("SELECT COUNT(*) FROM bible_reader_verses WHERE bookId = :bookId AND chapter = :chapter")
-    suspend fun getVerseCountForChapter(bookId: Int, chapter: Int): Int
+    @Query("SELECT COUNT(*) FROM bible_reader_verses WHERE bookId = :bookId AND chapter = :chapter AND bibleVersion = :version")
+    suspend fun getVerseCountForChapter(bookId: Int, chapter: Int, version: String): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertVerses(verses: List<BibleReaderVerseEntity>)

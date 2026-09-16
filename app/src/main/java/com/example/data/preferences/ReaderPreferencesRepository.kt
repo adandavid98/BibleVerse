@@ -27,6 +27,8 @@ class ReaderPreferencesRepository(private val context: Context) {
         val LAST_CHAPTER = intPreferencesKey("last_chapter")
         val LAST_VERSE = intPreferencesKey("last_verse")
         val BIBLE_VERSION = stringPreferencesKey("bible_version")
+        val RED_LETTERS_ENABLED = androidx.datastore.preferences.core.booleanPreferencesKey("red_letters_enabled")
+        val CONTINUOUS_SCROLL_ENABLED = androidx.datastore.preferences.core.booleanPreferencesKey("continuous_scroll_enabled")
     }
 
     val readerPreferences: Flow<ReaderPreferences> = context.dataStore.data
@@ -59,6 +61,8 @@ class ReaderPreferencesRepository(private val context: Context) {
             val lastChapter = preferences[PreferencesKeys.LAST_CHAPTER] ?: 1
             val lastVerse = preferences[PreferencesKeys.LAST_VERSE] ?: 1
             val bibleVersion = preferences[PreferencesKeys.BIBLE_VERSION] ?: "RVR1960"
+            val redLettersEnabled = preferences[PreferencesKeys.RED_LETTERS_ENABLED] ?: true
+            val continuousScrollEnabled = preferences[PreferencesKeys.CONTINUOUS_SCROLL_ENABLED] ?: false
 
             ReaderPreferences(
                 fontFamily = fontFamily,
@@ -68,7 +72,9 @@ class ReaderPreferencesRepository(private val context: Context) {
                 lastBookId = lastBookId,
                 lastChapter = lastChapter,
                 lastVerse = lastVerse,
-                bibleVersion = bibleVersion
+                bibleVersion = bibleVersion,
+                redLettersEnabled = redLettersEnabled,
+                continuousScrollEnabled = continuousScrollEnabled
             )
         }
 
@@ -109,6 +115,18 @@ class ReaderPreferencesRepository(private val context: Context) {
     suspend fun updateBibleVersion(version: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.BIBLE_VERSION] = version
+        }
+    }
+
+    suspend fun updateRedLettersEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.RED_LETTERS_ENABLED] = enabled
+        }
+    }
+
+    suspend fun updateContinuousScrollEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.CONTINUOUS_SCROLL_ENABLED] = enabled
         }
     }
 }

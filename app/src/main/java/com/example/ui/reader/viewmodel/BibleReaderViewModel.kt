@@ -83,19 +83,28 @@ class BibleReaderViewModel(
     }
 
     fun selectBookAndChapter(book: BibleBookEntity, chapter: Int) {
+        selectBookChapterVerse(book, chapter, 1)
+    }
+
+    fun selectBookChapterVerse(book: BibleBookEntity, chapter: Int, verse: Int = 1) {
         val validChapter = chapter.coerceIn(1, book.chaptersCount)
         _uiState.update {
             it.copy(
                 currentBook = book,
                 currentChapter = validChapter,
                 selectedVerseNumbers = emptySet(),
+                targetScrollVerse = verse,
                 isBookChapterSelectorOpen = false
             )
         }
         viewModelScope.launch {
-            preferencesRepository.updateLastPosition(book.id, validChapter, 1)
+            preferencesRepository.updateLastPosition(book.id, validChapter, verse)
         }
         loadChapter(book, validChapter, _uiState.value.preferences.bibleVersion)
+    }
+
+    fun clearTargetScrollVerse() {
+        _uiState.update { it.copy(targetScrollVerse = null) }
     }
 
     fun nextChapter() {
@@ -273,6 +282,14 @@ class BibleReaderViewModel(
                 loadChapter(currentBook, _uiState.value.currentChapter, version)
             }
         }
+    }
+
+    fun updateRedLettersEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.updateRedLettersEnabled(enabled) }
+    }
+
+    fun updateContinuousScrollEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.updateContinuousScrollEnabled(enabled) }
     }
 
     class Factory(private val context: Context) : ViewModelProvider.Factory {

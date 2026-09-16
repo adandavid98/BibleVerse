@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
         BibleReaderVerseEntity::class,
         VerseHighlightEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class BibleDatabase : RoomDatabase() {
@@ -81,6 +81,26 @@ abstract class BibleDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE IF EXISTS bible_reader_verses")
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS bible_reader_verses (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        bookId INTEGER NOT NULL,
+                        chapter INTEGER NOT NULL,
+                        verseNumber INTEGER NOT NULL,
+                        text TEXT NOT NULL,
+                        bibleVersion TEXT NOT NULL DEFAULT 'RVR1960',
+                        sectionHeading TEXT,
+                        isRedLetter INTEGER NOT NULL DEFAULT 0
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_bible_reader_verses_bookId_chapter_verseNumber_bibleVersion ON bible_reader_verses(bookId, chapter, verseNumber, bibleVersion)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_bible_reader_verses_bookId_chapter_bibleVersion ON bible_reader_verses(bookId, chapter, bibleVersion)")
+            }
+        }
+
         fun getDatabase(context: Context, scope: CoroutineScope? = null): BibleDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -88,7 +108,7 @@ abstract class BibleDatabase : RoomDatabase() {
                     BibleDatabase::class.java,
                     "bible_verses_database"
                 )
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .fallbackToDestructiveMigration(false)
                 .build()
                 INSTANCE = instance

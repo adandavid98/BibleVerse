@@ -52,5 +52,6 @@ data class BibleReaderUiState(
     val isBookChapterSelectorOpen: Boolean = false,
     val isSettingsSheetOpen: Boolean = false,
     val isShareDialogOpen: Boolean = false,
+    val targetScrollVerse: Int? = null,
     val userMessage: String? = null
 )

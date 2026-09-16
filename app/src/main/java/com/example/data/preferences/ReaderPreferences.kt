@@ -21,5 +21,7 @@ data class ReaderPreferences(
     val lastBookId: Int = 1, // Genesis
     val lastChapter: Int = 1,
     val lastVerse: Int = 1,
-    val bibleVersion: String = "RVR1960"
+    val bibleVersion: String = "RVR1960",
+    val redLettersEnabled: Boolean = true,
+    val continuousScrollEnabled: Boolean = false
 )

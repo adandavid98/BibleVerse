@@ -7,5 +7,7 @@ data class ReaderVerseUiModel(
     val verseNumber: Int,
     val text: String,
     val highlightColorHex: String? = null,
-    val isSelected: Boolean = false
+    val isSelected: Boolean = false,
+    val sectionHeading: String? = null,
+    val isRedLetter: Boolean = false
 )

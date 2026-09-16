@@ -29,7 +29,9 @@ class GetChapterVersesWithHighlightsUseCase(
                     verseNumber = verse.verseNumber,
                     text = verse.text,
                     highlightColorHex = highlightMap[verse.verseNumber]?.colorHex,
-                    isSelected = false
+                    isSelected = false,
+                    sectionHeading = verse.sectionHeading,
+                    isRedLetter = verse.isRedLetter
                 )
             }
         }
