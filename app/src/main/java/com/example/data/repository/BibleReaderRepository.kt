@@ -2,6 +2,7 @@ package com.example.data.repository
 
 import com.example.data.bible.BibleCatalog
 import com.example.data.bible.BollsBibleApiService
+import com.example.data.bible.WordsOfJesusCatalog
 import com.example.data.initial.InitialVersesData
 import com.example.data.local.BibleReaderDao
 import com.example.data.model.BibleBookEntity
