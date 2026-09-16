@@ -338,6 +338,7 @@ fun HomeScreen(
             onDismiss = { viewModel.showSyncDialog(false) },
             onSignInGoogle = { viewModel.signInWithGoogle(context) },
             onSignInAnonymous = { viewModel.signInAnonymously() },
+            onSignInEmailPassword = { email, pass -> viewModel.signInWithEmailPassword(email, pass) },
             onSignOut = { viewModel.signOutFirebase(context) },
             onUploadFirestore = { viewModel.uploadToFirestore() },
             onDownloadFirestore = { viewModel.downloadFromFirestore() },

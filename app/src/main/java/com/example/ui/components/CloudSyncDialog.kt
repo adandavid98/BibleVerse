@@ -1,10 +1,7 @@
 package com.example.ui.components
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,16 +19,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -54,9 +54,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -73,33 +76,35 @@ fun CloudSyncDialog(
     onDismiss: () -> Unit,
     onSignInGoogle: () -> Unit,
     onSignInAnonymous: () -> Unit,
+    onSignInEmailPassword: (String, String) -> Unit = { _, _ -> },
     onSignOut: () -> Unit,
     onUploadFirestore: () -> Unit,
     onDownloadFirestore: () -> Unit,
-    onPerformBackup: () -> String,
+    onPerformBackup: () -> Unit,
     onPerformRestore: (String) -> Unit
 ) {
-    val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
+    var showManualSection by remember { mutableStateOf(false) }
     var restoreCodeInput by remember { mutableStateOf("") }
-    var generatedBackupJson by remember { mutableStateOf<String?>(null) }
-    var showRestoreInput by remember { mutableStateOf(false) }
-    var showManualBackup by remember { mutableStateOf(false) }
+    var copyNotice by remember { mutableStateOf(false) }
+
+    // Email/Password login inputs
+    var showEmailLogin by remember { mutableStateOf(false) }
+    var emailInput by remember { mutableStateOf("") }
+    var passwordInput by remember { mutableStateOf("") }
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            decorFitsSystemWindows = false
-        )
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Surface(
+        Card(
             modifier = Modifier
-                .fillMaxWidth(0.92f)
-                .imePadding()
-                .clip(RoundedCornerShape(20.dp))
+                .fillMaxWidth(0.94f)
+                .heightIn(max = 680.dp)
+                .padding(vertical = 16.dp)
                 .testTag("dialog_cloud_sync"),
-            color = MaterialTheme.colorScheme.background,
-            tonalElevation = 6.dp
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(
                 modifier = Modifier
@@ -110,33 +115,108 @@ fun CloudSyncDialog(
                 // Header
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Filled.CloudDone,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Sincronización en la Nube",
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                    IconButton(onClick = onDismiss) {
-                        Icon(Icons.Filled.Close, contentDescription = "Cerrar")
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Filled.CloudSync,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+                        Column {
+                            Text(
+                                text = "Nube y Copia de Seguridad",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Tus notas, colores y favoritos seguros",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
 
-                Text(
-                    text = "Conecta tu cuenta de Google o Firebase para que tus favoritos, notas y versículos se guarden automáticamente en la nube y nunca se pierdan al reinstalar la app.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+                // Estado de Operación Firebase
+                when (syncOperation) {
+                    is CloudSyncState.Loading -> {
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                                Text(
+                                    text = "Sincronizando con la nube...",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+                    is CloudSyncState.Success -> {
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Icon(Icons.Filled.CloudDone, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                                Text(
+                                    text = syncOperation.message,
+                                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+                    is CloudSyncState.Error -> {
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Icon(Icons.Filled.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
+                                Text(
+                                    text = syncOperation.message,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            }
+                        }
+                    }
+                    CloudSyncState.Idle -> { /* Idle */ }
+                }
 
                 // 1. SECCIÓN DE CUENTA FIREBASE / GOOGLE
                 Card(
@@ -144,7 +224,7 @@ fun CloudSyncDialog(
                     shape = RoundedCornerShape(14.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = if (userState != null)
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
                         else
                             MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     )
@@ -183,7 +263,7 @@ fun CloudSyncDialog(
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
-                                        text = "Inicia sesión con Google para sincronizar",
+                                        text = "Conecta con Firebase para sincronizar tus notas",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -192,7 +272,21 @@ fun CloudSyncDialog(
                         }
 
                         if (userState == null) {
+                            // Botón 1: Conexión rápida anónima a Firebase (no requiere configuración de Google OAuth Web Client)
                             Button(
+                                onClick = onSignInAnonymous,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("btn_anonymous_signin"),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Icon(Icons.Filled.CloudSync, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Conectar con Nube Firebase Directa")
+                            }
+
+                            // Botón 2: Iniciar con Google
+                            OutlinedButton(
                                 onClick = onSignInGoogle,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -204,16 +298,46 @@ fun CloudSyncDialog(
                                 Text("Iniciar Sesión con Google")
                             }
 
+                            // Botón 3: Iniciar con Correo y Contraseña
                             OutlinedButton(
-                                onClick = onSignInAnonymous,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .testTag("btn_anonymous_signin"),
+                                onClick = { showEmailLogin = !showEmailLogin },
+                                modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(10.dp)
                             ) {
-                                Icon(Icons.Filled.CloudSync, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Icon(Icons.Filled.Email, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Conectar con Nube Firebase Rápida")
+                                Text(if (showEmailLogin) "Ocultar Correo / Contraseña" else "Iniciar con Correo / Contraseña")
+                            }
+
+                            if (showEmailLogin) {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    OutlinedTextField(
+                                        value = emailInput,
+                                        onValueChange = { emailInput = it },
+                                        label = { Text("Correo electrónico") },
+                                        singleLine = true,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    OutlinedTextField(
+                                        value = passwordInput,
+                                        onValueChange = { passwordInput = it },
+                                        label = { Text("Contraseña (mínimo 6 car.)") },
+                                        singleLine = true,
+                                        visualTransformation = PasswordVisualTransformation(),
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    Button(
+                                        onClick = {
+                                            if (emailInput.isNotBlank() && passwordInput.isNotBlank()) {
+                                                onSignInEmailPassword(emailInput, passwordInput)
+                                            }
+                                        },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(10.dp)
+                                    ) {
+                                        Text("Entrar / Crear Cuenta")
+                                    }
+                                }
                             }
                         } else {
                             Row(
@@ -243,160 +367,110 @@ fun CloudSyncDialog(
 
                             TextButton(
                                 onClick = onSignOut,
-                                modifier = Modifier.align(Alignment.CenterHorizontally),
-                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                                modifier = Modifier.align(Alignment.End)
                             ) {
                                 Icon(Icons.Filled.Logout, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Cerrar Sesión")
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Cerrar Sesión", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }
                 }
 
-                // Estado de la operación de sincronización
-                when (syncOperation) {
-                    is CloudSyncState.Loading -> {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-                            Spacer(modifier = Modifier.width(8.dp))
+                // 2. SECCIÓN DE RESPALDO MANUAL (Funciona 100% sin conexión ni servicios)
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showManualSection = !showManualSection }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Icon(Icons.Filled.Key, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                             Text(
-                                text = "Sincronizando con Firestore...",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
+                                text = "Respaldo portátil (Código Manual)",
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
-                    }
-                    is CloudSyncState.Success -> {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
-                                .padding(10.dp)
-                        ) {
-                            Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = syncOperation.message,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                    is CloudSyncState.Error -> {
                         Text(
-                            text = syncOperation.message,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(horizontal = 4.dp)
+                            text = if (showManualSection) "Ocultar ▲" else "Mostrar ▼",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
-                    else -> {}
                 }
 
-                // Última sincronización info
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Última sincronización:",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = lastSyncTime,
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-
-                // 2. RESPALDO MANUAL / PORTABLE (CÓDIGO O ARCHIVO)
-                TextButton(
-                    onClick = { showManualBackup = !showManualBackup },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = if (showManualBackup) "Ocultar respaldo manual (código)" else "Ver respaldo manual por código / archivo",
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                }
-
-                if (showManualBackup) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                if (showManualSection) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = "Genera un código compacto con todas tus notas para guardarlo en un bloc de notas o enviártelo por WhatsApp:",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Button(
+                            onClick = {
+                                onPerformBackup()
+                                copyNotice = true
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Icon(Icons.Filled.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Generar y Copiar Código de Respaldo", fontSize = 12.sp)
+                        }
+
+                        if (copyNotice) {
                             Text(
-                                text = "CLAVE DE SINCRONIZACIÓN LOCAL: $syncId",
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.secondary
+                                text = "✓ Código copiado al portapapeles. ¡Pégalo donde gustes!",
+                                color = MaterialTheme.colorScheme.primary,
+                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
                             )
+                        }
 
-                            Button(
-                                onClick = {
-                                    val json = onPerformBackup()
-                                    generatedBackupJson = json
-                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                    val clip = ClipData.newPlainText("BibleVerse_Backup", json)
-                                    clipboard.setPrimaryClip(clip)
-                                    Toast.makeText(context, "Copia de respaldo copiada al portapapeles", Toast.LENGTH_SHORT).show()
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Icon(Icons.Filled.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Generar y Copiar Código de Respaldo")
-                            }
+                        OutlinedTextField(
+                            value = restoreCodeInput,
+                            onValueChange = { restoreCodeInput = it },
+                            label = { Text("Pegar código de respaldo") },
+                            placeholder = { Text("Pega aquí el código copiado...") },
+                            modifier = Modifier.fillMaxWidth(),
+                            maxLines = 2
+                        )
 
-                            if (!showRestoreInput) {
-                                OutlinedButton(
-                                    onClick = { showRestoreInput = true },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(10.dp)
-                                ) {
-                                    Icon(Icons.Filled.Sync, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text("Pegar Código para Restaurar")
+                        OutlinedButton(
+                            onClick = {
+                                if (restoreCodeInput.isNotBlank()) {
+                                    onPerformRestore(restoreCodeInput)
+                                    restoreCodeInput = ""
                                 }
-                            } else {
-                                OutlinedTextField(
-                                    value = restoreCodeInput,
-                                    onValueChange = { restoreCodeInput = it },
-                                    label = { Text("Pega el código de respaldo aquí") },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    maxLines = 4,
-                                    textStyle = MaterialTheme.typography.bodySmall
-                                )
-                                Button(
-                                    onClick = {
-                                        if (restoreCodeInput.isNotBlank()) {
-                                            onPerformRestore(restoreCodeInput)
-                                            restoreCodeInput = ""
-                                            showRestoreInput = false
-                                        }
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(10.dp)
-                                ) {
-                                    Text("Restaurar desde Código")
-                                }
-                            }
+                            },
+                            enabled = restoreCodeInput.isNotBlank(),
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Text("Restaurar desde Código Pegado", fontSize = 12.sp)
                         }
                     }
+                }
+
+                // Footer Close
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Text("Cerrar", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }

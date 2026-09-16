@@ -14,6 +14,7 @@ import com.example.data.repository.VerseRepository
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
@@ -35,23 +36,8 @@ object FirebaseSyncManager {
     private const val COLLECTION_VERSES = "verses"
     private const val COLLECTION_METADATA = "metadata"
 
-    private val auth: FirebaseAuth? by lazy {
-        try {
-            FirebaseAuth.getInstance()
-        } catch (e: Exception) {
-            Log.w(TAG, "FirebaseAuth no disponible: ${e.message}")
-            null
-        }
-    }
-
-    private val firestore: FirebaseFirestore? by lazy {
-        try {
-            FirebaseFirestore.getInstance()
-        } catch (e: Exception) {
-            Log.w(TAG, "FirebaseFirestore no disponible: ${e.message}")
-            null
-        }
-    }
+    private var authInstance: FirebaseAuth? = null
+    private var firestoreInstance: FirebaseFirestore? = null
 
     private val _currentUserState = MutableStateFlow<FirebaseUserState?>(null)
     val currentUserState: StateFlow<FirebaseUserState?> = _currentUserState.asStateFlow()
@@ -59,10 +45,50 @@ object FirebaseSyncManager {
     private val _syncOperationState = MutableStateFlow<CloudSyncState>(CloudSyncState.Idle)
     val syncOperationState: StateFlow<CloudSyncState> = _syncOperationState.asStateFlow()
 
-    init {
-        auth?.addAuthStateListener { firebaseAuth ->
-            val user = firebaseAuth.currentUser
-            _currentUserState.value = user?.toUserState()
+    fun init(context: Context) {
+        try {
+            if (FirebaseApp.getApps(context).isEmpty()) {
+                FirebaseApp.initializeApp(context)
+            }
+            getOrInitAuth(context)
+            getOrInitFirestore(context)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error inicializando Firebase en init: ${e.message}", e)
+        }
+    }
+
+    private fun getOrInitAuth(context: Context? = null): FirebaseAuth? {
+        if (authInstance != null) return authInstance
+        try {
+            if (context != null && FirebaseApp.getApps(context).isEmpty()) {
+                FirebaseApp.initializeApp(context)
+            }
+            val a = FirebaseAuth.getInstance()
+            authInstance = a
+            a.addAuthStateListener { firebaseAuth ->
+                val user = firebaseAuth.currentUser
+                _currentUserState.value = user?.toUserState()
+            }
+            _currentUserState.value = a.currentUser?.toUserState()
+            return a
+        } catch (e: Exception) {
+            Log.e(TAG, "Fallo al obtener FirebaseAuth: ${e.message}", e)
+            return null
+        }
+    }
+
+    private fun getOrInitFirestore(context: Context? = null): FirebaseFirestore? {
+        if (firestoreInstance != null) return firestoreInstance
+        try {
+            if (context != null && FirebaseApp.getApps(context).isEmpty()) {
+                FirebaseApp.initializeApp(context)
+            }
+            val db = FirebaseFirestore.getInstance()
+            firestoreInstance = db
+            return db
+        } catch (e: Exception) {
+            Log.e(TAG, "Fallo al obtener FirebaseFirestore: ${e.message}", e)
+            return null
         }
     }
 
@@ -70,35 +96,33 @@ object FirebaseSyncManager {
         return FirebaseUserState(
             uid = uid,
             email = email,
-            displayName = displayName ?: email?.substringBefore('@'),
+            displayName = displayName ?: email?.substringBefore('@') ?: "Usuario",
             photoUrl = photoUrl?.toString()
         )
     }
 
     fun isFirebaseInitialized(): Boolean {
-        return auth != null && firestore != null
+        return authInstance != null || try { FirebaseAuth.getInstance() != null } catch (e: Exception) { false }
     }
 
     fun getCurrentUser(): FirebaseUserState? {
-        val user = auth?.currentUser
-        return user?.toUserState()
+        val auth = getOrInitAuth()
+        return auth?.currentUser?.toUserState()
     }
 
     /**
      * Signs in with Google using Android Credential Manager.
-     * Note: serverClientId can be provided from Firebase Console (Web Client ID).
      */
     suspend fun signInWithGoogle(
         context: Context,
         serverClientId: String? = null
     ): Result<FirebaseUserState> = withContext(Dispatchers.IO) {
-        val authInstance = auth
-            ?: return@withContext Result.failure(IllegalStateException("Firebase Auth no está inicializado. Asegúrate de configurar google-services.json."))
+        val auth = getOrInitAuth(context)
+            ?: return@withContext Result.failure(IllegalStateException("No se pudo iniciar el servicio de autenticación de Firebase en este dispositivo."))
 
         try {
             val credentialManager = CredentialManager.create(context)
 
-            // Random nonce for security
             val rawNonce = UUID.randomUUID().toString()
             val md = MessageDigest.getInstance("SHA-256")
             val digest = md.digest(rawNonce.toByteArray())
@@ -127,39 +151,83 @@ object FirebaseSyncManager {
                 val idToken = googleIdTokenCredential.idToken
 
                 val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
-                val authResult = authInstance.signInWithCredential(firebaseCredential).await()
+                val authResult = auth.signInWithCredential(firebaseCredential).await()
                 val user = authResult.user
                 if (user != null) {
                     val userState = user.toUserState()
                     _currentUserState.value = userState
                     Result.success(userState)
                 } else {
-                    Result.failure(Exception("No se pudo obtener el perfil de usuario de Firebase"))
+                    Result.failure(Exception("No se pudo obtener el perfil de usuario de Google"))
                 }
             } else {
-                Result.failure(Exception("Tipo de credencial recibido no reconocido"))
+                Result.failure(Exception("Credencial no compatible con Google ID Token"))
             }
         } catch (e: GetCredentialCancellationException) {
-            Result.failure(Exception("Inicio de sesión cancelado"))
+            Result.failure(Exception("Inicio de sesión con Google cancelado."))
         } catch (e: GoogleIdTokenParsingException) {
-            Result.failure(Exception("Error al procesar el token de Google: ${e.message}"))
+            Result.failure(Exception("Error procesando token: ${e.message}"))
         } catch (e: GetCredentialException) {
-            Result.failure(Exception("Error de Credential Manager: ${e.message}"))
+            Result.failure(Exception(e.message ?: "Error en Credential Manager"))
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
     /**
-     * Signs in anonymously if Google credentials aren't set up yet,
-     * allowing instant real-cloud testing without blocking the user.
+     * Signs in with Email and Password or Creates account if doesn't exist
      */
-    suspend fun signInAnonymously(): Result<FirebaseUserState> = withContext(Dispatchers.IO) {
-        val authInstance = auth
-            ?: return@withContext Result.failure(IllegalStateException("Firebase Auth no está configurado."))
+    suspend fun signInWithEmailPassword(
+        context: Context,
+        email: String,
+        pass: String
+    ): Result<FirebaseUserState> = withContext(Dispatchers.IO) {
+        val auth = getOrInitAuth(context)
+            ?: return@withContext Result.failure(IllegalStateException("Servicio de autenticación no listo."))
+
+        val trimmedEmail = email.trim()
+        val trimmedPass = pass.trim()
+
+        if (trimmedEmail.isEmpty() || !trimmedEmail.contains("@")) {
+            return@withContext Result.failure(IllegalArgumentException("Ingresa un correo electrónico válido."))
+        }
+        if (trimmedPass.length < 6) {
+            return@withContext Result.failure(IllegalArgumentException("La contraseña debe tener al menos 6 caracteres."))
+        }
+
         try {
-            val res = authInstance.signInAnonymously().await()
-            val user = res.user ?: return@withContext Result.failure(Exception("Usuario nulo al iniciar sesión anónima"))
+            // Try signing in first
+            val res = try {
+                auth.signInWithEmailAndPassword(trimmedEmail, trimmedPass).await()
+            } catch (e: Exception) {
+                // If user not found, try creating account automatically
+                Log.d(TAG, "Sign in falló, intentando crear cuenta nueva: ${e.message}")
+                auth.createUserWithEmailAndPassword(trimmedEmail, trimmedPass).await()
+            }
+
+            val user = res.user
+                ?: return@withContext Result.failure(Exception("Usuario nulo al iniciar sesión."))
+
+            val userState = user.toUserState()
+            _currentUserState.value = userState
+            Result.success(userState)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Signs in anonymously allowing real-cloud Firestore storage without requiring login credentials.
+     */
+    suspend fun signInAnonymously(context: Context? = null): Result<FirebaseUserState> = withContext(Dispatchers.IO) {
+        val auth = getOrInitAuth(context)
+            ?: return@withContext Result.failure(IllegalStateException("No se pudo iniciar el servicio de autenticación."))
+
+        try {
+            val res = auth.signInAnonymously().await()
+            val user = res.user
+                ?: return@withContext Result.failure(Exception("Usuario nulo al iniciar sesión anónima"))
+
             val userState = FirebaseUserState(
                 uid = user.uid,
                 email = "anonimo@dispositivo.local",
@@ -183,7 +251,7 @@ object FirebaseSyncManager {
                     Log.w(TAG, "Error limpiando estado de CredentialManager: ${e.message}")
                 }
             }
-            auth?.signOut()
+            getOrInitAuth(context)?.signOut()
             _currentUserState.value = null
         } catch (e: Exception) {
             Log.e(TAG, "Error cerrando sesión: ${e.message}", e)
@@ -191,16 +259,17 @@ object FirebaseSyncManager {
     }
 
     /**
-     * Uploads all personalized items (favorites, highlights, notes, and custom verses) to Firestore
-     * under users/{uid}/verses/{verseRefKey}.
+     * Uploads personalized items (favorites, highlights, notes, and custom verses) to Firestore.
      */
     suspend fun uploadToFirestore(
-        verses: List<VerseEntity>
+        verses: List<VerseEntity>,
+        context: Context? = null
     ): Result<Int> = withContext(Dispatchers.IO) {
+        val auth = getOrInitAuth(context)
         val user = auth?.currentUser
             ?: return@withContext Result.failure(IllegalStateException("Debes iniciar sesión para sincronizar."))
-        val db = firestore
-            ?: return@withContext Result.failure(IllegalStateException("Firestore no está inicializado."))
+        val db = getOrInitFirestore(context)
+            ?: return@withContext Result.failure(IllegalStateException("Firestore no está disponible."))
 
         _syncOperationState.value = CloudSyncState.Loading
 
@@ -215,7 +284,6 @@ object FirebaseSyncManager {
             }
 
             for (v in modifiedVerses) {
-                // Sanitize document ID using sanitized reference or custom ID
                 val docId = if (v.isCustom) {
                     "custom_${v.id}"
                 } else {
@@ -243,7 +311,6 @@ object FirebaseSyncManager {
                 uploadCount++
             }
 
-            // Also record sync timestamp metadata
             val metaDoc = userDocRef.collection(COLLECTION_METADATA).document("sync_info")
             batch.set(
                 metaDoc,
@@ -265,16 +332,18 @@ object FirebaseSyncManager {
     }
 
     /**
-     * Downloads user personalized data from Firestore and merges it with the local Room Database.
+     * Downloads user personalized data from Firestore and merges it with Room Database.
      */
     suspend fun downloadFromFirestore(
         repository: VerseRepository,
-        allCurrentVerses: List<VerseEntity>
+        allCurrentVerses: List<VerseEntity>,
+        context: Context? = null
     ): Result<Int> = withContext(Dispatchers.IO) {
+        val auth = getOrInitAuth(context)
         val user = auth?.currentUser
             ?: return@withContext Result.failure(IllegalStateException("Debes iniciar sesión para restaurar."))
-        val db = firestore
-            ?: return@withContext Result.failure(IllegalStateException("Firestore no está inicializado."))
+        val db = getOrInitFirestore(context)
+            ?: return@withContext Result.failure(IllegalStateException("Firestore no está disponible."))
 
         _syncOperationState.value = CloudSyncState.Loading
 

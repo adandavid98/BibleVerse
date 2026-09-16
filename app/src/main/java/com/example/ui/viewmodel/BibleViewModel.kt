@@ -494,9 +494,10 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun signInAnonymously() {
+        val app = getApplication<Application>()
         viewModelScope.launch {
             _syncStatusMessage.value = "Conectando con nube de Firebase..."
-            val result = FirebaseSyncManager.signInAnonymously()
+            val result = FirebaseSyncManager.signInAnonymously(app)
             result.onSuccess {
                 _syncStatusMessage.value = "Conectado a la nube. Sincronizando..."
                 syncWithFirestore()
@@ -506,8 +507,21 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun signOutFirebase(context: Context) {
+    fun signInWithEmailPassword(email: String, pass: String) {
         val app = getApplication<Application>()
+        viewModelScope.launch {
+            _syncStatusMessage.value = "Iniciando sesión con correo..."
+            val result = FirebaseSyncManager.signInWithEmailPassword(app, email, pass)
+            result.onSuccess { user ->
+                _syncStatusMessage.value = "Sesión iniciada como ${user.email}"
+                syncWithFirestore()
+            }.onFailure { err ->
+                _syncStatusMessage.value = "Error: ${err.message}"
+            }
+        }
+    }
+
+    fun signOutFirebase(context: Context) {
         viewModelScope.launch {
             FirebaseSyncManager.signOut(context)
             _syncStatusMessage.value = "Sesión cerrada en la nube"
@@ -517,7 +531,7 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     fun uploadToFirestore() {
         val app = getApplication<Application>()
         viewModelScope.launch {
-            val result = FirebaseSyncManager.uploadToFirestore(uiState.value.verses)
+            val result = FirebaseSyncManager.uploadToFirestore(uiState.value.verses, app)
             result.onSuccess { count ->
                 CloudSyncManager.recordSyncSuccess(app)
                 _lastSyncTime.value = CloudSyncManager.getLastSyncTime(app)
@@ -531,7 +545,7 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     fun downloadFromFirestore() {
         val app = getApplication<Application>()
         viewModelScope.launch {
-            val result = FirebaseSyncManager.downloadFromFirestore(repository, uiState.value.verses)
+            val result = FirebaseSyncManager.downloadFromFirestore(repository, uiState.value.verses, app)
             result.onSuccess { count ->
                 CloudSyncManager.recordSyncSuccess(app)
                 _lastSyncTime.value = CloudSyncManager.getLastSyncTime(app)
@@ -543,11 +557,10 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun syncWithFirestore() {
-        // First download any newer records from the cloud, then upload any local additions
         val app = getApplication<Application>()
         viewModelScope.launch {
-            val downloadRes = FirebaseSyncManager.downloadFromFirestore(repository, uiState.value.verses)
-            val uploadRes = FirebaseSyncManager.uploadToFirestore(uiState.value.verses)
+            val downloadRes = FirebaseSyncManager.downloadFromFirestore(repository, uiState.value.verses, app)
+            val uploadRes = FirebaseSyncManager.uploadToFirestore(uiState.value.verses, app)
             if (downloadRes.isSuccess || uploadRes.isSuccess) {
                 CloudSyncManager.recordSyncSuccess(app)
                 _lastSyncTime.value = CloudSyncManager.getLastSyncTime(app)
