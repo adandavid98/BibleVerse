@@ -76,6 +76,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -98,10 +99,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.BuildConfig
 import com.example.data.model.VerseEntity
 import com.example.ui.components.AddVerseDialog
 import com.example.ui.components.CloudSyncDialog
 import com.example.ui.components.ExportDialog
+import com.example.ui.components.UpdateDialog
 import com.example.ui.components.VerseCard
 import com.example.ui.components.VerseDetailDialog
 import com.example.ui.theme.AppReadingTheme
@@ -109,6 +112,13 @@ import com.example.ui.theme.BibleHighlightColors
 import com.example.ui.viewmodel.BibleUiState
 import com.example.ui.viewmodel.BibleViewModel
 import com.example.ui.viewmodel.VerseFilter
+import com.example.update.UpdateDownloadStatus
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.material.icons.filled.SystemUpdate
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.OpenInBrowser
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Edit
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -121,6 +131,10 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedTab by remember { mutableIntStateOf(0) }
+
+    val showUpdateDialog by viewModel.showUpdateDialog.collectAsStateWithLifecycle()
+    val updateInfo by viewModel.updateInfo.collectAsStateWithLifecycle()
+    val updateDownloadStatus by viewModel.updateDownloadStatus.collectAsStateWithLifecycle()
 
     // Notify user of sync / export messages
     LaunchedEffect(uiState.syncStatusMessage) {
@@ -295,6 +309,17 @@ fun HomeScreen(
             onDismiss = { viewModel.showSyncDialog(false) },
             onPerformBackup = { viewModel.performCloudBackup() },
             onPerformRestore = { viewModel.performCloudRestore(it) }
+        )
+    }
+
+    if (showUpdateDialog && updateInfo != null) {
+        UpdateDialog(
+            updateInfo = updateInfo!!,
+            downloadStatus = updateDownloadStatus,
+            onStartDownload = { viewModel.startUpdateDownload() },
+            onInstallApk = { viewModel.installDownloadedApk(context) },
+            onOpenInBrowser = { viewModel.openGitHubReleaseInBrowser(context) },
+            onDismiss = { viewModel.setShowUpdateDialog(false) }
         )
     }
 
@@ -870,6 +895,222 @@ fun SettingsTab(
                     Text("Exportar en PDF o Texto Plano")
                 }
             }
+        }
+
+        // Section: Updates and GitHub Releases
+        Text(
+            text = "ACTUALIZACIONES DE LA APLICACIÓN",
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            ),
+            color = MaterialTheme.colorScheme.secondary
+        )
+
+        val githubRepo by viewModel.githubRepo.collectAsStateWithLifecycle()
+        val updateDownloadStatus by viewModel.updateDownloadStatus.collectAsStateWithLifecycle()
+        val updateInfo by viewModel.updateInfo.collectAsStateWithLifecycle()
+        var showEditRepoDialog by remember { mutableStateOf(false) }
+        var tempRepoInput by remember(githubRepo) { mutableStateOf(githubRepo) }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Versión instalada",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "v${BuildConfig.VERSION_NAME} (Compilación ${BuildConfig.VERSION_CODE})",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Text(
+                            text = "GitHub Release",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
+                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+
+                // Configured GitHub Repository
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Repositorio GitHub:",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = githubRepo,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    IconButton(
+                        onClick = {
+                            tempRepoInput = githubRepo
+                            showEditRepoDialog = true
+                        },
+                        modifier = Modifier.testTag("btn_edit_repo")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Edit,
+                            contentDescription = "Cambiar Repositorio",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                // If update is available or status
+                val currentStatus = updateDownloadStatus
+                when (currentStatus) {
+                    is UpdateDownloadStatus.Available -> {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable { viewModel.setShowUpdateDialog(true) },
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Filled.SystemUpdate,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "¡Nueva versión disponible: ${currentStatus.info.tagName}!",
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        text = "Toca para ver novedades e instalar APK",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    is UpdateDownloadStatus.UpToDate -> {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Filled.CheckCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Tienes la versión más reciente.",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    else -> {}
+                }
+
+                // Buttons: Check for updates & Open GitHub
+                Button(
+                    onClick = { viewModel.checkForUpdates(silent = false) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("btn_check_updates")
+                ) {
+                    if (updateDownloadStatus is UpdateDownloadStatus.Checking) {
+                        Icon(Icons.Filled.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Comprobando en GitHub...")
+                    } else {
+                        Icon(Icons.Filled.SystemUpdate, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Buscar Actualizaciones Ahora")
+                    }
+                }
+
+                OutlinedButton(
+                    onClick = { viewModel.openGitHubReleaseInBrowser(context) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("btn_open_github_link")
+                ) {
+                    Icon(Icons.Filled.OpenInBrowser, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Descargar APK desde GitHub Releases")
+                }
+            }
+        }
+
+        if (showEditRepoDialog) {
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { showEditRepoDialog = false },
+                title = { Text("Configurar Repositorio GitHub") },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = "Ingresa 'usuario/repositorio' de GitHub donde subes tus tags o releases:",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        OutlinedTextField(
+                            value = tempRepoInput,
+                            onValueChange = { tempRepoInput = it },
+                            label = { Text("Repositorio (ej: usuario/mi-repo)") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            if (tempRepoInput.isNotBlank()) {
+                                viewModel.setGitHubRepo(tempRepoInput)
+                            }
+                            showEditRepoDialog = false
+                        }
+                    ) {
+                        Text("Guardar")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showEditRepoDialog = false }) {
+                        Text("Cancelar")
+                    }
+                }
+            )
         }
     }
 }

@@ -7,13 +7,19 @@ import androidx.lifecycle.viewModelScope
 import com.example.data.local.BibleDatabase
 import com.example.data.model.VerseEntity
 import com.example.data.repository.VerseRepository
+import com.example.BuildConfig
 import com.example.export.ExportManager
 import com.example.service.NotificationHelper
 import com.example.sync.CloudSyncManager
 import com.example.ui.theme.AppReadingTheme
+import com.example.update.AppUpdateInfo
+import com.example.update.AppUpdateManager
+import com.example.update.UpdateDownloadStatus
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -74,6 +80,18 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     private val _showExportDialog = MutableStateFlow(false)
     private val _showSyncDialog = MutableStateFlow(false)
 
+    private val _updateInfo = MutableStateFlow<AppUpdateInfo?>(null)
+    val updateInfo: StateFlow<AppUpdateInfo?> = _updateInfo.asStateFlow()
+
+    private val _updateDownloadStatus = MutableStateFlow<UpdateDownloadStatus>(UpdateDownloadStatus.Idle)
+    val updateDownloadStatus: StateFlow<UpdateDownloadStatus> = _updateDownloadStatus.asStateFlow()
+
+    private val _showUpdateDialog = MutableStateFlow(false)
+    val showUpdateDialog: StateFlow<Boolean> = _showUpdateDialog.asStateFlow()
+
+    private val _githubRepo = MutableStateFlow(AppUpdateManager.getGitHubRepo(application))
+    val githubRepo: StateFlow<String> = _githubRepo.asStateFlow()
+
     init {
         val db = BibleDatabase.getDatabase(application, viewModelScope)
         repository = VerseRepository(db.verseDao())
@@ -87,6 +105,12 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         NotificationHelper.createNotificationChannel(application)
         if (_reminderEnabled.value) {
             NotificationHelper.scheduleDailyReminder(application, _reminderHour.value, _reminderMinute.value)
+        }
+
+        // Check for updates in background shortly after launch
+        viewModelScope.launch {
+            delay(3500)
+            checkForUpdates(silent = true)
         }
     }
 
@@ -437,5 +461,74 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
 
     fun clearSyncMessage() {
         _syncStatusMessage.value = null
+    }
+
+    fun checkForUpdates(silent: Boolean = false) {
+        val app = getApplication<Application>()
+        _updateDownloadStatus.value = UpdateDownloadStatus.Checking
+        viewModelScope.launch {
+            val result = AppUpdateManager.checkForUpdate(app)
+            result.onSuccess { info ->
+                _updateInfo.value = info
+                if (info.isUpdateAvailable) {
+                    _updateDownloadStatus.value = UpdateDownloadStatus.Available(info)
+                    _showUpdateDialog.value = true
+                } else {
+                    _updateDownloadStatus.value = UpdateDownloadStatus.UpToDate
+                    if (!silent) {
+                        _syncStatusMessage.value = "Tienes la última versión instalada (v${BuildConfig.VERSION_NAME})"
+                    }
+                }
+            }.onFailure { err ->
+                _updateDownloadStatus.value = UpdateDownloadStatus.Error(err.localizedMessage ?: "Error al verificar actualizaciones")
+                if (!silent) {
+                    _syncStatusMessage.value = "Error al verificar actualización: ${err.localizedMessage}"
+                }
+            }
+        }
+    }
+
+    fun startUpdateDownload() {
+        val app = getApplication<Application>()
+        val info = _updateInfo.value ?: return
+        val downloadUrl = info.apkDownloadUrl ?: return
+
+        _updateDownloadStatus.value = UpdateDownloadStatus.Downloading(0f, 0L, info.apkSizeBytes)
+        viewModelScope.launch {
+            val result = AppUpdateManager.downloadApk(app, downloadUrl) { progress, downloaded, total ->
+                _updateDownloadStatus.value = UpdateDownloadStatus.Downloading(progress, downloaded, total)
+            }
+            result.onSuccess { file ->
+                _updateDownloadStatus.value = UpdateDownloadStatus.ReadyToInstall(file.absolutePath, info)
+                AppUpdateManager.installApk(app, file)
+            }.onFailure { err ->
+                _updateDownloadStatus.value = UpdateDownloadStatus.Error(err.localizedMessage ?: "Error al descargar el APK")
+            }
+        }
+    }
+
+    fun installDownloadedApk(context: Context) {
+        val status = _updateDownloadStatus.value
+        if (status is UpdateDownloadStatus.ReadyToInstall) {
+            val file = File(status.apkPath)
+            AppUpdateManager.installApk(context, file)
+        }
+    }
+
+    fun openGitHubReleaseInBrowser(context: Context) {
+        val info = _updateInfo.value
+        val url = info?.apkDownloadUrl ?: info?.htmlUrl ?: "https://github.com/${_githubRepo.value}/releases"
+        AppUpdateManager.openBrowser(context, url)
+    }
+
+    fun setGitHubRepo(newRepo: String) {
+        val app = getApplication<Application>()
+        AppUpdateManager.setGitHubRepo(app, newRepo)
+        _githubRepo.value = AppUpdateManager.getGitHubRepo(app)
+        _syncStatusMessage.value = "Repositorio configurado: ${_githubRepo.value}"
+    }
+
+    fun setShowUpdateDialog(show: Boolean) {
+        _showUpdateDialog.value = show
     }
 }
