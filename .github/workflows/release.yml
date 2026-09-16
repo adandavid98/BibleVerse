@@ -58,16 +58,19 @@ jobs:
 
       - name: Build Android APK
         run: |
-          # Ensure a usable debug keystore exists as required by signingConfig 'debugConfig'
+          # Guarantee the permanent debug keystore is decoded from base64 so all builds share the exact same signature
           if [ -f "debug.keystore.base64" ]; then
-            echo "Decoding debug.keystore from base64..."
-            base64 -d debug.keystore.base64 > debug.keystore 2>/dev/null || true
+            echo "Decoding permanent debug.keystore from base64..."
+            base64 -d debug.keystore.base64 > debug.keystore
           fi
 
           if [ ! -f "debug.keystore" ]; then
             echo "Generating debug.keystore with keytool..."
             keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           fi
+
+          # Verify certificate fingerprint in logs for transparency
+          keytool -list -v -keystore debug.keystore -storepass android | grep -E "Alias name|SHA256" || true
 
           # Also ensure ~/.android/debug.keystore exists
           mkdir -p ~/.android
