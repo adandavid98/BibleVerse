@@ -37,11 +37,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Cloud
+import com.example.ui.reader.BibleReaderScreen
+import com.example.ui.reader.viewmodel.BibleReaderViewModel
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Favorite
@@ -134,6 +137,9 @@ fun HomeScreen(
     uiState: BibleUiState
 ) {
     val context = LocalContext.current
+    val readerViewModel: BibleReaderViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        factory = BibleReaderViewModel.Factory(context)
+    )
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -160,94 +166,96 @@ fun HomeScreen(
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable {
-                                if (selectedTab != 0) {
-                                    selectedTab = 0
-                                    viewModel.onFilterSelected(VerseFilter.TODOS)
+            if (selectedTab != 1) {
+                TopAppBar(
+                    title = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable {
+                                    if (selectedTab != 0) {
+                                        selectedTab = 0
+                                        viewModel.onFilterSelected(VerseFilter.TODOS)
+                                    }
+                                    scope.launch {
+                                        versesListState.animateScrollToItem(0)
+                                    }
                                 }
-                                scope.launch {
-                                    versesListState.animateScrollToItem(0)
-                                }
-                            }
-                            .padding(horizontal = 6.dp, vertical = 4.dp)
-                            .testTag("top_bar_title_scroll_to_top")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.MenuBook,
-                            contentDescription = "Subir al inicio",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Column {
-                            Text(
-                                text = "Versículos Bíblicos",
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onBackground
+                                .padding(horizontal = 6.dp, vertical = 4.dp)
+                                .testTag("top_bar_title_scroll_to_top")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.MenuBook,
+                                contentDescription = "Subir al inicio",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
                             )
-                            Text(
-                                text = "Compilación Canónica Fundamental",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = "Versículos Bíblicos",
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                                Text(
+                                    text = "Compilación Canónica Fundamental",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = { viewModel.showBibleChat(true) },
+                            modifier = Modifier.testTag("btn_top_chat_ai")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.AutoAwesome,
+                                contentDescription = "Asistente Bíblico IA",
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = { viewModel.showBibleChat(true) },
-                        modifier = Modifier.testTag("btn_top_chat_ai")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.AutoAwesome,
-                            contentDescription = "Asistente Bíblico IA",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
 
-                    IconButton(
-                        onClick = { viewModel.showAddVerseDialog(true) },
-                        modifier = Modifier.testTag("btn_top_add")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = "Añadir Versículo Manual",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                        IconButton(
+                            onClick = { viewModel.showAddVerseDialog(true) },
+                            modifier = Modifier.testTag("btn_top_add")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = "Añadir Versículo Manual",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
 
-                    IconButton(
-                        onClick = { viewModel.showSyncDialog(true) },
-                        modifier = Modifier.testTag("btn_top_cloud")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.CloudDone,
-                            contentDescription = "Sincronizar en la nube",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                        IconButton(
+                            onClick = { viewModel.showSyncDialog(true) },
+                            modifier = Modifier.testTag("btn_top_cloud")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.CloudDone,
+                                contentDescription = "Sincronizar en la nube",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
 
-                    IconButton(
-                        onClick = { viewModel.showExportDialog(true) },
-                        modifier = Modifier.testTag("btn_top_export")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.PictureAsPdf,
-                            contentDescription = "Exportar PDF",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                        IconButton(
+                            onClick = { viewModel.showExportDialog(true) },
+                            modifier = Modifier.testTag("btn_top_export")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.PictureAsPdf,
+                                contentDescription = "Exportar PDF",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background
+                    )
                 )
-            )
+            }
         },
         bottomBar = {
             NavigationBar(
@@ -274,14 +282,23 @@ fun HomeScreen(
                     onClick = {
                         selectedTab = 1
                     },
-                    icon = { Icon(Icons.Filled.Search, contentDescription = "Buscador") },
-                    label = { Text("Buscador") },
-                    modifier = Modifier.testTag("nav_search")
+                    icon = { Icon(Icons.Filled.AutoStories, contentDescription = "Lector") },
+                    label = { Text("Lector") },
+                    modifier = Modifier.testTag("nav_reader")
                 )
                 NavigationBarItem(
                     selected = selectedTab == 2,
                     onClick = {
                         selectedTab = 2
+                    },
+                    icon = { Icon(Icons.Filled.Search, contentDescription = "Buscador") },
+                    label = { Text("Buscador") },
+                    modifier = Modifier.testTag("nav_search")
+                )
+                NavigationBarItem(
+                    selected = selectedTab == 3,
+                    onClick = {
+                        selectedTab = 3
                         viewModel.onFilterSelected(VerseFilter.FAVORITOS)
                     },
                     icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favoritos") },
@@ -289,9 +306,9 @@ fun HomeScreen(
                     modifier = Modifier.testTag("nav_favorites")
                 )
                 NavigationBarItem(
-                    selected = selectedTab == 3,
+                    selected = selectedTab == 4,
                     onClick = {
-                        selectedTab = 3
+                        selectedTab = 4
                     },
                     icon = { Icon(Icons.Outlined.Settings, contentDescription = "Ajustes") },
                     label = { Text("Ajustes") },
@@ -300,7 +317,7 @@ fun HomeScreen(
             }
         },
         floatingActionButton = {
-            if (selectedTab == 0 || selectedTab == 2) {
+            if (selectedTab == 0 || selectedTab == 3) {
                 Column(
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -337,9 +354,10 @@ fun HomeScreen(
         ) {
             when (selectedTab) {
                 0 -> VersesListTab(viewModel, uiState, versesListState)
-                1 -> SearchTab(viewModel, uiState)
-                2 -> FavoritesAndNotesTab(viewModel, uiState)
-                3 -> SettingsTab(viewModel, uiState)
+                1 -> BibleReaderScreen(viewModel = readerViewModel)
+                2 -> SearchTab(viewModel, uiState)
+                3 -> FavoritesAndNotesTab(viewModel, uiState)
+                4 -> SettingsTab(viewModel, uiState)
             }
         }
     }
