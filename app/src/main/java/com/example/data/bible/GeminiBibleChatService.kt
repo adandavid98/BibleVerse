@@ -25,9 +25,9 @@ object GeminiBibleChatService {
 
     private const val TAG = "GeminiBibleChat"
     private val FREE_TIER_MODELS = listOf(
-        "gemini-3.5-flash",
-        "gemini-3.1-flash-lite-preview",
-        "gemini-flash-latest"
+        "gemini-2.0-flash",
+        "gemini-1.5-flash",
+        "gemini-1.5-flash-8b"
     )
     private const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 

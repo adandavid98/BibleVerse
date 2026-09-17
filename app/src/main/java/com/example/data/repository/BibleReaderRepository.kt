@@ -3,7 +3,6 @@ package com.example.data.repository
 import com.example.data.bible.BibleCatalog
 import com.example.data.bible.BollsBibleApiService
 import com.example.data.bible.WordsOfJesusCatalog
-import com.example.data.initial.InitialVersesData
 import com.example.data.local.BibleReaderDao
 import com.example.data.model.BibleBookEntity
 import com.example.data.model.BibleReaderVerseEntity
@@ -39,37 +38,8 @@ class BibleReaderRepository(
         // Purge any synthetic placeholder verses from earlier versions
         dao.purgeSyntheticVerses()
 
-        // Preload individual curated verses only — full chapters come from SQLite in ensureChapterVerses()
-        seedInitialVerses()
-    }
-
-    private suspend fun seedInitialVerses() = withContext(Dispatchers.IO) {
-        val initialEntities = mutableListOf<BibleReaderVerseEntity>()
-        for (verse in InitialVersesData.verses) {
-            val catalogBook = BibleCatalog.findBook(verse.book) ?: continue
-            val parts = verse.chapterVerse.split(":")
-            if (parts.size == 2) {
-                val chapter = parts[0].trim().toIntOrNull() ?: continue
-                val verseNum = parts[1].trim().toIntOrNull() ?: continue
-                val cleanText = verse.text.removeSurrounding("«", "»").trim()
-                val isJesusWords = isWordsOfJesus(catalogBook.order, chapter, verseNum, cleanText)
-                initialEntities.add(
-                    BibleReaderVerseEntity(
-                        bookId = catalogBook.order,
-                        chapter = chapter,
-                        verseNumber = verseNum,
-                        text = cleanText,
-                        bibleVersion = verse.bibleVersion,
-                        isRedLetter = isJesusWords
-                    )
-                )
-            }
-        }
-        if (initialEntities.isNotEmpty()) {
-            dao.insertVerses(initialEntities)
-        }
-        // NOTE: Full chapters (Matthew 5, John 3, etc.) are intentionally NOT seeded here.
-        // They are always loaded completely from the offline SQLite DB (31,102 verses) in ensureChapterVerses().
+        // Clean up stale or polluted RVR1960 cache from earlier versions so every chapter is 100% complete
+        dao.deleteVersesForVersion("RVR1960")
     }
 
     fun getAllBooks(): Flow<List<BibleBookEntity>> {
@@ -87,27 +57,17 @@ class BibleReaderRepository(
     suspend fun ensureChapterVerses(bookId: Int, chapter: Int, version: String = "RVR1960") = withContext(Dispatchers.IO) {
         val isRvr1960 = version.equals("RVR1960", ignoreCase = true) || version.equals("RV1960", ignoreCase = true)
 
-        val existing = dao.getVersesSync(bookId, chapter, version)
-        val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
+        // 1. For RVR1960 (primary translation), ALWAYS use the complete pre-packaged offline SQLite (31,102 verses).
+        //    Guarantees all verses are loaded (Genesis 1 = 31 verses, Colossians 3 = 25 verses, Matthew 5 = 48 verses, etc.)
+        if (isRvr1960 && context != null) {
+            val offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter)
+            if (offlineVerses.isNotEmpty()) {
+                val existing = dao.getVersesSync(bookId, chapter, version)
+                val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
 
-        // Detect stale partial Room cache (e.g. old hardcoded Matthew 5 had 16 verses, SQLite has 48)
-        val hasIncompleteCache = if (isRvr1960 && existing.isNotEmpty() && !hasSynthetic && context != null) {
-            val sqliteCount = OfflineBibleManager.getVerseCount(context, bookId, chapter)
-            sqliteCount > 0 && existing.size < sqliteCount
-        } else false
-
-        if (hasSynthetic || hasIncompleteCache) {
-            dao.deleteVersesForChapter(bookId, chapter, version)
-        }
-
-        val needsLoad = existing.isEmpty() || hasSynthetic || hasIncompleteCache
-
-        if (needsLoad) {
-            // 1. For RVR1960 (primary translation), ALWAYS use the complete pre-packaged offline SQLite.
-            //    Guarantees all verses are loaded (Matthew 5 = 48 verses, John 3 = 36 verses, etc.)
-            if (isRvr1960 && context != null) {
-                val offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter)
-                if (offlineVerses.isNotEmpty()) {
+                // If not cached in Room yet, or incomplete (e.g. fewer verses than the full SQLite chapter), reload completely
+                if (existing.size != offlineVerses.size || hasSynthetic) {
+                    dao.deleteVersesForChapter(bookId, chapter, version)
                     val entities = offlineVerses.map { dto ->
                         val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber)
                             || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
@@ -123,9 +83,21 @@ class BibleReaderRepository(
                         )
                     }
                     dao.insertVerses(entities)
-                    return@withContext
                 }
+                return@withContext
             }
+        }
+
+        val existing = dao.getVersesSync(bookId, chapter, version)
+        val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
+
+        if (existing.isNotEmpty() && !hasSynthetic) {
+            return@withContext
+        }
+
+        if (hasSynthetic) {
+            dao.deleteVersesForChapter(bookId, chapter, version)
+        }
 
             // 2. For other versions already fully downloaded in Room — Room Flow serves them directly
             if (!isRvr1960) {

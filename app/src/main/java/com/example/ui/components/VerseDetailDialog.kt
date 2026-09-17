@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -64,6 +65,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -678,28 +680,33 @@ fun VerseDetailDialog(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "CONTEXTO TEOLÓGICO Y MORAL",
+                                    text = "CONTEXTO TEOLÓGICO",
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontWeight = FontWeight.Bold,
-                                        letterSpacing = 1.sp
+                                        letterSpacing = 0.5.sp
                                     ),
                                     color = MaterialTheme.colorScheme.secondary,
-                                    modifier = Modifier.weight(1f)
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false)
                                 )
-                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                ) {
                                     if (onEnrichContextAi != null) {
                                         if (isEnrichingAi) {
-                                            // Show loading indicator while AI generates context
                                             Row(
                                                 verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
                                             ) {
                                                 CircularProgressIndicator(
                                                     modifier = Modifier.size(13.dp),
                                                     strokeWidth = 2.dp,
                                                     color = MaterialTheme.colorScheme.primary
                                                 )
-                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Spacer(modifier = Modifier.width(4.dp))
                                                 Text(
                                                     text = "Analizando...",
                                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
@@ -710,12 +717,13 @@ fun VerseDetailDialog(
                                             TextButton(
                                                 onClick = { onEnrichContextAi() },
                                                 modifier = Modifier.testTag("btn_enrich_verse_ai"),
+                                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                                                 enabled = true
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Filled.AutoAwesome,
                                                     contentDescription = null,
-                                                    modifier = Modifier.size(15.dp),
+                                                    modifier = Modifier.size(14.dp),
                                                     tint = MaterialTheme.colorScheme.primary
                                                 )
                                                 Spacer(modifier = Modifier.width(4.dp))
@@ -729,12 +737,13 @@ fun VerseDetailDialog(
                                     }
                                     TextButton(
                                         onClick = { isEditingVerse = true },
-                                        modifier = Modifier.testTag("btn_edit_context")
+                                        modifier = Modifier.testTag("btn_edit_context"),
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Filled.Edit,
                                             contentDescription = null,
-                                            modifier = Modifier.size(15.dp),
+                                            modifier = Modifier.size(14.dp),
                                             tint = MaterialTheme.colorScheme.primary
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
