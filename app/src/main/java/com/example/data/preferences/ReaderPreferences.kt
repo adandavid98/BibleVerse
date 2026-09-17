@@ -10,6 +10,9 @@ enum class ReaderThemeMode {
 enum class ReaderFontFamily {
     SERIF,
     SANS_SERIF,
+    CONDENSED,
+    CASUAL,
+    CURSIVE,
     MONOSPACE
 }
 

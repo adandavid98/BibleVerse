@@ -124,31 +124,62 @@ fun ReaderSettingsBottomSheet(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                FontOptionChip(
-                    title = "Serif",
-                    fontFamily = FontFamily.Serif,
-                    isSelected = preferences.fontFamily == ReaderFontFamily.SERIF,
-                    onClick = { onFontFamilyChange(ReaderFontFamily.SERIF) },
-                    modifier = Modifier.weight(1f)
-                )
-                FontOptionChip(
-                    title = "Sans-Serif",
-                    fontFamily = FontFamily.SansSerif,
-                    isSelected = preferences.fontFamily == ReaderFontFamily.SANS_SERIF,
-                    onClick = { onFontFamilyChange(ReaderFontFamily.SANS_SERIF) },
-                    modifier = Modifier.weight(1f)
-                )
-                FontOptionChip(
-                    title = "Monospace",
-                    fontFamily = FontFamily.Monospace,
-                    isSelected = preferences.fontFamily == ReaderFontFamily.MONOSPACE,
-                    onClick = { onFontFamilyChange(ReaderFontFamily.MONOSPACE) },
-                    modifier = Modifier.weight(1f)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FontOptionChip(
+                        title = "Serif",
+                        fontFamily = FontFamily.Serif,
+                        isSelected = preferences.fontFamily == ReaderFontFamily.SERIF,
+                        onClick = { onFontFamilyChange(ReaderFontFamily.SERIF) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    FontOptionChip(
+                        title = "Sans",
+                        fontFamily = FontFamily.SansSerif,
+                        isSelected = preferences.fontFamily == ReaderFontFamily.SANS_SERIF,
+                        onClick = { onFontFamilyChange(ReaderFontFamily.SANS_SERIF) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    FontOptionChip(
+                        title = "Condensada",
+                        fontFamily = FontFamily(android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.NORMAL)),
+                        isSelected = preferences.fontFamily == ReaderFontFamily.CONDENSED,
+                        onClick = { onFontFamilyChange(ReaderFontFamily.CONDENSED) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FontOptionChip(
+                        title = "Casual",
+                        fontFamily = FontFamily(android.graphics.Typeface.create("casual", android.graphics.Typeface.NORMAL)),
+                        isSelected = preferences.fontFamily == ReaderFontFamily.CASUAL,
+                        onClick = { onFontFamilyChange(ReaderFontFamily.CASUAL) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    FontOptionChip(
+                        title = "Cursiva",
+                        fontFamily = FontFamily.Cursive,
+                        isSelected = preferences.fontFamily == ReaderFontFamily.CURSIVE,
+                        onClick = { onFontFamilyChange(ReaderFontFamily.CURSIVE) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    FontOptionChip(
+                        title = "Mono",
+                        fontFamily = FontFamily.Monospace,
+                        isSelected = preferences.fontFamily == ReaderFontFamily.MONOSPACE,
+                        onClick = { onFontFamilyChange(ReaderFontFamily.MONOSPACE) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -267,30 +298,63 @@ fun ReaderSettingsBottomSheet(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                listOf("RVR1960", "NVI", "NTV", "LBLA", "PDT", "BTX3").forEach { code ->
-                    val isSelected = preferences.bibleVersion.equals(code, ignoreCase = true)
-                    Surface(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(10.dp))
-                            .clickable { onVersionChange(code) },
-                        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            contentAlignment = Alignment.Center
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    listOf("RVR1960", "NVI", "NTV", "NBLA").forEach { code ->
+                        val isSelected = preferences.bibleVersion.equals(code, ignoreCase = true)
+                        Surface(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable { onVersionChange(code) },
+                            color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(10.dp)
                         ) {
-                            Text(
-                                text = code,
-                                fontSize = 11.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
-                            )
+                            Box(
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = code,
+                                    fontSize = 11.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    listOf("TLA", "LBLA", "PDT", "BTX3").forEach { code ->
+                        val isSelected = preferences.bibleVersion.equals(code, ignoreCase = true)
+                        Surface(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable { onVersionChange(code) },
+                            color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = code,
+                                    fontSize = 11.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
                     }
                 }

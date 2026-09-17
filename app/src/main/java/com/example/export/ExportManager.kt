@@ -240,38 +240,52 @@ object ExportManager {
     }
 
     fun shareExportedFile(context: Context, file: File, mimeType: String, subject: String) {
-        val uri = FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            file
-        )
+        try {
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
 
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = mimeType
-            putExtra(Intent.EXTRA_STREAM, uri)
-            putExtra(Intent.EXTRA_SUBJECT, subject)
-            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = mimeType
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_SUBJECT, subject)
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            }
+
+            val chooser = Intent.createChooser(intent, "Exportar / Compartir contenido").apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(chooser)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-
-        context.startActivity(Intent.createChooser(intent, "Exportar / Compartir contenido"))
     }
 
     fun shareSingleVerse(context: Context, verse: VerseEntity) {
-        val shareBody = """
-            ${verse.text}
-            — ${verse.reference} (${verse.testament})
+        try {
+            val shareBody = """
+                ${verse.text}
+                — ${verse.reference} (${verse.testament})
 
-            📖 Contexto:
-            ${verse.context}
-            
-            Compartido desde Versículos Bíblicos
-        """.trimIndent()
+                📖 Contexto:
+                ${verse.context}
+                
+                Compartido desde BibleVerse
+            """.trimIndent()
 
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_SUBJECT, "Versículo Bíblico: ${verse.reference}")
-            putExtra(Intent.EXTRA_TEXT, shareBody)
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_SUBJECT, "Versículo Bíblico: ${verse.reference}")
+                putExtra(Intent.EXTRA_TEXT, shareBody)
+            }
+            val chooser = Intent.createChooser(intent, "Compartir Versículo").apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(chooser)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        context.startActivity(Intent.createChooser(intent, "Compartir Versículo"))
     }
 }

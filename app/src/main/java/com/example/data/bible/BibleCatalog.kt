@@ -56,6 +56,13 @@ object BibleCatalog {
             tag = "Popular"
         ),
         BibleVersion(
+            code = "NBLA",
+            name = "Nueva Biblia de las Américas",
+            shortName = "NBLA",
+            description = "Traducción fiel y precisa producida en español latinoamericano contemporáneo claro y exacto.",
+            tag = "Precisa"
+        ),
+        BibleVersion(
             code = "LBLA",
             name = "La Biblia de las Américas",
             shortName = "LBLA",

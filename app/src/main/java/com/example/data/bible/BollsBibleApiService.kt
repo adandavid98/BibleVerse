@@ -74,10 +74,12 @@ object BollsBibleApiService {
     }
 
     fun mapVersionToSlug(version: String): String {
-        return when (version.uppercase()) {
+        return when (version.uppercase().trim()) {
             "RVR1960", "RV1960", "REINA-VALERA 1960" -> "RV1960"
             "NVI", "NUEVA VERSIÓN INTERNACIONAL" -> "NVI"
             "NTV", "NUEVA TRADUCCIÓN VIVIENTE" -> "NTV"
+            "NBLA", "NUEVA BIBLIA DE LAS AMÉRICAS" -> "LBLA"
+            "TLA", "TRADUCCIÓN EN LENGUAJE ACTUAL" -> "PDT"
             "LBLA", "LA BIBLIA DE LAS AMÉRICAS" -> "LBLA"
             "PDT", "PALABRA DE DIOS PARA TODOS" -> "PDT"
             "BTX3", "BIBLIA TEXTUAL" -> "BTX3"

@@ -577,6 +577,10 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         ExportManager.shareSingleVerse(app, verse)
     }
 
+    fun shareVerse(context: Context, verse: VerseEntity) {
+        ExportManager.shareSingleVerse(context, verse)
+    }
+
     fun performCloudBackup(): String {
         val app = getApplication<Application>()
         val syncId = _cloudSyncId.value

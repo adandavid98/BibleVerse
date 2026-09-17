@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.example.data.preferences.ReaderFontFamily
 import com.example.data.preferences.ReaderThemeMode
 import com.example.domain.model.ReaderVerseUiModel
+import com.example.ui.reader.components.BibleVersionSelectorDialog
 import com.example.ui.reader.components.BookChapterSelectorSheet
 import com.example.ui.reader.components.ReaderSettingsBottomSheet
 import com.example.ui.reader.components.ShareTemplateDialog
@@ -54,6 +55,7 @@ fun BibleReaderScreen(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
+    var showVersionSelectorModal by remember { mutableStateOf(false) }
 
     // Scroll to specific target verse when selected from modal or navigation
     LaunchedEffect(uiState.targetScrollVerse, uiState.verses.size) {
@@ -127,6 +129,9 @@ fun BibleReaderScreen(
     val selectedFontFamily = when (uiState.preferences.fontFamily) {
         ReaderFontFamily.SERIF -> FontFamily.Serif
         ReaderFontFamily.SANS_SERIF -> FontFamily.SansSerif
+        ReaderFontFamily.CONDENSED -> FontFamily(android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.NORMAL))
+        ReaderFontFamily.CASUAL -> FontFamily(android.graphics.Typeface.create("casual", android.graphics.Typeface.NORMAL))
+        ReaderFontFamily.CURSIVE -> FontFamily.Cursive
         ReaderFontFamily.MONOSPACE -> FontFamily.Monospace
     }
 
@@ -171,6 +176,36 @@ fun BibleReaderScreen(
                     }
                 },
                 actions = {
+                    // Direct Bible Version Selector Modal Pill in top-right
+                    Surface(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .clickable { showVersionSelectorModal = true }
+                            .border(1.dp, themeSecondary.copy(alpha = 0.35f), RoundedCornerShape(16.dp)),
+                        color = themeAccent.copy(alpha = 0.12f)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = uiState.preferences.bibleVersion,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = themeText
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = "Cambiar versión de la Biblia",
+                                tint = themeText,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
                     // Reader Settings Button
                     IconButton(onClick = { viewModel.openSettingsSheet() }) {
                         Icon(Icons.Default.FormatSize, contentDescription = "Ajustes de lectura", tint = themeText)
@@ -441,6 +476,16 @@ fun BibleReaderScreen(
                 viewModel.clearSelection()
             },
             onDismiss = { viewModel.closeShareDialog() }
+        )
+    }
+    // Dialog: Direct Bible Version Selector Modal
+    if (showVersionSelectorModal) {
+        BibleVersionSelectorDialog(
+            currentVersion = uiState.preferences.bibleVersion,
+            onSelectVersion = { version ->
+                viewModel.updateBibleVersion(version)
+            },
+            onDismiss = { showVersionSelectorModal = false }
         )
     }
 }

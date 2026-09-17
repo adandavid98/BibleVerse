@@ -144,6 +144,7 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedTab by remember { mutableIntStateOf(0) }
     val versesListState = rememberLazyListState()
+    var showSettingsDialog by remember { mutableStateOf(false) }
 
     val showUpdateDialog by viewModel.showUpdateDialog.collectAsStateWithLifecycle()
     val updateInfo by viewModel.updateInfo.collectAsStateWithLifecycle()
@@ -154,7 +155,7 @@ fun HomeScreen(
     val chatMessages by viewModel.chatMessages.collectAsStateWithLifecycle()
     val isChatLoading by viewModel.isChatLoading.collectAsStateWithLifecycle()
 
-    // Notify user of sync / export messages
+    // Notify user of sync messages
     LaunchedEffect(uiState.syncStatusMessage) {
         uiState.syncStatusMessage?.let { msg ->
             snackbarHostState.showSnackbar(msg)
@@ -194,7 +195,7 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = "Versículos Bíblicos",
+                                    text = "BibleVerse",
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     color = MaterialTheme.colorScheme.onBackground
                                 )
@@ -230,23 +231,12 @@ fun HomeScreen(
                         }
 
                         IconButton(
-                            onClick = { viewModel.showSyncDialog(true) },
-                            modifier = Modifier.testTag("btn_top_cloud")
+                            onClick = { showSettingsDialog = true },
+                            modifier = Modifier.testTag("btn_top_settings")
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.CloudDone,
-                                contentDescription = "Sincronizar en la nube",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-
-                        IconButton(
-                            onClick = { viewModel.showExportDialog(true) },
-                            modifier = Modifier.testTag("btn_top_export")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.PictureAsPdf,
-                                contentDescription = "Exportar PDF",
+                                imageVector = Icons.Outlined.Settings,
+                                contentDescription = "Ajustes de la Aplicación",
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -310,9 +300,9 @@ fun HomeScreen(
                     onClick = {
                         selectedTab = 4
                     },
-                    icon = { Icon(Icons.Outlined.Settings, contentDescription = "Ajustes") },
-                    label = { Text("Ajustes") },
-                    modifier = Modifier.testTag("nav_settings")
+                    icon = { Icon(Icons.Filled.CloudDone, contentDescription = "Copia de Seguridad") },
+                    label = { Text("Copia de Seg.") },
+                    modifier = Modifier.testTag("nav_cloud_backup")
                 )
             }
         },
@@ -357,12 +347,20 @@ fun HomeScreen(
                 1 -> BibleReaderScreen(viewModel = readerViewModel)
                 2 -> SearchTab(viewModel, uiState)
                 3 -> FavoritesAndNotesTab(viewModel, uiState)
-                4 -> SettingsTab(viewModel, uiState)
+                4 -> CloudBackupTab(viewModel, uiState)
             }
         }
     }
 
     // Dialogs
+    if (showSettingsDialog) {
+        SettingsDialog(
+            viewModel = viewModel,
+            uiState = uiState,
+            onDismiss = { showSettingsDialog = false }
+        )
+    }
+
     if (uiState.showAddDialog) {
         AddVerseDialog(
             onDismiss = { viewModel.showAddVerseDialog(false) },
@@ -371,15 +369,6 @@ fun HomeScreen(
             },
             onGenerateContext = { b, c, v, txt, ver, force, cb ->
                 viewModel.generateIntelligentContext(b, c, v, txt, ver, force, cb)
-            }
-        )
-    }
-
-    if (uiState.showExportDialog) {
-        ExportDialog(
-            onDismiss = { viewModel.showExportDialog(false) },
-            onExport = { format, exportAll ->
-                viewModel.exportContent(format, exportAll)
             }
         )
     }
@@ -433,7 +422,7 @@ fun HomeScreen(
             onSaveVerseEdit = { ref, txt, ctx, top, bibleVer ->
                 viewModel.updateVerseDetails(verse.id, ref, txt, ctx, top, bibleVer)
             },
-            onShare = { viewModel.shareVerse(verse) },
+            onShare = { viewModel.shareVerse(context, verse) },
             onExportPdf = {
                 viewModel.exportContent("PDF", exportAll = false)
             },
@@ -468,16 +457,19 @@ fun VersesListTab(
     uiState: BibleUiState,
     listState: LazyListState = rememberLazyListState()
 ) {
+    val context = LocalContext.current
     val otCount = remember(uiState.verses) { uiState.verses.count { it.testament.contains("Antiguo", ignoreCase = true) } }
     val ntCount = remember(uiState.verses) { uiState.verses.count { it.testament.contains("Nuevo", ignoreCase = true) } }
 
     LazyColumn(
         state = listState,
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+        contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp)
     ) {
-        // Verse of the Day Hero Banner
+        // Verse of the Day Card (Destacado del Día)
         uiState.verseOfTheDay?.let { vod ->
             item {
                 VerseOfTheDayCard(
@@ -485,7 +477,7 @@ fun VersesListTab(
                     fontScale = uiState.fontSizeScale,
                     onClick = { viewModel.openVerseDetail(vod) },
                     onFavoriteToggle = { viewModel.toggleFavorite(vod) },
-                    onShare = { viewModel.shareVerse(vod) }
+                    onShare = { viewModel.shareVerse(context, vod) }
                 )
             }
         }
@@ -529,7 +521,7 @@ fun VersesListTab(
                 fontScale = uiState.fontSizeScale,
                 onClick = { viewModel.openVerseDetail(verse) },
                 onFavoriteToggle = { viewModel.toggleFavorite(verse) },
-                onShare = { viewModel.shareVerse(verse) },
+                onShare = { viewModel.shareVerse(context, verse) },
                 onHighlightClick = { viewModel.openVerseDetail(verse) }
             )
         }
@@ -541,6 +533,7 @@ fun SearchTab(
     viewModel: BibleViewModel,
     uiState: BibleUiState
 ) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -645,7 +638,7 @@ fun SearchTab(
                         fontScale = uiState.fontSizeScale,
                         onClick = { viewModel.openVerseDetail(verse) },
                         onFavoriteToggle = { viewModel.toggleFavorite(verse) },
-                        onShare = { viewModel.shareVerse(verse) },
+                        onShare = { viewModel.shareVerse(context, verse) },
                         onHighlightClick = { viewModel.openVerseDetail(verse) }
                     )
                 }
@@ -659,6 +652,7 @@ fun FavoritesAndNotesTab(
     viewModel: BibleViewModel,
     uiState: BibleUiState
 ) {
+    val context = LocalContext.current
     var subFilter by remember { mutableStateOf("FAVORITOS") } // "FAVORITOS", "RESALTADOS", "NOTAS"
 
     val displayedVerses = when (subFilter) {
@@ -749,7 +743,7 @@ fun FavoritesAndNotesTab(
                         fontScale = uiState.fontSizeScale,
                         onClick = { viewModel.openVerseDetail(verse) },
                         onFavoriteToggle = { viewModel.toggleFavorite(verse) },
-                        onShare = { viewModel.shareVerse(verse) },
+                        onShare = { viewModel.shareVerse(context, verse) },
                         onHighlightClick = { viewModel.openVerseDetail(verse) }
                     )
                 }
@@ -975,45 +969,6 @@ fun SettingsTab(
             }
         }
 
-        // Section: Cloud & Export
-        Text(
-            text = "NUBE Y EXPORTACIÓN",
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
-            ),
-            color = MaterialTheme.colorScheme.secondary
-        )
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Button(
-                    onClick = { viewModel.showSyncDialog(true) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("btn_settings_cloud")
-                ) {
-                    Icon(Icons.Filled.CloudDone, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Sincronizar Notas y Versículos en la Nube")
-                }
-
-                OutlinedButton(
-                    onClick = { viewModel.showExportDialog(true) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("btn_settings_export")
-                ) {
-                    Icon(Icons.Filled.PictureAsPdf, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Exportar en PDF o Texto Plano")
-                }
-            }
-        }
 
         // Section: Updates and GitHub Releases
         Text(
@@ -1166,6 +1121,121 @@ fun SettingsTab(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Buscar Actualizaciones Ahora")
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CloudBackupTab(
+    viewModel: BibleViewModel,
+    uiState: BibleUiState
+) {
+    val context = LocalContext.current
+    val firebaseUserState by viewModel.firebaseUserState.collectAsStateWithLifecycle()
+    val firebaseSyncOperation by viewModel.firebaseSyncOperation.collectAsStateWithLifecycle()
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 14.dp, vertical = 10.dp)
+    ) {
+        com.example.ui.components.CloudSyncCardContent(
+            syncId = uiState.cloudSyncId,
+            lastSyncTime = uiState.lastSyncTime,
+            userState = firebaseUserState,
+            syncOperation = firebaseSyncOperation,
+            onDismiss = null,
+            onSignInGoogle = { viewModel.signInWithGoogle(context) },
+            onSignInAnonymous = { viewModel.signInAnonymously() },
+            onSignInEmailPassword = { email, pass -> viewModel.signInWithEmailPassword(email, pass) },
+            onSignOut = { viewModel.signOutFirebase(context) },
+            onUploadFirestore = { viewModel.uploadToFirestore() },
+            onDownloadFirestore = { viewModel.downloadFromFirestore() },
+            onPerformBackup = { viewModel.performCloudBackup() },
+            onPerformRestore = { viewModel.performCloudRestore(it) },
+            permanentSha1 = viewModel.permanentSha1,
+            currentWebClientId = viewModel.getResolvedFirebaseWebClientId(context),
+            onSaveWebClientId = { id -> viewModel.saveFirebaseWebClientId(context, id) },
+            isDialog = false
+        )
+    }
+}
+
+@Composable
+fun SettingsDialog(
+    viewModel: BibleViewModel,
+    uiState: BibleUiState,
+    onDismiss: () -> Unit
+) {
+    androidx.compose.ui.window.Dialog(
+        onDismissRequest = onDismiss,
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.94f)
+                .fillMaxHeight(0.88f)
+                .testTag("dialog_settings"),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp)
+            ) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Outlined.Settings,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Ajustes de la Aplicación",
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Personalización y Notificaciones",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    IconButton(onClick = onDismiss, modifier = Modifier.testTag("btn_close_settings_dialog")) {
+                        Icon(Icons.Default.Close, contentDescription = "Cerrar")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+                Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    SettingsTab(viewModel = viewModel, uiState = uiState)
                 }
             }
         }

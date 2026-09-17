@@ -88,6 +88,55 @@ fun CloudSyncDialog(
     currentWebClientId: String? = null,
     onSaveWebClientId: (String) -> Unit = {}
 ) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
+        )
+    ) {
+        CloudSyncCardContent(
+            syncId = syncId,
+            lastSyncTime = lastSyncTime,
+            userState = userState,
+            syncOperation = syncOperation,
+            onDismiss = onDismiss,
+            onSignInGoogle = onSignInGoogle,
+            onSignInAnonymous = onSignInAnonymous,
+            onSignInEmailPassword = onSignInEmailPassword,
+            onSignOut = onSignOut,
+            onUploadFirestore = onUploadFirestore,
+            onDownloadFirestore = onDownloadFirestore,
+            onPerformBackup = onPerformBackup,
+            onPerformRestore = onPerformRestore,
+            permanentSha1 = permanentSha1,
+            currentWebClientId = currentWebClientId,
+            onSaveWebClientId = onSaveWebClientId,
+            isDialog = true
+        )
+    }
+}
+
+@Composable
+fun CloudSyncCardContent(
+    syncId: String,
+    lastSyncTime: String,
+    userState: FirebaseUserState?,
+    syncOperation: CloudSyncState,
+    onDismiss: (() -> Unit)? = null,
+    onSignInGoogle: () -> Unit,
+    onSignInAnonymous: () -> Unit,
+    onSignInEmailPassword: (String, String) -> Unit = { _, _ -> },
+    onSignOut: () -> Unit,
+    onUploadFirestore: () -> Unit,
+    onDownloadFirestore: () -> Unit,
+    onPerformBackup: () -> Unit,
+    onPerformRestore: (String) -> Unit,
+    permanentSha1: String = "44:99:64:CA:F2:A6:54:72:7E:84:80:7C:25:2C:E4:FB:68:BD:96:03",
+    currentWebClientId: String? = null,
+    onSaveWebClientId: (String) -> Unit = {},
+    isDialog: Boolean = false
+) {
     val clipboardManager = LocalClipboardManager.current
     var showManualSection by remember { mutableStateOf(false) }
     var restoreCodeInput by remember { mutableStateOf("") }
@@ -104,29 +153,30 @@ fun CloudSyncDialog(
     var sha1Copied by remember { mutableStateOf(false) }
     var clientIdSaved by remember { mutableStateOf(false) }
 
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            decorFitsSystemWindows = false
-        )
+    val cardModifier = if (isDialog) {
+        Modifier
+            .fillMaxWidth(0.94f)
+            .heightIn(max = 680.dp)
+            .imePadding()
+            .padding(vertical = 16.dp)
+            .testTag("dialog_cloud_sync")
+    } else {
+        Modifier
+            .fillMaxWidth()
+            .testTag("screen_cloud_sync")
+    }
+
+    Card(
+        modifier = cardModifier,
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Card(
+        Column(
             modifier = Modifier
-                .fillMaxWidth(0.94f)
-                .heightIn(max = 680.dp)
-                .imePadding()
-                .padding(vertical = 16.dp)
-                .testTag("dialog_cloud_sync"),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                .padding(20.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(20.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
                 // Header
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -568,15 +618,16 @@ fun CloudSyncDialog(
                 }
 
                 // Footer Close
-                Button(
-                    onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Text("Cerrar", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (onDismiss != null) {
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Text("Cerrar", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             }
         }
-    }
 }

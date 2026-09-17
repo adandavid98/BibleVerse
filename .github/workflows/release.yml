@@ -16,7 +16,7 @@ on:
       release_title:
         description: 'Título del lanzamiento'
         required: false
-        default: 'Versículos Bíblicos - Nueva Actualización'
+        default: 'BibleVerse - Nueva Actualización'
 
 permissions:
   contents: write
@@ -108,7 +108,7 @@ jobs:
 
           echo "APK built at: $APK_PATH"
           mkdir -p build-artifacts
-          OUTPUT_APK="build-artifacts/VersiculosBiblicos-${VERSION_TAG}.apk"
+          OUTPUT_APK="build-artifacts/BibleVerse-${VERSION_TAG}.apk"
           cp "$APK_PATH" "$OUTPUT_APK"
           echo "FINAL_APK=$OUTPUT_APK" >> $GITHUB_ENV
 
@@ -118,12 +118,12 @@ jobs:
           tag_name: ${{ env.VERSION_TAG }}
           name: ${{ github.event.inputs.release_title || env.VERSION_TAG }}
           body: |
-            ## 📖 Versículos Bíblicos - Actualización ${{ env.VERSION_TAG }}
+            ## 📖 BibleVerse - Actualización ${{ env.VERSION_TAG }}
             
             ¡Nueva versión disponible para instalar directamente en tu teléfono Android!
             
             ### 📥 Descarga directa del instalador:
-            - Descarga el archivo **`VersiculosBiblicos-${{ env.VERSION_TAG }}.apk`** adjunto abajo.
+            - Descarga el archivo **`BibleVerse-${{ env.VERSION_TAG }}.apk`** adjunto abajo.
             - También puedes actualizar automáticamente desde la aplicación en **Ajustes > Actualizaciones de la Aplicación**.
             
             ---

@@ -30,7 +30,10 @@ object CardBitmapRenderer {
             putExtra(Intent.EXTRA_TEXT, "«$verseText» — $citationText")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        context.startActivity(Intent.createChooser(intent, "Compartir versículo"))
+        val chooser = Intent.createChooser(intent, "Compartir versículo").apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(chooser)
         return fileUri
     }
 
@@ -74,7 +77,7 @@ object CardBitmapRenderer {
             color = Color.parseColor("#F3F4F6")
             style = Paint.Style.FILL
         }
-        val badgeRect = RectF((w / 2f) - 120f, 80f, (w / 2f) + 120f, 130f)
+        val badgeRect = RectF((w / 2f) - 130f, 75f, (w / 2f) + 130f, 125f)
         canvas.drawRoundRect(badgeRect, 25f, 25f, badgeBgPaint)
 
         val badgeTextPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -83,35 +86,36 @@ object CardBitmapRenderer {
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
             textAlign = Paint.Align.CENTER
         }
-        canvas.drawText("PALABRA SAGRADA", w / 2f, 114f, badgeTextPaint)
+        canvas.drawText("PALABRA SAGRADA", w / 2f, 109f, badgeTextPaint)
 
         // Decorative quote mark
         val quoteMarkPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor("#E5E7EB")
-            textSize = 140f
+            textSize = 120f
             typeface = Typeface.create(Typeface.SERIF, Typeface.BOLD)
             textAlign = Paint.Align.CENTER
         }
-        canvas.drawText("“", w / 2f, 240f, quoteMarkPaint)
+        canvas.drawText("“", w / 2f, 220f, quoteMarkPaint)
 
-        // Main Verse Text
+        val headerBottom = 240f
+        val divY = h - 230f
+
+        // Main Verse Text (Centered both horizontally and vertically)
         val contentWidth = w - 180
         val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor("#111827")
-            textSize = calculateOptimalFontSize(text, contentWidth, 380)
             typeface = Typeface.create(Typeface.SERIF, Typeface.NORMAL)
-            textAlign = Paint.Align.CENTER
+            textSize = calculateOptimalFontSize(text, contentWidth, (divY - headerBottom - 30f).toInt(), typeface)
         }
 
-        val textLayout = createStaticLayout(text, textPaint, contentWidth, Layout.Alignment.ALIGN_NORMAL)
+        val textLayout = createStaticLayout(text, textPaint, contentWidth, Layout.Alignment.ALIGN_CENTER)
         canvas.save()
-        val textY = (h / 2f) - (textLayout.height / 2f) - 20f
-        canvas.translate(90f, textY.coerceAtLeast(260f))
+        val textY = headerBottom + ((divY - headerBottom) - textLayout.height) / 2f
+        canvas.translate(90f, textY.coerceAtLeast(headerBottom))
         textLayout.draw(canvas)
         canvas.restore()
 
         // Divider
-        val divY = h - 230f
         val divPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor("#E5E7EB")
             strokeWidth = 2f
@@ -134,7 +138,7 @@ object CardBitmapRenderer {
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
             textAlign = Paint.Align.CENTER
         }
-        canvas.drawText("Versículo Bíblico", w / 2f, divY + 120f, subPaint)
+        canvas.drawText("BibleVerse", w / 2f, divY + 120f, subPaint)
     }
 
     private fun drawSacredGradient(canvas: Canvas, w: Int, h: Int, text: String, citation: String) {
@@ -174,24 +178,26 @@ object CardBitmapRenderer {
         }
         canvas.drawText("✦ SAGRADA ESCRITURA ✦", w / 2f, 120f, tagPaint)
 
-        // Main text
+        val headerBottom = 180f
+        val divY = h - 220f
+
+        // Main text (Centered both horizontally and vertically)
         val contentWidth = w - 180
         val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor("#FFFFFF")
-            textSize = calculateOptimalFontSize(text, contentWidth, 400)
             typeface = Typeface.create(Typeface.SERIF, Typeface.NORMAL)
+            textSize = calculateOptimalFontSize(text, contentWidth, (divY - headerBottom - 30f).toInt(), typeface)
             setShadowLayer(8f, 0f, 4f, Color.parseColor("#60000000"))
         }
 
-        val textLayout = createStaticLayout(text, textPaint, contentWidth, Layout.Alignment.ALIGN_NORMAL)
+        val textLayout = createStaticLayout(text, textPaint, contentWidth, Layout.Alignment.ALIGN_CENTER)
         canvas.save()
-        val textY = (h / 2f) - (textLayout.height / 2f) - 30f
-        canvas.translate(90f, textY.coerceAtLeast(200f))
+        val textY = headerBottom + ((divY - headerBottom) - textLayout.height) / 2f
+        canvas.translate(90f, textY.coerceAtLeast(headerBottom))
         textLayout.draw(canvas)
         canvas.restore()
 
         // Golden divider
-        val divY = h - 220f
         val divPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor("#F59E0B")
             strokeWidth = 3f
@@ -261,23 +267,25 @@ object CardBitmapRenderer {
         }
         canvas.drawText("❖  SANTA BIBLIA  ❖", w / 2f, 125f, headerPaint)
 
-        // Verse Text
+        val headerBottom = 185f
+        val divY = h - 220f
+
+        // Verse Text (Centered both horizontally and vertically)
         val contentWidth = w - 180
         val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor("#2C1D11")
-            textSize = calculateOptimalFontSize(text, contentWidth, 390)
             typeface = Typeface.create(Typeface.SERIF, Typeface.ITALIC)
+            textSize = calculateOptimalFontSize(text, contentWidth, (divY - headerBottom - 30f).toInt(), typeface)
         }
 
-        val textLayout = createStaticLayout(text, textPaint, contentWidth, Layout.Alignment.ALIGN_NORMAL)
+        val textLayout = createStaticLayout(text, textPaint, contentWidth, Layout.Alignment.ALIGN_CENTER)
         canvas.save()
-        val textY = (h / 2f) - (textLayout.height / 2f) - 20f
-        canvas.translate(90f, textY.coerceAtLeast(200f))
+        val textY = headerBottom + ((divY - headerBottom) - textLayout.height) / 2f
+        canvas.translate(90f, textY.coerceAtLeast(headerBottom))
         textLayout.draw(canvas)
         canvas.restore()
 
         // Vintage divider
-        val divY = h - 220f
         val divPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor("#8B5A2B")
             strokeWidth = 2f
@@ -303,16 +311,25 @@ object CardBitmapRenderer {
         canvas.drawText("El cielo y la tierra pasarán, mas mis palabras no pasarán", w / 2f, divY + 115f, footPaint)
     }
 
-    private fun calculateOptimalFontSize(text: String, width: Int, maxHeight: Int): Float {
-        val length = text.length
-        return when {
-            length < 60 -> 48f
-            length < 120 -> 40f
-            length < 220 -> 34f
-            length < 380 -> 28f
-            length < 600 -> 24f
-            else -> 20f
+    private fun calculateOptimalFontSize(
+        text: String,
+        width: Int,
+        maxHeight: Int,
+        typeface: Typeface = Typeface.SERIF
+    ): Float {
+        var size = 46f
+        val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            this.typeface = typeface
         }
+        while (size > 18f) {
+            paint.textSize = size
+            val layout = createStaticLayout(text, paint, width, Layout.Alignment.ALIGN_CENTER)
+            if (layout.height <= maxHeight) {
+                return size
+            }
+            size -= 2f
+        }
+        return size
     }
 
     @Suppress("DEPRECATION")
