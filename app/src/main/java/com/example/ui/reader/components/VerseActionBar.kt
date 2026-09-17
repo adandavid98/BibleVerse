@@ -4,6 +4,8 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +29,7 @@ fun VerseActionBar(
     onCopy: () -> Unit,
     onHighlight: (String) -> Unit,
     onRemoveHighlight: () -> Unit,
+    onSaveToVerses: () -> Unit = {},
     onShareText: () -> Unit,
     onShareCard: () -> Unit,
     onClearSelection: () -> Unit,
@@ -56,7 +59,9 @@ fun VerseActionBar(
                     color = MaterialTheme.colorScheme.surfaceVariant
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        modifier = Modifier
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -145,6 +150,19 @@ fun VerseActionBar(
                             Icon(
                                 Icons.Default.BorderColor,
                                 contentDescription = "Subrayar",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+
+                        // Save / Bookmark button
+                        IconButton(
+                            onClick = onSaveToVerses,
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.BookmarkBorder,
+                                contentDescription = "Guardar en Versículos",
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(22.dp)
                             )

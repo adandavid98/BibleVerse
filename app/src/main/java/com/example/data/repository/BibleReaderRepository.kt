@@ -12,8 +12,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
+import android.content.Context
+import com.example.data.bible.OfflineBibleManager
+
 class BibleReaderRepository(
-    private val dao: BibleReaderDao
+    private val dao: BibleReaderDao,
+    private val context: Context? = null
 ) {
 
     suspend fun initializeCatalogIfNeeded() = withContext(Dispatchers.IO) {
@@ -95,7 +99,31 @@ class BibleReaderRepository(
                 return@withContext
             }
 
-            // 2. Fetch full chapter from Bolls Bible API (Online to Offline cache)
+            val isRvr1960 = version.equals("RVR1960", ignoreCase = true) || version.equals("RV1960", ignoreCase = true)
+
+            // 2. If RVR1960 (primary translation), query the complete pre-packaged offline SQLite database first!
+            if (isRvr1960 && context != null) {
+                val offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter)
+                if (offlineVerses.isNotEmpty()) {
+                    val entities = offlineVerses.map { dto ->
+                        val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber) || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
+                        val heading = detectSectionHeading(bookId, chapter, dto.verseNumber)
+                        BibleReaderVerseEntity(
+                            bookId = bookId,
+                            chapter = chapter,
+                            verseNumber = dto.verseNumber,
+                            text = dto.text,
+                            bibleVersion = version,
+                            sectionHeading = heading,
+                            isRedLetter = isJesus
+                        )
+                    }
+                    dao.insertVerses(entities)
+                    return@withContext
+                }
+            }
+
+            // 3. For other versions (NVI, NBLA, etc.), attempt online fetch to populate offline Room cache
             val networkVerses = BollsBibleApiService.fetchChapter(version, bookId, chapter)
             if (!networkVerses.isNullOrEmpty()) {
                 val entities = networkVerses.map { dto ->
@@ -115,7 +143,29 @@ class BibleReaderRepository(
                 return@withContext
             }
 
-            // 3. Dynamic fallback so user is never blocked offline
+            // 4. If network failed (offline), check offline SQLite database even for other translations
+            if (context != null) {
+                val fallbackOffline = OfflineBibleManager.getVerses(context, bookId, chapter)
+                if (fallbackOffline.isNotEmpty()) {
+                    val entities = fallbackOffline.map { dto ->
+                        val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber) || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
+                        val heading = detectSectionHeading(bookId, chapter, dto.verseNumber)
+                        BibleReaderVerseEntity(
+                            bookId = bookId,
+                            chapter = chapter,
+                            verseNumber = dto.verseNumber,
+                            text = dto.text,
+                            bibleVersion = version,
+                            sectionHeading = heading,
+                            isRedLetter = isJesus
+                        )
+                    }
+                    dao.insertVerses(entities)
+                    return@withContext
+                }
+            }
+
+            // 5. Dynamic fallback so user is never blocked
             val synthesized = generateChapterVerses(bookId, chapter, version)
             dao.insertVerses(synthesized)
         }

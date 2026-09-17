@@ -33,11 +33,14 @@ data class HighlightColorItem(
 
 object HighlightPalette {
     val colors = listOf(
-        HighlightColorItem("#FEF08A", "Amarillo"),
-        HighlightColorItem("#BBF7D0", "Verde"),
-        HighlightColorItem("#BFDBFE", "Azul"),
-        HighlightColorItem("#FBCFE8", "Rosa"),
-        HighlightColorItem("#FED7AA", "Ámbar")
+        HighlightColorItem("#FEF08A", "Amarillo Sol"),
+        HighlightColorItem("#A7F3D0", "Verde Menta"),
+        HighlightColorItem("#BAE6FD", "Azul Cielo"),
+        HighlightColorItem("#E9D5FF", "Lavanda"),
+        HighlightColorItem("#FBCFE8", "Rosa Pastel"),
+        HighlightColorItem("#FED7AA", "Melocotón"),
+        HighlightColorItem("#99F6E4", "Esmeralda"),
+        HighlightColorItem("#FDE68A", "Oro Cálido")
     )
 }
 

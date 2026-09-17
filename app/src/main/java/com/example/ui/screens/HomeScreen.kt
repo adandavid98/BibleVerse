@@ -37,6 +37,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Bookmark
@@ -146,7 +147,6 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedTab by remember { mutableIntStateOf(0) }
     val versesListState = rememberLazyListState()
-    var showSettingsDialog by remember { mutableStateOf(false) }
 
     val showUpdateDialog by viewModel.showUpdateDialog.collectAsStateWithLifecycle()
     val updateInfo by viewModel.updateInfo.collectAsStateWithLifecycle()
@@ -233,13 +233,13 @@ fun HomeScreen(
                         }
 
                         IconButton(
-                            onClick = { showSettingsDialog = true },
+                            onClick = { selectedTab = 4 },
                             modifier = Modifier.testTag("btn_top_settings")
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.Settings,
                                 contentDescription = "Ajustes de la Aplicación",
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = if (selectedTab == 4) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     },
@@ -297,15 +297,6 @@ fun HomeScreen(
                     label = { Text("Favoritos") },
                     modifier = Modifier.testTag("nav_favorites")
                 )
-                NavigationBarItem(
-                    selected = selectedTab == 4,
-                    onClick = {
-                        selectedTab = 4
-                    },
-                    icon = { Icon(Icons.Filled.CloudDone, contentDescription = "Copia de Seguridad") },
-                    label = { Text("Copia de Seg.") },
-                    modifier = Modifier.testTag("nav_cloud_backup")
-                )
             }
         },
         floatingActionButton = {
@@ -349,18 +340,9 @@ fun HomeScreen(
                 1 -> BibleReaderScreen(viewModel = readerViewModel)
                 2 -> SearchTab(viewModel, uiState)
                 3 -> FavoritesAndNotesTab(viewModel, uiState)
-                4 -> CloudBackupTab(viewModel, uiState)
+                4 -> SettingsTab(viewModel, uiState, onBack = { selectedTab = 0 })
             }
         }
-    }
-
-    // Dialogs
-    if (showSettingsDialog) {
-        SettingsDialog(
-            viewModel = viewModel,
-            uiState = uiState,
-            onDismiss = { showSettingsDialog = false }
-        )
     }
 
     if (uiState.showAddDialog) {
@@ -757,7 +739,8 @@ fun FavoritesAndNotesTab(
 @Composable
 fun SettingsTab(
     viewModel: BibleViewModel,
-    uiState: BibleUiState
+    uiState: BibleUiState,
+    onBack: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     var reminderHour by remember(uiState.reminderHour) { mutableIntStateOf(uiState.reminderHour) }
@@ -772,6 +755,36 @@ fun SettingsTab(
             .padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
+        if (onBack != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 2.dp)
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Regresar",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+                Column {
+                    Text(
+                        text = "Configuración",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Ajustes, Copias y Nube",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+        }
         // Section: Visual Themes (Modo Lectura Nocturna Anti-Fatiga)
         Text(
             text = "MODO DE LECTURA & VISUALIZACIÓN",
@@ -971,6 +984,38 @@ fun SettingsTab(
             }
         }
 
+        // Section: Nube y Copia de Seguridad
+        Text(
+            text = "NUBE Y COPIA DE SEGURIDAD",
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            ),
+            color = MaterialTheme.colorScheme.secondary
+        )
+
+        val firebaseUserState by viewModel.firebaseUserState.collectAsStateWithLifecycle()
+        val firebaseSyncOperation by viewModel.firebaseSyncOperation.collectAsStateWithLifecycle()
+
+        com.example.ui.components.CloudSyncCardContent(
+            syncId = uiState.cloudSyncId,
+            lastSyncTime = uiState.lastSyncTime,
+            userState = firebaseUserState,
+            syncOperation = firebaseSyncOperation,
+            onDismiss = null,
+            onSignInGoogle = { viewModel.signInWithGoogle(context) },
+            onSignInAnonymous = { viewModel.signInAnonymously() },
+            onSignInEmailPassword = { email, pass -> viewModel.signInWithEmailPassword(email, pass) },
+            onSignOut = { viewModel.signOutFirebase(context) },
+            onUploadFirestore = { viewModel.uploadToFirestore() },
+            onDownloadFirestore = { viewModel.downloadFromFirestore() },
+            onPerformBackup = { viewModel.performCloudBackup() },
+            onPerformRestore = { viewModel.performCloudRestore(it) },
+            permanentSha1 = viewModel.permanentSha1,
+            currentWebClientId = viewModel.getResolvedFirebaseWebClientId(context),
+            onSaveWebClientId = { id -> viewModel.saveFirebaseWebClientId(context, id) },
+            isDialog = false
+        )
 
         // Section: Updates and GitHub Releases
         Text(
@@ -1128,120 +1173,6 @@ fun SettingsTab(
         }
     }
 }
-
-@Composable
-fun CloudBackupTab(
-    viewModel: BibleViewModel,
-    uiState: BibleUiState
-) {
-    val context = LocalContext.current
-    val firebaseUserState by viewModel.firebaseUserState.collectAsStateWithLifecycle()
-    val firebaseSyncOperation by viewModel.firebaseSyncOperation.collectAsStateWithLifecycle()
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 14.dp, vertical = 10.dp)
-    ) {
-        com.example.ui.components.CloudSyncCardContent(
-            syncId = uiState.cloudSyncId,
-            lastSyncTime = uiState.lastSyncTime,
-            userState = firebaseUserState,
-            syncOperation = firebaseSyncOperation,
-            onDismiss = null,
-            onSignInGoogle = { viewModel.signInWithGoogle(context) },
-            onSignInAnonymous = { viewModel.signInAnonymously() },
-            onSignInEmailPassword = { email, pass -> viewModel.signInWithEmailPassword(email, pass) },
-            onSignOut = { viewModel.signOutFirebase(context) },
-            onUploadFirestore = { viewModel.uploadToFirestore() },
-            onDownloadFirestore = { viewModel.downloadFromFirestore() },
-            onPerformBackup = { viewModel.performCloudBackup() },
-            onPerformRestore = { viewModel.performCloudRestore(it) },
-            permanentSha1 = viewModel.permanentSha1,
-            currentWebClientId = viewModel.getResolvedFirebaseWebClientId(context),
-            onSaveWebClientId = { id -> viewModel.saveFirebaseWebClientId(context, id) },
-            isDialog = false
-        )
-    }
-}
-
-@Composable
-fun SettingsDialog(
-    viewModel: BibleViewModel,
-    uiState: BibleUiState,
-    onDismiss: () -> Unit
-) {
-    androidx.compose.ui.window.Dialog(
-        onDismissRequest = onDismiss,
-        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth(0.94f)
-                .fillMaxHeight(0.88f)
-                .testTag("dialog_settings"),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(20.dp)
-            ) {
-                // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            modifier = Modifier.size(40.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    Icons.Outlined.Settings,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text(
-                                text = "Ajustes de la Aplicación",
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = "Personalización y Notificaciones",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                    IconButton(onClick = onDismiss, modifier = Modifier.testTag("btn_close_settings_dialog")) {
-                        Icon(Icons.Default.Close, contentDescription = "Cerrar")
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-                Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                ) {
-                    SettingsTab(viewModel = viewModel, uiState = uiState)
-                }
-            }
-        }
-    }
 }
 
 @Composable

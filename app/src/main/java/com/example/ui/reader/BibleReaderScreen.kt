@@ -418,6 +418,10 @@ fun BibleReaderScreen(
                 onRemoveHighlight = {
                     viewModel.removeHighlightFromSelection()
                 },
+                onSaveToVerses = {
+                    viewModel.saveSelectedVersesToMainModule()
+                    Toast.makeText(context, "Versículo guardado en Versículos y Favoritos", Toast.LENGTH_SHORT).show()
+                },
                 onShareText = {
                     val formatted = viewModel.getFormattedQuotation()
                     sharePlainText(context, formatted)
@@ -505,7 +509,7 @@ private fun CompactVerseRow(
     val highlightColor = remember(verse.highlightColorHex) {
         if (!verse.highlightColorHex.isNullOrBlank()) {
             try {
-                Color(android.graphics.Color.parseColor(verse.highlightColorHex)).copy(alpha = 0.4f)
+                Color(android.graphics.Color.parseColor(verse.highlightColorHex)).copy(alpha = 0.28f)
             } catch (e: Exception) {
                 null
             }
@@ -514,6 +518,8 @@ private fun CompactVerseRow(
 
     val selectionBorder = if (verse.isSelected) {
         BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+    } else if (highlightColor != null) {
+        BorderStroke(0.8.dp, highlightColor.copy(alpha = 0.5f))
     } else null
 
     val rowBg = when {
@@ -528,11 +534,11 @@ private fun CompactVerseRow(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(6.dp))
+            .clip(RoundedCornerShape(8.dp))
             .background(rowBg)
-            .then(if (selectionBorder != null) Modifier.border(selectionBorder, RoundedCornerShape(6.dp)) else Modifier)
+            .then(if (selectionBorder != null) Modifier.border(selectionBorder, RoundedCornerShape(8.dp)) else Modifier)
             .clickable { onClick() }
-            .padding(horizontal = 4.dp, vertical = 2.dp)
+            .padding(horizontal = 6.dp, vertical = 3.dp)
     ) {
         val annotatedText = buildAnnotatedString {
             // Elegant superscript verse number

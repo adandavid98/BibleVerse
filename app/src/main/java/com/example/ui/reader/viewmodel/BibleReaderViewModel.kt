@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.data.local.BibleDatabase
+import com.example.data.local.VerseDao
 import com.example.data.model.BibleBookEntity
+import com.example.data.model.VerseEntity
 import com.example.data.preferences.ReaderFontFamily
 import com.example.data.preferences.ReaderPreferences
 import com.example.data.preferences.ReaderPreferencesRepository
@@ -31,7 +33,8 @@ class BibleReaderViewModel(
     private val getChapterVersesUseCase: GetChapterVersesWithHighlightsUseCase,
     private val toggleHighlightUseCase: ToggleVerseHighlightUseCase,
     private val formatVerseQuotationUseCase: FormatVerseQuotationUseCase,
-    private val preferencesRepository: ReaderPreferencesRepository
+    private val preferencesRepository: ReaderPreferencesRepository,
+    private val verseDao: VerseDao? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BibleReaderUiState())
@@ -47,14 +50,23 @@ class BibleReaderViewModel(
         // Collect Books
         viewModelScope.launch {
             getBibleBooksUseCase().collectLatest { books ->
-                _uiState.update { current ->
-                    val selectedBook = current.currentBook ?: books.firstOrNull { it.id == current.preferences.lastBookId }
-                        ?: books.firstOrNull()
-                    current.copy(
+                if (books.isEmpty()) return@collectLatest
+                val current = _uiState.value
+                val selectedBook = current.currentBook ?: books.firstOrNull { it.id == current.preferences.lastBookId }
+                    ?: books.firstOrNull()
+                _uiState.update {
+                    it.copy(
                         books = books,
                         currentBook = selectedBook,
-                        isLoading = books.isEmpty()
+                        isLoading = false
                     )
+                }
+
+                // If verses have not loaded yet, immediately load the target chapter!
+                if (_uiState.value.verses.isEmpty() && selectedBook != null) {
+                    val targetChapter = _uiState.value.preferences.lastChapter.coerceIn(1, selectedBook.chaptersCount)
+                    val targetVersion = _uiState.value.preferences.bibleVersion
+                    loadChapter(selectedBook, targetChapter, targetVersion)
                 }
             }
         }
@@ -69,12 +81,13 @@ class BibleReaderViewModel(
                 val bookId = prefs.lastBookId
                 val chapter = prefs.lastChapter
                 val version = prefs.bibleVersion
-                if (bookId != _uiState.value.currentBook?.id ||
+                val currentBook = _uiState.value.currentBook
+                if (bookId != currentBook?.id ||
                     chapter != _uiState.value.currentChapter ||
                     version != prevPrefs.bibleVersion ||
                     _uiState.value.verses.isEmpty()
                 ) {
-                    val targetBook = _uiState.value.books.firstOrNull { it.id == bookId }
+                    val targetBook = _uiState.value.books.firstOrNull { it.id == bookId } ?: currentBook
                     if (targetBook != null) {
                         loadChapter(targetBook, chapter, version)
                     }
@@ -370,11 +383,45 @@ class BibleReaderViewModel(
         }
     }
 
+    fun saveSelectedVersesToMainModule(colorHex: String = "#FEF08A") {
+        val currentBook = _uiState.value.currentBook ?: return
+        val chapter = _uiState.value.currentChapter
+        val selected = getSelectedVerses()
+        if (selected.isEmpty()) return
+
+        val dao = verseDao
+        viewModelScope.launch {
+            if (dao != null) {
+                val version = _uiState.value.preferences.bibleVersion
+                val testament = if (currentBook.orderIndex <= 39) "Antiguo Testamento" else "Nuevo Testamento"
+                for (v in selected) {
+                    val ref = "${currentBook.name} $chapter:${v.verseNumber}"
+                    val entity = VerseEntity(
+                        book = currentBook.name,
+                        chapterVerse = "$chapter:${v.verseNumber}",
+                        reference = ref,
+                        testament = testament,
+                        text = v.text,
+                        context = "Versículo guardado desde el Lector de la Biblia.",
+                        topic = "Biblia",
+                        isFavorite = true,
+                        highlightColor = colorHex,
+                        isCustom = true,
+                        bibleVersion = version
+                    )
+                    dao.insertVerse(entity)
+                }
+            }
+            toggleHighlightUseCase.applyHighlight(currentBook.id, chapter, selected.map { it.verseNumber }, colorHex)
+            clearSelection()
+        }
+    }
+
     class Factory(private val context: Context) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             val db = BibleDatabase.getDatabase(context)
-            val repo = BibleReaderRepository(db.bibleReaderDao())
+            val repo = BibleReaderRepository(db.bibleReaderDao(), context.applicationContext)
             val getBooks = GetBibleBooksUseCase(repo)
             val getChapterVerses = GetChapterVersesWithHighlightsUseCase(repo)
             val toggleHighlight = ToggleVerseHighlightUseCase(repo)
@@ -386,7 +433,8 @@ class BibleReaderViewModel(
                 getChapterVersesUseCase = getChapterVerses,
                 toggleHighlightUseCase = toggleHighlight,
                 formatVerseQuotationUseCase = formatQuote,
-                preferencesRepository = prefsRepo
+                preferencesRepository = prefsRepo,
+                verseDao = db.verseDao()
             ) as T
         }
     }
