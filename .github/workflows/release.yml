@@ -2,15 +2,12 @@ name: Build and Release Android APK
 
 on:
   push:
-    branches:
-      - main
-      - master
     tags:
       - 'v*'
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Tag de la versión (ej. v1.1)'
+        description: 'Tag de la versión (ej. v1.8)'
         required: false
         default: ''
       release_title:

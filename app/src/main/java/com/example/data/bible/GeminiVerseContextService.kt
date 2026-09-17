@@ -26,11 +26,13 @@ enum class ContextSource {
 object GeminiVerseContextService {
 
     private const val TAG = "GeminiContextService"
-    // Correct Gemini model names — ordered by capability (fastest first for free tier)
+    // Gemini free-tier models — all confirmed available on ai.google.dev/pricing
+    // Cascade: try newest/fastest first, fall back to stable older versions
     private val FREE_TIER_MODELS = listOf(
-        "gemini-2.0-flash",
-        "gemini-1.5-flash",
-        "gemini-1.5-flash-8b"
+        "gemini-3.5-flash",    // Latest Gemini 3.x series (free tier)
+        "gemini-2.5-flash",    // Gemini 2.5 (stable, free tier)
+        "gemini-2.0-flash",    // Gemini 2.0 (stable, free tier)
+        "gemini-2.5-flash-lite" // Lightweight fallback
     )
     private const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 

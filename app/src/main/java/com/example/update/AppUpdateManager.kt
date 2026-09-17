@@ -85,23 +85,25 @@ object AppUpdateManager {
     suspend fun checkForUpdate(context: Context): Result<AppUpdateInfo> = withContext(Dispatchers.IO) {
         try {
             val repo = getGitHubRepo(context)
-            val apiUrl = "https://api.github.com/repos/$repo/releases/latest"
+            // Query the list of releases instead of just /releases/latest,
+            // so we always identify the highest semantic release (e.g. v1.8 over v1.0.39)
+            val apiUrl = "https://api.github.com/repos/$repo/releases?per_page=20"
 
             val request = Request.Builder()
                 .url(apiUrl)
                 .header("Accept", "application/vnd.github.v3+json")
-                .header("User-Agent", "VersiculosBiblicos-AndroidApp")
+                .header("User-Agent", "BibleVerse-AndroidApp")
                 .build()
 
             val response = httpClient.newCall(request).execute()
             if (!response.isSuccessful) {
                 if (response.code == 404) {
                     return@withContext Result.failure(
-                        Exception("No se encontraron lanzamientos en el repositorio '$repo'. Asegúrate de haber publicado al menos un Release.")
+                        Exception("No se encontraron lanzamientos en el repositorio '$repo'.")
                     )
                 }
                 return@withContext Result.failure(
-                    Exception("Error del servidor de GitHub (${response.code}): ${response.message}")
+                    Exception("Error de GitHub (${response.code}): ${response.message}")
                 )
             }
 
@@ -109,18 +111,55 @@ object AppUpdateManager {
                 Exception("Respuesta vacía desde GitHub Releases.")
             )
 
-            val json = JSONObject(bodyString)
-            val tagName = json.optString("tag_name", "v1.0")
-            val releaseName = json.optString("name", tagName)
-            val releaseNotes = json.optString("body", "Sin notas de la versión.")
-            val htmlUrl = json.optString("html_url", "https://github.com/$repo/releases")
-            val publishedAt = json.optString("published_at", "")
+            val releasesArray = org.json.JSONArray(bodyString)
+            if (releasesArray.length() == 0) {
+                return@withContext Result.failure(Exception("No hay versiones publicadas."))
+            }
+
+            // Find the release with the highest semantic version number that has an APK
+            var bestRelease: JSONObject? = null
+            var bestTag = ""
+
+            for (i in 0 until releasesArray.length()) {
+                val rel = releasesArray.getJSONObject(i)
+                if (rel.optBoolean("draft", false) || rel.optBoolean("prerelease", false)) {
+                    continue
+                }
+                val tag = rel.optString("tag_name", "")
+                val assets = rel.optJSONArray("assets")
+                val hasApk = (0 until (assets?.length() ?: 0)).any { idx ->
+                    assets?.getJSONObject(idx)?.optString("name", "")?.endsWith(".apk", ignoreCase = true) == true
+                }
+                if (!hasApk) continue
+
+                // Check if this is the highest version
+                if (bestRelease == null) {
+                    bestRelease = rel
+                    bestTag = tag
+                } else {
+                    val cmp = compareVersions(tag, bestTag)
+                    // If tag is strictly higher, or if bestTag is a legacy run tag (v1.0.x) and tag is a real release
+                    val isCurrentLegacyRun = bestTag.startsWith("v1.0.") || bestTag.startsWith("1.0.")
+                    val isCandidateClean = !tag.startsWith("v1.0.") && !tag.startsWith("1.0.")
+                    if (cmp > 0 || (isCurrentLegacyRun && isCandidateClean)) {
+                        bestRelease = rel
+                        bestTag = tag
+                    }
+                }
+            }
+
+            val targetRelease = bestRelease ?: releasesArray.getJSONObject(0)
+            val tagName = targetRelease.optString("tag_name", "v1.8")
+            val releaseName = targetRelease.optString("name", tagName)
+            val releaseNotes = targetRelease.optString("body", "Sin notas de la versión.")
+            val htmlUrl = targetRelease.optString("html_url", "https://github.com/$repo/releases")
+            val publishedAt = targetRelease.optString("published_at", "")
 
             var apkUrl: String? = null
             var apkName: String? = null
             var apkSize: Long = 0L
 
-            val assets = json.optJSONArray("assets")
+            val assets = targetRelease.optJSONArray("assets")
             if (assets != null) {
                 for (i in 0 until assets.length()) {
                     val asset = assets.getJSONObject(i)
