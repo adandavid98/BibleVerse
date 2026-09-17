@@ -20,6 +20,7 @@ import com.example.domain.usecase.GetChapterVersesWithHighlightsUseCase
 import com.example.domain.usecase.ToggleVerseHighlightUseCase
 import com.example.ui.reader.model.BibleReaderUiState
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,7 +35,8 @@ class BibleReaderViewModel(
     private val toggleHighlightUseCase: ToggleVerseHighlightUseCase,
     private val formatVerseQuotationUseCase: FormatVerseQuotationUseCase,
     private val preferencesRepository: ReaderPreferencesRepository,
-    private val verseDao: VerseDao? = null
+    private val verseDao: VerseDao? = null,
+    private val readerDao: com.example.data.local.BibleReaderDao? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BibleReaderUiState())
@@ -47,50 +49,34 @@ class BibleReaderViewModel(
             getBibleBooksUseCase.initialize()
         }
 
-        // Collect Books
+        // Cleanly coordinate books and preferences without race conditions
         viewModelScope.launch {
-            getBibleBooksUseCase().collectLatest { books ->
+            combine(getBibleBooksUseCase(), preferencesRepository.readerPreferences) { books, prefs ->
+                Pair(books, prefs)
+            }.collectLatest { (books, prefs) ->
                 if (books.isEmpty()) return@collectLatest
+
+                val targetBook = books.firstOrNull { it.id == prefs.lastBookId } ?: books.first()
+                val targetChapter = prefs.lastChapter.coerceIn(1, targetBook.chaptersCount)
+                val targetVersion = prefs.bibleVersion
+
                 val current = _uiState.value
-                val selectedBook = current.currentBook ?: books.firstOrNull { it.id == current.preferences.lastBookId }
-                    ?: books.firstOrNull()
+                val needsReload = current.verses.isEmpty() ||
+                        current.currentBook?.id != targetBook.id ||
+                        current.currentChapter != targetChapter ||
+                        current.preferences.bibleVersion != targetVersion
+
                 _uiState.update {
                     it.copy(
                         books = books,
-                        currentBook = selectedBook,
-                        isLoading = false
+                        preferences = prefs,
+                        currentBook = targetBook,
+                        currentChapter = targetChapter
                     )
                 }
 
-                // If verses have not loaded yet, immediately load the target chapter!
-                if (_uiState.value.verses.isEmpty() && selectedBook != null) {
-                    val targetChapter = _uiState.value.preferences.lastChapter.coerceIn(1, selectedBook.chaptersCount)
-                    val targetVersion = _uiState.value.preferences.bibleVersion
-                    loadChapter(selectedBook, targetChapter, targetVersion)
-                }
-            }
-        }
-
-        // Collect Preferences
-        viewModelScope.launch {
-            preferencesRepository.readerPreferences.collectLatest { prefs ->
-                val prevPrefs = _uiState.value.preferences
-                _uiState.update { it.copy(preferences = prefs) }
-
-                // If book or chapter or version changed in preferences or on first run, reload chapter
-                val bookId = prefs.lastBookId
-                val chapter = prefs.lastChapter
-                val version = prefs.bibleVersion
-                val currentBook = _uiState.value.currentBook
-                if (bookId != currentBook?.id ||
-                    chapter != _uiState.value.currentChapter ||
-                    version != prevPrefs.bibleVersion ||
-                    _uiState.value.verses.isEmpty()
-                ) {
-                    val targetBook = _uiState.value.books.firstOrNull { it.id == bookId } ?: currentBook
-                    if (targetBook != null) {
-                        loadChapter(targetBook, chapter, version)
-                    }
+                if (needsReload) {
+                    loadChapter(targetBook, targetChapter, targetVersion)
                 }
             }
         }
@@ -417,11 +403,19 @@ class BibleReaderViewModel(
         }
     }
 
+    fun downloadBibleVersion(versionCode: String) {
+        val dao = readerDao ?: return
+        viewModelScope.launch {
+            com.example.data.bible.OfflineBibleDownloadManager.downloadVersion(dao, versionCode)
+        }
+    }
+
     class Factory(private val context: Context) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             val db = BibleDatabase.getDatabase(context)
-            val repo = BibleReaderRepository(db.bibleReaderDao(), context.applicationContext)
+            val dao = db.bibleReaderDao()
+            val repo = BibleReaderRepository(dao, context.applicationContext)
             val getBooks = GetBibleBooksUseCase(repo)
             val getChapterVerses = GetChapterVersesWithHighlightsUseCase(repo)
             val toggleHighlight = ToggleVerseHighlightUseCase(repo)
@@ -434,7 +428,8 @@ class BibleReaderViewModel(
                 toggleHighlightUseCase = toggleHighlight,
                 formatVerseQuotationUseCase = formatQuote,
                 preferencesRepository = prefsRepo,
-                verseDao = db.verseDao()
+                verseDao = db.verseDao(),
+                readerDao = dao
             ) as T
         }
     }

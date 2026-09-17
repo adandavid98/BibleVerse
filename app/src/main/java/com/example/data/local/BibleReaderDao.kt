@@ -46,6 +46,18 @@ interface BibleReaderDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertVerses(verses: List<BibleReaderVerseEntity>)
 
+    @Query("DELETE FROM bible_reader_verses WHERE text LIKE '%Palabra de Dios para edificación%'")
+    suspend fun purgeSyntheticVerses(): Int
+
+    @Query("DELETE FROM bible_reader_verses WHERE bookId = :bookId AND chapter = :chapter AND bibleVersion = :version")
+    suspend fun deleteVersesForChapter(bookId: Int, chapter: Int, version: String)
+
+    @Query("SELECT COUNT(*) FROM bible_reader_verses WHERE bibleVersion = :version")
+    suspend fun getVerseCountForVersion(version: String): Int
+
+    @Query("DELETE FROM bible_reader_verses WHERE bibleVersion = :version")
+    suspend fun deleteVersesForVersion(version: String)
+
     // === Highlights ===
     @Query("SELECT * FROM verse_highlights WHERE bookId = :bookId AND chapter = :chapter")
     fun getHighlights(bookId: Int, chapter: Int): Flow<List<VerseHighlightEntity>>

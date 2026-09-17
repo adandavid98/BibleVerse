@@ -174,7 +174,7 @@ fun CloudSyncCardContent(
         Column(
             modifier = Modifier
                 .padding(20.dp)
-                .verticalScroll(rememberScrollState()),
+                .then(if (isDialog) Modifier.verticalScroll(rememberScrollState()) else Modifier),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
                 // Header

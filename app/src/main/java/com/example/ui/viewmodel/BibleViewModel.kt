@@ -125,9 +125,18 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     private val _isChatLoading = MutableStateFlow(false)
     val isChatLoading: StateFlow<Boolean> = _isChatLoading.asStateFlow()
 
+    private lateinit var bibleReaderDao: com.example.data.local.BibleReaderDao
+    val offlineDownloadStates = com.example.data.bible.OfflineBibleDownloadManager.downloadStates
+
     init {
         val db = BibleDatabase.getDatabase(application, viewModelScope)
         repository = VerseRepository(db.verseDao())
+        bibleReaderDao = db.bibleReaderDao()
+
+        // Refresh offline versions statuses
+        viewModelScope.launch {
+            com.example.data.bible.OfflineBibleDownloadManager.refreshStatuses(bibleReaderDao)
+        }
 
         // Ensure pre-population on first run
         viewModelScope.launch {
@@ -858,5 +867,17 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     fun openAddVerseForReference(reference: String) {
         _showBibleChatDialog.value = false
         _showAddDialog.value = true
+    }
+
+    fun downloadOfflineVersion(versionCode: String) {
+        viewModelScope.launch {
+            com.example.data.bible.OfflineBibleDownloadManager.downloadVersion(bibleReaderDao, versionCode)
+        }
+    }
+
+    fun refreshOfflineVersions() {
+        viewModelScope.launch {
+            com.example.data.bible.OfflineBibleDownloadManager.refreshStatuses(bibleReaderDao)
+        }
     }
 }

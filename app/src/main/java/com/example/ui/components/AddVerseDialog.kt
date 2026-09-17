@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.AutoStories
@@ -72,6 +73,13 @@ import com.example.data.bible.BibleBook
 import com.example.data.bible.BibleCatalog
 import com.example.data.bible.BibleContextEngine
 import com.example.data.bible.BibleVersion
+import com.example.data.bible.OfflineBibleManager
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import com.example.data.bible.ContextGenerationResult
 import com.example.data.bible.ContextSource
 import com.example.data.bible.GeminiVerseContextService
@@ -111,6 +119,9 @@ fun AddVerseDialog(
     var selectedVersion by remember { mutableStateOf(BibleCatalog.versions.first()) }
     var showVersionModal by remember { mutableStateOf(false) }
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var showReferencePickerWindow by remember { mutableStateOf(false) }
+
     // === STATE FOR OPTION 1: BIBLE BOOK SELECTOR ===
     var selectedTestamentFilter by remember { mutableStateOf("Todos") } // "Todos", "Antiguo Testamento", "Nuevo Testamento"
     var bookSearchQuery by remember { mutableStateOf("") }
@@ -144,28 +155,51 @@ fun AddVerseDialog(
     // 1. Checks if exact match exists in InitialVersesData
     // 2. Otherwise computes grounded canonical context from BibleContextEngine
     LaunchedEffect(selectedBook, selectedChapter, verseInput, selectedVersion) {
-        val refQuery1 = "${selectedBook.name} $selectedChapter:$verseInput".trim()
-        val refQuery2 = "${selectedBook.name} $selectedChapter : $verseInput".trim()
-        val match = InitialVersesData.verses.firstOrNull {
-            it.reference.equals(refQuery1, ignoreCase = true) ||
-            it.reference.replace(" ", "").equals(refQuery2.replace(" ", ""), ignoreCase = true)
-        }
-        if (match != null) {
-            if (bibleText.isBlank() || bibleText.startsWith("«")) {
+        val vNum = verseInput.toIntOrNull() ?: 1
+        val offlineVerses = OfflineBibleManager.getVerses(context, selectedBook.order, selectedChapter)
+        val vMatch = offlineVerses.firstOrNull { it.verseNumber == vNum }
+        if (vMatch != null && vMatch.text.isNotBlank()) {
+            bibleText = vMatch.text
+        } else {
+            val refQuery1 = "${selectedBook.name} $selectedChapter:$verseInput".trim()
+            val match = InitialVersesData.verses.firstOrNull { it.reference.equals(refQuery1, ignoreCase = true) }
+            if (match != null && bibleText.isBlank()) {
                 bibleText = match.text.removeSurrounding("«", "»")
             }
-            bibleContext = match.context
-            contextSourceBadgeTab0 = "Catálogo Exacto"
-            if (bibleTopic == "General" || bibleTopic.isBlank()) {
-                bibleTopic = match.topic
-            }
-        } else {
-            // Intelligent canonical theological context for all 66 books and chapters
-            if (bibleContext.isBlank() || contextSourceBadgeTab0 != "✨ IA (Gemini)") {
-                bibleContext = BibleContextEngine.getLocalContext(selectedBook.name, selectedChapter, verseInput, bibleText)
-                contextSourceBadgeTab0 = "Catálogo Local"
-            }
         }
+
+        if (bibleContext.isBlank() || contextSourceBadgeTab0 != "✨ IA (Gemini)") {
+            bibleContext = BibleContextEngine.getLocalContext(selectedBook.name, selectedChapter, verseInput, bibleText)
+            contextSourceBadgeTab0 = "Catálogo Local"
+        }
+    }
+    }
+
+    
+    if (showReferencePickerWindow) {
+        BibleReferenceWindowPicker(
+            initialBook = selectedBook,
+            initialChapter = selectedChapter,
+            initialVerse = verseInput.toIntOrNull() ?: 1,
+            onReferenceSelected = { book, chapter, verse ->
+                selectedBook = book
+                selectedChapter = chapter
+                verseInput = verse.toString()
+                showReferencePickerWindow = false
+                coroutineScope.launch {
+                    val offline = OfflineBibleManager.getVerses(context, book.order, chapter)
+                    val v = offline.firstOrNull { it.verseNumber == verse }
+                    if (v != null && v.text.isNotBlank()) {
+                        bibleText = v.text
+                    }
+                    val ctx = BibleContextEngine.getLocalContext(book.name, chapter, verse.toString(), bibleText)
+                    if (ctx.isNotBlank()) {
+                        bibleContext = ctx
+                    }
+                }
+            },
+            onDismiss = { showReferencePickerWindow = false }
+        )
     }
 
     if (showVersionModal) {
@@ -370,219 +404,70 @@ fun AddVerseDialog(
 
                     if (selectedTab == 0) {
                         // ==========================================
-                        // OPCIÓN 1: SELECTOR DE LIBROS DE LA BIBLIA
+                        // OPCIÓN 1: SELECTOR PRECISO (VENTANA 3 PASOS)
                         // ==========================================
 
-                        // Filtro de Testamento (Todos - Antiguo - Nuevo)
-                        Text(
-                            text = "Filtrar por Testamento:",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Row(
-                            modifier = Modifier.horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            FilterChip(
-                                selected = selectedTestamentFilter == "Todos",
-                                onClick = { selectedTestamentFilter = "Todos" },
-                                label = { Text("Todos (66)") },
-                                modifier = Modifier.testTag("chip_filter_all")
-                            )
-                            FilterChip(
-                                selected = selectedTestamentFilter == "Antiguo Testamento",
-                                onClick = { selectedTestamentFilter = "Antiguo Testamento" },
-                                label = { Text("Antiguo Testamento (39)") },
-                                modifier = Modifier.testTag("chip_filter_ot")
-                            )
-                            FilterChip(
-                                selected = selectedTestamentFilter == "Nuevo Testamento",
-                                onClick = { selectedTestamentFilter = "Nuevo Testamento" },
-                                label = { Text("Nuevo Testamento (27)") },
-                                modifier = Modifier.testTag("chip_filter_nt")
-                            )
-                        }
-
-                        // Buscador de libros
-                        OutlinedTextField(
-                            value = bookSearchQuery,
-                            onValueChange = { bookSearchQuery = it },
-                            placeholder = { Text("Buscar libro (ej. Génesis, Salmos, Mateo, Romanos...)") },
-                            leadingIcon = {
-                                Icon(Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(18.dp))
-                            },
-                            trailingIcon = {
-                                if (bookSearchQuery.isNotBlank()) {
-                                    IconButton(onClick = { bookSearchQuery = "" }) {
-                                        Icon(Icons.Filled.Close, contentDescription = "Limpiar", modifier = Modifier.size(16.dp))
-                                    }
-                                }
-                            },
-                            singleLine = true,
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("input_search_books")
-                        )
-
-                        // Lista filtrada de libros de la Biblia
-                        val filteredBooks = remember(selectedTestamentFilter, bookSearchQuery) {
-                            BibleCatalog.books.filter { book ->
-                                val matchesTestament = when (selectedTestamentFilter) {
-                                    "Antiguo Testamento" -> book.testament == "Antiguo Testamento"
-                                    "Nuevo Testamento" -> book.testament == "Nuevo Testamento"
-                                    else -> true
-                                }
-                                val matchesQuery = bookSearchQuery.isBlank() ||
-                                        book.name.contains(bookSearchQuery, ignoreCase = true) ||
-                                        book.abbreviation.contains(bookSearchQuery, ignoreCase = true)
-                                matchesTestament && matchesQuery
-                            }
-                        }
-
-                        Text(
-                            text = "Selecciona un libro (${filteredBooks.size} disponibles):",
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        // Grid de chips de libros
-                        FlowRow(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(max = 160.dp)
-                                .verticalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            filteredBooks.forEach { book ->
-                                val isSelected = book.name == selectedBook.name
-                                FilterChip(
-                                    selected = isSelected,
-                                    onClick = {
-                                        selectedBook = book
-                                        if (selectedChapter > book.chaptersCount) {
-                                            selectedChapter = 1
-                                        }
-                                    },
-                                    label = {
-                                        Text("${book.name} (${book.chaptersCount})", fontSize = 12.sp)
-                                    },
-                                    leadingIcon = if (isSelected) {
-                                        { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(14.dp)) }
-                                    } else null,
-                                    modifier = Modifier.testTag("book_chip_${book.name}")
-                                )
-                            }
-                        }
-
-                        // Selector de Capítulo y Versículo
                         Card(
-                            shape = RoundedCornerShape(14.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                            ),
+                            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
                         ) {
                             Column(
-                                modifier = Modifier.padding(12.dp),
+                                modifier = Modifier.padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Text(
-                                    text = "Libro: ${selectedBook.name} (${selectedBook.testament})",
-                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    // Selector de Capítulo
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
-                                            text = "Capítulo (1..${selectedBook.chaptersCount}):",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            text = "PASO 1: SELECCIONAR REFERENCIA",
+                                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                            color = MaterialTheme.colorScheme.primary
                                         )
-                                        OutlinedTextField(
-                                            value = selectedChapter.toString(),
-                                            onValueChange = { input ->
-                                                val num = input.filter { it.isDigit() }.toIntOrNull()
-                                                if (num != null && num in 1..selectedBook.chaptersCount) {
-                                                    selectedChapter = num
-                                                } else if (input.isEmpty()) {
-                                                    selectedChapter = 1
-                                                }
-                                            },
-                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                            singleLine = true,
-                                            shape = RoundedCornerShape(10.dp),
-                                            modifier = Modifier.fillMaxWidth().testTag("input_chapter_number")
+                                        Text(
+                                            text = "${selectedBook.name} $selectedChapter:$verseInput",
+                                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = "${selectedBook.testament} • ${selectedBook.category} • ${selectedVersion.code}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
 
-                                    // Selector de Versículo
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = "Versículo(s):",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        OutlinedTextField(
-                                            value = verseInput,
-                                            onValueChange = { verseInput = it },
-                                            placeholder = { Text("ej. 1 ó 16-17") },
-                                            singleLine = true,
-                                            shape = RoundedCornerShape(10.dp),
-                                            modifier = Modifier.fillMaxWidth().testTag("input_verse_number")
-                                        )
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(44.dp)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                Icons.Filled.MenuBook,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onPrimary,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
                                     }
                                 }
 
-                                // Quick chapter buttons row (first 10 or current)
-                                Text(
-                                    text = "Capítulos rápidos:",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Row(
-                                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                Button(
+                                    onClick = { showReferencePickerWindow = true },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .testTag("btn_open_reference_picker"),
+                                    shape = RoundedCornerShape(10.dp)
                                 ) {
-                                    for (c in 1..minOf(selectedBook.chaptersCount, 25)) {
-                                        FilterChip(
-                                            selected = selectedChapter == c,
-                                            onClick = { selectedChapter = c },
-                                            label = { Text("Cap. $c", fontSize = 11.sp) }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        // Vista previa de la referencia
-                        val generatedRef = "${selectedBook.name} $selectedChapter:$verseInput".trim()
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column {
-                                    Text(
-                                        text = "Referencia a registrar:",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                    Text(
-                                        text = "$generatedRef (${selectedVersion.code})",
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
+                                    Icon(Icons.Filled.AutoStories, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Elegir Libro, Capítulo y Versículo")
                                 }
                             }
                         }
@@ -1147,6 +1032,274 @@ fun AddVerseDialog(
                         Icon(Icons.Filled.Save, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Guardar Versículo")
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+private enum class PickerStep {
+    BOOK,
+    CHAPTER,
+    VERSE
+}
+
+@Composable
+fun BibleReferenceWindowPicker(
+    initialBook: BibleBook,
+    initialChapter: Int,
+    initialVerse: Int,
+    onReferenceSelected: (BibleBook, Int, Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var step by remember { mutableStateOf(PickerStep.BOOK) }
+    var pickedBook by remember { mutableStateOf(initialBook) }
+    var pickedChapter by remember { mutableIntStateOf(initialChapter) }
+    var testamentFilter by remember { mutableIntStateOf(if (initialBook.order > 39) 2 else 0) }
+    var searchQuery by remember { mutableStateOf("") }
+
+    val filteredBooks = remember(testamentFilter, searchQuery) {
+        val list = when (testamentFilter) {
+            1 -> BibleCatalog.books.filter { it.order <= 39 }
+            2 -> BibleCatalog.books.filter { it.order > 39 }
+            else -> BibleCatalog.books
+        }
+        if (searchQuery.isBlank()) list
+        else list.filter { it.name.contains(searchQuery, ignoreCase = true) || it.abbreviation.contains(searchQuery, ignoreCase = true) }
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth(0.95f)
+                .fillMaxHeight(0.92f)
+                .clip(RoundedCornerShape(24.dp)),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(18.dp)
+            ) {
+                // Header with navigation and title
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (step != PickerStep.BOOK) {
+                        IconButton(onClick = {
+                            step = if (step == PickerStep.VERSE) PickerStep.CHAPTER else PickerStep.BOOK
+                        }) {
+                            Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.width(48.dp))
+                    }
+
+                    Text(
+                        text = when (step) {
+                            PickerStep.BOOK -> "1. Selecciona Libro"
+                            PickerStep.CHAPTER -> "${pickedBook.name} — 2. Capítulo"
+                            PickerStep.VERSE -> "${pickedBook.name} $pickedChapter — 3. Versículo"
+                        },
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Filled.Close, contentDescription = "Cerrar")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+                Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                Spacer(modifier = Modifier.height(10.dp))
+
+                when (step) {
+                    PickerStep.BOOK -> {
+                        // 3 Filter Tabs
+                        TabRow(
+                            selectedTabIndex = testamentFilter,
+                            containerColor = Color.Transparent,
+                            contentColor = MaterialTheme.colorScheme.primary
+                        ) {
+                            Tab(
+                                selected = testamentFilter == 0,
+                                onClick = { testamentFilter = 0 },
+                                text = { Text("Todo (66)") }
+                            )
+                            Tab(
+                                selected = testamentFilter == 1,
+                                onClick = { testamentFilter = 1 },
+                                text = { Text("A.T. (39)") }
+                            )
+                            Tab(
+                                selected = testamentFilter == 2,
+                                onClick = { testamentFilter = 2 },
+                                text = { Text("N.T. (27)") }
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            placeholder = { Text("Buscar libro...") },
+                            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        val initialIdx = remember(filteredBooks) {
+                            val idx = filteredBooks.indexOfFirst { it.name == initialBook.name }
+                            (idx - 1).coerceAtLeast(0)
+                        }
+                        val listState = rememberLazyListState(initialFirstVisibleItemIndex = initialIdx)
+
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(filteredBooks, key = { it.order }) { book ->
+                                val isSelected = book.name == pickedBook.name
+                                Surface(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .clickable {
+                                            pickedBook = book
+                                            step = PickerStep.CHAPTER
+                                        }
+                                        .then(
+                                            if (isSelected) Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+                                            else Modifier
+                                        ),
+                                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Surface(
+                                                shape = CircleShape,
+                                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
+                                                modifier = Modifier.size(32.dp)
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Text(
+                                                        text = "${book.order}",
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 12.sp,
+                                                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                                    )
+                                                }
+                                            }
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Column {
+                                                Text(
+                                                    text = book.name,
+                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                                                )
+                                                Text(
+                                                    text = "${book.category} • ${book.chaptersCount} capítulos",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+                                        Text("›", fontSize = 22.sp, color = MaterialTheme.colorScheme.outline)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    PickerStep.CHAPTER -> {
+                        LazyVerticalGrid(
+                            columns = GridCells.Adaptive(minSize = 64.dp),
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(vertical = 8.dp)
+                        ) {
+                            items((1..pickedBook.chaptersCount).toList()) { ch ->
+                                val isSelected = ch == pickedChapter
+                                Surface(
+                                    modifier = Modifier
+                                        .aspectRatio(1f)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .clickable {
+                                            pickedChapter = ch
+                                            step = PickerStep.VERSE
+                                        },
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(
+                                            text = "$ch",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 16.sp,
+                                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    PickerStep.VERSE -> {
+                        val maxVerses = 50
+                        LazyVerticalGrid(
+                            columns = GridCells.Adaptive(minSize = 60.dp),
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(vertical = 8.dp)
+                        ) {
+                            items((1..maxVerses).toList()) { v ->
+                                val isSelected = v == initialVerse
+                                Surface(
+                                    modifier = Modifier
+                                        .aspectRatio(1f)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .clickable {
+                                            onReferenceSelected(pickedBook, pickedChapter, v)
+                                        },
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(
+                                            text = "$v",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp,
+                                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

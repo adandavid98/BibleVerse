@@ -31,7 +31,9 @@ import com.example.data.bible.BibleVersion
 fun BibleVersionSelectorDialog(
     currentVersion: String,
     onSelectVersion: (String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    downloadStates: Map<String, com.example.data.bible.VersionDownloadState> = emptyMap(),
+    onDownloadVersion: ((String) -> Unit)? = null
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -79,7 +81,7 @@ fun BibleVersionSelectorDialog(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "Selecciona una traducción",
+                                text = "Selecciona o descarga traducciones offline",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -104,9 +106,12 @@ fun BibleVersionSelectorDialog(
                 ) {
                     items(BibleCatalog.versions) { version ->
                         val isSelected = currentVersion.equals(version.code, ignoreCase = true)
+                        val vState = downloadStates[version.code] ?: com.example.data.bible.VersionDownloadState.Idle
                         VersionSelectionCard(
                             version = version,
                             isSelected = isSelected,
+                            downloadState = vState,
+                            onDownload = if (onDownloadVersion != null) { { onDownloadVersion(version.code) } } else null,
                             onClick = {
                                 onSelectVersion(version.code)
                                 onDismiss()
@@ -123,6 +128,8 @@ fun BibleVersionSelectorDialog(
 private fun VersionSelectionCard(
     version: BibleVersion,
     isSelected: Boolean,
+    downloadState: com.example.data.bible.VersionDownloadState = com.example.data.bible.VersionDownloadState.Idle,
+    onDownload: (() -> Unit)? = null,
     onClick: () -> Unit
 ) {
     val borderColor = if (isSelected) {
@@ -193,6 +200,57 @@ private fun VersionSelectionCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 16.sp
                 )
+
+                // Offline download / status badge
+                val isRvr = version.code.equals("RVR1960", ignoreCase = true)
+                val isDownloaded = isRvr || downloadState is com.example.data.bible.VersionDownloadState.Downloaded
+                val isDownloading = downloadState is com.example.data.bible.VersionDownloadState.Downloading
+
+                Row(
+                    modifier = Modifier.padding(top = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (isDownloaded) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = Color(0xFF10B981).copy(alpha = 0.15f)
+                        ) {
+                            Text(
+                                text = if (isRvr) "✓ Offline (Incluida)" else "✓ Offline Completa",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF10B981),
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    } else if (isDownloading) {
+                        val pct = (downloadState as com.example.data.bible.VersionDownloadState.Downloading).progressPercent
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(
+                                progress = { pct / 100f },
+                                modifier = Modifier.size(14.dp),
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Descargando $pct%...",
+                                fontSize = 11.sp,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    } else if (onDownload != null) {
+                        OutlinedButton(
+                            onClick = onDownload,
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier.height(28.dp)
+                        ) {
+                            Text("Descargar Offline", fontSize = 11.sp)
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.width(10.dp))

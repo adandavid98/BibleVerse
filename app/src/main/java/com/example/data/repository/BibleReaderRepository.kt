@@ -36,6 +36,9 @@ class BibleReaderRepository(
             dao.insertBooks(bookEntities)
         }
 
+        // Purge any synthetic placeholder verses from earlier versions
+        dao.purgeSyntheticVerses()
+
         // Preload initial curated verses and specialized chapters
         seedInitialVerses()
     }
@@ -91,7 +94,12 @@ class BibleReaderRepository(
 
     suspend fun ensureChapterVerses(bookId: Int, chapter: Int, version: String = "RVR1960") = withContext(Dispatchers.IO) {
         val existing = dao.getVersesSync(bookId, chapter, version)
-        if (existing.isEmpty()) {
+        val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
+        if (hasSynthetic) {
+            dao.deleteVersesForChapter(bookId, chapter, version)
+        }
+
+        if (existing.isEmpty() || hasSynthetic) {
             // 1. First check if specialized offline chapter is defined
             val specialized = getSpecializedChapter(bookId, chapter, version)
             if (specialized.isNotEmpty()) {

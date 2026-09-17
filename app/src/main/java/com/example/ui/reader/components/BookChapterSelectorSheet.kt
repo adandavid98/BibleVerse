@@ -164,13 +164,30 @@ fun BookChapterSelectorSheet(
 
                             Spacer(modifier = Modifier.height(10.dp))
 
-                            // Book list in order Genesis to Revelation
+                            // Book list in order Genesis to Revelation with scroll memory to current book
+                            val targetBookId = chosenBook?.id ?: currentBook?.id ?: 1
+                            val initialBookIndex = remember(filteredBooks) {
+                                val idx = filteredBooks.indexOfFirst { it.id == targetBookId }
+                                (idx - 1).coerceAtLeast(0)
+                            }
+                            val bookListState = androidx.compose.foundation.lazy.rememberLazyListState(initialFirstVisibleItemIndex = initialBookIndex)
+
+                            LaunchedEffect(currentStep, targetBookId) {
+                                if (currentStep == SelectorStep.BOOK) {
+                                    val idx = filteredBooks.indexOfFirst { it.id == targetBookId }
+                                    if (idx >= 0) {
+                                        bookListState.scrollToItem((idx - 1).coerceAtLeast(0))
+                                    }
+                                }
+                            }
+
                             LazyColumn(
+                                state = bookListState,
                                 modifier = Modifier.fillMaxSize(),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 items(filteredBooks, key = { it.id }) { book ->
-                                    val isCurrent = book.id == currentBook?.id
+                                    val isCurrent = book.id == targetBookId
                                     Surface(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -178,7 +195,11 @@ fun BookChapterSelectorSheet(
                                             .clickable {
                                                 chosenBook = book
                                                 currentStep = SelectorStep.CHAPTER
-                                            },
+                                            }
+                                            .then(
+                                                if (isCurrent) Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+                                                else Modifier
+                                            ),
                                         color = if (isCurrent) MaterialTheme.colorScheme.primaryContainer
                                         else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
                                         shape = RoundedCornerShape(12.dp)

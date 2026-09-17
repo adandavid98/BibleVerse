@@ -482,12 +482,18 @@ fun BibleReaderScreen(
             onDismiss = { viewModel.closeShareDialog() }
         )
     }
+    val offlineStates by com.example.data.bible.OfflineBibleDownloadManager.downloadStates.collectAsState()
+
     // Dialog: Direct Bible Version Selector Modal
     if (showVersionSelectorModal) {
         BibleVersionSelectorDialog(
             currentVersion = uiState.preferences.bibleVersion,
             onSelectVersion = { version ->
                 viewModel.updateBibleVersion(version)
+            },
+            downloadStates = offlineStates,
+            onDownloadVersion = { version ->
+                viewModel.downloadBibleVersion(version)
             },
             onDismiss = { showVersionSelectorModal = false }
         )
