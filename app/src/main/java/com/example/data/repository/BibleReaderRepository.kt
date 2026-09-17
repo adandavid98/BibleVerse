@@ -155,7 +155,6 @@ class BibleReaderRepository(
             // 5. Last resort — dynamic placeholder so user is never blocked
             val synthesized = generateChapterVerses(bookId, chapter, version)
             dao.insertVerses(synthesized)
-        }
     }
 
     fun getHighlights(bookId: Int, chapter: Int): Flow<List<VerseHighlightEntity>> {
