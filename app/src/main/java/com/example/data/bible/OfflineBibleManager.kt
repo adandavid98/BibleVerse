@@ -101,4 +101,25 @@ object OfflineBibleManager {
         }
         results
     }
+
+    /**
+     * Returns only the count of verses for a given book/chapter without loading text.
+     * Used to detect stale partial Room cache vs the complete SQLite.
+     */
+    suspend fun getVerseCount(context: Context, bookId: Int, chapter: Int): Int = withContext(Dispatchers.IO) {
+        ensureReady(context)
+        val db = database ?: return@withContext 0
+        try {
+            val cursor = db.rawQuery(
+                "SELECT COUNT(*) FROM bible_verses WHERE book = ? AND chapter = ?",
+                arrayOf(bookId.toString(), chapter.toString())
+            )
+            cursor.use { c ->
+                if (c.moveToFirst()) c.getInt(0) else 0
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            0
+        }
+    }
 }

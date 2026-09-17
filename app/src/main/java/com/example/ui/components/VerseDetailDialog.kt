@@ -90,7 +90,8 @@ fun VerseDetailDialog(
     onShare: () -> Unit,
     onExportPdf: () -> Unit,
     onDelete: (() -> Unit)? = null,
-    onEnrichContextAi: (() -> Unit)? = null
+    onEnrichContextAi: (() -> Unit)? = null,
+    isEnrichingAi: Boolean = false
 ) {
     val coroutineScope = rememberCoroutineScope()
     var notesText by remember(verse.id) { mutableStateOf(verse.notes) }
@@ -682,26 +683,48 @@ fun VerseDetailDialog(
                                         fontWeight = FontWeight.Bold,
                                         letterSpacing = 1.sp
                                     ),
-                                    color = MaterialTheme.colorScheme.secondary
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.weight(1f)
                                 )
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     if (onEnrichContextAi != null) {
-                                        TextButton(
-                                            onClick = { onEnrichContextAi() },
-                                            modifier = Modifier.testTag("btn_enrich_verse_ai")
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Filled.AutoAwesome,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(15.dp),
-                                                tint = MaterialTheme.colorScheme.primary
-                                            )
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text(
-                                                text = "Profundizar IA",
-                                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                                color = MaterialTheme.colorScheme.primary
-                                            )
+                                        if (isEnrichingAi) {
+                                            // Show loading indicator while AI generates context
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                            ) {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(13.dp),
+                                                    strokeWidth = 2.dp,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text(
+                                                    text = "Analizando...",
+                                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+                                        } else {
+                                            TextButton(
+                                                onClick = { onEnrichContextAi() },
+                                                modifier = Modifier.testTag("btn_enrich_verse_ai"),
+                                                enabled = true
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.AutoAwesome,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(15.dp),
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                                Spacer(modifier = Modifier.width(4.dp))
+                                                Text(
+                                                    text = "Profundizar IA",
+                                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
                                         }
                                     }
                                     TextButton(

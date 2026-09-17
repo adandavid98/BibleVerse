@@ -26,13 +26,14 @@ enum class ContextSource {
 object GeminiVerseContextService {
 
     private const val TAG = "GeminiContextService"
-    // Free tier friendly cascade: primary fast model -> lightweight flash lite -> flash latest -> local engine
+    // Correct Gemini model names — ordered by capability (fastest first for free tier)
     private val FREE_TIER_MODELS = listOf(
-        "gemini-3.5-flash",
-        "gemini-3.1-flash-lite-preview",
-        "gemini-flash-latest"
+        "gemini-2.0-flash",
+        "gemini-1.5-flash",
+        "gemini-1.5-flash-8b"
     )
     private const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
+
 
     private val client: OkHttpClient by lazy {
         OkHttpClient.Builder()

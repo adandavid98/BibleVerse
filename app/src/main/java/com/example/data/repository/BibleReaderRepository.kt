@@ -39,7 +39,7 @@ class BibleReaderRepository(
         // Purge any synthetic placeholder verses from earlier versions
         dao.purgeSyntheticVerses()
 
-        // Preload initial curated verses and specialized chapters
+        // Preload individual curated verses only — full chapters come from SQLite in ensureChapterVerses()
         seedInitialVerses()
     }
 
@@ -68,16 +68,8 @@ class BibleReaderRepository(
         if (initialEntities.isNotEmpty()) {
             dao.insertVerses(initialEntities)
         }
-
-        // Seed specialized chapters like Micah 6, John 3, Matthew 5
-        val micah6 = getSpecializedChapter(33, 6, "RVR1960")
-        if (micah6.isNotEmpty()) dao.insertVerses(micah6)
-
-        val matthew5 = getSpecializedChapter(40, 5, "RVR1960")
-        if (matthew5.isNotEmpty()) dao.insertVerses(matthew5)
-
-        val john3 = getSpecializedChapter(43, 3, "RVR1960")
-        if (john3.isNotEmpty()) dao.insertVerses(john3)
+        // NOTE: Full chapters (Matthew 5, John 3, etc.) are intentionally NOT seeded here.
+        // They are always loaded completely from the offline SQLite DB (31,102 verses) in ensureChapterVerses().
     }
 
     fun getAllBooks(): Flow<List<BibleBookEntity>> {
@@ -93,28 +85,32 @@ class BibleReaderRepository(
     }
 
     suspend fun ensureChapterVerses(bookId: Int, chapter: Int, version: String = "RVR1960") = withContext(Dispatchers.IO) {
+        val isRvr1960 = version.equals("RVR1960", ignoreCase = true) || version.equals("RV1960", ignoreCase = true)
+
         val existing = dao.getVersesSync(bookId, chapter, version)
         val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
-        if (hasSynthetic) {
+
+        // Detect stale partial Room cache (e.g. old hardcoded Matthew 5 had 16 verses, SQLite has 48)
+        val hasIncompleteCache = if (isRvr1960 && existing.isNotEmpty() && !hasSynthetic && context != null) {
+            val sqliteCount = OfflineBibleManager.getVerseCount(context, bookId, chapter)
+            sqliteCount > 0 && existing.size < sqliteCount
+        } else false
+
+        if (hasSynthetic || hasIncompleteCache) {
             dao.deleteVersesForChapter(bookId, chapter, version)
         }
 
-        if (existing.isEmpty() || hasSynthetic) {
-            // 1. First check if specialized offline chapter is defined
-            val specialized = getSpecializedChapter(bookId, chapter, version)
-            if (specialized.isNotEmpty()) {
-                dao.insertVerses(specialized)
-                return@withContext
-            }
+        val needsLoad = existing.isEmpty() || hasSynthetic || hasIncompleteCache
 
-            val isRvr1960 = version.equals("RVR1960", ignoreCase = true) || version.equals("RV1960", ignoreCase = true)
-
-            // 2. If RVR1960 (primary translation), query the complete pre-packaged offline SQLite database first!
+        if (needsLoad) {
+            // 1. For RVR1960 (primary translation), ALWAYS use the complete pre-packaged offline SQLite.
+            //    Guarantees all verses are loaded (Matthew 5 = 48 verses, John 3 = 36 verses, etc.)
             if (isRvr1960 && context != null) {
                 val offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter)
                 if (offlineVerses.isNotEmpty()) {
                     val entities = offlineVerses.map { dto ->
-                        val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber) || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
+                        val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber)
+                            || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
                         val heading = detectSectionHeading(bookId, chapter, dto.verseNumber)
                         BibleReaderVerseEntity(
                             bookId = bookId,
@@ -131,11 +127,21 @@ class BibleReaderRepository(
                 }
             }
 
-            // 3. For other versions (NVI, NBLA, etc.), attempt online fetch to populate offline Room cache
+            // 2. For other versions already fully downloaded in Room — Room Flow serves them directly
+            if (!isRvr1960) {
+                val cachedCount = dao.getVerseCountForVersion(version)
+                if (cachedCount > 5000) {
+                    // Version is fully offline in Room — getVerses() Flow will emit all verses for this chapter
+                    return@withContext
+                }
+            }
+
+            // 3. For other versions not yet downloaded: fetch chapter via Bolls API
             val networkVerses = BollsBibleApiService.fetchChapter(version, bookId, chapter)
             if (!networkVerses.isNullOrEmpty()) {
                 val entities = networkVerses.map { dto ->
-                    val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber) || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
+                    val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber)
+                        || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
                     val heading = detectSectionHeading(bookId, chapter, dto.verseNumber)
                     BibleReaderVerseEntity(
                         bookId = bookId,
@@ -151,12 +157,13 @@ class BibleReaderRepository(
                 return@withContext
             }
 
-            // 4. If network failed (offline), check offline SQLite database even for other translations
+            // 4. Network failed (offline) — fall back to RVR1960 SQLite even for other translations
             if (context != null) {
                 val fallbackOffline = OfflineBibleManager.getVerses(context, bookId, chapter)
                 if (fallbackOffline.isNotEmpty()) {
                     val entities = fallbackOffline.map { dto ->
-                        val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber) || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
+                        val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber)
+                            || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
                         val heading = detectSectionHeading(bookId, chapter, dto.verseNumber)
                         BibleReaderVerseEntity(
                             bookId = bookId,
@@ -173,7 +180,7 @@ class BibleReaderRepository(
                 }
             }
 
-            // 5. Dynamic fallback so user is never blocked
+            // 5. Last resort — dynamic placeholder so user is never blocked
             val synthesized = generateChapterVerses(bookId, chapter, version)
             dao.insertVerses(synthesized)
         }

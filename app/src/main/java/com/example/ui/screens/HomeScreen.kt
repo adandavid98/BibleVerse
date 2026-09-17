@@ -157,6 +157,7 @@ fun HomeScreen(
     val showBibleChatDialog by viewModel.showBibleChatDialog.collectAsStateWithLifecycle()
     val chatMessages by viewModel.chatMessages.collectAsStateWithLifecycle()
     val isChatLoading by viewModel.isChatLoading.collectAsStateWithLifecycle()
+    val isGeneratingContext by viewModel.isGeneratingContext.collectAsStateWithLifecycle()
 
     // Notify user of sync messages
     LaunchedEffect(uiState.syncStatusMessage) {
@@ -416,7 +417,8 @@ fun HomeScreen(
             } else null,
             onEnrichContextAi = {
                 viewModel.enrichVerseContextWithAi(verse.id)
-            }
+            },
+            isEnrichingAi = isGeneratingContext
         )
     }
 
