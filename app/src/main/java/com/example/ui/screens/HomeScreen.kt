@@ -1173,7 +1173,6 @@ fun SettingsTab(
         }
     }
 }
-}
 
 @Composable
 fun ThemeOptionCard(
