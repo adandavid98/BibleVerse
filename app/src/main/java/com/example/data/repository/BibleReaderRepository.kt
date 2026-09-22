@@ -37,9 +37,6 @@ class BibleReaderRepository(
 
         // Purge any synthetic placeholder verses from earlier versions
         dao.purgeSyntheticVerses()
-
-        // Clean up stale or polluted RVR1960 cache from earlier versions so every chapter is 100% complete
-        dao.deleteVersesForVersion("RVR1960")
     }
 
     fun getAllBooks(): Flow<List<BibleBookEntity>> {

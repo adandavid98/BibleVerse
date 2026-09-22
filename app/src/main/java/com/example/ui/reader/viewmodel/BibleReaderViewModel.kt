@@ -47,10 +47,8 @@ class BibleReaderViewModel(
     init {
         viewModelScope.launch {
             getBibleBooksUseCase.initialize()
-        }
 
-        // Cleanly coordinate books and preferences without race conditions
-        viewModelScope.launch {
+            // Cleanly coordinate books and preferences without race conditions
             combine(getBibleBooksUseCase(), preferencesRepository.readerPreferences) { books, prefs ->
                 Pair(books, prefs)
             }.collectLatest { (books, prefs) ->
@@ -80,6 +78,13 @@ class BibleReaderViewModel(
                 }
             }
         }
+    }
+
+    fun reloadCurrentChapter() {
+        val currentBook = _uiState.value.currentBook ?: return
+        val currentChapter = _uiState.value.currentChapter
+        val version = _uiState.value.preferences.bibleVersion
+        loadChapter(currentBook, currentChapter, version)
     }
 
     fun selectBookAndChapter(book: BibleBookEntity, chapter: Int) {

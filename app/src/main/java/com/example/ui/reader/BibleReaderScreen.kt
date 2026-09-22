@@ -57,6 +57,13 @@ fun BibleReaderScreen(
     val listState = rememberLazyListState()
     var showVersionSelectorModal by remember { mutableStateOf(false) }
 
+    // Ensure active chapter is loaded if screen appears empty
+    LaunchedEffect(uiState.currentBook, uiState.currentChapter, uiState.verses.size) {
+        if (uiState.verses.isEmpty() && !uiState.isLoading && uiState.currentBook != null) {
+            viewModel.reloadCurrentChapter()
+        }
+    }
+
     // Scroll to specific target verse when selected from modal or navigation
     LaunchedEffect(uiState.targetScrollVerse, uiState.verses.size) {
         val target = uiState.targetScrollVerse
@@ -225,12 +232,31 @@ fun BibleReaderScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (uiState.isLoading && uiState.verses.isEmpty()) {
+            if (uiState.verses.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = themeAccent)
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(color = themeAccent)
+                    } else {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Text(
+                                text = "Cargando lectura...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = themeSecondary
+                            )
+                            Button(
+                                onClick = { viewModel.reloadCurrentChapter() },
+                                colors = ButtonDefaults.buttonColors(containerColor = themeAccent)
+                            ) {
+                                Text("Recargar capítulo")
+                            }
+                        }
+                    }
                 }
             } else {
                 LazyColumn(

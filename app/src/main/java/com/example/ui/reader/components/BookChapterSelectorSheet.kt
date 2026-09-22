@@ -1,5 +1,6 @@
 package com.example.ui.reader.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,6 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.data.model.BibleBookEntity
 
 enum class SelectorStep {
@@ -66,57 +69,73 @@ fun BookChapterSelectorSheet(
         }
     }
 
-    ModalBottomSheet(
+    Dialog(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
+        )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.88f)
-                .padding(horizontal = 20.dp, vertical = 8.dp)
-        ) {
-            // Header with Back Button and Title
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (currentStep != SelectorStep.BOOK) {
-                    IconButton(
-                        onClick = {
-                            currentStep = when (currentStep) {
-                                SelectorStep.VERSE -> SelectorStep.CHAPTER
-                                SelectorStep.CHAPTER -> SelectorStep.BOOK
-                                else -> SelectorStep.BOOK
-                            }
-                        }
-                    ) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
-                    }
-                } else {
-                    Spacer(modifier = Modifier.width(48.dp))
-                }
-
-                Text(
-                    text = when (currentStep) {
-                        SelectorStep.BOOK -> "Seleccionar Libro"
-                        SelectorStep.CHAPTER -> "${chosenBook?.name} — Capítulo"
-                        SelectorStep.VERSE -> "${chosenBook?.name} $chosenChapter — Versículo"
-                    },
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, contentDescription = "Cerrar")
-                }
+        BackHandler {
+            when (currentStep) {
+                SelectorStep.VERSE -> currentStep = SelectorStep.CHAPTER
+                SelectorStep.CHAPTER -> currentStep = SelectorStep.BOOK
+                SelectorStep.BOOK -> onDismiss()
             }
+        }
 
-            Spacer(modifier = Modifier.height(10.dp))
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Scaffold(
+                contentWindowInsets = WindowInsets.safeDrawing,
+                topBar = {
+                    TopAppBar(
+                        navigationIcon = {
+                            if (currentStep != SelectorStep.BOOK) {
+                                IconButton(
+                                    onClick = {
+                                        currentStep = when (currentStep) {
+                                            SelectorStep.VERSE -> SelectorStep.CHAPTER
+                                            SelectorStep.CHAPTER -> SelectorStep.BOOK
+                                            else -> SelectorStep.BOOK
+                                        }
+                                    }
+                                ) {
+                                    Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                                }
+                            }
+                        },
+                        title = {
+                            Text(
+                                text = when (currentStep) {
+                                    SelectorStep.BOOK -> "Seleccionar Libro"
+                                    SelectorStep.CHAPTER -> "${chosenBook?.name ?: ""} — Capítulos"
+                                    SelectorStep.VERSE -> "${chosenBook?.name ?: ""} $chosenChapter — Versículos"
+                                },
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        },
+                        actions = {
+                            IconButton(onClick = onDismiss) {
+                                Icon(Icons.Default.Close, contentDescription = "Cerrar")
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    )
+                }
+            ) { paddingValues ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                ) {
 
             AnimatedContent(
                 targetState = currentStep,
@@ -355,9 +374,11 @@ fun BookChapterSelectorSheet(
                         }
                     }
                 }
+                }
             }
         }
     }
+}
 }
 
 private fun estimateVerseCount(bookId: Int, chapter: Int): Int {
