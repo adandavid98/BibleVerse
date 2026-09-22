@@ -77,7 +77,7 @@ fun BibleChatDialog(
             modifier = Modifier
                 .fillMaxSize()
                 .imePadding()
-                .padding(horizontal = 12.dp, top = 28.dp, bottom = 32.dp),
+                .padding(start = 12.dp, end = 12.dp, top = 28.dp, bottom = 32.dp),
             contentAlignment = Alignment.Center
         ) {
             Surface(
