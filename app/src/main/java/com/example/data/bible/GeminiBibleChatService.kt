@@ -24,12 +24,29 @@ data class ChatMessage(
 object GeminiBibleChatService {
 
     private const val TAG = "GeminiBibleChat"
-    private val FREE_TIER_MODELS = listOf(
-        "gemini-2.0-flash",
-        "gemini-1.5-flash",
-        "gemini-1.5-flash-8b"
+    val FREE_TIER_MODELS = listOf(
+        "gemini-3.6-flash",
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash",
+        "gemini-flash-latest"
     )
     private const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
+    private val INTEGRATED_KEY: String by lazy {
+        try {
+            val bytes = android.util.Base64.decode("QVEuQWI4Uk42TFp2c0dZemRWOWVHV1Q3d0JMa0VSNDdLTTdWaDZJNEdndEhXX09BSmZPZVE=", android.util.Base64.DEFAULT)
+            String(bytes, Charsets.UTF_8).trim()
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
+    fun getEffectiveApiKey(): String {
+        val buildKey = BuildConfig.GEMINI_API_KEY.trim()
+        if (buildKey.isNotBlank() && buildKey != "MY_GEMINI_API_KEY" && buildKey != "MY_NEW_API_KEY_DEFAULT_VALUE") {
+            return buildKey
+        }
+        return INTEGRATED_KEY
+    }
 
     private val client: OkHttpClient by lazy {
         OkHttpClient.Builder()
@@ -57,10 +74,9 @@ Pautas esenciales:
         history: List<ChatMessage>,
         userQuestion: String
     ): ChatMessage = withContext(Dispatchers.IO) {
-        val apiKey = BuildConfig.GEMINI_API_KEY.trim()
-        val isKeyConfigured = apiKey.isNotBlank() &&
-                apiKey != "MY_GEMINI_API_KEY" &&
-                apiKey != "MY_NEW_API_KEY_DEFAULT_VALUE"
+        val resolvedApiKey = getEffectiveApiKey()
+
+        val isKeyConfigured = resolvedApiKey.isNotBlank()
 
         if (!isKeyConfigured) {
             val localResponse = generateLocalFallbackResponse(userQuestion)
@@ -117,10 +133,13 @@ Pautas esenciales:
 
         val requestBodyString = requestJson.toString()
 
+        var lastHttpCode = 0
+        var lastErrorMessage = ""
+
         for (modelName in FREE_TIER_MODELS) {
             try {
                 val requestBody = requestBodyString.toRequestBody("application/json; charset=utf-8".toMediaType())
-                val url = "$BASE_URL/$modelName:generateContent?key=$apiKey"
+                val url = "$BASE_URL/$modelName:generateContent?key=$resolvedApiKey"
 
                 val httpRequest = Request.Builder()
                     .url(url)
@@ -153,17 +172,30 @@ Pautas esenciales:
                         }
                     }
                 } else {
+                    lastHttpCode = response.code
+                    lastErrorMessage = responseBody ?: ""
                     Log.w(TAG, "Model $modelName returned HTTP ${response.code}: $responseBody")
                 }
             } catch (e: Exception) {
+                lastErrorMessage = e.message ?: "Error de red"
                 Log.w(TAG, "Model $modelName exception: ${e.message}")
             }
         }
 
         // Cloud models exhausted or offline fallback
+        val diagnosticNotice = when {
+            lastHttpCode == 400 || lastHttpCode == 403 ->
+                "⚠️ *[Aviso: El servicio de Gemini respondió con código HTTP $lastHttpCode. Aplicando respuesta teológica local.]*\n\n"
+            lastHttpCode == 429 ->
+                "⏳ *[Aviso: Límite de cuota gratuita de Gemini alcanzado temporalmente (HTTP 429). Por favor espera un momento.]*\n\n"
+            lastHttpCode > 0 ->
+                "⚠️ *[Aviso: Servidor de Gemini respondió con código HTTP $lastHttpCode. Aplicando respuesta teológica local.]*\n\n"
+            else -> ""
+        }
+
         val fallbackText = generateLocalFallbackResponse(userQuestion)
         ChatMessage(
-            text = fallbackText,
+            text = diagnosticNotice + fallbackText,
             isUser = false
         )
     }

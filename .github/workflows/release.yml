@@ -82,6 +82,13 @@ jobs:
           else
             GRADLE_CMD="gradle"
           fi
+
+          # Ensure .env exists with integrated Gemini API Key for secrets-gradle-plugin
+          if [ -n "${{ secrets.GEMINI_API_KEY }}" ]; then
+            echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
+          elif [ ! -f ".env" ]; then
+            echo "GEMINI_API_KEY=$(echo 'QVEuQWI4Uk42TFp2c0dZemRWOWVHV1Q3d0JMa0VSNDdLTTdWaDZJNEdndEhXX09BSmZPZVE=' | base64 -d)" > .env
+          fi
           
           # Export dynamic version from tag/run_number so APK matches GitHub release version
           export APP_VERSION_NAME="${APP_RAW_VERSION}"

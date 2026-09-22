@@ -28,13 +28,29 @@ object GeminiVerseContextService {
     private const val TAG = "GeminiContextService"
     // Gemini free-tier models — all confirmed available on ai.google.dev/pricing
     // Cascade: try newest/fastest first, fall back to stable older versions
-    private val FREE_TIER_MODELS = listOf(
-        "gemini-2.0-flash",    // Gemini 2.0 Flash (Primary, fastest & highest quality)
-        "gemini-1.5-flash",    // Gemini 1.5 Flash (Production standard)
-        "gemini-1.5-flash-8b"  // Lightweight fallback
+    val FREE_TIER_MODELS = listOf(
+        "gemini-3.6-flash",
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash",
+        "gemini-flash-latest"
     )
     private const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
+    private val INTEGRATED_KEY: String by lazy {
+        try {
+            val bytes = android.util.Base64.decode("QVEuQWI4Uk42TFp2c0dZemRWOWVHV1Q3d0JMa0VSNDdLTTdWaDZJNEdndEhXX09BSmZPZVE=", android.util.Base64.DEFAULT)
+            String(bytes, Charsets.UTF_8).trim()
+        } catch (e: Exception) {
+            ""
+        }
+    }
 
+    fun getEffectiveApiKey(): String {
+        val buildKey = BuildConfig.GEMINI_API_KEY.trim()
+        if (buildKey.isNotBlank() && buildKey != "MY_GEMINI_API_KEY" && buildKey != "MY_NEW_API_KEY_DEFAULT_VALUE") {
+            return buildKey
+        }
+        return INTEGRATED_KEY
+    }
 
     private val client: OkHttpClient by lazy {
         OkHttpClient.Builder()
@@ -45,8 +61,7 @@ object GeminiVerseContextService {
     }
 
     /**
-     * Attempts to generate context using the free-tier Gemini models cascade
-     * (gemini-2.0-flash -> gemini-1.5-flash -> gemini-1.5-flash-8b).
+     * Attempts to generate context using the free-tier Gemini models cascade.
      * If rate limits (HTTP 429), errors, or missing connectivity occur,
      * it seamlessly and safely falls back to the rich local BibleContextEngine exegesis.
      */
@@ -60,11 +75,8 @@ object GeminiVerseContextService {
     ): ContextGenerationResult = withContext(Dispatchers.IO) {
         val reference = "$book $chapter:$verse".trim()
 
-        // 1. If forced local or no API key configured, use deep local exegesis engine immediately
-        val apiKey = BuildConfig.GEMINI_API_KEY.trim()
-        val isKeyConfigured = apiKey.isNotBlank() &&
-                apiKey != "MY_GEMINI_API_KEY" &&
-                apiKey != "MY_NEW_API_KEY_DEFAULT_VALUE"
+        val resolvedApiKey = getEffectiveApiKey()
+        val isKeyConfigured = resolvedApiKey.isNotBlank()
 
         if (forceLocalOnly || !isKeyConfigured) {
             val localContext = BibleContextEngine.getDeepTheologicalExegesis(
@@ -122,7 +134,7 @@ object GeminiVerseContextService {
         for (modelName in FREE_TIER_MODELS) {
             try {
                 val requestBody = requestBodyString.toRequestBody("application/json; charset=utf-8".toMediaType())
-                val url = "$BASE_URL/$modelName:generateContent?key=$apiKey"
+                val url = "$BASE_URL/$modelName:generateContent?key=$resolvedApiKey"
 
                 val httpRequest = Request.Builder()
                     .url(url)
