@@ -28,19 +28,19 @@ interface BibleReaderDao {
     // === Verses ===
     @Query("""
         SELECT * FROM bible_reader_verses 
-        WHERE bookId = :bookId AND chapter = :chapter AND bibleVersion = :version 
+        WHERE bookId = :bookId AND chapter = :chapter AND bibleVersion = :version COLLATE NOCASE
         ORDER BY verseNumber ASC
     """)
     fun getVerses(bookId: Int, chapter: Int, version: String): Flow<List<BibleReaderVerseEntity>>
 
     @Query("""
         SELECT * FROM bible_reader_verses 
-        WHERE bookId = :bookId AND chapter = :chapter AND bibleVersion = :version 
+        WHERE bookId = :bookId AND chapter = :chapter AND bibleVersion = :version COLLATE NOCASE
         ORDER BY verseNumber ASC
     """)
     suspend fun getVersesSync(bookId: Int, chapter: Int, version: String): List<BibleReaderVerseEntity>
 
-    @Query("SELECT COUNT(*) FROM bible_reader_verses WHERE bookId = :bookId AND chapter = :chapter AND bibleVersion = :version")
+    @Query("SELECT COUNT(*) FROM bible_reader_verses WHERE bookId = :bookId AND chapter = :chapter AND bibleVersion = :version COLLATE NOCASE")
     suspend fun getVerseCountForChapter(bookId: Int, chapter: Int, version: String): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -49,13 +49,13 @@ interface BibleReaderDao {
     @Query("DELETE FROM bible_reader_verses WHERE text LIKE '%Palabra de Dios para edificación%'")
     suspend fun purgeSyntheticVerses(): Int
 
-    @Query("DELETE FROM bible_reader_verses WHERE bookId = :bookId AND chapter = :chapter AND bibleVersion = :version")
+    @Query("DELETE FROM bible_reader_verses WHERE bookId = :bookId AND chapter = :chapter AND bibleVersion = :version COLLATE NOCASE")
     suspend fun deleteVersesForChapter(bookId: Int, chapter: Int, version: String)
 
-    @Query("SELECT COUNT(*) FROM bible_reader_verses WHERE bibleVersion = :version")
+    @Query("SELECT COUNT(*) FROM bible_reader_verses WHERE bibleVersion = :version COLLATE NOCASE")
     suspend fun getVerseCountForVersion(version: String): Int
 
-    @Query("DELETE FROM bible_reader_verses WHERE bibleVersion = :version")
+    @Query("DELETE FROM bible_reader_verses WHERE bibleVersion = :version COLLATE NOCASE")
     suspend fun deleteVersesForVersion(version: String)
 
     // === Highlights ===

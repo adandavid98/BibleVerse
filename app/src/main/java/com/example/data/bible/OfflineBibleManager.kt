@@ -2,6 +2,7 @@ package com.example.data.bible
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -17,63 +18,189 @@ data class OfflineVerseDto(
 
 object OfflineBibleManager {
 
+    private const val TAG = "OfflineBibleManager"
     private const val ASSET_NAME = "bible/bible_rvr1960.db.gz"
     private const val DB_FILE_NAME = "bible_rvr1960.db"
+    private const val TOTAL_CANONICAL_VERSES = 31102
+    private const val MIN_VALID_SIZE_BYTES = 4_000_000L
 
     @Volatile
     private var database: SQLiteDatabase? = null
 
     /**
-     * Ensures the local uncompressed SQLite database is extracted to internal storage.
-     * Extraction only happens once and takes ~150-200ms.
+     * Ensures the local SQLite database is extracted, verified for full canonical integrity
+     * (31,102 verses) and ready for immediate sub-millisecond offline reading.
      */
-    suspend fun ensureReady(context: Context) = withContext(Dispatchers.IO) {
-        if (database != null && database?.isOpen == true) return@withContext
+    suspend fun ensureReady(context: Context): Boolean = withContext(Dispatchers.IO) {
+        if (isDatabaseHealthy()) return@withContext true
 
         synchronized(this) {
-            if (database != null && database?.isOpen == true) return@synchronized
+            if (isDatabaseHealthy()) return@synchronized true
 
             val dbFile = File(context.filesDir, DB_FILE_NAME)
-            // If file does not exist or is corrupted (less than 1MB), re-extract
-            if (!dbFile.exists() || dbFile.length() < 1_000_000) {
-                try {
-                    context.assets.open(ASSET_NAME).use { rawIn ->
-                        GZIPInputStream(rawIn).use { gzIn ->
-                            FileOutputStream(dbFile).use { fileOut ->
-                                val buffer = ByteArray(32 * 1024)
-                                var bytesRead: Int
-                                while (gzIn.read(buffer).also { bytesRead = it } != -1) {
-                                    fileOut.write(buffer, 0, bytesRead)
-                                }
-                                fileOut.flush()
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    return@synchronized
+
+            // 1. If existing file exists but is unhealthy or truncated, remove it
+            if (dbFile.exists() && (!isValidDatabaseFile(dbFile))) {
+                Log.w(TAG, "Existing database file is corrupted or incomplete (${dbFile.length()} bytes). Removing.")
+                closeCurrentDatabase()
+                dbFile.delete()
+            }
+
+            // 2. Extract freshly from assets if needed
+            if (!dbFile.exists()) {
+                val extracted = extractFromAssetsAtomically(context, dbFile)
+                if (!extracted) {
+                    Log.e(TAG, "Failed to extract offline database from assets.")
+                    return@synchronized false
                 }
             }
 
+            // 3. Open database with read-write flags to avoid readonly locking issues
             try {
+                closeCurrentDatabase()
                 database = SQLiteDatabase.openDatabase(
                     dbFile.absolutePath,
                     null,
-                    SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                    SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.NO_LOCALIZED_COLLATORS
                 )
+                if (isDatabaseHealthy()) {
+                    Log.d(TAG, "Offline SQLite Bible successfully opened and verified.")
+                    return@synchronized true
+                } else {
+                    Log.e(TAG, "Database opened but failed health check. Re-extracting.")
+                    closeCurrentDatabase()
+                    dbFile.delete()
+                    val reExtracted = extractFromAssetsAtomically(context, dbFile)
+                    if (reExtracted) {
+                        database = SQLiteDatabase.openDatabase(
+                            dbFile.absolutePath,
+                            null,
+                            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                        )
+                    }
+                    return@synchronized isDatabaseHealthy()
+                }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Exception opening offline database", e)
+                closeCurrentDatabase()
+                dbFile.delete()
+                return@synchronized false
             }
         }
     }
 
+    private fun isDatabaseHealthy(): Boolean {
+        val db = database ?: return false
+        if (!db.isOpen) return false
+        return try {
+            val cursor = db.rawQuery("SELECT COUNT(*) FROM bible_verses", null)
+            val count = cursor.use { c ->
+                if (c.moveToFirst()) c.getInt(0) else 0
+            }
+            count >= TOTAL_CANONICAL_VERSES
+        } catch (e: Exception) {
+            Log.w(TAG, "Health check failed on open database", e)
+            false
+        }
+    }
+
+    private fun isValidDatabaseFile(file: File): Boolean {
+        if (!file.exists() || file.length() < MIN_VALID_SIZE_BYTES) return false
+        var testDb: SQLiteDatabase? = null
+        return try {
+            testDb = SQLiteDatabase.openDatabase(
+                file.absolutePath,
+                null,
+                SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+            )
+            val cursor = testDb.rawQuery("SELECT COUNT(*) FROM bible_verses", null)
+            val count = cursor.use { c ->
+                if (c.moveToFirst()) c.getInt(0) else 0
+            }
+            count >= TOTAL_CANONICAL_VERSES
+        } catch (e: Exception) {
+            false
+        } finally {
+            try { testDb?.close() } catch (_: Exception) {}
+        }
+    }
+
+    private fun extractFromAssetsAtomically(context: Context, targetFile: File): Boolean {
+        val tempFile = File(targetFile.parentFile, "${targetFile.name}.tmp")
+        if (tempFile.exists()) tempFile.delete()
+
+        try {
+            context.assets.open(ASSET_NAME).use { rawIn ->
+                GZIPInputStream(rawIn).use { gzIn ->
+                    FileOutputStream(tempFile).use { fileOut ->
+                        val buffer = ByteArray(64 * 1024)
+                        var bytesRead: Int
+                        while (gzIn.read(buffer).also { bytesRead = it } != -1) {
+                            fileOut.write(buffer, 0, bytesRead)
+                        }
+                        fileOut.flush()
+                    }
+                }
+            }
+
+            if (!isValidDatabaseFile(tempFile)) {
+                Log.e(TAG, "Extracted temp file failed integrity check (${tempFile.length()} bytes)")
+                tempFile.delete()
+                return false
+            }
+
+            if (targetFile.exists()) targetFile.delete()
+            val renamed = tempFile.renameTo(targetFile)
+            if (!renamed) {
+                // Fallback copy if renameTo fails across file boundaries
+                tempFile.copyTo(targetFile, overwrite = true)
+                tempFile.delete()
+            }
+            return true
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception during atomic extraction of offline database", e)
+            if (tempFile.exists()) tempFile.delete()
+            return false
+        }
+    }
+
+    private fun closeCurrentDatabase() {
+        try {
+            database?.close()
+        } catch (_: Exception) {}
+        database = null
+    }
+
     /**
      * Reads all verses for a given book and chapter offline directly from SQLite in ~1ms.
+     * Includes self-healing: if an unexpected corruption happens, it auto-repairs and retries.
      */
     suspend fun getVerses(context: Context, bookId: Int, chapter: Int): List<OfflineVerseDto> = withContext(Dispatchers.IO) {
-        ensureReady(context)
-        val db = database ?: return@withContext emptyList()
+        val isReady = ensureReady(context)
+        if (!isReady) return@withContext emptyList()
 
+        val results = readVersesQuery(bookId, chapter)
+        if (results.isNotEmpty()) {
+            return@withContext results
+        }
+
+        // Self-healing: if 0 results returned for a valid canonical chapter, force re-check
+        Log.w(TAG, "0 verses returned for book $bookId, chapter $chapter. Verifying database integrity.")
+        synchronized(this@OfflineBibleManager) {
+            val dbFile = File(context.filesDir, DB_FILE_NAME)
+            closeCurrentDatabase()
+            dbFile.delete()
+        }
+
+        val recovered = ensureReady(context)
+        if (recovered) {
+            return@withContext readVersesQuery(bookId, chapter)
+        }
+        emptyList()
+    }
+
+    private fun readVersesQuery(bookId: Int, chapter: Int): List<OfflineVerseDto> {
+        val db = database ?: return emptyList()
         val results = mutableListOf<OfflineVerseDto>()
         try {
             val cursor = db.rawQuery(
@@ -97,14 +224,13 @@ object OfflineBibleManager {
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Query error for book $bookId, chapter $chapter", e)
         }
-        results
+        return results
     }
 
     /**
      * Returns only the count of verses for a given book/chapter without loading text.
-     * Used to detect stale partial Room cache vs the complete SQLite.
      */
     suspend fun getVerseCount(context: Context, bookId: Int, chapter: Int): Int = withContext(Dispatchers.IO) {
         ensureReady(context)
@@ -118,7 +244,7 @@ object OfflineBibleManager {
                 if (c.moveToFirst()) c.getInt(0) else 0
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Count error for book $bookId, chapter $chapter", e)
             0
         }
     }

@@ -80,6 +80,7 @@ object BollsBibleApiService {
             "NTV", "NUEVA TRADUCCIÓN VIVIENTE" -> "NTV"
             "NBLA", "NUEVA BIBLIA DE LAS AMÉRICAS" -> "LBLA"
             "TLA", "TRADUCCIÓN EN LENGUAJE ACTUAL" -> "PDT"
+            "DHH", "DIOS HABLA HOY" -> "PDT"
             "LBLA", "LA BIBLIA DE LAS AMÉRICAS" -> "LBLA"
             "PDT", "PALABRA DE DIOS PARA TODOS" -> "PDT"
             "BTX3", "BIBLIA TEXTUAL" -> "BTX3"
