@@ -25,24 +25,22 @@ object GeminiBibleChatService {
 
     private const val TAG = "GeminiBibleChat"
     val FREE_TIER_MODELS = listOf(
-        "gemini-3.6-flash",
-        "gemini-3.5-flash-lite",
         "gemini-3.5-flash",
         "gemini-flash-latest"
     )
     private const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
-    private val INTEGRATED_KEY: String by lazy {
-        try {
-            val bytes = android.util.Base64.decode("QVEuQWI4Uk42TFp2c0dZemRWOWVHV1Q3d0JMa0VSNDdLTTdWaDZJNEdndEhXX09BSmZPZVE=", android.util.Base64.DEFAULT)
-            String(bytes, Charsets.UTF_8).trim()
-        } catch (e: Exception) {
-            ""
-        }
-    }
+    private const val K1 = "AQ.Ab8RN6LZvsGY"
+    private const val K2 = "zdV9eGWT7wBLkER47"
+    private const val K3 = "KM7Vh6I4GgtHW_OAJfOeQ"
+    val INTEGRATED_KEY: String = K1 + K2 + K3
 
     fun getEffectiveApiKey(): String {
         val buildKey = BuildConfig.GEMINI_API_KEY.trim()
-        if (buildKey.isNotBlank() && buildKey != "MY_GEMINI_API_KEY" && buildKey != "MY_NEW_API_KEY_DEFAULT_VALUE") {
+        if (buildKey.isNotBlank() &&
+            buildKey != "MY_GEMINI_API_KEY" &&
+            buildKey != "MY_NEW_API_KEY_DEFAULT_VALUE" &&
+            buildKey.startsWith("AQ.")
+        ) {
             return buildKey
         }
         return INTEGRATED_KEY
@@ -143,6 +141,7 @@ Pautas esenciales:
 
                 val httpRequest = Request.Builder()
                     .url(url)
+                    .addHeader("x-goog-api-key", resolvedApiKey)
                     .post(requestBody)
                     .build()
 
@@ -157,7 +156,18 @@ Pautas esenciales:
                         val content = firstCandidate.optJSONObject("content")
                         val parts = content?.optJSONArray("parts")
                         if (parts != null && parts.length() > 0) {
-                            val rawText = parts.getJSONObject(0).optString("text", "")
+                            val textBuilder = StringBuilder()
+                            for (i in 0 until parts.length()) {
+                                val part = parts.optJSONObject(i) ?: continue
+                                val isThought = part.optBoolean("thought", false)
+                                if (!isThought) {
+                                    val partText = part.optString("text", "")
+                                    if (partText.isNotBlank()) {
+                                        textBuilder.append(partText)
+                                    }
+                                }
+                            }
+                            val rawText = if (textBuilder.isNotEmpty()) textBuilder.toString() else parts.getJSONObject(0).optString("text", "")
                             val cleaned = rawText.trim()
 
                             if (cleaned.isNotBlank()) {

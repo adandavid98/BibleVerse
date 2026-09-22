@@ -76,13 +76,14 @@ fun BibleChatDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .safeDrawingPadding()
                 .imePadding()
-                .padding(horizontal = 12.dp, vertical = 12.dp)
+                .padding(horizontal = 12.dp, top = 28.dp, bottom = 32.dp),
+            contentAlignment = Alignment.Center
         ) {
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
+                    .clip(RoundedCornerShape(24.dp))
                     .testTag("bible_chat_dialog"),
                 shape = RoundedCornerShape(24.dp),
                 color = MaterialTheme.colorScheme.surface,
@@ -120,12 +121,15 @@ fun BibleChatDialog(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = "Asistente Teológico Bíblico",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 17.sp
+                            ),
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = "Impulsado por Gemini 3.5 Flash • Doctrinas y Escatología",
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.5.sp),
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -181,13 +185,19 @@ fun BibleChatDialog(
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = "¿Qué deseas consultar en las Escrituras?",
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp
+                                ),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = "Haz preguntas doctrinales, escatológicas (últimos tiempos), exégesis de versículos o temas de fe cristiana.",
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontSize = 15.sp,
+                                    lineHeight = 22.sp
+                                ),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
                             )
@@ -195,7 +205,10 @@ fun BibleChatDialog(
                             Spacer(modifier = Modifier.height(20.dp))
                             Text(
                                 text = "Preguntas frecuentes sugeridas:",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 14.sp
+                                ),
                                 color = MaterialTheme.colorScheme.primary
                             )
                             Spacer(modifier = Modifier.height(10.dp))
@@ -210,7 +223,7 @@ fun BibleChatDialog(
                                 ) {
                                     Text(
                                         text = topic,
-                                        style = MaterialTheme.typography.bodySmall,
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.5.sp),
                                         maxLines = 1
                                     )
                                 }
@@ -257,7 +270,7 @@ fun BibleChatDialog(
                                                 Spacer(modifier = Modifier.width(10.dp))
                                                 Text(
                                                     text = "Escudriñando las Escrituras con IA...",
-                                                    style = MaterialTheme.typography.bodySmall,
+                                                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
@@ -285,7 +298,12 @@ fun BibleChatDialog(
                                         onSendMessage(topic)
                                     }
                                 },
-                                label = { Text(topic, style = MaterialTheme.typography.labelSmall) }
+                                label = {
+                                    Text(
+                                        topic,
+                                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 13.sp)
+                                    )
+                                }
                             )
                         }
                     }
@@ -298,7 +316,7 @@ fun BibleChatDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.surface)
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                        .padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedTextField(
@@ -307,10 +325,11 @@ fun BibleChatDialog(
                         modifier = Modifier
                             .weight(1f)
                             .testTag("chat_input_field"),
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
                         placeholder = {
                             Text(
                                 "Haz una pregunta bíblica o doctrinal...",
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp)
                             )
                         },
                         maxLines = 4,
@@ -372,7 +391,7 @@ fun ChatMessageBubble(
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
     ) {
         Column(
-            modifier = Modifier.widthIn(max = 320.dp),
+            modifier = Modifier.widthIn(max = 340.dp),
             horizontalAlignment = if (isUser) Alignment.End else Alignment.Start
         ) {
             Box(
@@ -396,8 +415,8 @@ fun ChatMessageBubble(
                 Text(
                     text = message.text,
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp
+                        fontSize = 16.sp,
+                        lineHeight = 23.sp
                     ),
                     color = if (isUser)
                         MaterialTheme.colorScheme.onPrimary
@@ -430,10 +449,10 @@ fun ChatMessageBubble(
                             label = {
                                 Text(
                                     text = "📖 ${message.suggestedVerseReference}",
-                                    style = MaterialTheme.typography.labelSmall
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 13.sp)
                                 )
                             },
-                            modifier = Modifier.height(28.dp)
+                            modifier = Modifier.height(30.dp)
                         )
                     }
                 }
