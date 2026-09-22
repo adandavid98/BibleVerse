@@ -27,6 +27,8 @@ object OfflineBibleManager {
     @Volatile
     private var database: SQLiteDatabase? = null
 
+    suspend fun ensureDatabase(context: Context): Boolean = ensureReady(context)
+
     /**
      * Ensures the local SQLite database is extracted, verified for full canonical integrity
      * (31,102 verses) and ready for immediate sub-millisecond offline reading.

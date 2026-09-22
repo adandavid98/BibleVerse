@@ -95,11 +95,11 @@ jobs:
             export KEYSTORE_PATH="$(pwd)/my-upload-key.jks"
             export STORE_PASSWORD="${{ secrets.STORE_PASSWORD }}"
             export KEY_PASSWORD="${{ secrets.KEY_PASSWORD }}"
-            $GRADLE_CMD assembleRelease -PversionName="${APP_RAW_VERSION}" -PversionCode="${{ github.run_number }}" --no-daemon
+            $GRADLE_CMD assembleRelease -PversionName="${APP_RAW_VERSION}" -PversionCode="${{ github.run_number }}" --no-daemon --stacktrace
             APK_PATH=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
           else
             echo "Building installable APK with debug signing for direct phone installation..."
-            $GRADLE_CMD assembleDebug -PversionName="${APP_RAW_VERSION}" -PversionCode="${{ github.run_number }}" --no-daemon
+            $GRADLE_CMD assembleDebug -PversionName="${APP_RAW_VERSION}" -PversionCode="${{ github.run_number }}" --no-daemon --stacktrace
             APK_PATH=$(find app/build/outputs/apk/debug -name "*.apk" | head -n 1)
           fi
 
