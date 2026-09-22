@@ -167,7 +167,7 @@ Pautas esenciales:
                                     }
                                 }
                             }
-                            val rawText = if (textBuilder.isNotEmpty()) textBuilder.toString() else parts.getJSONObject(0).optString("text", "")
+                            val rawText = if (textBuilder.length > 0) textBuilder.toString() else parts.getJSONObject(0).optString("text", "")
                             val cleaned = rawText.trim()
 
                             if (cleaned.isNotBlank()) {

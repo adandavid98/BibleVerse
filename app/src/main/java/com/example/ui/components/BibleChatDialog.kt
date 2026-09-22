@@ -129,7 +129,7 @@ fun BibleChatDialog(
                         )
                         Text(
                             text = "Impulsado por Gemini 3.5 Flash • Doctrinas y Escatología",
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.5.sp),
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 13.sp),
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -223,7 +223,7 @@ fun BibleChatDialog(
                                 ) {
                                     Text(
                                         text = topic,
-                                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.5.sp),
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
                                         maxLines = 1
                                     )
                                 }
