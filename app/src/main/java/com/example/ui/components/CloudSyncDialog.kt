@@ -138,9 +138,6 @@ fun CloudSyncCardContent(
     isDialog: Boolean = false
 ) {
     val clipboardManager = LocalClipboardManager.current
-    var showManualSection by remember { mutableStateOf(false) }
-    var restoreCodeInput by remember { mutableStateOf("") }
-    var copyNotice by remember { mutableStateOf(false) }
 
     // Email/Password login inputs
     var showEmailLogin by remember { mutableStateOf(false) }
@@ -531,91 +528,6 @@ fun CloudSyncCardContent(
                     }
                 }
 
-                // 2. SECCIÓN DE RESPALDO MANUAL (Funciona 100% sin conexión ni servicios)
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { showManualSection = !showManualSection }
-                ) {
-                    Row(
-                        modifier = Modifier.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Filled.Key, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-                            Text(
-                                text = "Respaldo portátil (Código Manual)",
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        Text(
-                            text = if (showManualSection) "Ocultar ▲" else "Mostrar ▼",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-
-                if (showManualSection) {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(
-                            text = "Genera un código compacto con todas tus notas para guardarlo en un bloc de notas o enviártelo por WhatsApp:",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        Button(
-                            onClick = {
-                                onPerformBackup()
-                                copyNotice = true
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp)
-                        ) {
-                            Icon(Icons.Filled.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Generar y Copiar Código de Respaldo", fontSize = 12.sp)
-                        }
-
-                        if (copyNotice) {
-                            Text(
-                                text = "✓ Código copiado al portapapeles. ¡Pégalo donde gustes!",
-                                color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
-                            )
-                        }
-
-                        OutlinedTextField(
-                            value = restoreCodeInput,
-                            onValueChange = { restoreCodeInput = it },
-                            label = { Text("Pegar código de respaldo") },
-                            placeholder = { Text("Pega aquí el código copiado...") },
-                            modifier = Modifier.fillMaxWidth(),
-                            maxLines = 2
-                        )
-
-                        OutlinedButton(
-                            onClick = {
-                                if (restoreCodeInput.isNotBlank()) {
-                                    onPerformRestore(restoreCodeInput)
-                                    restoreCodeInput = ""
-                                }
-                            },
-                            enabled = restoreCodeInput.isNotBlank(),
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp)
-                        ) {
-                            Text("Restaurar desde Código Pegado", fontSize = 12.sp)
-                        }
-                    }
-                }
 
                 // Footer Close
                 if (onDismiss != null) {

@@ -127,11 +127,6 @@ fun BibleChatDialog(
                             ),
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        Text(
-                            text = "Impulsado por Gemini 3.5 Flash • Doctrinas y Escatología",
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 13.sp),
-                            color = MaterialTheme.colorScheme.primary
-                        )
                     }
 
                     if (chatMessages.isNotEmpty()) {

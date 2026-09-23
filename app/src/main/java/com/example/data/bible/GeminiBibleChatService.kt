@@ -25,8 +25,10 @@ object GeminiBibleChatService {
 
     private const val TAG = "GeminiBibleChat"
     val FREE_TIER_MODELS = listOf(
-        "gemini-3.5-flash",
-        "gemini-flash-latest"
+        "gemini-3.5-flash-lite",
+        "gemini-3.6-flash",
+        "gemini-flash-lite-latest",
+        "gemini-3.5-flash"
     )
     private const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
     private const val K1 = "AQ.Ab8RN6LZvsGY"
@@ -40,9 +42,9 @@ object GeminiBibleChatService {
 
     private val client: OkHttpClient by lazy {
         OkHttpClient.Builder()
-            .connectTimeout(20, TimeUnit.SECONDS)
-            .readTimeout(25, TimeUnit.SECONDS)
-            .writeTimeout(20, TimeUnit.SECONDS)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(45, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
             .build()
     }
 
