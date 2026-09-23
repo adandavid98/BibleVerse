@@ -325,7 +325,7 @@ fun BookChapterSelectorSheet(
 
                     SelectorStep.VERSE -> {
                         val book = chosenBook ?: return@AnimatedContent
-                        val estimatedVerses = estimateVerseCount(book.orderIndex, chosenChapter)
+                        val verseCount = com.example.data.bible.BibleVerseCounts.getVerseCount(book.orderIndex, chosenChapter)
 
                         Column(modifier = Modifier.fillMaxSize()) {
                             Text(
@@ -341,7 +341,7 @@ fun BookChapterSelectorSheet(
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                                 modifier = Modifier.fillMaxSize()
                             ) {
-                                items((1..estimatedVerses).toList()) { vNum ->
+                                items((1..verseCount).toList()) { vNum ->
                                     val isCurrentVerse = (book.id == currentBook?.id) && (chosenChapter == currentChapter) && (vNum == currentVerse)
                                     Box(
                                         modifier = Modifier
@@ -379,18 +379,4 @@ fun BookChapterSelectorSheet(
         }
     }
 }
-}
-
-private fun estimateVerseCount(bookId: Int, chapter: Int): Int {
-    return when {
-        bookId == 1 && chapter == 1 -> 31 // Genesis 1
-        bookId == 19 && chapter == 23 -> 6 // Salmo 23
-        bookId == 19 && chapter == 119 -> 176 // Salmo 119
-        bookId == 33 && chapter == 6 -> 16 // Miqueas 6
-        bookId == 40 && chapter == 5 -> 48 // Mateo 5
-        bookId == 43 && chapter == 3 -> 36 // Juan 3
-        bookId == 45 && chapter == 8 -> 39 // Romanos 8
-        bookId == 46 && chapter == 13 -> 13 // 1 Corintios 13
-        else -> 28 // Typical chapter average
-    }
 }

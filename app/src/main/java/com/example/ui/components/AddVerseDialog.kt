@@ -1271,7 +1271,7 @@ fun BibleReferenceWindowPicker(
                     }
 
                     PickerStep.VERSE -> {
-                        val maxVerses = 50
+                        val maxVerses = com.example.data.bible.BibleVerseCounts.getVerseCount(pickedBook.order, pickedChapter)
                         LazyVerticalGrid(
                             columns = GridCells.Adaptive(minSize = 60.dp),
                             modifier = Modifier.fillMaxSize(),
