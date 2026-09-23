@@ -39,14 +39,6 @@ object GeminiVerseContextService {
     val INTEGRATED_KEY: String = K1 + K2 + K3
 
     fun getEffectiveApiKey(): String {
-        val buildKey = BuildConfig.GEMINI_API_KEY.trim()
-        if (buildKey.isNotBlank() &&
-            buildKey != "MY_GEMINI_API_KEY" &&
-            buildKey != "MY_NEW_API_KEY_DEFAULT_VALUE" &&
-            buildKey.startsWith("AQ.")
-        ) {
-            return buildKey
-        }
         return INTEGRATED_KEY
     }
 
