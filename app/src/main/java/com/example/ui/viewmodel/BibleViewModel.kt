@@ -849,31 +849,47 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         )
 
         viewModelScope.launch {
-            val responseTextBuilder = StringBuilder()
+            val fullTargetText = StringBuilder()
+            val displayedText = StringBuilder()
             var assistantAdded = false
+            var isStreamFinished = false
 
-            try {
-                GeminiBibleChatService.askBibleQuestionStream(
-                    history = currentHistory,
-                    userQuestion = text,
-                    onChunk = { chunk ->
-                        responseTextBuilder.append(chunk)
-                        val updatedText = responseTextBuilder.toString()
-                        val suggestedRef = GeminiBibleChatService.extractFirstBibleReference(updatedText)
+            // Smooth typewriter coroutine: gradually emits characters to achieve fluid progressive typing
+            val typewriterJob = launch {
+                while (!isStreamFinished || displayedText.length < fullTargetText.length) {
+                    val targetLen = synchronized(fullTargetText) { fullTargetText.length }
+                    if (displayedText.length < targetLen) {
+                        val remaining = targetLen - displayedText.length
+                        // Dynamically catch up if incoming chunk is large, while keeping motion silky smooth
+                        val step = when {
+                            remaining > 250 -> 10
+                            remaining > 120 -> 6
+                            remaining > 60 -> 4
+                            remaining > 20 -> 2
+                            else -> 1
+                        }
+                        val nextLen = (displayedText.length + step).coerceAtMost(targetLen)
+                        val chunkToAppend = synchronized(fullTargetText) {
+                            fullTargetText.substring(displayedText.length, nextLen)
+                        }
+                        displayedText.append(chunkToAppend)
+
+                        val currentText = displayedText.toString()
+                        val suggestedRef = GeminiBibleChatService.extractFirstBibleReference(currentText)
 
                         _isChatLoading.value = false
 
                         if (!assistantAdded) {
                             assistantAdded = true
                             _chatMessages.value = _chatMessages.value + initialAssistantMessage.copy(
-                                text = updatedText,
+                                text = currentText,
                                 suggestedVerseReference = suggestedRef
                             )
                         } else {
                             _chatMessages.value = _chatMessages.value.map { msg ->
                                 if (msg.id == assistantMessageId) {
                                     msg.copy(
-                                        text = updatedText,
+                                        text = currentText,
                                         suggestedVerseReference = suggestedRef
                                     )
                                 } else {
@@ -881,10 +897,25 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
                                 }
                             }
                         }
+                        kotlinx.coroutines.delay(18) // ~55 fps natural progressive typing
+                    } else {
+                        kotlinx.coroutines.delay(20)
+                    }
+                }
+            }
+
+            try {
+                GeminiBibleChatService.askBibleQuestionStream(
+                    history = currentHistory,
+                    userQuestion = text,
+                    onChunk = { chunk ->
+                        synchronized(fullTargetText) {
+                            fullTargetText.append(chunk)
+                        }
                     }
                 )
             } catch (e: Exception) {
-                if (!assistantAdded) {
+                if (!assistantAdded && fullTargetText.isEmpty()) {
                     val errorMessage = ChatMessage(
                         text = "Ocurrió un error al procesar la respuesta. Por favor intenta de nuevo.",
                         isUser = false
@@ -892,6 +923,23 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
                     _chatMessages.value = _chatMessages.value + errorMessage
                 }
             } finally {
+                isStreamFinished = true
+                typewriterJob.join()
+
+                val finalCleanText = synchronized(fullTargetText) { fullTargetText.toString().trim() }
+                if (finalCleanText.isNotBlank()) {
+                    val finalRef = GeminiBibleChatService.extractFirstBibleReference(finalCleanText)
+                    _chatMessages.value = _chatMessages.value.map { msg ->
+                        if (msg.id == assistantMessageId) {
+                            msg.copy(
+                                text = finalCleanText,
+                                suggestedVerseReference = finalRef
+                            )
+                        } else {
+                            msg
+                        }
+                    }
+                }
                 _isChatLoading.value = false
             }
         }

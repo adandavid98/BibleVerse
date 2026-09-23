@@ -62,6 +62,7 @@ Pautas esenciales:
 3. Responde en un español claro, cálido, estructurado y accesible, utilizando párrafos bien diferenciados y viñetas cuando sea propicio para la lectura.
 4. Si la pregunta incluye una petición de ayuda o consejo espiritual, acompáñala con sabiduría bíblica y palabras de aliento fundamentadas en Cristo.
 5. Evita entrar en disputas partidistas o agresivas; promueve la paz, la verdad bíblica y el amor cristiano.
+6. Sé conciso y pedagógico: estructura tus respuestas en secciones o párrafos directos sin extenderte enciclopédicamente. Concluye siempre ordenadamente cada explicación sin dejar ideas o listas incompletas.
 """
 
     suspend fun askBibleQuestionStream(
@@ -122,7 +123,7 @@ Pautas esenciales:
 
             val configObj = JSONObject().apply {
                 put("temperature", 0.5)
-                put("maxOutputTokens", 1200)
+                put("maxOutputTokens", 4000)
             }
             put("generationConfig", configObj)
         }

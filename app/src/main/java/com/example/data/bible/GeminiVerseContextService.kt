@@ -116,7 +116,7 @@ object GeminiVerseContextService {
 
             val configObj = JSONObject().apply {
                 put("temperature", 0.3)
-                put("maxOutputTokens", 650)
+                put("maxOutputTokens", 1500)
             }
             put("generationConfig", configObj)
         }
