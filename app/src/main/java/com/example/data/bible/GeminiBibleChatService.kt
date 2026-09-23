@@ -10,6 +10,8 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
@@ -26,8 +28,8 @@ object GeminiBibleChatService {
     private const val TAG = "GeminiBibleChat"
     val FREE_TIER_MODELS = listOf(
         "gemini-3.5-flash-lite",
-        "gemini-3.6-flash",
         "gemini-flash-lite-latest",
+        "gemini-3.6-flash",
         "gemini-3.5-flash"
     )
     private const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
@@ -62,9 +64,10 @@ Pautas esenciales:
 5. Evita entrar en disputas partidistas o agresivas; promueve la paz, la verdad bíblica y el amor cristiano.
 """
 
-    suspend fun askBibleQuestion(
+    suspend fun askBibleQuestionStream(
         history: List<ChatMessage>,
-        userQuestion: String
+        userQuestion: String,
+        onChunk: suspend (String) -> Unit
     ): ChatMessage = withContext(Dispatchers.IO) {
         val resolvedApiKey = getEffectiveApiKey()
 
@@ -72,6 +75,7 @@ Pautas esenciales:
 
         if (!isKeyConfigured) {
             val localResponse = generateLocalFallbackResponse(userQuestion)
+            onChunk(localResponse)
             return@withContext ChatMessage(
                 text = localResponse,
                 isUser = false
@@ -124,65 +128,90 @@ Pautas esenciales:
         }
 
         val requestBodyString = requestJson.toString()
-
+        val fullAccumulatedText = StringBuilder()
         var lastHttpCode = 0
         var lastErrorMessage = ""
 
         for (modelName in FREE_TIER_MODELS) {
+            var modelEmittedChunk = false
             try {
                 val requestBody = requestBodyString.toRequestBody("application/json; charset=utf-8".toMediaType())
-                val url = "$BASE_URL/$modelName:generateContent?key=$resolvedApiKey"
+                val url = "$BASE_URL/$modelName:streamGenerateContent?alt=sse&key=$resolvedApiKey"
 
                 val httpRequest = Request.Builder()
                     .url(url)
                     .addHeader("x-goog-api-key", resolvedApiKey)
+                    .addHeader("Accept", "text/event-stream")
                     .post(requestBody)
                     .build()
 
                 val response = client.newCall(httpRequest).execute()
-                val responseBody = response.body?.string()
-
-                if (response.isSuccessful && !responseBody.isNullOrBlank()) {
-                    val jsonResponse = JSONObject(responseBody)
-                    val candidates = jsonResponse.optJSONArray("candidates")
-                    if (candidates != null && candidates.length() > 0) {
-                        val firstCandidate = candidates.getJSONObject(0)
-                        val content = firstCandidate.optJSONObject("content")
-                        val parts = content?.optJSONArray("parts")
-                        if (parts != null && parts.length() > 0) {
-                            val textBuilder = StringBuilder()
-                            for (i in 0 until parts.length()) {
-                                val part = parts.optJSONObject(i) ?: continue
-                                val isThought = part.optBoolean("thought", false)
-                                if (!isThought) {
-                                    val partText = part.optString("text", "")
-                                    if (partText.isNotBlank()) {
-                                        textBuilder.append(partText)
+                if (response.isSuccessful) {
+                    val responseBody = response.body
+                    if (responseBody != null) {
+                        val reader = BufferedReader(InputStreamReader(responseBody.byteStream(), Charsets.UTF_8))
+                        var line: String?
+                        while (reader.readLine().also { line = it } != null) {
+                            val currentLine = line?.trim() ?: continue
+                            if (currentLine.startsWith("data:")) {
+                                val jsonStr = currentLine.removePrefix("data:").trim()
+                                if (jsonStr.isNotEmpty() && jsonStr != "[DONE]") {
+                                    try {
+                                        val jsonObj = JSONObject(jsonStr)
+                                        val candidates = jsonObj.optJSONArray("candidates")
+                                        if (candidates != null && candidates.length() > 0) {
+                                            val firstCandidate = candidates.getJSONObject(0)
+                                            val content = firstCandidate.optJSONObject("content")
+                                            val parts = content?.optJSONArray("parts")
+                                            if (parts != null && parts.length() > 0) {
+                                                for (i in 0 until parts.length()) {
+                                                    val part = parts.optJSONObject(i) ?: continue
+                                                    val isThought = part.optBoolean("thought", false)
+                                                    if (!isThought) {
+                                                        val chunkText = part.optString("text", "")
+                                                        if (chunkText.isNotEmpty()) {
+                                                            modelEmittedChunk = true
+                                                            fullAccumulatedText.append(chunkText)
+                                                            onChunk(chunkText)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.w(TAG, "Error parsing SSE chunk: ${e.message}")
                                     }
                                 }
                             }
-                            val rawText = if (textBuilder.length > 0) textBuilder.toString() else parts.getJSONObject(0).optString("text", "")
-                            val cleaned = rawText.trim()
-
-                            if (cleaned.isNotBlank()) {
-                                Log.i(TAG, "Chat response generated successfully with model: $modelName")
-                                val suggestedRef = extractFirstBibleReference(cleaned)
-                                return@withContext ChatMessage(
-                                    text = cleaned,
-                                    isUser = false,
-                                    suggestedVerseReference = suggestedRef
-                                )
-                            }
                         }
+                    }
+
+                    if (modelEmittedChunk && fullAccumulatedText.isNotBlank()) {
+                        Log.i(TAG, "Chat response streamed successfully with model: $modelName")
+                        val finalText = fullAccumulatedText.toString().trim()
+                        val suggestedRef = extractFirstBibleReference(finalText)
+                        return@withContext ChatMessage(
+                            text = finalText,
+                            isUser = false,
+                            suggestedVerseReference = suggestedRef
+                        )
                     }
                 } else {
                     lastHttpCode = response.code
-                    lastErrorMessage = responseBody ?: ""
-                    Log.w(TAG, "Model $modelName returned HTTP ${response.code}: $responseBody")
+                    lastErrorMessage = response.body?.string() ?: ""
+                    Log.w(TAG, "Model $modelName stream returned HTTP ${response.code}: $lastErrorMessage")
                 }
             } catch (e: Exception) {
-                lastErrorMessage = e.message ?: "Error de red"
-                Log.w(TAG, "Model $modelName exception: ${e.message}")
+                Log.w(TAG, "Exception streaming with model $modelName: ${e.message}")
+                if (modelEmittedChunk && fullAccumulatedText.isNotBlank()) {
+                    val finalText = fullAccumulatedText.toString().trim()
+                    val suggestedRef = extractFirstBibleReference(finalText)
+                    return@withContext ChatMessage(
+                        text = finalText,
+                        isUser = false,
+                        suggestedVerseReference = suggestedRef
+                    )
+                }
             }
         }
 
@@ -197,17 +226,26 @@ Pautas esenciales:
             else -> ""
         }
 
-        val fallbackText = generateLocalFallbackResponse(userQuestion)
+        val fallbackText = diagnosticNotice + generateLocalFallbackResponse(userQuestion)
+        onChunk(fallbackText)
         ChatMessage(
-            text = diagnosticNotice + fallbackText,
-            isUser = false
+            text = fallbackText,
+            isUser = false,
+            suggestedVerseReference = extractFirstBibleReference(fallbackText)
         )
+    }
+
+    suspend fun askBibleQuestion(
+        history: List<ChatMessage>,
+        userQuestion: String
+    ): ChatMessage {
+        return askBibleQuestionStream(history, userQuestion) { /* no-op */ }
     }
 
     /**
      * Finds a biblical reference (e.g. "Juan 3:16", "Romanos 8:28") to suggest adding as verse.
      */
-    private fun extractFirstBibleReference(text: String): String? {
+    fun extractFirstBibleReference(text: String): String? {
         val pattern = Regex(
             "\\b(Génesis|Éxodo|Levítico|Números|Deuteronomio|Josué|Jueces|Rut|1\\s+Samuel|2\\s+Samuel|1\\s+Reyes|2\\s+Reyes|1\\s+Crónicas|2\\s+Crónicas|Esdras|Nehemías|Ester|Job|Salmos?|Proverbios|Eclesiastés|Cantares|Isaías|Jeremías|Lamentaciones|Ezequiel|Daniel|Oseas|Joel|Amós|Abdías|Jonás|Miqueas|Nahúm|Habacuc|Sofonías|Hageo|Zacarías|Malaquías|Mateo|Marcos|Lucas|Juan|Hechos|Romanos|1\\s+Corintios|2\\s+Corintios|Gálatas|Efesios|Filipenses|Colosenses|1\\s+Tesalonicenses|2\\s+Tesalonicenses|1\\s+Timoteo|2\\s+Timoteo|Tito|Filemón|Hebreos|Santiago|1\\s+Pedro|2\\s+Pedro|1\\s+Juan|2\\s+Juan|3\\s+Juan|Judas|Apocalipsis)\\s+(\\d+):(\\d+)(?:-\\d+)?\\b",
             RegexOption.IGNORE_CASE

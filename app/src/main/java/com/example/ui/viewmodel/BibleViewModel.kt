@@ -841,19 +841,56 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         _chatMessages.value = currentHistory + userMessage
         _isChatLoading.value = true
 
+        val assistantMessageId = java.util.UUID.randomUUID().toString()
+        val initialAssistantMessage = ChatMessage(
+            id = assistantMessageId,
+            text = "",
+            isUser = false
+        )
+
         viewModelScope.launch {
+            val responseTextBuilder = StringBuilder()
+            var assistantAdded = false
+
             try {
-                val assistantReply = GeminiBibleChatService.askBibleQuestion(
+                GeminiBibleChatService.askBibleQuestionStream(
                     history = currentHistory,
-                    userQuestion = text
+                    userQuestion = text,
+                    onChunk = { chunk ->
+                        responseTextBuilder.append(chunk)
+                        val updatedText = responseTextBuilder.toString()
+                        val suggestedRef = GeminiBibleChatService.extractFirstBibleReference(updatedText)
+
+                        _isChatLoading.value = false
+
+                        if (!assistantAdded) {
+                            assistantAdded = true
+                            _chatMessages.value = _chatMessages.value + initialAssistantMessage.copy(
+                                text = updatedText,
+                                suggestedVerseReference = suggestedRef
+                            )
+                        } else {
+                            _chatMessages.value = _chatMessages.value.map { msg ->
+                                if (msg.id == assistantMessageId) {
+                                    msg.copy(
+                                        text = updatedText,
+                                        suggestedVerseReference = suggestedRef
+                                    )
+                                } else {
+                                    msg
+                                }
+                            }
+                        }
+                    }
                 )
-                _chatMessages.value = _chatMessages.value + assistantReply
             } catch (e: Exception) {
-                val errorMessage = ChatMessage(
-                    text = "Ocurrió un error al procesar la respuesta. Por favor intenta de nuevo.",
-                    isUser = false
-                )
-                _chatMessages.value = _chatMessages.value + errorMessage
+                if (!assistantAdded) {
+                    val errorMessage = ChatMessage(
+                        text = "Ocurrió un error al procesar la respuesta. Por favor intenta de nuevo.",
+                        isUser = false
+                    )
+                    _chatMessages.value = _chatMessages.value + errorMessage
+                }
             } finally {
                 _isChatLoading.value = false
             }

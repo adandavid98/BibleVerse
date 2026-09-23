@@ -58,9 +58,9 @@ fun BibleChatDialog(
         )
     }
 
-    LaunchedEffect(chatMessages.size, isLoading) {
+    LaunchedEffect(chatMessages.size, chatMessages.lastOrNull()?.text?.length, isLoading) {
         if (chatMessages.isNotEmpty()) {
-            listState.animateScrollToItem(chatMessages.size - 1)
+            listState.scrollToItem(chatMessages.size - 1)
         }
     }
 
