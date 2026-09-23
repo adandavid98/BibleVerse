@@ -325,7 +325,11 @@ fun BookChapterSelectorSheet(
 
                     SelectorStep.VERSE -> {
                         val book = chosenBook ?: return@AnimatedContent
-                        val verseCount = com.example.data.bible.BibleVerseCounts.getVerseCount(book.orderIndex, chosenChapter)
+                        val verseCount = com.example.data.bible.BibleVerseCounts.getVerseCount(
+                            bookName = book.name,
+                            bookOrder = book.orderIndex,
+                            chapter = chosenChapter
+                        )
 
                         Column(modifier = Modifier.fillMaxSize()) {
                             Text(

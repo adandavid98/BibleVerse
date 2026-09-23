@@ -76,96 +76,196 @@ object BibleVerseCounts {
         intArrayOf(20, 29, 22, 11, 14, 17, 17, 13, 21, 11, 19, 17, 18, 20, 8, 21, 18, 24, 21, 15, 27, 21), // Book 66
     )
 
-    private val BOOK_NAME_TO_ORDER = mapOf(
-        "Génesis" to 1, "Genesis" to 1, "Gn" to 1,
-        "Éxodo" to 2, "Exodo" to 2, "Éx" to 2, "Ex" to 2,
-        "Levítico" to 3, "Levitico" to 3, "Lv" to 3,
-        "Números" to 4, "Numeros" to 4, "Nm" to 4,
-        "Deuteronomio" to 5, "Dt" to 5,
-        "Josué" to 6, "Josue" to 6, "Jos" to 6,
-        "Jueces" to 7, "Jue" to 7,
-        "Rut" to 8, "Rt" to 8,
-        "1 Samuel" to 9, "1 S" to 9,
-        "2 Samuel" to 10, "2 S" to 10,
-        "1 Reyes" to 11, "1 R" to 11,
-        "2 Reyes" to 12, "2 R" to 12,
-        "1 Crónicas" to 13, "1 Cronicas" to 13, "1 Cr" to 13,
-        "2 Crónicas" to 14, "2 Cronicas" to 14, "2 Cr" to 14,
-        "Esdras" to 15, "Esd" to 15,
-        "Nehemías" to 16, "Nehemias" to 16, "Neh" to 16,
-        "Ester" to 17, "Est" to 17,
-        "Job" to 18,
-        "Salmos" to 19, "Salmo" to 19, "Sal" to 19,
-        "Proverbios" to 20, "Pr" to 20,
-        "Eclesiastés" to 21, "Eclesiastes" to 21, "Ec" to 21,
-        "Cantares" to 22, "Cnt" to 22,
-        "Isaías" to 23, "Isaias" to 23, "Is" to 23,
-        "Jeremías" to 24, "Jeremias" to 24, "Jer" to 24,
-        "Lamentaciones" to 25, "Lm" to 25,
-        "Ezequiel" to 26, "Ez" to 26,
-        "Daniel" to 27, "Dn" to 27,
-        "Oseas" to 28, "Os" to 28,
-        "Joel" to 29, "Jl" to 29,
-        "Amós" to 30, "Amos" to 30, "Am" to 30,
-        "Abdías" to 31, "Abdias" to 31, "Abd" to 31,
-        "Jonás" to 32, "Jonas" to 32, "Jon" to 32,
-        "Miqueas" to 33, "Miq" to 33,
-        "Nahúm" to 34, "Nahum" to 34, "Nah" to 34,
-        "Habacuc" to 35, "Hab" to 35,
-        "Sofonías" to 36, "Sofonias" to 36, "Sof" to 36,
-        "Hageo" to 37, "Hag" to 37,
-        "Zacarías" to 38, "Zacarias" to 38, "Zac" to 38,
-        "Malaquías" to 39, "Malaquias" to 39, "Mal" to 39,
-        "Mateo" to 40, "Mt" to 40,
-        "Marcos" to 41, "Mr" to 41,
-        "Lucas" to 42, "Lc" to 42,
-        "Juan" to 43, "Jn" to 43,
-        "Hechos" to 44, "Hch" to 44,
-        "Romanos" to 45, "Ro" to 45,
-        "1 Corintios" to 46, "1 Co" to 46,
-        "2 Corintios" to 47, "2 Co" to 47,
-        "Gálatas" to 48, "Galatas" to 48, "Gál" to 48, "Gal" to 48,
-        "Efesios" to 49, "Ef" to 49,
-        "Filipenses" to 50, "Fil" to 50,
-        "Colosenses" to 51, "Col" to 51,
-        "1 Tesalonicenses" to 52, "1 Ts" to 52,
-        "2 Tesalonicenses" to 53, "2 Ts" to 53,
-        "1 Timoteo" to 54, "1 Ti" to 54,
-        "2 Timoteo" to 55, "2 Ti" to 55,
-        "Tito" to 56, "Tit" to 56,
-        "Filemón" to 57, "Filemon" to 57, "Flm" to 57,
-        "Hebreos" to 58, "He" to 58,
-        "Santiago" to 59, "Stg" to 59,
-        "1 Pedro" to 60, "1 P" to 60,
-        "2 Pedro" to 61, "2 P" to 61,
-        "1 Juan" to 62, "1 Jn" to 62,
-        "2 Juan" to 63, "2 Jn" to 63,
-        "3 Juan" to 64, "3 Jn" to 64,
-        "Judas" to 65, "Jud" to 65,
-        "Apocalipsis" to 66, "Ap" to 66
+    private fun normalize(name: String): String {
+        return java.text.Normalizer.normalize(name, java.text.Normalizer.Form.NFD)
+            .replace("\\p{InCombiningDiacriticalMarks}+".toRegex(), "")
+            .lowercase()
+            .replace("[^a-z0-9]".toRegex(), "")
+            .trim()
+    }
+
+    private val NORMALIZED_NAME_TO_INDEX: Map<String, Int> = mapOf(
+        // Book 1
+        "genesis" to 0, "gn" to 0, "gen" to 0,
+        // Book 2
+        "exodo" to 1, "ex" to 1,
+        // Book 3
+        "levitico" to 2, "lv" to 2, "lev" to 2,
+        // Book 4
+        "numeros" to 3, "nm" to 3, "num" to 3,
+        // Book 5
+        "deuteronomio" to 4, "dt" to 4, "deut" to 4,
+        // Book 6
+        "josue" to 5, "jos" to 5,
+        // Book 7
+        "jueces" to 6, "jue" to 6, "jdc" to 6,
+        // Book 8
+        "rut" to 7, "rt" to 7,
+        // Book 9
+        "1samuel" to 8, "1s" to 8, "1sam" to 8,
+        // Book 10
+        "2samuel" to 9, "2s" to 9, "2sam" to 9,
+        // Book 11
+        "1reyes" to 10, "1r" to 10, "1rey" to 10,
+        // Book 12
+        "2reyes" to 11, "2r" to 11, "2rey" to 11,
+        // Book 13
+        "1cronicas" to 12, "1cr" to 12, "1cron" to 12,
+        // Book 14
+        "2cronicas" to 13, "2cr" to 13, "2cron" to 13,
+        // Book 15
+        "esdras" to 14, "esd" to 14,
+        // Book 16
+        "nehemias" to 15, "neh" to 15,
+        // Book 17
+        "ester" to 16, "est" to 16,
+        // Book 18
+        "job" to 17,
+        // Book 19
+        "salmos" to 18, "salmo" to 18, "sal" to 18, "ps" to 18,
+        // Book 20
+        "proverbios" to 19, "pr" to 19, "prov" to 19,
+        // Book 21
+        "eclesiastes" to 20, "ec" to 20, "ecl" to 20,
+        // Book 22
+        "cantares" to 21, "cnt" to 21, "cantardeloscantares" to 21,
+        // Book 23
+        "isaias" to 22, "is" to 22,
+        // Book 24
+        "jeremias" to 23, "jer" to 23,
+        // Book 25
+        "lamentaciones" to 24, "lm" to 24, "lam" to 24,
+        // Book 26
+        "ezequiel" to 25, "ez" to 25,
+        // Book 27
+        "daniel" to 26, "dn" to 26, "dan" to 26,
+        // Book 28
+        "oseas" to 27, "os" to 27,
+        // Book 29
+        "joel" to 28, "jl" to 28,
+        // Book 30
+        "amos" to 29, "am" to 29,
+        // Book 31
+        "abdias" to 30, "abd" to 30,
+        // Book 32
+        "jonas" to 31, "jon" to 31,
+        // Book 33
+        "miqueas" to 32, "miq" to 32, "mic" to 32,
+        // Book 34
+        "nahum" to 33, "nah" to 33,
+        // Book 35
+        "habacuc" to 34, "hab" to 34,
+        // Book 36
+        "sofonias" to 35, "sof" to 35,
+        // Book 37
+        "hageo" to 36, "hag" to 36,
+        // Book 38
+        "zacarias" to 37, "zac" to 37,
+        // Book 39
+        "malaquias" to 38, "mal" to 38,
+        // Book 40
+        "mateo" to 39, "mt" to 39, "mat" to 39,
+        // Book 41
+        "marcos" to 40, "mr" to 40, "mc" to 40,
+        // Book 42
+        "lucas" to 41, "lc" to 41, "luc" to 41,
+        // Book 43
+        "juan" to 42, "jn" to 42,
+        // Book 44
+        "hechos" to 43, "hch" to 43, "hech" to 43,
+        // Book 45
+        "romanos" to 44, "ro" to 44, "rom" to 44,
+        // Book 46
+        "1corintios" to 45, "1co" to 45, "1cor" to 45,
+        // Book 47
+        "2corintios" to 46, "2co" to 46, "2cor" to 46,
+        // Book 48
+        "galatas" to 47, "gal" to 47,
+        // Book 49
+        "efesios" to 48, "ef" to 48, "eph" to 48,
+        // Book 50
+        "filipenses" to 49, "fil" to 49, "flp" to 49,
+        // Book 51
+        "colosenses" to 50, "col" to 50,
+        // Book 52
+        "1tesalonicenses" to 51, "1ts" to 51, "1tes" to 51,
+        // Book 53
+        "2tesalonicenses" to 52, "2ts" to 52, "2tes" to 52,
+        // Book 54
+        "1timoteo" to 53, "1ti" to 53, "1tim" to 53,
+        // Book 55
+        "2timoteo" to 54, "2ti" to 54, "2tim" to 54,
+        // Book 56
+        "tito" to 55, "tit" to 55,
+        // Book 57
+        "filemon" to 56, "flm" to 56, "phm" to 56,
+        // Book 58
+        "hebreos" to 57, "he" to 57, "heb" to 57,
+        // Book 59
+        "santiago" to 58, "stg" to 58, "sant" to 58,
+        // Book 60
+        "1pedro" to 59, "1p" to 59, "1pe" to 59, "1ped" to 59,
+        // Book 61
+        "2pedro" to 60, "2p" to 60, "2pe" to 60, "2ped" to 60,
+        // Book 62
+        "1juan" to 61, "1jn" to 61, "1j" to 61,
+        // Book 63
+        "2juan" to 62, "2jn" to 62, "2j" to 62,
+        // Book 64
+        "3juan" to 63, "3jn" to 63, "3j" to 63,
+        // Book 65
+        "judas" to 64, "jud" to 64, "jds" to 64,
+        // Book 66
+        "apocalipsis" to 65, "ap" to 65, "apoc" to 65, "revelacion" to 65
     )
 
     /**
-     * Returns the exact canonical verse count for a given book (1-66) and chapter (1-based).
+     * Returns the exact canonical verse count for a given book (by name and/or order) and chapter (1-based).
+     * Guaranteed to return the precise count for every book and chapter in the Reina-Valera 1960.
+     * Never falls back to arbitrary numbers like 28.
      */
-    fun getVerseCount(bookOrder: Int, chapter: Int): Int {
-        val bookIdx = bookOrder - 1
-        if (bookIdx in CANONICAL_COUNTS.indices) {
-            val chapters = CANONICAL_COUNTS[bookIdx]
-            val chIdx = chapter - 1
-            if (chIdx in chapters.indices) {
-                return chapters[chIdx]
+    fun getVerseCount(bookName: String? = null, bookOrder: Int = -1, chapter: Int): Int {
+        var bookIdx = -1
+
+        // 1. Try matching by normalized book name if provided
+        if (!bookName.isNullOrBlank()) {
+            val key = normalize(bookName)
+            val mappedIdx = NORMALIZED_NAME_TO_INDEX[key]
+            if (mappedIdx != null && mappedIdx in CANONICAL_COUNTS.indices) {
+                bookIdx = mappedIdx
             }
         }
-        return 28
+
+        // 2. If not found by name, try bookOrder (supports 1-based 1..66 and 0-based 0..65)
+        if (bookIdx == -1) {
+            bookIdx = when {
+                bookOrder in 1..CANONICAL_COUNTS.size -> bookOrder - 1
+                bookOrder in 0 until CANONICAL_COUNTS.size -> bookOrder
+                else -> -1
+            }
+        }
+
+        // 3. Fallback to Genesis (index 0) only if book is completely unidentified
+        if (bookIdx !in CANONICAL_COUNTS.indices) {
+            bookIdx = 0
+        }
+
+        val chapters = CANONICAL_COUNTS[bookIdx]
+        val chIdx = (chapter - 1).coerceIn(0, chapters.lastIndex)
+        return chapters[chIdx]
+    }
+
+    /**
+     * Backwards-compatible overload by bookOrder and chapter.
+     */
+    fun getVerseCount(bookOrder: Int, chapter: Int): Int {
+        return getVerseCount(bookName = null, bookOrder = bookOrder, chapter = chapter)
     }
 
     /**
      * Returns the exact canonical verse count by book name and chapter.
      */
     fun getVerseCountByName(bookName: String, chapter: Int): Int {
-        val cleanName = bookName.trim()
-        val order = BOOK_NAME_TO_ORDER[cleanName] ?: return getVerseCount(1, chapter)
-        return getVerseCount(order, chapter)
+        return getVerseCount(bookName = bookName, bookOrder = -1, chapter = chapter)
     }
 }

@@ -20,7 +20,7 @@ class BibleReaderRepository(
 ) {
 
     suspend fun initializeCatalogIfNeeded() = withContext(Dispatchers.IO) {
-        if (dao.getBookCount() == 0) {
+        if (dao.getBookCount() < 66) {
             val bookEntities = BibleCatalog.books.map { book ->
                 BibleBookEntity(
                     id = book.order,
