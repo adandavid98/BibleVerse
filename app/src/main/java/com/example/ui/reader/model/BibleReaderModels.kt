@@ -57,5 +57,6 @@ data class BibleReaderUiState(
     val isSettingsSheetOpen: Boolean = false,
     val isShareDialogOpen: Boolean = false,
     val targetScrollVerse: Int? = null,
-    val userMessage: String? = null
+    val userMessage: String? = null,
+    val isReaderBarsVisible: Boolean = true
 )

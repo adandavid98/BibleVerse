@@ -4,6 +4,8 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -158,6 +160,7 @@ fun HomeScreen(
     val chatMessages by viewModel.chatMessages.collectAsStateWithLifecycle()
     val isChatLoading by viewModel.isChatLoading.collectAsStateWithLifecycle()
     val isGeneratingContext by viewModel.isGeneratingContext.collectAsStateWithLifecycle()
+    val readerUiState by readerViewModel.uiState.collectAsStateWithLifecycle()
 
     // Notify user of sync messages
     LaunchedEffect(uiState.syncStatusMessage) {
@@ -252,53 +255,61 @@ fun HomeScreen(
             }
         },
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface
+            val showBottomBar = selectedTab != 1 || readerUiState.isReaderBarsVisible
+
+            AnimatedVisibility(
+                visible = showBottomBar,
+                enter = slideInVertically(initialOffsetY = { it }),
+                exit = slideOutVertically(targetOffsetY = { it })
             ) {
-                NavigationBarItem(
-                    selected = selectedTab == 0,
-                    onClick = {
-                        if (selectedTab == 0) {
-                            scope.launch {
-                                versesListState.animateScrollToItem(0)
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ) {
+                    NavigationBarItem(
+                        selected = selectedTab == 0,
+                        onClick = {
+                            if (selectedTab == 0) {
+                                scope.launch {
+                                    versesListState.animateScrollToItem(0)
+                                }
+                            } else {
+                                selectedTab = 0
+                                viewModel.onFilterSelected(VerseFilter.TODOS)
                             }
-                        } else {
-                            selectedTab = 0
-                            viewModel.onFilterSelected(VerseFilter.TODOS)
-                        }
-                    },
-                    icon = { Icon(Icons.Filled.MenuBook, contentDescription = "Versículos") },
-                    label = { Text("Versículos") },
-                    modifier = Modifier.testTag("nav_verses")
-                )
-                NavigationBarItem(
-                    selected = selectedTab == 1,
-                    onClick = {
-                        selectedTab = 1
-                    },
-                    icon = { Icon(Icons.Filled.AutoStories, contentDescription = "Lector") },
-                    label = { Text("Lector") },
-                    modifier = Modifier.testTag("nav_reader")
-                )
-                NavigationBarItem(
-                    selected = selectedTab == 2,
-                    onClick = {
-                        selectedTab = 2
-                    },
-                    icon = { Icon(Icons.Filled.Search, contentDescription = "Buscador") },
-                    label = { Text("Buscador") },
-                    modifier = Modifier.testTag("nav_search")
-                )
-                NavigationBarItem(
-                    selected = selectedTab == 3,
-                    onClick = {
-                        selectedTab = 3
-                        viewModel.onFilterSelected(VerseFilter.FAVORITOS)
-                    },
-                    icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favoritos") },
-                    label = { Text("Favoritos") },
-                    modifier = Modifier.testTag("nav_favorites")
-                )
+                        },
+                        icon = { Icon(Icons.Filled.MenuBook, contentDescription = "Versículos") },
+                        label = { Text("Versículos") },
+                        modifier = Modifier.testTag("nav_verses")
+                    )
+                    NavigationBarItem(
+                        selected = selectedTab == 1,
+                        onClick = {
+                            selectedTab = 1
+                        },
+                        icon = { Icon(Icons.Filled.AutoStories, contentDescription = "Lector") },
+                        label = { Text("Lector") },
+                        modifier = Modifier.testTag("nav_reader")
+                    )
+                    NavigationBarItem(
+                        selected = selectedTab == 2,
+                        onClick = {
+                            selectedTab = 2
+                        },
+                        icon = { Icon(Icons.Filled.Search, contentDescription = "Buscador") },
+                        label = { Text("Buscador") },
+                        modifier = Modifier.testTag("nav_search")
+                    )
+                    NavigationBarItem(
+                        selected = selectedTab == 3,
+                        onClick = {
+                            selectedTab = 3
+                            viewModel.onFilterSelected(VerseFilter.FAVORITOS)
+                        },
+                        icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favoritos") },
+                        label = { Text("Favoritos") },
+                        modifier = Modifier.testTag("nav_favorites")
+                    )
+                }
             }
         },
         floatingActionButton = {
@@ -334,7 +345,13 @@ fun HomeScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(
+                    if (selectedTab == 1 && !readerUiState.isReaderBarsVisible) {
+                        PaddingValues(0.dp)
+                    } else {
+                        paddingValues
+                    }
+                )
                 .background(MaterialTheme.colorScheme.background)
         ) {
             when (selectedTab) {

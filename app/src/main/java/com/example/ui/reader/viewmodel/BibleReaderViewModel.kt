@@ -112,6 +112,16 @@ class BibleReaderViewModel(
         _uiState.update { it.copy(targetScrollVerse = null) }
     }
 
+    fun setReaderBarsVisible(visible: Boolean) {
+        if (_uiState.value.isReaderBarsVisible != visible) {
+            _uiState.update { it.copy(isReaderBarsVisible = visible) }
+        }
+    }
+
+    fun toggleReaderBars() {
+        _uiState.update { it.copy(isReaderBarsVisible = !it.isReaderBarsVisible) }
+    }
+
     fun nextChapter() {
         val currentBook = _uiState.value.currentBook ?: return
         val currentChapter = _uiState.value.currentChapter

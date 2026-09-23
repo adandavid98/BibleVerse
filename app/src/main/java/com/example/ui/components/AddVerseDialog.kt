@@ -88,6 +88,10 @@ import androidx.compose.foundation.layout.aspectRatio
 import com.example.data.bible.ContextGenerationResult
 import com.example.data.bible.ContextSource
 import com.example.data.bible.GeminiVerseContextService
+import android.content.Context
+import com.example.data.bible.BollsBibleApiService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import com.example.data.initial.InitialVersesData
 
@@ -139,6 +143,7 @@ fun AddVerseDialog(
     var bibleNotes by remember { mutableStateOf("") }
     var isGeneratingAiTab0 by remember { mutableStateOf(false) }
     var contextSourceBadgeTab0 by remember { mutableStateOf("Catálogo Local") }
+    var isFetchingVerseText by remember { mutableStateOf(false) }
 
     // === STATE FOR OPTION 2: MANUAL ENTRY ===
     var manualBook by remember { mutableStateOf("") }
@@ -157,21 +162,22 @@ fun AddVerseDialog(
     val suggestedTopics = listOf("Fe", "Amor", "Esperanza", "Fortaleza", "Paz", "Salvación", "Sabiduría", "Oración", "Promesa", "Gracia")
 
     // Intelligent hybrid filling for Book & Chapter selection:
-    // 1. Checks if exact match exists in InitialVersesData
-    // 2. Otherwise computes grounded canonical context from BibleContextEngine
+    // Resolves genuine biblical text across Offline SQLite, Room Cache, Network (Bolls API) & Canonical fallbacks
     LaunchedEffect(selectedBook, selectedChapter, verseInput, selectedVersion) {
         val vNum = verseInput.toIntOrNull() ?: 1
-        val offlineVerses = OfflineBibleManager.getVerses(context, selectedBook.order, selectedChapter)
-        val vMatch = offlineVerses.firstOrNull { it.verseNumber == vNum }
-        if (vMatch != null && vMatch.text.isNotBlank()) {
-            bibleText = vMatch.text
-        } else {
-            val refQuery1 = "${selectedBook.name} $selectedChapter:$verseInput".trim()
-            val match = InitialVersesData.verses.firstOrNull { it.reference.equals(refQuery1, ignoreCase = true) }
-            if (match != null && bibleText.isBlank()) {
-                bibleText = match.text.removeSurrounding("«", "»")
-            }
+        isFetchingVerseText = true
+        val resolvedText = resolveVerseText(
+            context = context,
+            bookOrder = selectedBook.order,
+            chapter = selectedChapter,
+            verse = vNum,
+            versionCode = selectedVersion.code,
+            bookName = selectedBook.name
+        )
+        if (resolvedText.isNotBlank()) {
+            bibleText = resolvedText
         }
+        isFetchingVerseText = false
 
         if (bibleContext.isBlank() || contextSourceBadgeTab0 != "✨ IA (Gemini)") {
             bibleContext = BibleContextEngine.getLocalContext(selectedBook.name, selectedChapter, verseInput, bibleText)
@@ -188,13 +194,22 @@ fun AddVerseDialog(
                 selectedBook = book
                 selectedChapter = chapter
                 verseInput = verse.toString()
+                bibleText = "" // Clear immediately so outdated verse is not shown
                 showReferencePickerWindow = false
                 coroutineScope.launch {
-                    val offline = OfflineBibleManager.getVerses(context, book.order, chapter)
-                    val v = offline.firstOrNull { it.verseNumber == verse }
-                    if (v != null && v.text.isNotBlank()) {
-                        bibleText = v.text
+                    isFetchingVerseText = true
+                    val resolved = resolveVerseText(
+                        context = context,
+                        bookOrder = book.order,
+                        chapter = chapter,
+                        verse = verse,
+                        versionCode = selectedVersion.code,
+                        bookName = book.name
+                    )
+                    if (resolved.isNotBlank()) {
+                        bibleText = resolved
                     }
+                    isFetchingVerseText = false
                     val ctx = BibleContextEngine.getLocalContext(book.name, chapter, verse.toString(), bibleText)
                     if (ctx.isNotBlank()) {
                         bibleContext = ctx
@@ -486,6 +501,15 @@ fun AddVerseDialog(
                                 .testTag("input_bible_text"),
                             minLines = 3,
                             maxLines = 6,
+                            trailingIcon = {
+                                if (isFetchingVerseText) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(18.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            },
                             shape = RoundedCornerShape(12.dp)
                         )
 
@@ -1312,4 +1336,61 @@ fun BibleReferenceWindowPicker(
             }
         }
     }
+}
+
+/**
+ * Resolves biblical text across offline SQLite, Room cache, network (Bolls API) and canonical data.
+ */
+private suspend fun resolveVerseText(
+    context: Context,
+    bookOrder: Int,
+    chapter: Int,
+    verse: Int,
+    versionCode: String,
+    bookName: String
+): String = withContext(Dispatchers.IO) {
+    val normVersion = when (versionCode.uppercase().trim()) {
+        "RV1960", "REINA-VALERA 1960" -> "RVR1960"
+        else -> versionCode.uppercase().trim()
+    }
+
+    // 1. Try OfflineBibleManager for RVR1960 (local SQLite database - instant sub-millisecond)
+    if (normVersion == "RVR1960") {
+        try {
+            val offlineVerses = OfflineBibleManager.getVerses(context, bookOrder, chapter)
+            val match = offlineVerses.firstOrNull { it.verseNumber == verse }
+            if (match != null && match.text.isNotBlank()) {
+                return@withContext match.text.trim()
+            }
+        } catch (_: Exception) {}
+    }
+
+    // 2. Try fetching from network (Bolls API) if online
+    try {
+        val netVerses = BollsBibleApiService.fetchChapter(normVersion, bookOrder, chapter)
+        if (!netVerses.isNullOrEmpty()) {
+            val netMatch = netVerses.firstOrNull { it.verseNumber == verse }
+            if (netMatch != null && netMatch.text.isNotBlank()) {
+                return@withContext netMatch.text.trim()
+            }
+        }
+    } catch (_: Exception) {}
+
+    // 3. Fallback to OfflineBibleManager regardless of version
+    try {
+        val fallbackOffline = OfflineBibleManager.getVerses(context, bookOrder, chapter)
+        val fallbackMatch = fallbackOffline.firstOrNull { it.verseNumber == verse }
+        if (fallbackMatch != null && fallbackMatch.text.isNotBlank()) {
+            return@withContext fallbackMatch.text.trim()
+        }
+    } catch (_: Exception) {}
+
+    // 4. InitialVersesData fallback if available
+    val refQuery = "$bookName $chapter:$verse".trim()
+    val initMatch = InitialVersesData.verses.firstOrNull { it.reference.equals(refQuery, ignoreCase = true) }
+    if (initMatch != null && initMatch.text.isNotBlank()) {
+        return@withContext initMatch.text.removeSurrounding("«", "»").trim()
+    }
+
+    ""
 }

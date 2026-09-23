@@ -113,7 +113,7 @@ object OfflineBibleManager {
             testDb = SQLiteDatabase.openDatabase(
                 file.absolutePath,
                 null,
-                SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.NO_LOCALIZED_COLLATORS
             )
             val cursor = testDb.rawQuery("SELECT COUNT(*) FROM bible_verses", null)
             val count = cursor.use { c ->
@@ -121,6 +121,7 @@ object OfflineBibleManager {
             }
             count >= TOTAL_CANONICAL_VERSES
         } catch (e: Exception) {
+            Log.w(TAG, "isValidDatabaseFile check failed for ${file.name}", e)
             false
         } finally {
             try { testDb?.close() } catch (_: Exception) {}
@@ -186,17 +187,18 @@ object OfflineBibleManager {
             return@withContext results
         }
 
-        // Self-healing: if 0 results returned for a valid canonical chapter, force re-check
-        Log.w(TAG, "0 verses returned for book $bookId, chapter $chapter. Verifying database integrity.")
-        synchronized(this@OfflineBibleManager) {
-            val dbFile = File(context.filesDir, DB_FILE_NAME)
-            closeCurrentDatabase()
-            dbFile.delete()
-        }
-
-        val recovered = ensureReady(context)
-        if (recovered) {
-            return@withContext readVersesQuery(bookId, chapter)
+        // Check if database health is degraded before deleting
+        if (!isDatabaseHealthy()) {
+            Log.w(TAG, "Database health degraded for book $bookId, chapter $chapter. Re-extracting.")
+            synchronized(this@OfflineBibleManager) {
+                val dbFile = File(context.filesDir, DB_FILE_NAME)
+                closeCurrentDatabase()
+                dbFile.delete()
+            }
+            val recovered = ensureReady(context)
+            if (recovered) {
+                return@withContext readVersesQuery(bookId, chapter)
+            }
         }
         emptyList()
     }

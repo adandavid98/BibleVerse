@@ -22,6 +22,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -259,12 +263,29 @@ fun BibleReaderScreen(
                     }
                 }
             } else {
+                val nestedScrollConnection = remember {
+                    object : NestedScrollConnection {
+                        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                            val delta = available.y
+                            if (delta < -12f) {
+                                // Scrolling down (reading forward into the chapter) -> Hide bottom bars for full screen
+                                viewModel.setReaderBarsVisible(false)
+                            } else if (delta > 12f) {
+                                // Swipe down (scrolling up to previous text) -> Show bottom bars
+                                viewModel.setReaderBarsVisible(true)
+                            }
+                            return Offset.Zero
+                        }
+                    }
+                }
+
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
                         .fillMaxSize()
+                        .nestedScroll(nestedScrollConnection)
                         .padding(horizontal = 22.dp),
-                    contentPadding = PaddingValues(top = 12.dp, bottom = 110.dp),
+                    contentPadding = PaddingValues(top = 12.dp, bottom = if (uiState.isReaderBarsVisible) 110.dp else 24.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     itemsIndexed(
@@ -339,92 +360,98 @@ fun BibleReaderScreen(
             }
 
             // Navigation buttons at the extremes & center pill (Matching screenshot layout)
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 18.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            AnimatedVisibility(
+                visible = uiState.isReaderBarsVisible,
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter)
             ) {
-                // Left extreme: Previous chapter button (pointing left)
-                Surface(
+                Row(
                     modifier = Modifier
-                        .size(46.dp)
-                        .clip(CircleShape)
-                        .shadow(6.dp, CircleShape)
-                        .clickable { viewModel.previousChapter() },
-                    shape = CircleShape,
-                    color = themeBg,
-                    border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.3f))
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, bottom = 18.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Default.ArrowBack,
-                            contentDescription = "Capítulo anterior",
-                            tint = themeText,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-
-                // Center: Current Book & Chapter pill (Click opens selector modal)
-                Surface(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
-                        .shadow(8.dp, RoundedCornerShape(24.dp))
-                        .clickable { viewModel.openBookChapterSelector() },
-                    shape = RoundedCornerShape(24.dp),
-                    color = themeBg,
-                    border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.35f))
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    // Left extreme: Previous chapter button (pointing left)
+                    Surface(
+                        modifier = Modifier
+                            .size(46.dp)
+                            .clip(CircleShape)
+                            .shadow(6.dp, CircleShape)
+                            .clickable { viewModel.previousChapter() },
+                        shape = CircleShape,
+                        color = themeBg,
+                        border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.3f))
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(CircleShape)
-                                .background(themeAccent.copy(alpha = 0.15f)),
-                            contentAlignment = Alignment.Center
-                        ) {
+                        Box(contentAlignment = Alignment.Center) {
                             Icon(
-                                Icons.Default.PlayArrow,
-                                contentDescription = null,
-                                tint = themeAccent,
-                                modifier = Modifier.size(16.dp)
+                                Icons.Default.ArrowBack,
+                                contentDescription = "Capítulo anterior",
+                                tint = themeText,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
-                        Text(
-                            text = "${(uiState.currentBook?.name ?: "LIBRO").uppercase()} ${uiState.currentChapter}",
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 1.5.sp,
-                            fontSize = 13.sp,
-                            color = themeText
-                        )
                     }
-                }
 
-                // Right extreme: Next chapter button (pointing right)
-                Surface(
-                    modifier = Modifier
-                        .size(46.dp)
-                        .clip(CircleShape)
-                        .shadow(6.dp, CircleShape)
-                        .clickable { viewModel.nextChapter() },
-                    shape = CircleShape,
-                    color = themeBg,
-                    border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.3f))
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Default.ArrowForward,
-                            contentDescription = "Capítulo siguiente",
-                            tint = themeText,
-                            modifier = Modifier.size(20.dp)
-                        )
+                    // Center: Current Book & Chapter pill (Click opens selector modal)
+                    Surface(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(24.dp))
+                            .shadow(8.dp, RoundedCornerShape(24.dp))
+                            .clickable { viewModel.openBookChapterSelector() },
+                        shape = RoundedCornerShape(24.dp),
+                        color = themeBg,
+                        border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.35f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .background(themeAccent.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Default.PlayArrow,
+                                    contentDescription = null,
+                                    tint = themeAccent,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                            Text(
+                                text = "${(uiState.currentBook?.name ?: "LIBRO").uppercase()} ${uiState.currentChapter}",
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.5.sp,
+                                fontSize = 13.sp,
+                                color = themeText
+                            )
+                        }
+                    }
+
+                    // Right extreme: Next chapter button (pointing right)
+                    Surface(
+                        modifier = Modifier
+                            .size(46.dp)
+                            .clip(CircleShape)
+                            .shadow(6.dp, CircleShape)
+                            .clickable { viewModel.nextChapter() },
+                        shape = CircleShape,
+                        color = themeBg,
+                        border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.3f))
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Default.ArrowForward,
+                                contentDescription = "Capítulo siguiente",
+                                tint = themeText,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
             }
