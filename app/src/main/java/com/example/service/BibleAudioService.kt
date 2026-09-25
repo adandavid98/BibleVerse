@@ -23,6 +23,7 @@ import android.os.Looper
 import android.os.PowerManager
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.speech.tts.Voice
 import com.example.MainActivity
 import com.example.data.bible.BibleCatalog
 import com.example.data.bible.OfflineBibleManager
@@ -48,6 +49,7 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         const val ACTION_PREVIOUS = "com.example.action.AUDIO_PREVIOUS"
         const val ACTION_SEEK_INDEX = "com.example.action.AUDIO_SEEK_INDEX"
         const val ACTION_SET_SPEED = "com.example.action.AUDIO_SET_SPEED"
+        const val ACTION_SET_VOICE_GENDER = "com.example.action.AUDIO_SET_VOICE_GENDER"
         const val ACTION_STOP = "com.example.action.AUDIO_STOP"
 
         const val EXTRA_BOOK_ID = "extra_book_id"
@@ -56,6 +58,7 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         const val EXTRA_VERSION = "extra_version"
         const val EXTRA_START_INDEX = "extra_start_index"
         const val EXTRA_SPEED = "extra_speed"
+        const val EXTRA_VOICE_GENDER = "extra_voice_gender"
     }
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -76,6 +79,7 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
     private var version = "RVR1960"
     private var currentIndex = 0
     private var speechRate = 1.0f
+    private var voiceGender = AudioVoiceGender.FEMALE
 
     override fun onCreate() {
         super.onCreate()
@@ -90,33 +94,37 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         if (status == TextToSpeech.SUCCESS) {
             val ttsEngine = tts
             if (ttsEngine != null) {
-                var langResult = ttsEngine.setLanguage(Locale("es", "ES"))
-                if (langResult == TextToSpeech.LANG_MISSING_DATA || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    langResult = ttsEngine.setLanguage(Locale("es"))
-                    if (langResult == TextToSpeech.LANG_MISSING_DATA || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
-                        ttsEngine.setLanguage(Locale.getDefault())
-                    }
-                }
-                ttsEngine.setSpeechRate(speechRate)
+                applyVoiceAndSpeed(ttsEngine)
+
                 ttsEngine.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                     override fun onStart(utteranceId: String?) {
                         mainHandler.post {
-                            updateCurrentVerseState()
-                            updateNotificationAndMediaSession()
+                            val parsedIndex = utteranceId?.substringAfter("verse_")?.toIntOrNull()
+                            if (parsedIndex != null && parsedIndex in BibleAudioController.currentPlaylist.indices) {
+                                currentIndex = parsedIndex
+                                updateCurrentVerseState()
+                                updateNotificationAndMediaSession()
+
+                                // Pre-buffer the next verse seamlessly with QUEUE_ADD for 0ms transition gap
+                                if (isPlaying) {
+                                    val playlist = BibleAudioController.currentPlaylist
+                                    val nextIdx = currentIndex + 1
+                                    if (nextIdx in playlist.indices) {
+                                        enqueueVerseLookahead(nextIdx)
+                                    }
+                                }
+                            }
                         }
                     }
 
                     override fun onDone(utteranceId: String?) {
                         mainHandler.post {
-                            if (isPlaying) {
-                                val playlist = BibleAudioController.currentPlaylist
-                                if (currentIndex < playlist.size - 1) {
-                                    currentIndex++
-                                    speakCurrentVerse()
-                                } else {
-                                    // Current chapter finished! Seamlessly transition to next chapter
-                                    advanceToNextChapter()
-                                }
+                            val parsedIndex = utteranceId?.substringAfter("verse_")?.toIntOrNull()
+                            val playlist = BibleAudioController.currentPlaylist
+
+                            if (isPlaying && parsedIndex != null && parsedIndex >= playlist.size - 1) {
+                                // Final verse of current chapter completed! Smoothly advance to next chapter
+                                advanceToNextChapter()
                             }
                         }
                     }
@@ -128,7 +136,7 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
                                 val playlist = BibleAudioController.currentPlaylist
                                 if (currentIndex < playlist.size - 1) {
                                     currentIndex++
-                                    speakCurrentVerse()
+                                    startStreamingFromCurrentIndex()
                                 } else {
                                     advanceToNextChapter()
                                 }
@@ -136,11 +144,11 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
                         }
                     }
                 })
+
                 isTtsInitialized = true
 
-                // If playback was requested before initialization finished
                 if (isPlaying) {
-                    speakCurrentVerse()
+                    startStreamingFromCurrentIndex()
                 }
             }
         }
@@ -157,8 +165,16 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
                 version = intent.getStringExtra(EXTRA_VERSION) ?: version
                 currentIndex = intent.getIntExtra(EXTRA_START_INDEX, 0)
                 speechRate = intent.getFloatExtra(EXTRA_SPEED, 1.0f)
+                val genderStr = intent.getStringExtra(EXTRA_VOICE_GENDER)
+                if (genderStr != null) {
+                    voiceGender = try {
+                        AudioVoiceGender.valueOf(genderStr)
+                    } catch (e: Exception) {
+                        AudioVoiceGender.FEMALE
+                    }
+                }
 
-                tts?.setSpeechRate(speechRate)
+                tts?.let { applyVoiceAndSpeed(it) }
                 startForegroundWithNotification()
                 play()
             }
@@ -175,6 +191,17 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
                 val speed = intent.getFloatExtra(EXTRA_SPEED, speechRate)
                 setSpeechRateInternal(speed)
             }
+            ACTION_SET_VOICE_GENDER -> {
+                val genderStr = intent.getStringExtra(EXTRA_VOICE_GENDER)
+                if (genderStr != null) {
+                    val newGender = try {
+                        AudioVoiceGender.valueOf(genderStr)
+                    } catch (e: Exception) {
+                        AudioVoiceGender.FEMALE
+                    }
+                    setVoiceGenderInternal(newGender)
+                }
+            }
             ACTION_STOP -> stopPlayback()
         }
 
@@ -185,13 +212,13 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         requestAudioFocus()
         acquireWakeLock()
         isPlaying = true
-        tts?.setSpeechRate(speechRate)
 
+        tts?.let { applyVoiceAndSpeed(it) }
         updateCurrentVerseState()
         updateNotificationAndMediaSession()
 
         if (isTtsInitialized) {
-            speakCurrentVerse()
+            startStreamingFromCurrentIndex()
         }
     }
 
@@ -209,7 +236,7 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         if (currentIndex < playlist.size - 1) {
             currentIndex++
             if (isPlaying) {
-                speakCurrentVerse()
+                startStreamingFromCurrentIndex()
             } else {
                 updateCurrentVerseState()
                 updateNotificationAndMediaSession()
@@ -223,15 +250,14 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         if (currentIndex > 0) {
             currentIndex--
             if (isPlaying) {
-                speakCurrentVerse()
+                startStreamingFromCurrentIndex()
             } else {
                 updateCurrentVerseState()
                 updateNotificationAndMediaSession()
             }
         } else {
-            // Already at beginning of chapter -> re-read verse 1
             if (isPlaying) {
-                speakCurrentVerse()
+                startStreamingFromCurrentIndex()
             } else {
                 updateCurrentVerseState()
                 updateNotificationAndMediaSession()
@@ -244,7 +270,7 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         if (index in playlist.indices) {
             currentIndex = index
             if (isPlaying) {
-                speakCurrentVerse()
+                startStreamingFromCurrentIndex()
             } else {
                 updateCurrentVerseState()
                 updateNotificationAndMediaSession()
@@ -258,8 +284,18 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         BibleAudioController.updateState { it.copy(speechRate = rate) }
 
         if (isPlaying) {
-            // Re-speak current verse at new rate immediately
-            speakCurrentVerse()
+            startStreamingFromCurrentIndex()
+        }
+        updateNotificationAndMediaSession()
+    }
+
+    private fun setVoiceGenderInternal(gender: AudioVoiceGender) {
+        voiceGender = gender
+        tts?.let { applyVoiceAndSpeed(it) }
+        BibleAudioController.updateState { it.copy(voiceGender = gender) }
+
+        if (isPlaying) {
+            startStreamingFromCurrentIndex()
         }
         updateNotificationAndMediaSession()
     }
@@ -283,26 +319,122 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         stopSelf()
     }
 
-    private fun speakCurrentVerse() {
+    /**
+     * Starts speaking current verse immediately with QUEUE_FLUSH,
+     * and queues the subsequent verse with QUEUE_ADD to achieve 0ms natural flow.
+     */
+    private fun startStreamingFromCurrentIndex() {
         val playlist = BibleAudioController.currentPlaylist
         if (currentIndex !in playlist.indices) return
 
-        val verse = playlist[currentIndex]
-        val cleanText = OfflineBibleManager.cleanVerseText(verse.text)
-        if (cleanText.isBlank()) {
-            // Skip empty verse
+        tts?.stop() // Flush any previous utterances
+
+        val currentVerse = playlist[currentIndex]
+        val cleanText = BibleAudioSpeechSanitizer.prepareForNaturalSpeech(currentVerse.text)
+        if (cleanText.isNotBlank()) {
+            val params = Bundle().apply {
+                putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f)
+            }
+            tts?.speak(cleanText, TextToSpeech.QUEUE_FLUSH, params, "verse_$currentIndex")
+
+            // Lookahead: enqueue next verse right away so TTS executes with zero hesitation
+            val nextIdx = currentIndex + 1
+            if (nextIdx in playlist.indices) {
+                enqueueVerseLookahead(nextIdx)
+            }
+        } else {
             if (currentIndex < playlist.size - 1) {
                 currentIndex++
-                speakCurrentVerse()
+                startStreamingFromCurrentIndex()
             }
-            return
+        }
+    }
+
+    private fun enqueueVerseLookahead(index: Int) {
+        val playlist = BibleAudioController.currentPlaylist
+        if (index !in playlist.indices) return
+
+        val verse = playlist[index]
+        val cleanText = BibleAudioSpeechSanitizer.prepareForNaturalSpeech(verse.text)
+        if (cleanText.isNotBlank()) {
+            val params = Bundle().apply {
+                putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f)
+            }
+            tts?.speak(cleanText, TextToSpeech.QUEUE_ADD, params, "verse_$index")
+        }
+    }
+
+    /**
+     * Selects high-fidelity Google Neural / HD voices and adjusts prosody pitch.
+     */
+    private fun applyVoiceAndSpeed(ttsEngine: TextToSpeech) {
+        ttsEngine.setSpeechRate(speechRate)
+
+        // Pitch modulation: slightly lower for masculine depth, slightly higher for feminine clarity
+        val targetPitch = when (voiceGender) {
+            AudioVoiceGender.MALE -> 0.92f
+            AudioVoiceGender.FEMALE -> 1.06f
+        }
+        ttsEngine.setPitch(targetPitch)
+
+        try {
+            val allVoices = ttsEngine.voices
+            if (!allVoices.isNullOrEmpty()) {
+                val spanishVoices = allVoices.filter { it.locale.language.equals("es", ignoreCase = true) }
+                val selectedVoice = findBestVoiceForGender(spanishVoices, voiceGender)
+                if (selectedVoice != null) {
+                    ttsEngine.voice = selectedVoice
+                    return
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
 
-        val params = Bundle().apply {
-            putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f)
+        // Fallback locale if voice list isn't accessible
+        var langResult = ttsEngine.setLanguage(Locale("es", "ES"))
+        if (langResult == TextToSpeech.LANG_MISSING_DATA || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+            langResult = ttsEngine.setLanguage(Locale("es"))
+            if (langResult == TextToSpeech.LANG_MISSING_DATA || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                ttsEngine.setLanguage(Locale.getDefault())
+            }
         }
-        val utteranceId = "verse_${verse.bookId}_${verse.chapter}_${verse.verseNumber}_${System.currentTimeMillis()}"
-        tts?.speak(cleanText, TextToSpeech.QUEUE_FLUSH, params, utteranceId)
+    }
+
+    private fun findBestVoiceForGender(spanishVoices: List<Voice>, gender: AudioVoiceGender): Voice? {
+        if (spanishVoices.isEmpty()) return null
+
+        val isLookingForFemale = (gender == AudioVoiceGender.FEMALE)
+
+        val candidates = spanishVoices.filter { voice ->
+            val name = voice.name.lowercase()
+            val features = voice.features?.map { it.lowercase() } ?: emptyList()
+
+            val isExplicitFemale = features.any { it.contains("female") || it.contains("gender=female") } ||
+                    name.contains("female") || name.contains("mujer") ||
+                    name.contains("-eed") || name.contains("-sfb") || name.contains("-eea") || name.contains("-eee")
+
+            val isExplicitMale = features.any { it.contains("male") || it.contains("gender=male") } ||
+                    name.contains("male") || name.contains("hombre") ||
+                    name.contains("-eec") || name.contains("-sfa") || name.contains("-eef") || name.contains("-eeb")
+
+            if (isLookingForFemale) {
+                isExplicitFemale || (!isExplicitMale && (name.contains("d-") || name.contains("f-") || name.contains("a-")))
+            } else {
+                isExplicitMale || (!isExplicitFemale && (name.contains("c-") || name.contains("b-") || name.contains("m-")))
+            }
+        }
+
+        // Rank by neural / network quality and modern dialect
+        return candidates.maxByOrNull { voice ->
+            var score = 0
+            if (voice.name.contains("network", ignoreCase = true)) score += 60
+            if (voice.name.contains("neural", ignoreCase = true)) score += 60
+            if (voice.quality >= Voice.QUALITY_VERY_HIGH) score += 40
+            else if (voice.quality >= Voice.QUALITY_HIGH) score += 20
+            if (voice.locale.country.equals("US", ignoreCase = true) || voice.locale.country.equals("MX", ignoreCase = true)) score += 15
+            score
+        } ?: spanishVoices.firstOrNull()
     }
 
     private fun advanceToNextChapter() {
@@ -342,10 +474,9 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
                 updateNotificationAndMediaSession()
 
                 if (isPlaying) {
-                    speakCurrentVerse()
+                    startStreamingFromCurrentIndex()
                 }
             } else {
-                // No more chapters found or reached end of Bible
                 stopPlayback()
             }
         }
@@ -369,6 +500,7 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
                 totalVerses = playlist.size,
                 currentIndex = currentIndex,
                 speechRate = speechRate,
+                voiceGender = voiceGender,
                 bibleVersion = version
             )
         }
@@ -413,7 +545,7 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         // 2. Update MediaSession Metadata
         val metadata = MediaMetadata.Builder()
             .putString(MediaMetadata.METADATA_KEY_TITLE, "$bookName $chapter:$vNumber")
-            .putString(MediaMetadata.METADATA_KEY_ARTIST, "Biblia $version • Lectura con Voz")
+            .putString(MediaMetadata.METADATA_KEY_ARTIST, "Biblia $version • ${voiceGender.displayName}")
             .putString(MediaMetadata.METADATA_KEY_ALBUM, "$bookName $chapter")
             .putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, "$bookName $chapter:$vNumber")
             .putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, vText)
@@ -489,7 +621,7 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
 
         builder.setContentTitle("$bookName $chapter:$verseNumber")
             .setContentText(if (verseText.isNotBlank()) verseText else "Versículo $verseNumber de $totalVerses")
-            .setSubText("Biblia $version • ${speechRate}x")
+            .setSubText("Biblia $version • ${speechRate}x • ${voiceGender.shortLabel}")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setContentIntent(openAppPendingIntent)
             .setOngoing(isPlaying)

@@ -2,6 +2,7 @@ package com.example.service
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,6 +10,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 object BibleAudioController {
+
+    private const val PREFS_NAME = "bible_audio_preferences"
+    private const val KEY_SPEED = "pref_audio_speed"
+    private const val KEY_GENDER = "pref_voice_gender"
 
     private val _audioState = MutableStateFlow(BibleAudioState())
     val audioState: StateFlow<BibleAudioState> = _audioState.asStateFlow()
@@ -21,6 +26,28 @@ object BibleAudioController {
     // Available speeds
     val availableSpeeds = listOf(1.0f, 1.25f, 1.5f)
 
+    private fun getPrefs(context: Context): SharedPreferences {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    }
+
+    fun initPreferences(context: Context) {
+        val prefs = getPrefs(context)
+        val savedSpeed = prefs.getFloat(KEY_SPEED, 1.0f)
+        val savedGenderStr = prefs.getString(KEY_GENDER, AudioVoiceGender.FEMALE.name)
+        val savedGender = try {
+            AudioVoiceGender.valueOf(savedGenderStr ?: AudioVoiceGender.FEMALE.name)
+        } catch (e: Exception) {
+            AudioVoiceGender.FEMALE
+        }
+
+        _audioState.update {
+            it.copy(
+                speechRate = savedSpeed,
+                voiceGender = savedGender
+            )
+        }
+    }
+
     fun startChapter(
         context: Context,
         bookId: Int,
@@ -29,9 +56,12 @@ object BibleAudioController {
         version: String,
         verses: List<AudioVerseItem>,
         startVerseNumber: Int = 1,
-        speed: Float = _audioState.value.speechRate
+        speed: Float = _audioState.value.speechRate,
+        voiceGender: AudioVoiceGender = _audioState.value.voiceGender
     ) {
         if (verses.isEmpty()) return
+        initPreferences(context)
+
         currentPlaylist = verses
         val startIndex = verses.indexOfFirst { it.verseNumber == startVerseNumber }.coerceAtLeast(0)
         val initialVerse = verses[startIndex]
@@ -48,6 +78,7 @@ object BibleAudioController {
                 totalVerses = verses.size,
                 currentIndex = startIndex,
                 speechRate = speed,
+                voiceGender = voiceGender,
                 bibleVersion = version,
                 errorMessage = null
             )
@@ -61,6 +92,7 @@ object BibleAudioController {
             putExtra(BibleAudioService.EXTRA_VERSION, version)
             putExtra(BibleAudioService.EXTRA_START_INDEX, startIndex)
             putExtra(BibleAudioService.EXTRA_SPEED, speed)
+            putExtra(BibleAudioService.EXTRA_VOICE_GENDER, voiceGender.name)
         }
         startService(context, intent)
     }
@@ -107,10 +139,29 @@ object BibleAudioController {
     }
 
     fun setSpeed(context: Context, speed: Float) {
+        getPrefs(context).edit().putFloat(KEY_SPEED, speed).apply()
         _audioState.update { it.copy(speechRate = speed) }
+
         val intent = Intent(context, BibleAudioService::class.java).apply {
             action = BibleAudioService.ACTION_SET_SPEED
             putExtra(BibleAudioService.EXTRA_SPEED, speed)
+        }
+        startService(context, intent)
+    }
+
+    fun toggleVoiceGender(context: Context) {
+        val current = _audioState.value.voiceGender
+        val next = if (current == AudioVoiceGender.FEMALE) AudioVoiceGender.MALE else AudioVoiceGender.FEMALE
+        setVoiceGender(context, next)
+    }
+
+    fun setVoiceGender(context: Context, gender: AudioVoiceGender) {
+        getPrefs(context).edit().putString(KEY_GENDER, gender.name).apply()
+        _audioState.update { it.copy(voiceGender = gender) }
+
+        val intent = Intent(context, BibleAudioService::class.java).apply {
+            action = BibleAudioService.ACTION_SET_VOICE_GENDER
+            putExtra(BibleAudioService.EXTRA_VOICE_GENDER, gender.name)
         }
         startService(context, intent)
     }

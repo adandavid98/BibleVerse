@@ -1,6 +1,14 @@
 package com.example.service
 
 /**
+ * Available voice genders for natural neural narration.
+ */
+enum class AudioVoiceGender(val displayName: String, val shortLabel: String) {
+    FEMALE("Voz Femenina", "Femenina"),
+    MALE("Voz Masculina", "Masculina")
+}
+
+/**
  * Item representing a verse in the audio playback queue.
  */
 data class AudioVerseItem(
@@ -25,6 +33,7 @@ data class BibleAudioState(
     val totalVerses: Int = 0,
     val currentIndex: Int = 0,
     val speechRate: Float = 1.0f,
+    val voiceGender: AudioVoiceGender = AudioVoiceGender.FEMALE,
     val bibleVersion: String = "RVR1960",
     val isBuffering: Boolean = false,
     val errorMessage: String? = null

@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.Speed
@@ -60,6 +61,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.service.AudioVoiceGender
 import com.example.service.BibleAudioController
 import com.example.service.BibleAudioState
 
@@ -163,11 +165,29 @@ fun BibleAudioBottomBar(
                         }
                     }
 
-                    // Right: Speed pill & Playback Controls
+                    // Right: Voice Gender, Speed pill & Playback Controls
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
+                        // Voice Gender Toggle (Mujer / Hombre)
+                        Surface(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable { BibleAudioController.toggleVoiceGender(context) },
+                            shape = RoundedCornerShape(12.dp),
+                            color = themeAccent.copy(alpha = 0.12f),
+                            border = BorderStroke(1.dp, themeAccent.copy(alpha = 0.3f))
+                        ) {
+                            Text(
+                                text = if (audioState.voiceGender == AudioVoiceGender.FEMALE) "👩 Fem" else "👨 Masc",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.5.sp,
+                                color = themeAccent,
+                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 4.dp)
+                            )
+                        }
+
                         // Speed Cycle Button
                         Surface(
                             modifier = Modifier
@@ -426,7 +446,64 @@ private fun BibleAudioDetailBottomSheet(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Voice Gender Selector Buttons (Voz Femenina / Voz Masculina)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Default.RecordVoiceOver,
+                    contentDescription = null,
+                    tint = themeSecondary,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Voz:",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = themeSecondary
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+
+                AudioVoiceGender.values().forEach { gender ->
+                    val isSelected = (audioState.voiceGender == gender)
+                    Surface(
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { BibleAudioController.setVoiceGender(context, gender) },
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isSelected) themeAccent else themeAccent.copy(alpha = 0.10f),
+                        border = BorderStroke(
+                            1.dp,
+                            if (isSelected) themeAccent else themeSecondary.copy(alpha = 0.25f)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = if (gender == AudioVoiceGender.FEMALE) "👩" else "👨",
+                                fontSize = 13.sp
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(
+                                text = gender.displayName,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                fontSize = 12.5.sp,
+                                color = if (isSelected) Color.White else themeText
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Speed Selector Buttons (1.0x, 1.25x, 1.5x)
             Row(
