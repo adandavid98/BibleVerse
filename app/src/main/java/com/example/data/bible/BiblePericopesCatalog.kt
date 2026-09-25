@@ -3,6 +3,7 @@ package com.example.data.bible
 import android.content.Context
 import android.util.Log
 import org.json.JSONObject
+import java.io.BufferedInputStream
 import java.util.concurrent.ConcurrentHashMap
 import java.util.zip.GZIPInputStream
 
@@ -70,11 +71,34 @@ object BiblePericopesCatalog {
     }
 
     private fun loadFromAssets(context: Context) {
-        context.assets.open("bible/pericopes_es.json.gz").use { rawIn ->
-            GZIPInputStream(rawIn).bufferedReader(Charsets.UTF_8).use { reader ->
-                parseJson(reader.readText())
+        val assetNames = listOf(
+            "bible/pericopes_es.json",
+            "bible/pericopes_es.json.gz"
+        )
+
+        for (name in assetNames) {
+            try {
+                context.assets.open(name).use { rawStream ->
+                    val bis = BufferedInputStream(rawStream)
+                    bis.mark(4)
+                    val b1 = bis.read()
+                    val b2 = bis.read()
+                    bis.reset()
+
+                    val jsonString = if (b1 == 0x1f && b2 == 0x8b) {
+                        GZIPInputStream(bis).bufferedReader(Charsets.UTF_8).use { it.readText() }
+                    } else {
+                        bis.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                    }
+                    parseJson(jsonString)
+                    Log.d(TAG, "Cargadas exitosamente ${headings.size} perícopas desde asset: $name")
+                    return
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "No se pudo cargar desde asset: $name", e)
             }
         }
+        Log.e(TAG, "ADVERTENCIA: No se pudo cargar perícopas de ningún asset disponible.")
     }
 
     private fun parseJson(jsonString: String) {

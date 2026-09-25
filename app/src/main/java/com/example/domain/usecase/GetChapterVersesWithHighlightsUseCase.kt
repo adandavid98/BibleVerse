@@ -32,7 +32,12 @@ class GetChapterVersesWithHighlightsUseCase(
                     text = verse.text,
                     highlightColorHex = highlightMap[verse.verseNumber]?.colorHex,
                     isSelected = false,
-                    sectionHeading = verse.sectionHeading,
+                    sectionHeading = verse.sectionHeading ?: com.example.data.bible.BiblePericopesCatalog.getHeading(
+                        bookId = bookId,
+                        chapter = chapter,
+                        verse = verse.verseNumber,
+                        version = version
+                    ),
                     isRedLetter = isJesusSpoken
                 )
             }

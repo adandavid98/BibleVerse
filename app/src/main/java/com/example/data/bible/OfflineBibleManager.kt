@@ -132,39 +132,48 @@ object OfflineBibleManager {
         val tempFile = File(targetFile.parentFile, "${targetFile.name}.tmp")
         if (tempFile.exists()) tempFile.delete()
 
-        try {
-            context.assets.open(ASSET_NAME).use { rawIn ->
-                GZIPInputStream(rawIn).use { gzIn ->
+        val candidates = listOf("bible/bible_rvr1960.db", "bible/bible_rvr1960.db.gz")
+        for (assetPath in candidates) {
+            try {
+                context.assets.open(assetPath).use { rawIn ->
+                    val bis = java.io.BufferedInputStream(rawIn)
+                    bis.mark(4)
+                    val b1 = bis.read()
+                    val b2 = bis.read()
+                    bis.reset()
+
+                    val isGzip = (b1 == 0x1f && b2 == 0x8b)
+                    val inputStream = if (isGzip) GZIPInputStream(bis) else bis
+
                     FileOutputStream(tempFile).use { fileOut ->
                         val buffer = ByteArray(64 * 1024)
                         var bytesRead: Int
-                        while (gzIn.read(buffer).also { bytesRead = it } != -1) {
+                        while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                             fileOut.write(buffer, 0, bytesRead)
                         }
                         fileOut.flush()
                     }
                 }
-            }
 
-            if (!isValidDatabaseFile(tempFile)) {
-                Log.e(TAG, "Extracted temp file failed integrity check (${tempFile.length()} bytes)")
-                tempFile.delete()
-                return false
+                if (isValidDatabaseFile(tempFile)) {
+                    if (targetFile.exists()) targetFile.delete()
+                    val renamed = tempFile.renameTo(targetFile)
+                    if (!renamed) {
+                        tempFile.copyTo(targetFile, overwrite = true)
+                        tempFile.delete()
+                    }
+                    Log.d(TAG, "Base de datos RVR1960 extraída exitosamente desde $assetPath")
+                    return true
+                } else {
+                    Log.e(TAG, "Extracted temp file from $assetPath failed integrity check (${tempFile.length()} bytes)")
+                    if (tempFile.exists()) tempFile.delete()
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "No se pudo extraer desde $assetPath: ${e.message}")
+                if (tempFile.exists()) tempFile.delete()
             }
-
-            if (targetFile.exists()) targetFile.delete()
-            val renamed = tempFile.renameTo(targetFile)
-            if (!renamed) {
-                // Fallback copy if renameTo fails across file boundaries
-                tempFile.copyTo(targetFile, overwrite = true)
-                tempFile.delete()
-            }
-            return true
-        } catch (e: Exception) {
-            Log.e(TAG, "Exception during atomic extraction of offline database", e)
-            if (tempFile.exists()) tempFile.delete()
-            return false
         }
+        return false
     }
 
     private fun closeCurrentDatabase() {

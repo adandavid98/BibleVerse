@@ -80,10 +80,13 @@ class BibleReaderRepository(
                 val existing = dao.getVersesSync(bookId, chapter, normVersion)
                 val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
                 val hasHeadingsInCatalog = BiblePericopesCatalog.hasHeadingsForChapter(bookId, chapter)
-                val missingHeadings = hasHeadingsInCatalog && existing.isNotEmpty() && existing.all { it.sectionHeading.isNullOrBlank() }
+                val needsHeadingRefresh = hasHeadingsInCatalog && existing.isNotEmpty() && existing.any { v ->
+                    val expected = BiblePericopesCatalog.getHeading(context, bookId, chapter, v.verseNumber, normVersion)
+                    v.sectionHeading != expected
+                }
 
-                // If not cached in Room yet, or incomplete, or contains synthetic placeholder, or missing headings, reload completely
-                if (existing.size != offlineVerses.size || hasSynthetic || missingHeadings) {
+                // If not cached in Room yet, or incomplete, or contains synthetic placeholder, or headings need update, reload completely
+                if (existing.size != offlineVerses.size || hasSynthetic || needsHeadingRefresh) {
                     dao.deleteVersesForChapter(bookId, chapter, normVersion)
                     val entities = offlineVerses.map { dto ->
                         val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber)
@@ -109,13 +112,16 @@ class BibleReaderRepository(
         val existing = dao.getVersesSync(bookId, chapter, normVersion)
         val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
         val hasHeadingsInCatalog = BiblePericopesCatalog.hasHeadingsForChapter(bookId, chapter)
-        val missingHeadings = hasHeadingsInCatalog && existing.isNotEmpty() && existing.all { it.sectionHeading.isNullOrBlank() }
+        val needsHeadingRefresh = hasHeadingsInCatalog && existing.isNotEmpty() && existing.any { v ->
+            val expected = BiblePericopesCatalog.getHeading(context, bookId, chapter, v.verseNumber, normVersion)
+            v.sectionHeading != expected
+        }
 
-        if (existing.isNotEmpty() && !hasSynthetic && !missingHeadings) {
+        if (existing.isNotEmpty() && !hasSynthetic && !needsHeadingRefresh) {
             return@withContext
         }
 
-        if (missingHeadings && !hasSynthetic) {
+        if (needsHeadingRefresh && !hasSynthetic) {
             val updated = existing.map { v ->
                 val heading = BiblePericopesCatalog.getHeading(context, bookId, chapter, v.verseNumber, normVersion)
                 if (heading != v.sectionHeading) v.copy(sectionHeading = heading) else v
