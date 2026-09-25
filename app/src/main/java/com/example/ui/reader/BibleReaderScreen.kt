@@ -42,6 +42,10 @@ import androidx.compose.ui.unit.sp
 import com.example.data.preferences.ReaderFontFamily
 import com.example.data.preferences.ReaderThemeMode
 import com.example.domain.model.ReaderVerseUiModel
+import com.example.service.AudioVerseItem
+import com.example.service.BibleAudioController
+import com.example.service.BibleAudioState
+import com.example.ui.reader.components.BibleAudioBottomBar
 import com.example.ui.reader.components.BibleVersionSelectorDialog
 import com.example.ui.reader.components.BookChapterSelectorSheet
 import com.example.ui.reader.components.ReaderSettingsBottomSheet
@@ -60,6 +64,7 @@ fun BibleReaderScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+    val audioState by BibleAudioController.audioState.collectAsState()
     val listState = rememberLazyListState()
     var showVersionSelectorModal by remember { mutableStateOf(false) }
 
@@ -81,6 +86,22 @@ fun BibleReaderScreen(
             if (scrollIndex >= 0) {
                 listState.animateScrollToItem(scrollIndex)
                 viewModel.clearTargetScrollVerse()
+            }
+        }
+    }
+
+    // Smoothly scroll to keep active audio verse visible in the reader
+    LaunchedEffect(audioState.currentVerseNumber, audioState.isPlaying, audioState.isActive) {
+        if (audioState.isActive && audioState.isPlaying &&
+            audioState.currentBookId == uiState.currentBook?.id &&
+            audioState.currentChapter == uiState.currentChapter
+        ) {
+            val targetIdx = uiState.verses.indexOfFirst { it.verseNumber == audioState.currentVerseNumber }
+            if (targetIdx >= 0) {
+                val visibleIndices = listState.layoutInfo.visibleItemsInfo.map { it.index }
+                if (targetIdx !in visibleIndices) {
+                    listState.animateScrollToItem((targetIdx - 1).coerceAtLeast(0))
+                }
             }
         }
     }
@@ -189,6 +210,63 @@ fun BibleReaderScreen(
                     }
                 },
                 actions = {
+                    // Audio / Listen to Chapter Button (YouVersion Style)
+                    val isAudioCurrent = audioState.isActive &&
+                            audioState.currentBookId == (uiState.currentBook?.id ?: 0) &&
+                            audioState.currentChapter == uiState.currentChapter
+
+                    IconButton(
+                        onClick = {
+                            val currentBook = uiState.currentBook
+                            val verses = uiState.verses
+                            if (currentBook != null && verses.isNotEmpty()) {
+                                if (isAudioCurrent) {
+                                    BibleAudioController.togglePlayPause(context)
+                                } else {
+                                    val audioVerses = verses.map {
+                                        AudioVerseItem(
+                                            bookId = it.bookId,
+                                            bookName = currentBook.name,
+                                            chapter = it.chapter,
+                                            verseNumber = it.verseNumber,
+                                            text = it.text
+                                        )
+                                    }
+                                    BibleAudioController.startChapter(
+                                        context = context,
+                                        bookId = currentBook.id,
+                                        bookName = currentBook.name,
+                                        chapter = uiState.currentChapter,
+                                        version = uiState.preferences.bibleVersion,
+                                        verses = audioVerses,
+                                        startVerseNumber = 1
+                                    )
+                                }
+                            }
+                        }
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .then(
+                                    if (isAudioCurrent && audioState.isPlaying)
+                                        Modifier.background(themeAccent.copy(alpha = 0.18f))
+                                    else Modifier
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (isAudioCurrent && audioState.isPlaying) Icons.Default.VolumeUp else Icons.Default.Headphones,
+                                contentDescription = "Escuchar capítulo",
+                                tint = if (isAudioCurrent) themeAccent else themeText,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(2.dp))
+
                     // Direct Bible Version Selector Modal Pill in top-right
                     Surface(
                         modifier = Modifier
@@ -337,6 +415,11 @@ fun BibleReaderScreen(
                                 )
                             }
 
+                            val isVerseSpeaking = audioState.isActive && audioState.isPlaying &&
+                                    audioState.currentBookId == verse.bookId &&
+                                    audioState.currentChapter == verse.chapter &&
+                                    audioState.currentVerseNumber == verse.verseNumber
+
                             // Compact verse text with superscript number & red letters
                             CompactVerseRow(
                                 verse = verse,
@@ -345,8 +428,10 @@ fun BibleReaderScreen(
                                 lineHeight = lineHeight,
                                 textColor = themeText,
                                 secondaryColor = themeSecondary,
+                                accentColor = themeAccent,
                                 isDarkTheme = uiState.preferences.themeMode == ReaderThemeMode.DARK || uiState.preferences.themeMode == ReaderThemeMode.NIGHT,
                                 redLettersEnabled = uiState.preferences.redLettersEnabled,
+                                isSpeaking = isVerseSpeaking,
                                 isPrevSameHighlight = isPrevSameHighlight,
                                 isNextSameHighlight = isNextSameHighlight,
                                 onCrossReferenceClick = { viewModel.openCrossReferences(verse) },
@@ -374,22 +459,38 @@ fun BibleReaderScreen(
 
                     // Bottom spacer before bottom controls
                     item {
-                        Spacer(modifier = Modifier.height(30.dp))
+                        Spacer(modifier = Modifier.height(if (audioState.isActive) 140.dp else 40.dp))
                     }
                 }
             }
 
-            // Navigation buttons at the extremes & center pill (anchored permanently at the bottom)
-            Row(
+            // Bottom audio player + Navigation buttons permanently at the bottom
+            Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .navigationBarsPadding()
-                    .padding(start = 16.dp, end = 16.dp, bottom = if (uiState.isReaderBarsVisible) 18.dp else 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(bottom = if (uiState.isReaderBarsVisible) 14.dp else 8.dp)
             ) {
-                // Left extreme: Previous chapter button (pointing left)
+                if (audioState.isActive) {
+                    BibleAudioBottomBar(
+                        audioState = audioState,
+                        themeBg = themeBg,
+                        themeText = themeText,
+                        themeSecondary = themeSecondary,
+                        themeAccent = themeAccent
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Left extreme: Previous chapter button (pointing left)
                 Surface(
                     modifier = Modifier
                         .size(46.dp)
@@ -470,8 +571,9 @@ fun BibleReaderScreen(
                     }
                 }
             }
+        }
 
-            // Contextual Floating Action Bar when verses are selected
+        // Contextual Floating Action Bar when verses are selected
             VerseActionBar(
                 selectedCount = uiState.selectedVerseNumbers.size,
                 onCopy = {
@@ -612,8 +714,10 @@ private fun CompactVerseRow(
     lineHeight: androidx.compose.ui.unit.TextUnit,
     textColor: Color,
     secondaryColor: Color,
+    accentColor: Color,
     isDarkTheme: Boolean,
     redLettersEnabled: Boolean,
+    isSpeaking: Boolean = false,
     isPrevSameHighlight: Boolean = false,
     isNextSameHighlight: Boolean = false,
     onCrossReferenceClick: () -> Unit = {},
@@ -635,13 +739,16 @@ private fun CompactVerseRow(
         com.example.data.bible.BibleCrossReferencesCatalog.hasReferences(verse.bookId, verse.chapter, verse.verseNumber)
     }
 
-    // Border is strictly for active selection (touch interaction), NEVER for highlights
-    val selectionBorder = if (verse.isSelected) {
-        BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.85f))
-    } else null
+    // Border is for active selection or audio speech indicator
+    val selectionBorder = when {
+        isSpeaking -> BorderStroke(1.5.dp, accentColor.copy(alpha = 0.85f))
+        verse.isSelected -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.85f))
+        else -> null
+    }
 
     // Seamless, connected shape for consecutive highlighted verses like YouVersion
     val highlightShape = when {
+        isSpeaking -> RoundedCornerShape(6.dp)
         isPrevSameHighlight && isNextSameHighlight -> RoundedCornerShape(0.dp)
         isPrevSameHighlight -> RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
         isNextSameHighlight -> RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
@@ -649,6 +756,7 @@ private fun CompactVerseRow(
     }
 
     val rowBg = when {
+        isSpeaking -> accentColor.copy(alpha = if (isDarkTheme) 0.22f else 0.16f)
         verse.isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
         highlightColor != null -> highlightColor
         else -> Color.Transparent
@@ -662,24 +770,24 @@ private fun CompactVerseRow(
             .fillMaxWidth()
             .clip(highlightShape)
             .background(rowBg)
-            .then(if (selectionBorder != null) Modifier.border(selectionBorder, RoundedCornerShape(4.dp)) else Modifier)
+            .then(if (selectionBorder != null) Modifier.border(selectionBorder, highlightShape) else Modifier)
             .clickable { onClick() }
             .padding(
                 horizontal = 6.dp,
-                vertical = if (isPrevSameHighlight || isNextSameHighlight) 2.dp else 3.dp
+                vertical = if (isSpeaking) 4.dp else if (isPrevSameHighlight || isNextSameHighlight) 2.dp else 3.dp
             )
     ) {
         val annotatedText = buildAnnotatedString {
-            // Elegant superscript verse number
+            // Elegant superscript verse number with speech symbol when active
             withStyle(
                 style = SpanStyle(
-                    color = secondaryColor.copy(alpha = 0.75f),
+                    color = if (isSpeaking) accentColor else secondaryColor.copy(alpha = 0.75f),
                     fontWeight = FontWeight.Bold,
                     fontSize = (fontSize.value * 0.7f).sp,
                     baselineShift = BaselineShift.Superscript
                 )
             ) {
-                append("${verse.verseNumber} ")
+                append(if (isSpeaking) "▶ ${verse.verseNumber} " else "${verse.verseNumber} ")
             }
 
             // Append verse content with accurate red letters
