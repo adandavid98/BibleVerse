@@ -439,7 +439,8 @@ private suspend fun loadVerseTextForVersion(
             val matching = offlineVerses.filter { it.verseNumber in verseNumbers }
             if (matching.isNotEmpty()) {
                 return matching.joinToString(" ") { v ->
-                    if (verseNumbers.size > 1) "${v.verseNumber} ${v.text}" else v.text
+                    val clean = OfflineBibleManager.cleanVerseText(v.text)
+                    if (verseNumbers.size > 1) "${v.verseNumber} $clean" else clean
                 }
             }
         }
@@ -452,7 +453,8 @@ private suspend fun loadVerseTextForVersion(
             val matching = cached.filter { it.verseNumber in verseNumbers }
             if (matching.isNotEmpty()) {
                 return matching.joinToString(" ") { v ->
-                    if (verseNumbers.size > 1) "${v.verseNumber} ${v.text}" else v.text
+                    val clean = OfflineBibleManager.cleanVerseText(v.text)
+                    if (verseNumbers.size > 1) "${v.verseNumber} $clean" else clean
                 }
             }
         }
@@ -464,7 +466,7 @@ private suspend fun loadVerseTextForVersion(
         val matching = networkVerses.filter { it.verseNumber in verseNumbers }
         if (matching.isNotEmpty()) {
             return matching.joinToString(" ") { v ->
-                val clean = v.text.replace(Regex("<[^>]*>"), "").trim()
+                val clean = OfflineBibleManager.cleanVerseText(v.text)
                 if (verseNumbers.size > 1) "${v.verseNumber} $clean" else clean
             }
         }
@@ -475,7 +477,8 @@ private suspend fun loadVerseTextForVersion(
         .filter { it.verseNumber in verseNumbers }
     return if (fallback.isNotEmpty()) {
         fallback.joinToString(" ") { v ->
-            if (verseNumbers.size > 1) "${v.verseNumber} ${v.text}" else v.text
+            val clean = OfflineBibleManager.cleanVerseText(v.text)
+            if (verseNumbers.size > 1) "${v.verseNumber} $clean" else clean
         }
     } else {
         "Versículo no disponible en esta versión."

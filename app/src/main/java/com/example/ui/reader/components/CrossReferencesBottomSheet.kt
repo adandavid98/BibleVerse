@@ -53,7 +53,8 @@ fun CrossReferencesBottomSheet(
             launch(Dispatchers.IO) {
                 try {
                     val verses = OfflineBibleManager.getVerses(context, ref.targetBookId, ref.targetChapter)
-                    val text = verses.firstOrNull { it.verseNumber == ref.targetVerse }?.text ?: ""
+                    val raw = verses.firstOrNull { it.verseNumber == ref.targetVerse }?.text ?: ""
+                    val text = OfflineBibleManager.cleanVerseText(raw)
                     withContext(Dispatchers.Main) {
                         verseTexts = verseTexts + (ref.targetCitation to text)
                     }

@@ -225,13 +225,13 @@ object OfflineBibleManager {
                 val colText = c.getColumnIndexOrThrow("text")
                 while (c.moveToNext()) {
                     val verseNum = c.getInt(colVerse)
-                    val text = c.getString(colText)
+                    val rawText = c.getString(colText)
                     results.add(
                         OfflineVerseDto(
                             bookId = bookId,
                             chapter = chapter,
                             verseNumber = verseNum,
-                            text = text
+                            text = cleanVerseText(rawText)
                         )
                     )
                 }
@@ -305,12 +305,13 @@ object OfflineBibleManager {
                 val colVerse = c.getColumnIndexOrThrow("verse")
                 val colText = c.getColumnIndexOrThrow("text")
                 while (c.moveToNext()) {
+                    val rawText = c.getString(colText)
                     results.add(
                         OfflineVerseDto(
                             bookId = c.getInt(colBook),
                             chapter = c.getInt(colChap),
                             verseNumber = c.getInt(colVerse),
-                            text = c.getString(colText)
+                            text = cleanVerseText(rawText)
                         )
                     )
                 }
@@ -319,5 +320,23 @@ object OfflineBibleManager {
             Log.e(TAG, "Search error for query: $query", e)
         }
         results
+    }
+
+    /**
+     * Completely strips <br>, <br/>, and all HTML tags or encoded entities from verse texts.
+     */
+    fun cleanVerseText(raw: String?): String {
+        if (raw.isNullOrBlank()) return ""
+        return raw
+            .replace(Regex("(?i)<br\\s*/?>"), " ")
+            .replace(Regex("<[^>]*>"), "")
+            .replace("&nbsp;", " ")
+            .replace("&quot;", "\"")
+            .replace("&amp;", "&")
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&#39;", "'")
+            .replace("\\s+".toRegex(), " ")
+            .trim()
     }
 }

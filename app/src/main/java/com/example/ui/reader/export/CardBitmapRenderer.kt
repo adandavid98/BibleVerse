@@ -21,13 +21,14 @@ object CardBitmapRenderer {
         citationText: String,
         template: ShareCardTemplate
     ): Uri? {
-        val bitmap = renderToBitmap(verseText, citationText, template)
+        val clean = com.example.data.bible.OfflineBibleManager.cleanVerseText(verseText)
+        val bitmap = renderToBitmap(clean, citationText, template)
         val fileUri = saveBitmapToCache(context, bitmap) ?: return null
 
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "image/png"
             putExtra(Intent.EXTRA_STREAM, fileUri)
-            putExtra(Intent.EXTRA_TEXT, "«$verseText» — $citationText")
+            putExtra(Intent.EXTRA_TEXT, "«$clean» — $citationText")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         val chooser = Intent.createChooser(intent, "Compartir versículo").apply {
@@ -44,13 +45,14 @@ object CardBitmapRenderer {
         width: Int = 1080,
         height: Int = 1080
     ): Bitmap {
+        val clean = com.example.data.bible.OfflineBibleManager.cleanVerseText(verseText)
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
         when (template) {
-            ShareCardTemplate.MINIMALIST -> drawMinimalist(canvas, width, height, verseText, citationText)
-            ShareCardTemplate.SACRED_GRADIENT -> drawSacredGradient(canvas, width, height, verseText, citationText)
-            ShareCardTemplate.PARCHMENT -> drawParchment(canvas, width, height, verseText, citationText)
+            ShareCardTemplate.MINIMALIST -> drawMinimalist(canvas, width, height, clean, citationText)
+            ShareCardTemplate.SACRED_GRADIENT -> drawSacredGradient(canvas, width, height, clean, citationText)
+            ShareCardTemplate.PARCHMENT -> drawParchment(canvas, width, height, clean, citationText)
         }
 
         return bitmap

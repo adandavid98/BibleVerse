@@ -41,6 +41,7 @@ fun ShareTemplateDialog(
 ) {
     val context = LocalContext.current
     var selectedTemplate by remember { mutableStateOf(ShareCardTemplate.MINIMALIST) }
+    val cleanVerseText = remember(verseText) { com.example.data.bible.OfflineBibleManager.cleanVerseText(verseText) }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -89,9 +90,9 @@ fun ShareTemplateDialog(
                         .shadow(4.dp, RoundedCornerShape(18.dp))
                 ) {
                     when (selectedTemplate) {
-                        ShareCardTemplate.MINIMALIST -> MinimalistCardPreview(verseText, citationText)
-                        ShareCardTemplate.SACRED_GRADIENT -> SacredGradientCardPreview(verseText, citationText)
-                        ShareCardTemplate.PARCHMENT -> ParchmentCardPreview(verseText, citationText)
+                        ShareCardTemplate.MINIMALIST -> MinimalistCardPreview(cleanVerseText, citationText)
+                        ShareCardTemplate.SACRED_GRADIENT -> SacredGradientCardPreview(cleanVerseText, citationText)
+                        ShareCardTemplate.PARCHMENT -> ParchmentCardPreview(cleanVerseText, citationText)
                     }
                 }
 
@@ -158,7 +159,7 @@ fun ShareTemplateDialog(
                     onClick = {
                         CardBitmapRenderer.renderAndShare(
                             context = context,
-                            verseText = verseText,
+                            verseText = cleanVerseText,
                             citationText = citationText,
                             template = selectedTemplate
                         )

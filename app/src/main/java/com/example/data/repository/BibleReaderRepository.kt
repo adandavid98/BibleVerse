@@ -84,19 +84,21 @@ class BibleReaderRepository(
                     val expected = BiblePericopesCatalog.getHeading(context, bookId, chapter, v.verseNumber, normVersion)
                     v.sectionHeading != expected
                 }
+                val hasHtmlTags = existing.any { it.text.contains("<br", ignoreCase = true) || it.text.contains("<") }
 
-                // If not cached in Room yet, or incomplete, or contains synthetic placeholder, or headings need update, reload completely
-                if (existing.size != offlineVerses.size || hasSynthetic || needsHeadingRefresh) {
+                // If not cached in Room yet, or incomplete, or contains synthetic placeholder, or headings need update, or has HTML tags, reload completely
+                if (existing.size != offlineVerses.size || hasSynthetic || needsHeadingRefresh || hasHtmlTags) {
                     dao.deleteVersesForChapter(bookId, chapter, normVersion)
                     val entities = offlineVerses.map { dto ->
+                        val cleanText = OfflineBibleManager.cleanVerseText(dto.text)
                         val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber)
-                            || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
+                            || isWordsOfJesus(bookId, chapter, dto.verseNumber, cleanText)
                         val heading = BiblePericopesCatalog.getHeading(context, bookId, chapter, dto.verseNumber, normVersion)
                         BibleReaderVerseEntity(
                             bookId = bookId,
                             chapter = chapter,
                             verseNumber = dto.verseNumber,
-                            text = dto.text,
+                            text = cleanText,
                             bibleVersion = normVersion,
                             sectionHeading = heading,
                             isRedLetter = isJesus
@@ -117,11 +119,13 @@ class BibleReaderRepository(
             v.sectionHeading != expected
         }
 
-        if (existing.isNotEmpty() && !hasSynthetic && !needsHeadingRefresh) {
+        val hasHtmlTags = existing.any { it.text.contains("<br", ignoreCase = true) || it.text.contains("<") }
+
+        if (existing.isNotEmpty() && !hasSynthetic && !needsHeadingRefresh && !hasHtmlTags) {
             return@withContext
         }
 
-        if (needsHeadingRefresh && !hasSynthetic) {
+        if (needsHeadingRefresh && !hasSynthetic && !hasHtmlTags) {
             val updated = existing.map { v ->
                 val heading = BiblePericopesCatalog.getHeading(context, bookId, chapter, v.verseNumber, normVersion)
                 if (heading != v.sectionHeading) v.copy(sectionHeading = heading) else v
@@ -130,7 +134,7 @@ class BibleReaderRepository(
             return@withContext
         }
 
-        if (hasSynthetic) {
+        if (hasSynthetic || hasHtmlTags) {
             dao.deleteVersesForChapter(bookId, chapter, normVersion)
         }
 
@@ -140,7 +144,7 @@ class BibleReaderRepository(
             if (cachedCount > 5000) {
                 // Version is fully downloaded in Room, check if chapter is now present
                 val fresh = dao.getVersesSync(bookId, chapter, normVersion)
-                if (fresh.isNotEmpty()) return@withContext
+                if (fresh.isNotEmpty() && !fresh.any { it.text.contains("<") }) return@withContext
             }
         }
 
@@ -148,14 +152,15 @@ class BibleReaderRepository(
         val networkVerses = BollsBibleApiService.fetchChapter(normVersion, bookId, chapter)
         if (!networkVerses.isNullOrEmpty()) {
             val entities = networkVerses.map { dto ->
+                val cleanText = OfflineBibleManager.cleanVerseText(dto.text)
                 val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber)
-                    || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
+                    || isWordsOfJesus(bookId, chapter, dto.verseNumber, cleanText)
                 val heading = BiblePericopesCatalog.getHeading(context, bookId, chapter, dto.verseNumber, normVersion)
                 BibleReaderVerseEntity(
                     bookId = bookId,
                     chapter = chapter,
                     verseNumber = dto.verseNumber,
-                    text = dto.text,
+                    text = cleanText,
                     bibleVersion = normVersion,
                     sectionHeading = heading,
                     isRedLetter = isJesus
@@ -170,14 +175,15 @@ class BibleReaderRepository(
         val fallbackOffline = OfflineBibleManager.getVerses(context, bookId, chapter)
         if (fallbackOffline.isNotEmpty()) {
             val entities = fallbackOffline.map { dto ->
+                val cleanText = OfflineBibleManager.cleanVerseText(dto.text)
                 val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber)
-                    || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
+                    || isWordsOfJesus(bookId, chapter, dto.verseNumber, cleanText)
                 val heading = BiblePericopesCatalog.getHeading(context, bookId, chapter, dto.verseNumber, normVersion)
                 BibleReaderVerseEntity(
                     bookId = bookId,
                     chapter = chapter,
                     verseNumber = dto.verseNumber,
-                    text = dto.text,
+                    text = cleanText,
                     bibleVersion = normVersion,
                     sectionHeading = heading,
                     isRedLetter = isJesus

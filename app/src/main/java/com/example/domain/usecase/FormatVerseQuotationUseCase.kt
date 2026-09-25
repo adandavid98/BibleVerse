@@ -14,9 +14,9 @@ class FormatVerseQuotationUseCase {
 
         val verseRef = formatVerseRange(sorted.map { it.verseNumber })
         val combinedText = if (sorted.size == 1) {
-            sorted.first().text
+            com.example.data.bible.OfflineBibleManager.cleanVerseText(sorted.first().text)
         } else {
-            sorted.joinToString(" ") { "(${it.verseNumber}) ${it.text}" }
+            sorted.joinToString(" ") { "(${it.verseNumber}) ${com.example.data.bible.OfflineBibleManager.cleanVerseText(it.text)}" }
         }
 
         return "«$combinedText»\n\n— $bookName $chapter:$verseRef ($bibleVersion)"

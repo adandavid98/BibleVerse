@@ -220,7 +220,7 @@ fun ReadingPlanDayReaderModal(
                                 ) {
                                     append("${verse.verseNumber} ")
                                 }
-                                append(verse.text)
+                                append(OfflineBibleManager.cleanVerseText(verse.text))
                             }
 
                             Text(

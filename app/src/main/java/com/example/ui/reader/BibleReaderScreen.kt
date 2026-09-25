@@ -785,22 +785,23 @@ private fun appendVerseContent(
     fontFamily: FontFamily,
     fontSize: androidx.compose.ui.unit.TextUnit
 ) {
+    val cleanText = com.example.data.bible.OfflineBibleManager.cleanVerseText(text)
     if (!isRedLetter || !redLettersEnabled) {
         builder.withStyle(SpanStyle(color = textColor, fontSize = fontSize, fontFamily = fontFamily)) {
-            append(text)
+            append(cleanText)
         }
         return
     }
 
     // Check for quote marks: «...» or "..."
-    val hasGuillemets = text.contains("«") && text.contains("»")
+    val hasGuillemets = cleanText.contains("«") && cleanText.contains("»")
     if (hasGuillemets) {
-        val qStart = text.indexOf("«")
-        val qEnd = text.indexOf("»", qStart)
+        val qStart = cleanText.indexOf("«")
+        val qEnd = cleanText.indexOf("»", qStart)
         if (qStart >= 0 && qEnd > qStart) {
-            val before = text.substring(0, qStart)
-            val spoken = text.substring(qStart, qEnd + 1)
-            val after = text.substring(qEnd + 1)
+            val before = cleanText.substring(0, qStart)
+            val spoken = cleanText.substring(qStart, qEnd + 1)
+            val after = cleanText.substring(qEnd + 1)
 
             if (before.isNotEmpty()) {
                 builder.withStyle(SpanStyle(color = textColor, fontSize = fontSize, fontFamily = fontFamily)) {
@@ -820,10 +821,10 @@ private fun appendVerseContent(
     }
 
     // Check for colon dialogue indicator (e.g. "diciendo: ", "les dijo: ", "respondió: ", etc.)
-    val colonIdx = text.indexOf(":")
-    if (colonIdx in 3..(text.length - 4)) {
-        val prefix = text.substring(0, colonIdx + 1)
-        val spoken = text.substring(colonIdx + 1)
+    val colonIdx = cleanText.indexOf(":")
+    if (colonIdx in 3..(cleanText.length - 4)) {
+        val prefix = cleanText.substring(0, colonIdx + 1)
+        val spoken = cleanText.substring(colonIdx + 1)
 
         val prefixLower = prefix.lowercase()
         val isSpeechIntro = prefixLower.contains("dijo") ||
@@ -846,7 +847,7 @@ private fun appendVerseContent(
 
     // Otherwise, the entire verse is Jesus speaking
     builder.withStyle(SpanStyle(color = jesusRedColor, fontSize = fontSize, fontFamily = fontFamily)) {
-        append(text)
+        append(cleanText)
     }
 }
 
