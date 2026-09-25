@@ -261,4 +261,63 @@ object OfflineBibleManager {
             0
         }
     }
+
+    /**
+     * Searches all 31,102 verses locally and offline in the RVR1960 SQLite database.
+     * Supports filtering by testament ("OT", "NT") or by specific book (1..66).
+     */
+    suspend fun searchVerses(
+        context: Context,
+        query: String,
+        testament: String? = null,
+        bookId: Int? = null,
+        limit: Int = 100
+    ): List<OfflineVerseDto> = withContext(Dispatchers.IO) {
+        val trimmed = query.trim()
+        if (trimmed.isEmpty()) return@withContext emptyList()
+        ensureReady(context)
+        val db = database ?: return@withContext emptyList()
+        val results = mutableListOf<OfflineVerseDto>()
+        try {
+            val conditions = mutableListOf<String>()
+            val args = mutableListOf<String>()
+
+            conditions.add("text LIKE ?")
+            args.add("%$trimmed%")
+
+            if (bookId != null && bookId in 1..66) {
+                conditions.add("book = ?")
+                args.add(bookId.toString())
+            } else if (testament == "OT") {
+                conditions.add("book <= 39")
+            } else if (testament == "NT") {
+                conditions.add("book >= 40")
+            }
+
+            val whereClause = if (conditions.isNotEmpty()) "WHERE " + conditions.joinToString(" AND ") else ""
+            val sql = "SELECT book, chapter, verse, text FROM bible_verses $whereClause ORDER BY book ASC, chapter ASC, verse ASC LIMIT ?"
+            args.add(limit.toString())
+
+            val cursor = db.rawQuery(sql, args.toTypedArray())
+            cursor.use { c ->
+                val colBook = c.getColumnIndexOrThrow("book")
+                val colChap = c.getColumnIndexOrThrow("chapter")
+                val colVerse = c.getColumnIndexOrThrow("verse")
+                val colText = c.getColumnIndexOrThrow("text")
+                while (c.moveToNext()) {
+                    results.add(
+                        OfflineVerseDto(
+                            bookId = c.getInt(colBook),
+                            chapter = c.getInt(colChap),
+                            verseNumber = c.getInt(colVerse),
+                            text = c.getString(colText)
+                        )
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Search error for query: $query", e)
+        }
+        results
+    }
 }

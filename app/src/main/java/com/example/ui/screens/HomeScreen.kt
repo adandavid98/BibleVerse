@@ -61,18 +61,28 @@ import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.ArrowForward
+import com.example.ui.screens.components.ReadingPlansBottomSheet
+import com.example.data.bible.OfflineBibleManager
+import com.example.data.bible.OfflineVerseDto
+import com.example.data.bible.BibleCatalog
+import com.example.data.bible.BibleBook
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Icon
@@ -150,6 +160,7 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedTab by remember { mutableIntStateOf(0) }
     val versesListState = rememberLazyListState()
+    var showReadingPlans by remember { mutableStateOf(false) }
 
     val showUpdateDialog by viewModel.showUpdateDialog.collectAsStateWithLifecycle()
     val updateInfo by viewModel.updateInfo.collectAsStateWithLifecycle()
@@ -233,6 +244,17 @@ fun HomeScreen(
                             Icon(
                                 imageVector = Icons.Filled.Add,
                                 contentDescription = "Añadir Versículo Manual",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        IconButton(
+                            onClick = { showReadingPlans = true },
+                            modifier = Modifier.testTag("btn_top_reading_plans")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.CalendarMonth,
+                                contentDescription = "Planes de Lectura Bíblica",
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -355,9 +377,25 @@ fun HomeScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             when (selectedTab) {
-                0 -> VersesListTab(viewModel, uiState, versesListState)
+                0 -> VersesListTab(
+                    viewModel = viewModel,
+                    uiState = uiState,
+                    listState = versesListState,
+                    onOpenReadingPlans = { showReadingPlans = true },
+                    onNavigateToReader = { bookId, chapter, verse ->
+                        readerViewModel.navigateToVerse(bookId, chapter, verse)
+                        selectedTab = 1
+                    }
+                )
                 1 -> BibleReaderScreen(viewModel = readerViewModel)
-                2 -> SearchTab(viewModel, uiState)
+                2 -> SearchTab(
+                    viewModel = viewModel,
+                    uiState = uiState,
+                    onNavigateToReader = { bookId, chapter, verse ->
+                        readerViewModel.navigateToVerse(bookId, chapter, verse)
+                        selectedTab = 1
+                    }
+                )
                 3 -> FavoritesAndNotesTab(viewModel, uiState)
                 4 -> SettingsTab(viewModel, uiState, onBack = { selectedTab = 0 })
             }
@@ -453,13 +491,25 @@ fun HomeScreen(
             }
         )
     }
+
+    if (showReadingPlans) {
+        ReadingPlansBottomSheet(
+            onNavigateToReader = { bookId, chapter, verse ->
+                readerViewModel.navigateToVerse(bookId, chapter, verse)
+                selectedTab = 1
+            },
+            onDismiss = { showReadingPlans = false }
+        )
+    }
 }
 
 @Composable
 fun VersesListTab(
     viewModel: BibleViewModel,
     uiState: BibleUiState,
-    listState: LazyListState = rememberLazyListState()
+    listState: LazyListState = rememberLazyListState(),
+    onOpenReadingPlans: () -> Unit = {},
+    onNavigateToReader: (bookId: Int, chapter: Int, verse: Int) -> Unit = { _, _, _ -> }
 ) {
     val context = LocalContext.current
     val otCount = remember(uiState.verses) { uiState.verses.count { it.testament.contains("Antiguo", ignoreCase = true) } }
@@ -483,6 +533,68 @@ fun VersesListTab(
                     onFavoriteToggle = { viewModel.toggleFavorite(vod) },
                     onShare = { viewModel.shareVerse(context, vod) }
                 )
+            }
+        }
+
+        // Reading Plan Quick Banner
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable { onOpenReadingPlans() },
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Default.CalendarMonth,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                        Column {
+                            Text(
+                                text = "Plan de Lectura Anual",
+                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "365 días • Clásico y Cronológico",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Button(
+                        onClick = onOpenReadingPlans,
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text("Ver Plan", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
             }
         }
 
@@ -532,12 +644,50 @@ fun VersesListTab(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchTab(
     viewModel: BibleViewModel,
-    uiState: BibleUiState
+    uiState: BibleUiState,
+    onNavigateToReader: (bookId: Int, chapter: Int, verse: Int) -> Unit = { _, _, _ -> }
 ) {
     val context = LocalContext.current
+    var searchScope by remember { mutableStateOf("ALL") } // "ALL", "OT", "NT", "BOOK"
+    var selectedBook by remember { mutableStateOf<BibleBook?>(null) }
+    var isBookPickerOpen by remember { mutableStateOf(false) }
+
+    var localQuery by remember { mutableStateOf("") }
+    var offlineResults by remember { mutableStateOf<List<OfflineVerseDto>>(emptyList()) }
+    var isSearchingOffline by remember { mutableStateOf(false) }
+
+    // Execute instant search
+    LaunchedEffect(localQuery, searchScope, selectedBook) {
+        val trimmed = localQuery.trim()
+        if (trimmed.length < 2) {
+            offlineResults = emptyList()
+            isSearchingOffline = false
+            return@LaunchedEffect
+        }
+
+        isSearchingOffline = true
+        val testamentParam = when (searchScope) {
+            "OT" -> "OT"
+            "NT" -> "NT"
+            else -> null
+        }
+        val bookParam = if (searchScope == "BOOK") selectedBook?.order else null
+
+        val results = OfflineBibleManager.searchVerses(
+            context = context,
+            query = trimmed,
+            testament = testamentParam,
+            bookId = bookParam,
+            limit = 80
+        )
+        offlineResults = results
+        isSearchingOffline = false
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -546,18 +696,24 @@ fun SearchTab(
     ) {
         // Search bar
         OutlinedTextField(
-            value = uiState.searchQuery,
-            onValueChange = { viewModel.onSearchQueryChange(it) },
+            value = localQuery,
+            onValueChange = { 
+                localQuery = it
+                viewModel.onSearchQueryChange(it)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("search_input_field"),
-            placeholder = { Text("Buscar por palabra clave, libro, pasaje o tema...") },
+            placeholder = { Text("Buscar en toda la Biblia (gracia, fe, justicia...)") },
             leadingIcon = {
                 Icon(Icons.Filled.Search, contentDescription = "Buscar")
             },
             trailingIcon = {
-                if (uiState.searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
+                if (localQuery.isNotEmpty()) {
+                    IconButton(onClick = { 
+                        localQuery = ""
+                        viewModel.onSearchQueryChange("")
+                    }) {
                         Icon(Icons.Filled.Clear, contentDescription = "Limpiar")
                     }
                 }
@@ -568,46 +724,128 @@ fun SearchTab(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // Topic chips row
+        // Search Scope Filter Chips
         Text(
-            text = "Temas bíblicos destacados:",
+            text = "Ámbito de búsqueda bíblica (Offline):",
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(6.dp))
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            contentPadding = PaddingValues(vertical = 4.dp)
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            item {
-                FilterChip(
-                    selected = uiState.selectedTopic == null,
-                    onClick = { viewModel.onTopicSelected(null) },
-                    label = { Text("Cualquiera") }
-                )
-            }
-            items(uiState.availableTopics) { topic ->
-                FilterChip(
-                    selected = uiState.selectedTopic == topic,
-                    onClick = { viewModel.onTopicSelected(topic) },
-                    label = { Text(topic) }
-                )
-            }
+            FilterChip(
+                selected = searchScope == "ALL",
+                onClick = { 
+                    searchScope = "ALL"
+                    selectedBook = null
+                },
+                label = { Text("Toda la Biblia") }
+            )
+            FilterChip(
+                selected = searchScope == "OT",
+                onClick = { 
+                    searchScope = "OT"
+                    selectedBook = null
+                },
+                label = { Text("Antiguo Testamento") }
+            )
+            FilterChip(
+                selected = searchScope == "NT",
+                onClick = { 
+                    searchScope = "NT"
+                    selectedBook = null
+                },
+                label = { Text("Nuevo Testamento") }
+            )
+            FilterChip(
+                selected = searchScope == "BOOK",
+                onClick = { 
+                    searchScope = "BOOK"
+                    isBookPickerOpen = true
+                },
+                label = { 
+                    Text(if (selectedBook != null) "Libro: ${selectedBook!!.name}" else "Por Libro...") 
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Results count
-        Text(
-            text = "${uiState.filteredVerses.size} versículo(s) encontrados",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.secondary
-        )
+        if (isSearchingOffline) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(32.dp))
+            }
+        } else if (localQuery.trim().length < 2) {
+            // Initial state with suggested keywords
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                    modifier = Modifier.size(64.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(14.dp))
+                Text(
+                    text = "Búsqueda Bíblica Offline",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Busca al instante en los 31,102 versículos de la Biblia sin conexión a internet.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
 
-        Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "Palabras clave sugeridas:",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(8.dp))
 
-        // Results list
-        if (uiState.filteredVerses.isEmpty()) {
+                val quickKeywords = listOf("Gracia", "Justicia", "Fe", "Amor", "Paz", "Salvación", "Esperanza", "Perdón", "Sabiduría", "Verdad")
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
+                ) {
+                    items(quickKeywords) { keyword ->
+                        SuggestionChip(
+                            onClick = { localQuery = keyword },
+                            label = { Text(keyword) }
+                        )
+                    }
+                }
+            }
+        } else if (offlineResults.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -623,30 +861,260 @@ fun SearchTab(
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "No se encontraron versículos con «${uiState.searchQuery}»",
+                        text = "No se encontraron versículos con «$localQuery» en el ámbito seleccionado",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 24.dp)
                     )
                 }
             }
         } else {
+            // Results list
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${offlineResults.size} versículo(s) encontrados (RVR1960)",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             LazyColumn(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-                items(uiState.filteredVerses, key = { it.id }) { verse ->
-                    VerseCard(
-                        verse = verse,
-                        fontScale = uiState.fontSizeScale,
-                        onClick = { viewModel.openVerseDetail(verse) },
-                        onFavoriteToggle = { viewModel.toggleFavorite(verse) },
-                        onShare = { viewModel.shareVerse(context, verse) },
-                        onHighlightClick = { viewModel.openVerseDetail(verse) }
-                    )
+                items(offlineResults, key = { "${it.bookId}_${it.chapter}_${it.verseNumber}" }) { item ->
+                    val bookName = BibleCatalog.books.getOrNull(item.bookId - 1)?.name ?: "Libro ${item.bookId}"
+                    val testament = if (item.bookId <= 39) "Antiguo Testamento" else "Nuevo Testamento"
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                        )
+                    ) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "$bookName ${item.chapter}:${item.verseNumber}",
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = testament,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            // Highlighted query in verse text
+                            Text(
+                                text = buildHighlightedString(item.text, localQuery, MaterialTheme.colorScheme.primary),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    IconButton(
+                                        onClick = {
+                                            val quote = "«${item.text}» - $bookName ${item.chapter}:${item.verseNumber} (RVR1960)"
+                                            val clip = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                            clip.setPrimaryClip(android.content.ClipData.newPlainText("Versículo", quote))
+                                            Toast.makeText(context, "Copiado al portapapeles", Toast.LENGTH_SHORT).show()
+                                        },
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.ContentCopy,
+                                            contentDescription = "Copiar",
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+
+                                    IconButton(
+                                        onClick = {
+                                            viewModel.addCustomVerse(
+                                                book = bookName,
+                                                chapterVerse = "${item.chapter}:${item.verseNumber}",
+                                                testament = testament,
+                                                text = item.text,
+                                                context = "Versículo guardado desde Búsqueda Bíblica Offline.",
+                                                topic = "Búsqueda Bíblica",
+                                                notes = "",
+                                                bibleVersion = "RVR1960"
+                                            )
+                                            Toast.makeText(context, "Guardado en Favoritos", Toast.LENGTH_SHORT).show()
+                                        },
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Favorite,
+                                            contentDescription = "Guardar",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+
+                                Button(
+                                    onClick = {
+                                        onNavigateToReader(item.bookId, item.chapter, item.verseNumber)
+                                    },
+                                    shape = RoundedCornerShape(10.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Text("Leer en contexto", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                        Icon(Icons.Default.ArrowForward, contentDescription = null, modifier = Modifier.size(14.dp))
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
+        }
+    }
+
+    // Book Picker Dialog
+    if (isBookPickerOpen) {
+        AlertDialog(
+            onDismissRequest = { isBookPickerOpen = false },
+            title = { Text("Seleccionar Libro para Filtrar", fontWeight = FontWeight.Bold) },
+            text = {
+                var bookSearch by remember { mutableStateOf("") }
+                val filteredBooks = remember(bookSearch) {
+                    if (bookSearch.isBlank()) BibleCatalog.books
+                    else BibleCatalog.books.filter { it.name.contains(bookSearch, ignoreCase = true) }
+                }
+
+                Column(modifier = Modifier.fillMaxWidth().height(350.dp)) {
+                    OutlinedTextField(
+                        value = bookSearch,
+                        onValueChange = { bookSearch = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Buscar libro...") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyColumn(modifier = Modifier.weight(1f)) {
+                        item {
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        selectedBook = null
+                                        searchScope = "ALL"
+                                        isBookPickerOpen = false
+                                    }
+                                    .padding(vertical = 10.dp, horizontal = 8.dp)
+                            ) {
+                                Text("Todos los libros (Sin filtro)", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                            }
+                            Divider()
+                        }
+                        items(filteredBooks) { book ->
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        selectedBook = book
+                                        isBookPickerOpen = false
+                                    }
+                                    .padding(vertical = 8.dp, horizontal = 8.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(book.name, fontWeight = FontWeight.Medium)
+                                    Text(
+                                        if (book.order <= 39) "AT" else "NT",
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontSize = 12.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { isBookPickerOpen = false }) {
+                    Text("Cerrar")
+                }
+            }
+        )
+    }
+}
+
+private fun buildHighlightedString(
+    fullText: String,
+    query: String,
+    highlightColor: Color
+): androidx.compose.ui.text.AnnotatedString {
+    return androidx.compose.ui.text.buildAnnotatedString {
+        val trimmed = query.trim()
+        if (trimmed.isEmpty()) {
+            append(fullText)
+            return@buildAnnotatedString
+        }
+
+        var currentIndex = 0
+        val lowerFull = fullText.lowercase()
+        val lowerQuery = trimmed.lowercase()
+
+        while (currentIndex < fullText.length) {
+            val matchIndex = lowerFull.indexOf(lowerQuery, currentIndex)
+            if (matchIndex == -1) {
+                append(fullText.substring(currentIndex))
+                break
+            }
+
+            if (matchIndex > currentIndex) {
+                append(fullText.substring(currentIndex, matchIndex))
+            }
+
+            val endIndex = matchIndex + lowerQuery.length
+            withStyle(
+                androidx.compose.ui.text.SpanStyle(
+                    fontWeight = FontWeight.Bold,
+                    color = highlightColor
+                )
+            ) {
+                append(fullText.substring(matchIndex, endIndex))
+            }
+
+            currentIndex = endIndex
         }
     }
 }

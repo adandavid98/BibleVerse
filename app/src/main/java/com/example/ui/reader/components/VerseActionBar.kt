@@ -30,6 +30,7 @@ fun VerseActionBar(
     onHighlight: (String) -> Unit,
     onRemoveHighlight: () -> Unit,
     onSaveToVerses: () -> Unit = {},
+    onCompareVersions: () -> Unit = {},
     onShareText: () -> Unit,
     onShareCard: () -> Unit,
     onClearSelection: () -> Unit,
@@ -163,6 +164,19 @@ fun VerseActionBar(
                             Icon(
                                 Icons.Default.BookmarkBorder,
                                 contentDescription = "Guardar en Versículos",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+
+                        // Compare Versions button
+                        IconButton(
+                            onClick = onCompareVersions,
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.CompareArrows,
+                                contentDescription = "Comparar versiones",
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(22.dp)
                             )

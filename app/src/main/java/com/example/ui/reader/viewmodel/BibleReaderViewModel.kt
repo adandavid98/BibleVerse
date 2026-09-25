@@ -36,7 +36,7 @@ class BibleReaderViewModel(
     private val formatVerseQuotationUseCase: FormatVerseQuotationUseCase,
     private val preferencesRepository: ReaderPreferencesRepository,
     private val verseDao: VerseDao? = null,
-    private val readerDao: com.example.data.local.BibleReaderDao? = null
+    val readerDao: com.example.data.local.BibleReaderDao? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BibleReaderUiState())
@@ -106,6 +106,19 @@ class BibleReaderViewModel(
             preferencesRepository.updateLastPosition(book.id, validChapter, verse)
         }
         loadChapter(book, validChapter, _uiState.value.preferences.bibleVersion)
+    }
+
+    fun navigateToVerse(bookId: Int, chapter: Int, verse: Int = 1) {
+        val book = _uiState.value.books.firstOrNull { it.id == bookId }
+            ?: com.example.data.local.BibleBookEntity(
+                id = bookId,
+                name = com.example.data.bible.BibleCatalog.books.getOrNull(bookId - 1)?.name ?: "Libro $bookId",
+                testament = if (bookId <= 39) "Antiguo Testamento" else "Nuevo Testamento",
+                chaptersCount = com.example.data.bible.BibleCatalog.books.getOrNull(bookId - 1)?.chaptersCount ?: 1,
+                abbreviation = com.example.data.bible.BibleCatalog.books.getOrNull(bookId - 1)?.abbreviation ?: "",
+                orderIndex = bookId
+            )
+        selectBookChapterVerse(book, chapter, verse)
     }
 
     fun clearTargetScrollVerse() {
@@ -391,6 +404,32 @@ class BibleReaderViewModel(
 
     fun closeShareDialog() {
         _uiState.update { it.copy(isShareDialogOpen = false) }
+    }
+
+    fun openCompareModal() {
+        _uiState.update { it.copy(isCompareModalOpen = true) }
+    }
+
+    fun closeCompareModal() {
+        _uiState.update { it.copy(isCompareModalOpen = false) }
+    }
+
+    fun openCrossReferences(verse: ReaderVerseUiModel) {
+        _uiState.update {
+            it.copy(
+                isCrossReferencesOpen = true,
+                selectedCrossReferenceVerse = verse
+            )
+        }
+    }
+
+    fun closeCrossReferences() {
+        _uiState.update {
+            it.copy(
+                isCrossReferencesOpen = false,
+                selectedCrossReferenceVerse = null
+            )
+        }
     }
 
     // Preference Updates

@@ -47,6 +47,8 @@ import com.example.ui.reader.components.BookChapterSelectorSheet
 import com.example.ui.reader.components.ReaderSettingsBottomSheet
 import com.example.ui.reader.components.ShareTemplateDialog
 import com.example.ui.reader.components.VerseActionBar
+import com.example.ui.reader.components.VerseVersionComparatorBottomSheet
+import com.example.ui.reader.components.CrossReferencesBottomSheet
 import com.example.ui.reader.viewmodel.BibleReaderViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -347,6 +349,7 @@ fun BibleReaderScreen(
                                 redLettersEnabled = uiState.preferences.redLettersEnabled,
                                 isPrevSameHighlight = isPrevSameHighlight,
                                 isNextSameHighlight = isNextSameHighlight,
+                                onCrossReferenceClick = { viewModel.openCrossReferences(verse) },
                                 onClick = { viewModel.toggleVerseSelection(verse.verseNumber) }
                             )
                         }
@@ -494,6 +497,9 @@ fun BibleReaderScreen(
                 onShareCard = {
                     viewModel.openShareDialog()
                 },
+                onCompareVersions = {
+                    viewModel.openCompareModal()
+                },
                 onClearSelection = {
                     viewModel.clearSelection()
                 },
@@ -549,6 +555,33 @@ fun BibleReaderScreen(
             onDismiss = { viewModel.closeShareDialog() }
         )
     }
+
+    // Bottom Sheet: Compare Versions
+    if (uiState.isCompareModalOpen) {
+        VerseVersionComparatorBottomSheet(
+            citation = viewModel.getCitationOnly(),
+            bookId = uiState.currentBook?.id ?: 1,
+            chapter = uiState.currentChapter,
+            verseNumbers = uiState.selectedVerseNumbers.toList(),
+            readerDao = viewModel.readerDao,
+            onDismiss = { viewModel.closeCompareModal() }
+        )
+    }
+
+    // Bottom Sheet: Cross References
+    if (uiState.isCrossReferencesOpen && uiState.selectedCrossReferenceVerse != null) {
+        val selected = uiState.selectedCrossReferenceVerse!!
+        CrossReferencesBottomSheet(
+            sourceCitation = "${selected.bookName} ${selected.chapter}:${selected.verseNumber}",
+            bookId = selected.bookId,
+            chapter = selected.chapter,
+            verse = selected.verseNumber,
+            onNavigateToVerse = { bId, chap, vNum ->
+                viewModel.navigateToVerse(bId, chap, vNum)
+            },
+            onDismiss = { viewModel.closeCrossReferences() }
+        )
+    }
     val offlineStates by com.example.data.bible.OfflineBibleDownloadManager.downloadStates.collectAsState()
 
     // Dialog: Direct Bible Version Selector Modal
@@ -579,6 +612,7 @@ private fun CompactVerseRow(
     redLettersEnabled: Boolean,
     isPrevSameHighlight: Boolean = false,
     isNextSameHighlight: Boolean = false,
+    onCrossReferenceClick: () -> Unit = {},
     onClick: () -> Unit
 ) {
     val highlightColor = remember(verse.highlightColorHex, isDarkTheme) {
@@ -591,6 +625,10 @@ private fun CompactVerseRow(
                 null
             }
         } else null
+    }
+
+    val hasCrossReferences = remember(verse.bookId, verse.chapter, verse.verseNumber) {
+        com.example.data.bible.BibleCrossReferencesCatalog.hasReferences(verse.bookId, verse.chapter, verse.verseNumber)
     }
 
     // Border is strictly for active selection (touch interaction), NEVER for highlights
@@ -653,11 +691,46 @@ private fun CompactVerseRow(
             )
         }
 
-        Text(
-            text = annotatedText,
-            lineHeight = lineHeight,
-            modifier = Modifier.fillMaxWidth()
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = annotatedText,
+                lineHeight = lineHeight,
+                modifier = Modifier.weight(1f)
+            )
+
+            if (hasCrossReferences) {
+                Spacer(modifier = Modifier.width(6.dp))
+                Surface(
+                    onClick = onCrossReferenceClick,
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (isDarkTheme) Color(0xFF1E293B) else Color(0xFFE2E8F0),
+                    modifier = Modifier.padding(top = 2.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            text = "⊕",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isDarkTheme) Color(0xFF38BDF8) else Color(0xFF2563EB)
+                        )
+                        Text(
+                            text = "Ref",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = secondaryColor
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

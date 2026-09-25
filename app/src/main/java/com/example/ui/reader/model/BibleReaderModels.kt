@@ -56,6 +56,9 @@ data class BibleReaderUiState(
     val isBookChapterSelectorOpen: Boolean = false,
     val isSettingsSheetOpen: Boolean = false,
     val isShareDialogOpen: Boolean = false,
+    val isCompareModalOpen: Boolean = false,
+    val isCrossReferencesOpen: Boolean = false,
+    val selectedCrossReferenceVerse: ReaderVerseUiModel? = null,
     val targetScrollVerse: Int? = null,
     val userMessage: String? = null,
     val isReaderBarsVisible: Boolean = true
