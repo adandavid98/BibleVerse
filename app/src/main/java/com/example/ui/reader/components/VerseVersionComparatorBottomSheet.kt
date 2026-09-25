@@ -30,7 +30,7 @@ import com.example.data.bible.BibleVersion
 import com.example.data.bible.BollsBibleApiService
 import com.example.data.bible.OfflineBibleManager
 import com.example.data.bible.OfflineBibleDownloadManager
-import com.example.data.bible.DownloadStatus
+import com.example.data.bible.VersionDownloadState
 import com.example.data.local.BibleReaderDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -92,7 +92,7 @@ fun VerseVersionComparatorBottomSheet(
     val visibleVersions = remember(allVersions, filterOnlyDownloaded, downloadStates) {
         if (filterOnlyDownloaded) {
             allVersions.filter { ver ->
-                ver.code == "RVR1960" || downloadStates[ver.code] is DownloadStatus.Completed
+                ver.code == "RVR1960" || downloadStates[ver.code] is VersionDownloadState.Downloaded
             }
         } else {
             allVersions
@@ -202,7 +202,7 @@ fun VerseVersionComparatorBottomSheet(
                 )
 
                 val downloadedCount = remember(downloadStates) {
-                    1 + downloadStates.values.count { it is DownloadStatus.Completed }
+                    1 + downloadStates.values.count { it is VersionDownloadState.Downloaded }
                 }
                 FilterChip(
                     selected = filterOnlyDownloaded,
@@ -230,7 +230,7 @@ fun VerseVersionComparatorBottomSheet(
                 contentPadding = PaddingValues(bottom = 20.dp)
             ) {
                 items(visibleVersions, key = { it.code }) { ver ->
-                    val isOffline = ver.code == "RVR1960" || downloadStates[ver.code] is DownloadStatus.Completed
+                    val isOffline = ver.code == "RVR1960" || downloadStates[ver.code] is VersionDownloadState.Downloaded
                     val state = versionsMap[ver.code] ?: VersionTextState.Loading
 
                     Card(
