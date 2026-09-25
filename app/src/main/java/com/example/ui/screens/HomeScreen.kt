@@ -657,12 +657,16 @@ fun FavoritesAndNotesTab(
     uiState: BibleUiState
 ) {
     val context = LocalContext.current
-    var subFilter by remember { mutableStateOf("FAVORITOS") } // "FAVORITOS", "RESALTADOS", "NOTAS"
+    val activeFilter = when (uiState.selectedFilter) {
+        VerseFilter.RESALTADOS -> VerseFilter.RESALTADOS
+        VerseFilter.CON_NOTAS -> VerseFilter.CON_NOTAS
+        else -> VerseFilter.FAVORITOS
+    }
 
-    val displayedVerses = when (subFilter) {
-        "FAVORITOS" -> uiState.verses.filter { it.isFavorite }
-        "RESALTADOS" -> uiState.verses.filter { it.highlightColor.isNotBlank() }
-        "NOTAS" -> uiState.verses.filter { it.notes.isNotBlank() }
+    val displayedVerses = when (activeFilter) {
+        VerseFilter.FAVORITOS -> uiState.verses.filter { it.isFavorite }
+        VerseFilter.RESALTADOS -> uiState.verses.filter { it.highlightColor.isNotBlank() }
+        VerseFilter.CON_NOTAS -> uiState.verses.filter { it.notes.isNotBlank() }
         else -> uiState.verses.filter { it.isFavorite }
     }
 
@@ -672,26 +676,48 @@ fun FavoritesAndNotesTab(
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             FilterChip(
-                selected = subFilter == "FAVORITOS",
-                onClick = { subFilter = "FAVORITOS" },
-                label = { Text("Favoritos (${uiState.verses.count { it.isFavorite }})") },
+                selected = activeFilter == VerseFilter.FAVORITOS,
+                onClick = { viewModel.onFilterSelected(VerseFilter.FAVORITOS) },
+                label = {
+                    Text(
+                        text = "Favoritos (${uiState.verses.count { it.isFavorite }})",
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                },
                 leadingIcon = { Icon(Icons.Filled.Favorite, contentDescription = null, modifier = Modifier.size(16.dp)) },
                 modifier = Modifier.testTag("chip_sub_favorites")
             )
             FilterChip(
-                selected = subFilter == "RESALTADOS",
-                onClick = { subFilter = "RESALTADOS" },
-                label = { Text("Resaltados (${uiState.verses.count { it.highlightColor.isNotBlank() }})") },
+                selected = activeFilter == VerseFilter.RESALTADOS,
+                onClick = { viewModel.onFilterSelected(VerseFilter.RESALTADOS) },
+                label = {
+                    Text(
+                        text = "Resaltados (${uiState.verses.count { it.highlightColor.isNotBlank() }})",
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                },
+                leadingIcon = { Icon(Icons.Filled.Bookmark, contentDescription = null, modifier = Modifier.size(16.dp)) },
                 modifier = Modifier.testTag("chip_sub_highlights")
             )
             FilterChip(
-                selected = subFilter == "NOTAS",
-                onClick = { subFilter = "NOTAS" },
-                label = { Text("Con Notas (${uiState.verses.count { it.notes.isNotBlank() }})") },
+                selected = activeFilter == VerseFilter.CON_NOTAS,
+                onClick = { viewModel.onFilterSelected(VerseFilter.CON_NOTAS) },
+                label = {
+                    Text(
+                        text = "Con Notas (${uiState.verses.count { it.notes.isNotBlank() }})",
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                },
+                leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null, modifier = Modifier.size(16.dp)) },
                 modifier = Modifier.testTag("chip_sub_notes")
             )
         }
@@ -710,16 +736,20 @@ fun FavoritesAndNotesTab(
                     modifier = Modifier.padding(24.dp)
                 ) {
                     Icon(
-                        imageVector = if (subFilter == "FAVORITOS") Icons.Outlined.FavoriteBorder else Icons.Outlined.BookmarkBorder,
+                        imageVector = when (activeFilter) {
+                            VerseFilter.FAVORITOS -> Icons.Outlined.FavoriteBorder
+                            VerseFilter.RESALTADOS -> Icons.Outlined.BookmarkBorder
+                            else -> Icons.Filled.Edit
+                        },
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.outline,
                         modifier = Modifier.size(54.dp)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = when (subFilter) {
-                            "FAVORITOS" -> "Aún no tienes versículos favoritos marcados."
-                            "RESALTADOS" -> "No has resaltado ningún versículo todavía."
+                        text = when (activeFilter) {
+                            VerseFilter.FAVORITOS -> "Aún no tienes versículos favoritos marcados."
+                            VerseFilter.RESALTADOS -> "No has resaltado ningún versículo todavía."
                             else -> "No has escrito notas personales en ningún versículo."
                         },
                         style = MaterialTheme.typography.bodyMedium,

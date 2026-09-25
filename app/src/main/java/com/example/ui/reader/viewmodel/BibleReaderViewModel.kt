@@ -270,11 +270,46 @@ class BibleReaderViewModel(
     fun applyHighlightToSelection(colorHex: String) {
         val currentBook = _uiState.value.currentBook ?: return
         val chapter = _uiState.value.currentChapter
-        val selected = _uiState.value.selectedVerseNumbers.toList()
+        val selected = getSelectedVerses()
         if (selected.isEmpty()) return
 
+        val dao = verseDao
         viewModelScope.launch {
-            toggleHighlightUseCase.applyHighlight(currentBook.id, chapter, selected, colorHex)
+            if (dao != null) {
+                val version = _uiState.value.preferences.bibleVersion
+                val testament = if (currentBook.orderIndex <= 39) "Antiguo Testamento" else "Nuevo Testamento"
+                val allVerses = dao.getAllVersesDirect()
+                for (v in selected) {
+                    val ref = "${currentBook.name} $chapter:${v.verseNumber}"
+                    val existing = allVerses.find {
+                        it.reference.trim().equals(ref.trim(), ignoreCase = true)
+                    }
+                    if (existing != null) {
+                        dao.updateVerse(
+                            existing.copy(
+                                highlightColor = colorHex,
+                                updatedAt = System.currentTimeMillis()
+                            )
+                        )
+                    } else {
+                        val entity = VerseEntity(
+                            book = currentBook.name,
+                            chapterVerse = "$chapter:${v.verseNumber}",
+                            reference = ref,
+                            testament = testament,
+                            text = v.text,
+                            context = "Versículo resaltado desde el Lector de la Biblia.",
+                            topic = "Biblia",
+                            isFavorite = false,
+                            highlightColor = colorHex,
+                            isCustom = true,
+                            bibleVersion = version
+                        )
+                        dao.insertVerse(entity)
+                    }
+                }
+            }
+            toggleHighlightUseCase.applyHighlight(currentBook.id, chapter, selected.map { it.verseNumber }, colorHex)
             clearSelection()
         }
     }
@@ -282,11 +317,29 @@ class BibleReaderViewModel(
     fun removeHighlightFromSelection() {
         val currentBook = _uiState.value.currentBook ?: return
         val chapter = _uiState.value.currentChapter
-        val selected = _uiState.value.selectedVerseNumbers.toList()
+        val selected = getSelectedVerses()
         if (selected.isEmpty()) return
 
+        val dao = verseDao
         viewModelScope.launch {
-            toggleHighlightUseCase.removeHighlight(currentBook.id, chapter, selected)
+            if (dao != null) {
+                val allVerses = dao.getAllVersesDirect()
+                for (v in selected) {
+                    val ref = "${currentBook.name} $chapter:${v.verseNumber}"
+                    val existing = allVerses.find {
+                        it.reference.trim().equals(ref.trim(), ignoreCase = true)
+                    }
+                    if (existing != null) {
+                        dao.updateVerse(
+                            existing.copy(
+                                highlightColor = "",
+                                updatedAt = System.currentTimeMillis()
+                            )
+                        )
+                    }
+                }
+            }
+            toggleHighlightUseCase.removeHighlight(currentBook.id, chapter, selected.map { it.verseNumber })
             clearSelection()
         }
     }
@@ -384,7 +437,7 @@ class BibleReaderViewModel(
         }
     }
 
-    fun saveSelectedVersesToMainModule(colorHex: String = "#FEF08A") {
+    fun saveSelectedVersesToMainModule(colorHex: String = "") {
         val currentBook = _uiState.value.currentBook ?: return
         val chapter = _uiState.value.currentChapter
         val selected = getSelectedVerses()
@@ -395,25 +448,41 @@ class BibleReaderViewModel(
             if (dao != null) {
                 val version = _uiState.value.preferences.bibleVersion
                 val testament = if (currentBook.orderIndex <= 39) "Antiguo Testamento" else "Nuevo Testamento"
+                val allVerses = dao.getAllVersesDirect()
                 for (v in selected) {
                     val ref = "${currentBook.name} $chapter:${v.verseNumber}"
-                    val entity = VerseEntity(
-                        book = currentBook.name,
-                        chapterVerse = "$chapter:${v.verseNumber}",
-                        reference = ref,
-                        testament = testament,
-                        text = v.text,
-                        context = "Versículo guardado desde el Lector de la Biblia.",
-                        topic = "Biblia",
-                        isFavorite = true,
-                        highlightColor = colorHex,
-                        isCustom = true,
-                        bibleVersion = version
-                    )
-                    dao.insertVerse(entity)
+                    val existing = allVerses.find {
+                        it.reference.trim().equals(ref.trim(), ignoreCase = true)
+                    }
+                    if (existing != null) {
+                        dao.updateVerse(
+                            existing.copy(
+                                isFavorite = true,
+                                highlightColor = if (colorHex.isNotBlank()) colorHex else existing.highlightColor,
+                                updatedAt = System.currentTimeMillis()
+                            )
+                        )
+                    } else {
+                        val entity = VerseEntity(
+                            book = currentBook.name,
+                            chapterVerse = "$chapter:${v.verseNumber}",
+                            reference = ref,
+                            testament = testament,
+                            text = v.text,
+                            context = "Versículo guardado desde el Lector de la Biblia.",
+                            topic = "Biblia",
+                            isFavorite = true,
+                            highlightColor = colorHex,
+                            isCustom = true,
+                            bibleVersion = version
+                        )
+                        dao.insertVerse(entity)
+                    }
                 }
             }
-            toggleHighlightUseCase.applyHighlight(currentBook.id, chapter, selected.map { it.verseNumber }, colorHex)
+            if (colorHex.isNotBlank()) {
+                toggleHighlightUseCase.applyHighlight(currentBook.id, chapter, selected.map { it.verseNumber }, colorHex)
+            }
             clearSelection()
         }
     }
