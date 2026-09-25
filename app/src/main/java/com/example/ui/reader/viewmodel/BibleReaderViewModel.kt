@@ -110,7 +110,7 @@ class BibleReaderViewModel(
 
     fun navigateToVerse(bookId: Int, chapter: Int, verse: Int = 1) {
         val book = _uiState.value.books.firstOrNull { it.id == bookId }
-            ?: com.example.data.local.BibleBookEntity(
+            ?: com.example.data.model.BibleBookEntity(
                 id = bookId,
                 name = com.example.data.bible.BibleCatalog.books.getOrNull(bookId - 1)?.name ?: "Libro $bookId",
                 testament = if (bookId <= 39) "Antiguo Testamento" else "Nuevo Testamento",
