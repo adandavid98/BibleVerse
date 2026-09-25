@@ -115,6 +115,7 @@ class BibleReaderViewModel(
                 name = com.example.data.bible.BibleCatalog.books.getOrNull(bookId - 1)?.name ?: "Libro $bookId",
                 testament = if (bookId <= 39) "Antiguo Testamento" else "Nuevo Testamento",
                 chaptersCount = com.example.data.bible.BibleCatalog.books.getOrNull(bookId - 1)?.chaptersCount ?: 1,
+                category = com.example.data.bible.BibleCatalog.books.getOrNull(bookId - 1)?.category ?: "General",
                 abbreviation = com.example.data.bible.BibleCatalog.books.getOrNull(bookId - 1)?.abbreviation ?: "",
                 orderIndex = bookId
             )
