@@ -36,6 +36,7 @@ fun ReaderSettingsBottomSheet(
     onVersionChange: (String) -> Unit,
     onRedLettersChange: (Boolean) -> Unit,
     onContinuousScrollChange: (Boolean) -> Unit,
+    onShowSectionHeadingsChange: (Boolean) -> Unit = {},
     onDismiss: () -> Unit
 ) {
     ModalBottomSheet(
@@ -426,6 +427,33 @@ fun ReaderSettingsBottomSheet(
                 Switch(
                     checked = preferences.continuousScrollEnabled,
                     onCheckedChange = onContinuousScrollChange
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // 8. Section Headings Switch
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Títulos de sección (perícopas)",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Muestra divisiones temáticas en los capítulos",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = preferences.showSectionHeadings,
+                    onCheckedChange = onShowSectionHeadingsChange
                 )
             }
 

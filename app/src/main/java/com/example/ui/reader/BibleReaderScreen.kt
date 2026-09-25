@@ -306,8 +306,8 @@ fun BibleReaderScreen(
                                 )
                             }
 
-                            // Section Heading (Perícopa) in bold italic if present
-                            if (!verse.sectionHeading.isNullOrBlank()) {
+                            // Section Heading (Perícopa) in bold italic if present and enabled
+                            if (uiState.preferences.showSectionHeadings && !verse.sectionHeading.isNullOrBlank()) {
                                 Spacer(modifier = Modifier.height(14.dp))
                                 Text(
                                     text = verse.sectionHeading,
@@ -513,6 +513,7 @@ fun BibleReaderScreen(
             onVersionChange = { viewModel.updateBibleVersion(it) },
             onRedLettersChange = { viewModel.updateRedLettersEnabled(it) },
             onContinuousScrollChange = { viewModel.updateContinuousScrollEnabled(it) },
+            onShowSectionHeadingsChange = { viewModel.updateShowSectionHeadings(it) },
             onDismiss = { viewModel.closeSettingsSheet() }
         )
     }

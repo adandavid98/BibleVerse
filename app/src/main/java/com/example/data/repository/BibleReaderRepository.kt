@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 import android.content.Context
+import com.example.data.bible.BiblePericopesCatalog
 import com.example.data.bible.OfflineBibleManager
 
 class BibleReaderRepository(
@@ -78,14 +79,16 @@ class BibleReaderRepository(
             if (offlineVerses.isNotEmpty()) {
                 val existing = dao.getVersesSync(bookId, chapter, normVersion)
                 val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
+                val hasHeadingsInCatalog = BiblePericopesCatalog.hasHeadingsForChapter(bookId, chapter)
+                val missingHeadings = hasHeadingsInCatalog && existing.isNotEmpty() && existing.all { it.sectionHeading.isNullOrBlank() }
 
-                // If not cached in Room yet, or incomplete, or contains synthetic placeholder, reload completely
-                if (existing.size != offlineVerses.size || hasSynthetic) {
+                // If not cached in Room yet, or incomplete, or contains synthetic placeholder, or missing headings, reload completely
+                if (existing.size != offlineVerses.size || hasSynthetic || missingHeadings) {
                     dao.deleteVersesForChapter(bookId, chapter, normVersion)
                     val entities = offlineVerses.map { dto ->
                         val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber)
                             || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
-                        val heading = detectSectionHeading(bookId, chapter, dto.verseNumber)
+                        val heading = BiblePericopesCatalog.getHeading(context, bookId, chapter, dto.verseNumber, normVersion)
                         BibleReaderVerseEntity(
                             bookId = bookId,
                             chapter = chapter,
@@ -105,8 +108,19 @@ class BibleReaderRepository(
         // 2. Check if we already have valid verses in Room for this chapter and version
         val existing = dao.getVersesSync(bookId, chapter, normVersion)
         val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
+        val hasHeadingsInCatalog = BiblePericopesCatalog.hasHeadingsForChapter(bookId, chapter)
+        val missingHeadings = hasHeadingsInCatalog && existing.isNotEmpty() && existing.all { it.sectionHeading.isNullOrBlank() }
 
-        if (existing.isNotEmpty() && !hasSynthetic) {
+        if (existing.isNotEmpty() && !hasSynthetic && !missingHeadings) {
+            return@withContext
+        }
+
+        if (missingHeadings && !hasSynthetic) {
+            val updated = existing.map { v ->
+                val heading = BiblePericopesCatalog.getHeading(context, bookId, chapter, v.verseNumber, normVersion)
+                if (heading != v.sectionHeading) v.copy(sectionHeading = heading) else v
+            }
+            dao.insertVerses(updated)
             return@withContext
         }
 
@@ -130,7 +144,7 @@ class BibleReaderRepository(
             val entities = networkVerses.map { dto ->
                 val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber)
                     || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
-                val heading = detectSectionHeading(bookId, chapter, dto.verseNumber)
+                val heading = BiblePericopesCatalog.getHeading(context, bookId, chapter, dto.verseNumber, normVersion)
                 BibleReaderVerseEntity(
                     bookId = bookId,
                     chapter = chapter,
@@ -152,7 +166,7 @@ class BibleReaderRepository(
             val entities = fallbackOffline.map { dto ->
                 val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber)
                     || isWordsOfJesus(bookId, chapter, dto.verseNumber, dto.text)
-                val heading = detectSectionHeading(bookId, chapter, dto.verseNumber)
+                val heading = BiblePericopesCatalog.getHeading(context, bookId, chapter, dto.verseNumber, normVersion)
                 BibleReaderVerseEntity(
                     bookId = bookId,
                     chapter = chapter,
@@ -191,30 +205,7 @@ class BibleReaderRepository(
     }
 
     private fun detectSectionHeading(bookId: Int, chapter: Int, verseNumber: Int): String? {
-        // Miqueas 6
-        if (bookId == 33 && chapter == 6) {
-            if (verseNumber == 1) return "Controversia de Jehová contra Israel"
-            if (verseNumber == 6) return "Lo que pide Jehová"
-        }
-        // Mateo 5
-        if (bookId == 40 && chapter == 5) {
-            if (verseNumber == 1) return "Las bienaventuranzas"
-            if (verseNumber == 13) return "La sal de la tierra"
-            if (verseNumber == 14) return "La luz del mundo"
-            if (verseNumber == 17) return "Jesús y la ley"
-            if (verseNumber == 21) return "Jesús y la ira"
-            if (verseNumber == 27) return "Jesús y el adulterio"
-        }
-        // Juan 3
-        if (bookId == 43 && chapter == 3) {
-            if (verseNumber == 1) return "Jesús y Nicodemo"
-            if (verseNumber == 22) return "El testimonio de Juan el Bautista"
-        }
-        // Salmo 23
-        if (bookId == 19 && chapter == 23) {
-            if (verseNumber == 1) return "Jehová es mi pastor"
-        }
-        return null
+        return BiblePericopesCatalog.getHeading(context, bookId, chapter, verseNumber, "RVR1960")
     }
 
     private fun isWordsOfJesus(bookId: Int, chapter: Int, verseNumber: Int, text: String): Boolean {

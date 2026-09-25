@@ -26,5 +26,6 @@ data class ReaderPreferences(
     val lastVerse: Int = 1,
     val bibleVersion: String = "RVR1960",
     val redLettersEnabled: Boolean = true,
-    val continuousScrollEnabled: Boolean = false
+    val continuousScrollEnabled: Boolean = false,
+    val showSectionHeadings: Boolean = true
 )

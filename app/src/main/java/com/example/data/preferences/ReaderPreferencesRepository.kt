@@ -29,6 +29,7 @@ class ReaderPreferencesRepository(private val context: Context) {
         val BIBLE_VERSION = stringPreferencesKey("bible_version")
         val RED_LETTERS_ENABLED = androidx.datastore.preferences.core.booleanPreferencesKey("red_letters_enabled")
         val CONTINUOUS_SCROLL_ENABLED = androidx.datastore.preferences.core.booleanPreferencesKey("continuous_scroll_enabled")
+        val SHOW_SECTION_HEADINGS = androidx.datastore.preferences.core.booleanPreferencesKey("show_section_headings")
     }
 
     val readerPreferences: Flow<ReaderPreferences> = context.dataStore.data
@@ -63,6 +64,7 @@ class ReaderPreferencesRepository(private val context: Context) {
             val bibleVersion = preferences[PreferencesKeys.BIBLE_VERSION] ?: "RVR1960"
             val redLettersEnabled = preferences[PreferencesKeys.RED_LETTERS_ENABLED] ?: true
             val continuousScrollEnabled = preferences[PreferencesKeys.CONTINUOUS_SCROLL_ENABLED] ?: false
+            val showSectionHeadings = preferences[PreferencesKeys.SHOW_SECTION_HEADINGS] ?: true
 
             ReaderPreferences(
                 fontFamily = fontFamily,
@@ -74,7 +76,8 @@ class ReaderPreferencesRepository(private val context: Context) {
                 lastVerse = lastVerse,
                 bibleVersion = bibleVersion,
                 redLettersEnabled = redLettersEnabled,
-                continuousScrollEnabled = continuousScrollEnabled
+                continuousScrollEnabled = continuousScrollEnabled,
+                showSectionHeadings = showSectionHeadings
             )
         }
 
@@ -127,6 +130,12 @@ class ReaderPreferencesRepository(private val context: Context) {
     suspend fun updateContinuousScrollEnabled(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.CONTINUOUS_SCROLL_ENABLED] = enabled
+        }
+    }
+
+    suspend fun updateShowSectionHeadings(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_SECTION_HEADINGS] = enabled
         }
     }
 }

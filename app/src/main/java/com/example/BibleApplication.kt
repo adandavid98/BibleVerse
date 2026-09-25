@@ -16,8 +16,9 @@ class BibleApplication : Application() {
                 Log.d("BibleApplication", "Firebase ya estaba inicializado")
             }
             FirebaseSyncManager.init(this)
+            com.example.data.bible.BiblePericopesCatalog.init(this)
         } catch (e: Exception) {
-            Log.e("BibleApplication", "Error al inicializar Firebase: ${e.message}", e)
+            Log.e("BibleApplication", "Error al inicializar: ${e.message}", e)
         }
     }
 }

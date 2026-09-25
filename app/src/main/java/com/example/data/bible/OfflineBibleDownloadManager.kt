@@ -121,6 +121,12 @@ object OfflineBibleDownloadManager {
 
                 val cleanText = sanitizeVerseText(rawText)
                 val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, verseNum)
+                val heading = BiblePericopesCatalog.getHeading(
+                    bookId = bookId,
+                    chapter = chapter,
+                    verse = verseNum,
+                    version = codeUpper
+                )
 
                 batch.add(
                     BibleReaderVerseEntity(
@@ -129,6 +135,7 @@ object OfflineBibleDownloadManager {
                         verseNumber = verseNum,
                         text = cleanText,
                         bibleVersion = codeUpper,
+                        sectionHeading = heading,
                         isRedLetter = isJesus
                     )
                 )

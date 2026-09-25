@@ -437,6 +437,10 @@ class BibleReaderViewModel(
         }
     }
 
+    fun updateShowSectionHeadings(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.updateShowSectionHeadings(enabled) }
+    }
+
     fun saveSelectedVersesToMainModule(colorHex: String = "") {
         val currentBook = _uiState.value.currentBook ?: return
         val chapter = _uiState.value.currentChapter
