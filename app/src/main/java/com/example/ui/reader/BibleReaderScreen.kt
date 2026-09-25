@@ -500,13 +500,17 @@ fun BibleReaderScreen(
                 onCompareVersions = {
                     viewModel.openCompareModal()
                 },
+                onCrossReferences = {
+                    val firstSelected = viewModel.getSelectedVerses().firstOrNull()
+                    if (firstSelected != null) {
+                        viewModel.openCrossReferences(firstSelected)
+                    }
+                },
                 onClearSelection = {
                     viewModel.clearSelection()
                 },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
-                    .padding(bottom = if (uiState.isReaderBarsVisible) 76.dp else 70.dp)
             )
         }
     }

@@ -44,6 +44,7 @@ fun ReadingPlansBottomSheet(
     }
 
     val listState = rememberLazyListState()
+    var activeReadingDay by remember { mutableStateOf<ReadingPlanDay?>(null) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -183,8 +184,7 @@ fun ReadingPlansBottomSheet(
                     val nextDay = currentDays.firstOrNull { it.dayNumber == progress.nextPendingDay } ?: currentDays.first()
                     Button(
                         onClick = {
-                            onDismiss()
-                            onNavigateToReader(nextDay.primaryBookId, nextDay.primaryChapter, nextDay.primaryVerse)
+                            activeReadingDay = nextDay
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
@@ -252,7 +252,9 @@ fun ReadingPlansBottomSheet(
                     val isCompleted = progress.completedDays.contains(day.dayNumber)
 
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { activeReadingDay = day },
                         shape = RoundedCornerShape(14.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = if (isCompleted) {
@@ -300,8 +302,7 @@ fun ReadingPlansBottomSheet(
                             // Read button
                             IconButton(
                                 onClick = {
-                                    onDismiss()
-                                    onNavigateToReader(day.primaryBookId, day.primaryChapter, day.primaryVerse)
+                                    activeReadingDay = day
                                 },
                                 modifier = Modifier.size(36.dp)
                             ) {
@@ -317,5 +318,29 @@ fun ReadingPlansBottomSheet(
                 }
             }
         }
+    }
+
+    // Isolated Daily Reader Sheet
+    activeReadingDay?.let { dayToRead ->
+        val isDayCompleted = progress.completedDays.contains(dayToRead.dayNumber)
+        val nextDayNumber = dayToRead.dayNumber + 1
+        val nextDayObj = currentDays.firstOrNull { it.dayNumber == nextDayNumber }
+
+        ReadingPlanDayReaderModal(
+            day = dayToRead,
+            isCompleted = isDayCompleted,
+            onToggleCompleted = { dayNum ->
+                preferences.toggleDayCompleted(dayNum)
+            },
+            onNextDay = if (nextDayObj != null) {
+                { activeReadingDay = nextDayObj }
+            } else null,
+            onOpenInFullBible = { bookId, chapter, verse ->
+                activeReadingDay = null
+                onDismiss()
+                onNavigateToReader(bookId, chapter, verse)
+            },
+            onDismiss = { activeReadingDay = null }
+        )
     }
 }

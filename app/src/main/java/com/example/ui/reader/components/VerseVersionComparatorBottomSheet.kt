@@ -6,13 +6,15 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.CompareArrows
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,8 +26,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.bible.BibleCatalog
+import com.example.data.bible.BibleVersion
 import com.example.data.bible.BollsBibleApiService
 import com.example.data.bible.OfflineBibleManager
+import com.example.data.bible.OfflineBibleDownloadManager
+import com.example.data.bible.DownloadStatus
 import com.example.data.local.BibleReaderDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -49,18 +54,17 @@ fun VerseVersionComparatorBottomSheet(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val scrollState = rememberScrollState()
 
-    val targetVersions = listOf(
-        "RVR1960" to "Reina-Valera 1960",
-        "NTV" to "Nueva Traducción Viviente",
-        "NVI" to "Nueva Versión Internacional",
-        "NBLA" to "Nueva Biblia de las Américas"
-    )
+    val downloadStates by OfflineBibleDownloadManager.downloadStates.collectAsState()
+    var filterOnlyDownloaded by remember { mutableStateOf(false) }
 
+    // All available canonical versions in the app
+    val allVersions = remember { BibleCatalog.versions }
+
+    // Track text state for each version code
     var versionsMap by remember {
         mutableStateOf<Map<String, VersionTextState>>(
-            targetVersions.associate { it.first to VersionTextState.Loading }
+            allVersions.associate { it.code to VersionTextState.Loading }
         )
     }
 
@@ -68,7 +72,8 @@ fun VerseVersionComparatorBottomSheet(
         val sortedVerses = verseNumbers.sorted()
         if (sortedVerses.isEmpty()) return@LaunchedEffect
 
-        targetVersions.forEach { (code, _) ->
+        allVersions.forEach { ver ->
+            val code = ver.code
             scope.launch(Dispatchers.IO) {
                 try {
                     val text = loadVerseTextForVersion(context, readerDao, bookId, chapter, sortedVerses, code)
@@ -81,6 +86,16 @@ fun VerseVersionComparatorBottomSheet(
                     }
                 }
             }
+        }
+    }
+
+    val visibleVersions = remember(allVersions, filterOnlyDownloaded, downloadStates) {
+        if (filterOnlyDownloaded) {
+            allVersions.filter { ver ->
+                ver.code == "RVR1960" || downloadStates[ver.code] is DownloadStatus.Completed
+            }
+        } else {
+            allVersions
         }
     }
 
@@ -105,14 +120,22 @@ fun VerseVersionComparatorBottomSheet(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.CompareArrows,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.CompareArrows,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                    }
                     Column {
                         Text(
                             text = "Comparador de Versiones",
@@ -135,29 +158,29 @@ fun VerseVersionComparatorBottomSheet(
                         onClick = {
                             val sb = StringBuilder()
                             sb.appendLine("=== $citation ===")
-                            targetVersions.forEach { (code, name) ->
-                                val state = versionsMap[code]
+                            visibleVersions.forEach { ver ->
+                                val state = versionsMap[ver.code]
                                 if (state is VersionTextState.Success) {
-                                    sb.appendLine("[$code - $name]")
+                                    sb.appendLine("[${ver.shortName}] ${ver.name}")
                                     sb.appendLine(state.text)
                                     sb.appendLine()
                                 }
                             }
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            clipboard.setPrimaryClip(ClipData.newPlainText("Comparación Bíblica", sb.toString().trim()))
-                            Toast.makeText(context, "Comparación copiada al portapapeles", Toast.LENGTH_SHORT).show()
+                            clipboard.setPrimaryClip(ClipData.newPlainText("Comparación de Versiones", sb.toString()))
+                            Toast.makeText(context, "Comparación completa copiada", Toast.LENGTH_SHORT).show()
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ContentCopy,
-                            contentDescription = "Copiar todo",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            Icons.Default.ContentCopy,
+                            contentDescription = "Copiar todas",
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
 
                     IconButton(onClick = onDismiss) {
                         Icon(
-                            imageVector = Icons.Default.Close,
+                            Icons.Default.Close,
                             contentDescription = "Cerrar",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -165,138 +188,231 @@ fun VerseVersionComparatorBottomSheet(
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
-            Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // Scrollable list of versions
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                targetVersions.forEach { (code, fullName) ->
-                    val state = versionsMap[code] ?: VersionTextState.Loading
-                    VersionCard(
-                        code = code,
-                        fullName = fullName,
-                        state = state,
-                        onCopy = { text ->
-                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            clipboard.setPrimaryClip(ClipData.newPlainText(citation, "\"$text\" - $citation ($code)"))
-                            Toast.makeText(context, "Copiado ($code)", Toast.LENGTH_SHORT).show()
-                        }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun VersionCard(
-    code: String,
-    fullName: String,
-    state: VersionTextState,
-    onCopy: (String) -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-        tonalElevation = 1.dp
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // Top tag
+            // Filter Tabs: Todas las Versiones vs Solo Descargadas
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = code,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    Text(
-                        text = fullName,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 12.sp
-                    )
-                }
+                FilterChip(
+                    selected = !filterOnlyDownloaded,
+                    onClick = { filterOnlyDownloaded = false },
+                    label = { Text("Todas las versiones (${allVersions.size})") }
+                )
 
-                if (state is VersionTextState.Success) {
-                    IconButton(
-                        onClick = { onCopy(state.text) },
-                        modifier = Modifier.size(28.dp)
-                    ) {
+                val downloadedCount = remember(downloadStates) {
+                    1 + downloadStates.values.count { it is DownloadStatus.Completed }
+                }
+                FilterChip(
+                    selected = filterOnlyDownloaded,
+                    onClick = { filterOnlyDownloaded = true },
+                    label = { Text("Solo Descargadas ($downloadedCount)") },
+                    leadingIcon = {
                         Icon(
-                            imageVector = Icons.Default.ContentCopy,
-                            contentDescription = "Copiar",
-                            tint = MaterialTheme.colorScheme.outline,
-                            modifier = Modifier.size(16.dp)
+                            Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
-                }
+                )
             }
 
             Spacer(modifier = Modifier.height(10.dp))
+            Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            when (state) {
-                is VersionTextState.Loading -> {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 12.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+            // Version Cards List
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(bottom = 20.dp)
+            ) {
+                items(visibleVersions, key = { it.code }) { ver ->
+                    val isOffline = ver.code == "RVR1960" || downloadStates[ver.code] is DownloadStatus.Completed
+                    val state = versionsMap[ver.code] ?: VersionTextState.Loading
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                        )
                     ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = "Consultando versión...",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            // Version Header with Badges
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Surface(
+                                        shape = RoundedCornerShape(6.dp),
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                    ) {
+                                        Text(
+                                            text = ver.shortName,
+                                            fontWeight = FontWeight.Black,
+                                            fontSize = 12.sp,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                        )
+                                    }
+
+                                    Text(
+                                        text = ver.name,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    if (isOffline) {
+                                        Surface(
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = Color(0xFF10B981).copy(alpha = 0.15f)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.CheckCircle,
+                                                    contentDescription = null,
+                                                    tint = Color(0xFF059669),
+                                                    modifier = Modifier.size(12.dp)
+                                                )
+                                                Text(
+                                                    text = "Offline",
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color(0xFF059669)
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        Surface(
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Cloud,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.size(12.dp)
+                                                )
+                                                Text(
+                                                    text = "En línea",
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Medium,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    // Single copy button
+                                    if (state is VersionTextState.Success) {
+                                        IconButton(
+                                            onClick = {
+                                                val textToCopy = "«${state.text}» - $citation (${ver.shortName})"
+                                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                                clipboard.setPrimaryClip(ClipData.newPlainText("Versículo ${ver.shortName}", textToCopy))
+                                                Toast.makeText(context, "${ver.shortName} copiada", Toast.LENGTH_SHORT).show()
+                                            },
+                                            modifier = Modifier.size(32.dp)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.ContentCopy,
+                                                contentDescription = "Copiar versión",
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            // Verse Text Content
+                            when (state) {
+                                is VersionTextState.Loading -> {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.padding(vertical = 8.dp)
+                                    ) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(18.dp),
+                                            strokeWidth = 2.dp,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Text(
+                                            text = "Cargando traducción...",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                                is VersionTextState.Success -> {
+                                    Text(
+                                        text = state.text,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        lineHeight = 22.sp,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                                is VersionTextState.Error -> {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text(
+                                            text = state.message,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                        TextButton(
+                                            onClick = {
+                                                versionsMap = versionsMap + (ver.code to VersionTextState.Loading)
+                                                scope.launch(Dispatchers.IO) {
+                                                    try {
+                                                        val text = loadVerseTextForVersion(context, readerDao, bookId, chapter, verseNumbers.sorted(), ver.code)
+                                                        withContext(Dispatchers.Main) {
+                                                            versionsMap = versionsMap + (ver.code to VersionTextState.Success(text))
+                                                        }
+                                                    } catch (_: Exception) {
+                                                        withContext(Dispatchers.Main) {
+                                                            versionsMap = versionsMap + (ver.code to VersionTextState.Error("Reintento fallido"))
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        ) {
+                                            Text("Reintentar", fontSize = 12.sp)
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
-                }
-                is VersionTextState.Success -> {
-                    Text(
-                        text = state.text,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            lineHeight = 22.sp,
-                            fontSize = 15.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                is VersionTextState.Error -> {
-                    Text(
-                        text = state.message,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
                 }
             }
         }

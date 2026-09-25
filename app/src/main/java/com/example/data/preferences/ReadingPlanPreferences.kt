@@ -57,6 +57,18 @@ class ReadingPlanPreferences(context: Context) {
         _progressFlow.value = current.copy(completedDays = updated)
     }
 
+    fun setDayCompleted(dayNumber: Int, completed: Boolean) {
+        val current = _progressFlow.value
+        val updated = if (completed) {
+            current.completedDays + dayNumber
+        } else {
+            current.completedDays - dayNumber
+        }
+        val setString = updated.map { it.toString() }.toSet()
+        prefs.edit().putStringSet(KEY_COMPLETED_DAYS + "_" + current.activePlanType.name, setString).apply()
+        _progressFlow.value = current.copy(completedDays = updated)
+    }
+
     fun resetPlanProgress() {
         val current = _progressFlow.value
         prefs.edit().remove(KEY_COMPLETED_DAYS + "_" + current.activePlanType.name).apply()
