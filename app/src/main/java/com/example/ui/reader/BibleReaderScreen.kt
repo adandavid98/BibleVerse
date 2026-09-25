@@ -286,14 +286,29 @@ fun BibleReaderScreen(
                         .nestedScroll(nestedScrollConnection)
                         .padding(horizontal = 22.dp),
                     contentPadding = PaddingValues(top = 12.dp, bottom = if (uiState.isReaderBarsVisible) 120.dp else 80.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     itemsIndexed(
                         items = uiState.verses,
                         key = { _, v -> "${v.bookId}_${v.chapter}_${v.verseNumber}" }
                     ) { index, verse ->
                         val prevVerse = if (index > 0) uiState.verses[index - 1] else null
+                        val nextVerse = if (index < uiState.verses.size - 1) uiState.verses[index + 1] else null
                         val isNewChapter = prevVerse != null && (prevVerse.chapter != verse.chapter || prevVerse.bookId != verse.bookId)
+
+                        val hasHighlight = !verse.highlightColorHex.isNullOrBlank()
+                        val isPrevSameHighlight = hasHighlight && prevVerse != null &&
+                                !prevVerse.highlightColorHex.isNullOrBlank() &&
+                                prevVerse.highlightColorHex.equals(verse.highlightColorHex, ignoreCase = true) &&
+                                verse.sectionHeading.isNullOrBlank() &&
+                                !isNewChapter
+
+                        val isNextSameHighlight = hasHighlight && nextVerse != null &&
+                                !nextVerse.highlightColorHex.isNullOrBlank() &&
+                                nextVerse.highlightColorHex.equals(verse.highlightColorHex, ignoreCase = true) &&
+                                nextVerse.sectionHeading.isNullOrBlank() &&
+                                nextVerse.chapter == verse.chapter &&
+                                nextVerse.bookId == verse.bookId
 
                         Column(modifier = Modifier.fillMaxWidth()) {
                             if (isNewChapter) {
@@ -330,6 +345,8 @@ fun BibleReaderScreen(
                                 secondaryColor = themeSecondary,
                                 isDarkTheme = uiState.preferences.themeMode == ReaderThemeMode.DARK || uiState.preferences.themeMode == ReaderThemeMode.NIGHT,
                                 redLettersEnabled = uiState.preferences.redLettersEnabled,
+                                isPrevSameHighlight = isPrevSameHighlight,
+                                isNextSameHighlight = isNextSameHighlight,
                                 onClick = { viewModel.toggleVerseSelection(verse.verseNumber) }
                             )
                         }
@@ -560,23 +577,34 @@ private fun CompactVerseRow(
     secondaryColor: Color,
     isDarkTheme: Boolean,
     redLettersEnabled: Boolean,
+    isPrevSameHighlight: Boolean = false,
+    isNextSameHighlight: Boolean = false,
     onClick: () -> Unit
 ) {
-    val highlightColor = remember(verse.highlightColorHex) {
+    val highlightColor = remember(verse.highlightColorHex, isDarkTheme) {
         if (!verse.highlightColorHex.isNullOrBlank()) {
             try {
-                Color(android.graphics.Color.parseColor(verse.highlightColorHex)).copy(alpha = 0.28f)
+                // Soft, integrated highlight tint without harsh contrast
+                Color(android.graphics.Color.parseColor(verse.highlightColorHex))
+                    .copy(alpha = if (isDarkTheme) 0.24f else 0.28f)
             } catch (e: Exception) {
                 null
             }
         } else null
     }
 
+    // Border is strictly for active selection (touch interaction), NEVER for highlights
     val selectionBorder = if (verse.isSelected) {
-        BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
-    } else if (highlightColor != null) {
-        BorderStroke(0.8.dp, highlightColor.copy(alpha = 0.5f))
+        BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.85f))
     } else null
+
+    // Seamless, connected shape for consecutive highlighted verses like YouVersion
+    val highlightShape = when {
+        isPrevSameHighlight && isNextSameHighlight -> RoundedCornerShape(0.dp)
+        isPrevSameHighlight -> RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
+        isNextSameHighlight -> RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
+        else -> RoundedCornerShape(4.dp)
+    }
 
     val rowBg = when {
         verse.isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
@@ -590,11 +618,14 @@ private fun CompactVerseRow(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(highlightShape)
             .background(rowBg)
-            .then(if (selectionBorder != null) Modifier.border(selectionBorder, RoundedCornerShape(8.dp)) else Modifier)
+            .then(if (selectionBorder != null) Modifier.border(selectionBorder, RoundedCornerShape(4.dp)) else Modifier)
             .clickable { onClick() }
-            .padding(horizontal = 6.dp, vertical = 3.dp)
+            .padding(
+                horizontal = 6.dp,
+                vertical = if (isPrevSameHighlight || isNextSameHighlight) 2.dp else 3.dp
+            )
     ) {
         val annotatedText = buildAnnotatedString {
             // Elegant superscript verse number
