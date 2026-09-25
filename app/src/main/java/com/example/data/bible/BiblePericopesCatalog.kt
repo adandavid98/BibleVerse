@@ -70,22 +70,8 @@ object BiblePericopesCatalog {
     }
 
     private fun loadFromAssets(context: Context) {
-        var loaded = false
-        // Try gzipped JSON first (compact asset)
-        try {
-            context.assets.open("bible/pericopes_es.json.gz").use { rawIn ->
-                GZIPInputStream(rawIn).bufferedReader(Charsets.UTF_8).use { reader ->
-                    parseJson(reader.readText())
-                    loaded = true
-                }
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "No se pudo leer pericopes_es.json.gz, probando json sin comprimir...", e)
-        }
-
-        if (!loaded) {
-            // Fallback to uncompressed JSON
-            context.assets.open("bible/pericopes_es.json").bufferedReader(Charsets.UTF_8).use { reader ->
+        context.assets.open("bible/pericopes_es.json.gz").use { rawIn ->
+            GZIPInputStream(rawIn).bufferedReader(Charsets.UTF_8).use { reader ->
                 parseJson(reader.readText())
             }
         }
