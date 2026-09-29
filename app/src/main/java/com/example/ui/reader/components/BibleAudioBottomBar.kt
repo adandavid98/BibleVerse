@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -229,12 +230,20 @@ fun BibleAudioBottomBar(
                             color = themeAccent
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = if (audioState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                    contentDescription = if (audioState.isPlaying) "Pausar" else "Reproducir",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(22.dp)
-                                )
+                                if (audioState.isBuffering) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        color = Color.White,
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = if (audioState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                        contentDescription = if (audioState.isPlaying) "Pausar" else "Reproducir",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
                             }
                         }
 
@@ -317,7 +326,7 @@ private fun BibleAudioDetailBottomSheet(
             )
 
             Text(
-                text = "Biblia ${audioState.bibleVersion} • Audio Manos Libres",
+                text = "Biblia ${audioState.bibleVersion} • Voz Estudio Neural",
                 fontSize = 13.sp,
                 color = themeSecondary,
                 modifier = Modifier.padding(top = 2.dp, bottom = 16.dp)
@@ -365,6 +374,16 @@ private fun BibleAudioDetailBottomSheet(
                         maxLines = 4,
                         overflow = TextOverflow.Ellipsis
                     )
+
+                    if (audioState.errorMessage != null) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = audioState.errorMessage,
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
 
@@ -423,12 +442,20 @@ private fun BibleAudioDetailBottomSheet(
                     shadowElevation = 6.dp
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = if (audioState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = if (audioState.isPlaying) "Pausar" else "Reproducir",
-                            tint = Color.White,
-                            modifier = Modifier.size(38.dp)
-                        )
+                        if (audioState.isBuffering) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(34.dp),
+                                color = Color.White,
+                                strokeWidth = 3.dp
+                            )
+                        } else {
+                            Icon(
+                                imageVector = if (audioState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                contentDescription = if (audioState.isPlaying) "Pausar" else "Reproducir",
+                                tint = Color.White,
+                                modifier = Modifier.size(38.dp)
+                            )
+                        }
                     }
                 }
 

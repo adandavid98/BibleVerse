@@ -13,31 +13,35 @@ import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaMetadata
+import android.media.MediaPlayer
+import android.media.PlaybackParams
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Build
-import android.os.Bundle
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.os.PowerManager
-import android.speech.tts.TextToSpeech
-import android.speech.tts.UtteranceProgressListener
-import android.speech.tts.Voice
+import android.util.Log
 import com.example.MainActivity
 import com.example.data.bible.BibleCatalog
 import com.example.data.bible.OfflineBibleManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Locale
 
-class BibleAudioService : Service(), TextToSpeech.OnInitListener {
+/**
+ * Background Service for Ultra-Realistic Studio Neural Bible Audio.
+ * Powered by Google's generative speech engine (24kHz studio PCM) with MediaSession,
+ * lock-screen controls, ForegroundService notification, and 0ms lookahead pre-caching.
+ */
+class BibleAudioService : Service() {
 
     companion object {
+        private const val TAG = "BibleAudioService"
         const val CHANNEL_ID = "bible_audio_playback_channel"
         const val NOTIFICATION_ID = 2002
 
@@ -62,10 +66,11 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
     }
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    private val mainHandler = Handler(Looper.getMainLooper())
 
-    private var tts: TextToSpeech? = null
-    private var isTtsInitialized = false
+    private var mediaPlayer: MediaPlayer? = null
+    private var currentPlayJob: Job? = null
+    private var prefetchJob: Job? = null
+
     private var mediaSession: MediaSession? = null
     private var wakeLock: PowerManager.WakeLock? = null
     private var audioManager: AudioManager? = null
@@ -87,69 +92,24 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         initMediaSession()
         initWakeLock()
         initAudioManager()
-        tts = TextToSpeech(applicationContext, this)
+        initMediaPlayer()
     }
 
-    override fun onInit(status: Int) {
-        if (status == TextToSpeech.SUCCESS) {
-            val ttsEngine = tts
-            if (ttsEngine != null) {
-                applyVoiceAndSpeed(ttsEngine)
-
-                ttsEngine.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                    override fun onStart(utteranceId: String?) {
-                        mainHandler.post {
-                            val parsedIndex = utteranceId?.substringAfter("verse_")?.toIntOrNull()
-                            if (parsedIndex != null && parsedIndex in BibleAudioController.currentPlaylist.indices) {
-                                currentIndex = parsedIndex
-                                updateCurrentVerseState()
-                                updateNotificationAndMediaSession()
-
-                                // Pre-buffer the next verse seamlessly with QUEUE_ADD for 0ms transition gap
-                                if (isPlaying) {
-                                    val playlist = BibleAudioController.currentPlaylist
-                                    val nextIdx = currentIndex + 1
-                                    if (nextIdx in playlist.indices) {
-                                        enqueueVerseLookahead(nextIdx)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    override fun onDone(utteranceId: String?) {
-                        mainHandler.post {
-                            val parsedIndex = utteranceId?.substringAfter("verse_")?.toIntOrNull()
-                            val playlist = BibleAudioController.currentPlaylist
-
-                            if (isPlaying && parsedIndex != null && parsedIndex >= playlist.size - 1) {
-                                // Final verse of current chapter completed! Smoothly advance to next chapter
-                                advanceToNextChapter()
-                            }
-                        }
-                    }
-
-                    @Deprecated("Deprecated in Java")
-                    override fun onError(utteranceId: String?) {
-                        mainHandler.post {
-                            if (isPlaying) {
-                                val playlist = BibleAudioController.currentPlaylist
-                                if (currentIndex < playlist.size - 1) {
-                                    currentIndex++
-                                    startStreamingFromCurrentIndex()
-                                } else {
-                                    advanceToNextChapter()
-                                }
-                            }
-                        }
-                    }
-                })
-
-                isTtsInitialized = true
-
-                if (isPlaying) {
-                    startStreamingFromCurrentIndex()
-                }
+    private fun initMediaPlayer() {
+        mediaPlayer = MediaPlayer().apply {
+            setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .build()
+            )
+            setOnCompletionListener {
+                onVersePlaybackCompleted()
+            }
+            setOnErrorListener { _, what, extra ->
+                Log.e(TAG, "MediaPlayer error: what=$what, extra=$extra")
+                skipNext()
+                true
             }
         }
     }
@@ -174,9 +134,8 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
                     }
                 }
 
-                tts?.let { applyVoiceAndSpeed(it) }
                 startForegroundWithNotification()
-                play()
+                playCurrentVerse()
             }
             ACTION_PLAY -> play()
             ACTION_PAUSE -> pause()
@@ -213,21 +172,36 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         acquireWakeLock()
         isPlaying = true
 
-        tts?.let { applyVoiceAndSpeed(it) }
-        updateCurrentVerseState()
-        updateNotificationAndMediaSession()
-
-        if (isTtsInitialized) {
-            startStreamingFromCurrentIndex()
+        try {
+            val player = mediaPlayer
+            if (player != null && !player.isPlaying && player.currentPosition > 0) {
+                applyPlaybackSpeed(player)
+                player.start()
+                updateCurrentVerseState(isBuffering = false)
+                updateNotificationAndMediaSession()
+                triggerLookaheadPrefetch()
+                return
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Error resuming player directly, restarting verse", e)
         }
+
+        playCurrentVerse()
     }
 
     private fun pause() {
         isPlaying = false
-        tts?.stop()
+        currentPlayJob?.cancel()
+        try {
+            if (mediaPlayer?.isPlaying == true) {
+                mediaPlayer?.pause()
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Error pausing MediaPlayer", e)
+        }
         releaseWakeLock()
 
-        updateCurrentVerseState()
+        updateCurrentVerseState(isBuffering = false)
         updateNotificationAndMediaSession()
     }
 
@@ -236,9 +210,9 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         if (currentIndex < playlist.size - 1) {
             currentIndex++
             if (isPlaying) {
-                startStreamingFromCurrentIndex()
+                playCurrentVerse()
             } else {
-                updateCurrentVerseState()
+                updateCurrentVerseState(isBuffering = false)
                 updateNotificationAndMediaSession()
             }
         } else {
@@ -249,19 +223,12 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
     private fun skipPrevious() {
         if (currentIndex > 0) {
             currentIndex--
-            if (isPlaying) {
-                startStreamingFromCurrentIndex()
-            } else {
-                updateCurrentVerseState()
-                updateNotificationAndMediaSession()
-            }
+        }
+        if (isPlaying) {
+            playCurrentVerse()
         } else {
-            if (isPlaying) {
-                startStreamingFromCurrentIndex()
-            } else {
-                updateCurrentVerseState()
-                updateNotificationAndMediaSession()
-            }
+            updateCurrentVerseState(isBuffering = false)
+            updateNotificationAndMediaSession()
         }
     }
 
@@ -270,9 +237,9 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         if (index in playlist.indices) {
             currentIndex = index
             if (isPlaying) {
-                startStreamingFromCurrentIndex()
+                playCurrentVerse()
             } else {
-                updateCurrentVerseState()
+                updateCurrentVerseState(isBuffering = false)
                 updateNotificationAndMediaSession()
             }
         }
@@ -280,34 +247,57 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
 
     private fun setSpeechRateInternal(rate: Float) {
         speechRate = rate
-        tts?.setSpeechRate(speechRate)
         BibleAudioController.updateState { it.copy(speechRate = rate) }
 
-        if (isPlaying) {
-            startStreamingFromCurrentIndex()
+        mediaPlayer?.let { player ->
+            if (isPlaying) {
+                applyPlaybackSpeed(player)
+            }
         }
         updateNotificationAndMediaSession()
     }
 
     private fun setVoiceGenderInternal(gender: AudioVoiceGender) {
+        if (voiceGender == gender) return
         voiceGender = gender
-        tts?.let { applyVoiceAndSpeed(it) }
         BibleAudioController.updateState { it.copy(voiceGender = gender) }
 
         if (isPlaying) {
-            startStreamingFromCurrentIndex()
+            playCurrentVerse()
         }
         updateNotificationAndMediaSession()
     }
 
+    private fun applyPlaybackSpeed(player: MediaPlayer) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            try {
+                val params = player.playbackParams ?: PlaybackParams()
+                player.playbackParams = params.setSpeed(speechRate)
+            } catch (e: Exception) {
+                Log.w(TAG, "Could not set playback speed on MediaPlayer", e)
+            }
+        }
+    }
+
     private fun stopPlayback() {
         isPlaying = false
-        tts?.stop()
+        currentPlayJob?.cancel()
+        prefetchJob?.cancel()
+
+        try {
+            if (mediaPlayer?.isPlaying == true) {
+                mediaPlayer?.stop()
+            }
+            mediaPlayer?.reset()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error stopping MediaPlayer", e)
+        }
+
         releaseWakeLock()
         abandonAudioFocus()
 
         BibleAudioController.updateState {
-            it.copy(isPlaying = false, isActive = false)
+            it.copy(isPlaying = false, isActive = false, isBuffering = false)
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -320,121 +310,145 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
     }
 
     /**
-     * Starts speaking current verse immediately with QUEUE_FLUSH,
-     * and queues the subsequent verse with QUEUE_ADD to achieve 0ms natural flow.
+     * Fetches studio-quality neural audio for the current verse, plays it with MediaPlayer,
+     * and immediately schedules lookahead pre-caching for upcoming verses.
      */
-    private fun startStreamingFromCurrentIndex() {
+    private fun playCurrentVerse() {
         val playlist = BibleAudioController.currentPlaylist
         if (currentIndex !in playlist.indices) return
 
-        tts?.stop() // Flush any previous utterances
+        requestAudioFocus()
+        acquireWakeLock()
+        isPlaying = true
+
+        currentPlayJob?.cancel()
+        try {
+            mediaPlayer?.reset()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error resetting MediaPlayer", e)
+        }
 
         val currentVerse = playlist[currentIndex]
-        val cleanText = BibleAudioSpeechSanitizer.prepareForNaturalSpeech(currentVerse.text)
-        if (cleanText.isNotBlank()) {
-            val params = Bundle().apply {
-                putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f)
-            }
-            tts?.speak(cleanText, TextToSpeech.QUEUE_FLUSH, params, "verse_$currentIndex")
+        val isCached = StudioAudioGenerator.isVerseCached(
+            context = applicationContext,
+            version = version,
+            bookId = bookId,
+            chapter = chapter,
+            verseNumber = currentVerse.verseNumber,
+            gender = voiceGender
+        )
 
-            // Lookahead: enqueue next verse right away so TTS executes with zero hesitation
-            val nextIdx = currentIndex + 1
-            if (nextIdx in playlist.indices) {
-                enqueueVerseLookahead(nextIdx)
-            }
-        } else {
-            if (currentIndex < playlist.size - 1) {
-                currentIndex++
-                startStreamingFromCurrentIndex()
-            }
-        }
-    }
+        updateCurrentVerseState(isBuffering = !isCached)
+        updateNotificationAndMediaSession()
 
-    private fun enqueueVerseLookahead(index: Int) {
-        val playlist = BibleAudioController.currentPlaylist
-        if (index !in playlist.indices) return
+        currentPlayJob = serviceScope.launch {
+            val audioFile = StudioAudioGenerator.getOrGenerateVerseAudio(
+                context = applicationContext,
+                version = version,
+                bookId = bookId,
+                chapter = chapter,
+                verseNumber = currentVerse.verseNumber,
+                rawText = currentVerse.text,
+                gender = voiceGender
+            )
 
-        val verse = playlist[index]
-        val cleanText = BibleAudioSpeechSanitizer.prepareForNaturalSpeech(verse.text)
-        if (cleanText.isNotBlank()) {
-            val params = Bundle().apply {
-                putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f)
+            if (!coroutineContext.isActive) return@launch
+
+            if (audioFile != null && audioFile.exists()) {
+                withContext(Dispatchers.Main) {
+                    try {
+                        val player = mediaPlayer ?: MediaPlayer().also { mediaPlayer = it }
+                        player.reset()
+                        player.setDataSource(audioFile.absolutePath)
+                        player.setAudioAttributes(
+                            AudioAttributes.Builder()
+                                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                                .setUsage(AudioAttributes.USAGE_MEDIA)
+                                .build()
+                        )
+                        player.setOnCompletionListener {
+                            onVersePlaybackCompleted()
+                        }
+                        player.setOnErrorListener { _, what, extra ->
+                            Log.e(TAG, "MediaPlayer error playing verse: what=$what, extra=$extra")
+                            skipNext()
+                            true
+                        }
+                        player.prepare()
+                        applyPlaybackSpeed(player)
+                        player.start()
+
+                        isPlaying = true
+                        updateCurrentVerseState(isBuffering = false)
+                        updateNotificationAndMediaSession()
+
+                        // Trigger prefetch for next 2 verses for seamless 0ms transition
+                        triggerLookaheadPrefetch()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error starting MediaPlayer on verse file", e)
+                        isPlaying = false
+                        updateCurrentVerseState(
+                            isBuffering = false,
+                            errorMessage = "Error al reproducir audio"
+                        )
+                        updateNotificationAndMediaSession()
+                    }
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    Log.w(TAG, "Could not obtain studio audio for verse $bookId $chapter:${currentVerse.verseNumber}")
+                    // Try next verse or notify
+                    if (currentIndex < playlist.size - 1) {
+                        currentIndex++
+                        playCurrentVerse()
+                    } else {
+                        isPlaying = false
+                        updateCurrentVerseState(
+                            isBuffering = false,
+                            errorMessage = "No se pudo conectar con el servicio de voz neuronal"
+                        )
+                        updateNotificationAndMediaSession()
+                    }
+                }
             }
-            tts?.speak(cleanText, TextToSpeech.QUEUE_ADD, params, "verse_$index")
         }
     }
 
     /**
-     * Selects high-fidelity Google Neural / HD voices and adjusts prosody pitch.
+     * Background lookahead pre-fetch of the next 2 verses so they are ready on disk
+     * before the current verse finishes, delivering 0ms perceived latency.
      */
-    private fun applyVoiceAndSpeed(ttsEngine: TextToSpeech) {
-        ttsEngine.setSpeechRate(speechRate)
-
-        // Pitch modulation: slightly lower for masculine depth, slightly higher for feminine clarity
-        val targetPitch = when (voiceGender) {
-            AudioVoiceGender.MALE -> 0.92f
-            AudioVoiceGender.FEMALE -> 1.06f
-        }
-        ttsEngine.setPitch(targetPitch)
-
-        try {
-            val allVoices = ttsEngine.voices
-            if (!allVoices.isNullOrEmpty()) {
-                val spanishVoices = allVoices.filter { it.locale.language.equals("es", ignoreCase = true) }
-                val selectedVoice = findBestVoiceForGender(spanishVoices, voiceGender)
-                if (selectedVoice != null) {
-                    ttsEngine.voice = selectedVoice
-                    return
+    private fun triggerLookaheadPrefetch() {
+        prefetchJob?.cancel()
+        prefetchJob = serviceScope.launch(Dispatchers.IO) {
+            val playlist = BibleAudioController.currentPlaylist
+            for (offset in 1..2) {
+                if (!coroutineContext.isActive) break
+                val targetIdx = currentIndex + offset
+                if (targetIdx in playlist.indices) {
+                    val verse = playlist[targetIdx]
+                    StudioAudioGenerator.prefetchVerseAudio(
+                        context = applicationContext,
+                        version = version,
+                        bookId = bookId,
+                        chapter = chapter,
+                        verseNumber = verse.verseNumber,
+                        rawText = verse.text,
+                        gender = voiceGender
+                    )
                 }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        // Fallback locale if voice list isn't accessible
-        var langResult = ttsEngine.setLanguage(Locale("es", "ES"))
-        if (langResult == TextToSpeech.LANG_MISSING_DATA || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
-            langResult = ttsEngine.setLanguage(Locale("es"))
-            if (langResult == TextToSpeech.LANG_MISSING_DATA || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
-                ttsEngine.setLanguage(Locale.getDefault())
             }
         }
     }
 
-    private fun findBestVoiceForGender(spanishVoices: List<Voice>, gender: AudioVoiceGender): Voice? {
-        if (spanishVoices.isEmpty()) return null
-
-        val isLookingForFemale = (gender == AudioVoiceGender.FEMALE)
-
-        val candidates = spanishVoices.filter { voice ->
-            val name = voice.name.lowercase()
-            val features = voice.features?.map { it.lowercase() } ?: emptyList()
-
-            val isExplicitFemale = features.any { it.contains("female") || it.contains("gender=female") } ||
-                    name.contains("female") || name.contains("mujer") ||
-                    name.contains("-eed") || name.contains("-sfb") || name.contains("-eea") || name.contains("-eee")
-
-            val isExplicitMale = features.any { it.contains("male") || it.contains("gender=male") } ||
-                    name.contains("male") || name.contains("hombre") ||
-                    name.contains("-eec") || name.contains("-sfa") || name.contains("-eef") || name.contains("-eeb")
-
-            if (isLookingForFemale) {
-                isExplicitFemale || (!isExplicitMale && (name.contains("d-") || name.contains("f-") || name.contains("a-")))
-            } else {
-                isExplicitMale || (!isExplicitFemale && (name.contains("c-") || name.contains("b-") || name.contains("m-")))
-            }
+    private fun onVersePlaybackCompleted() {
+        val playlist = BibleAudioController.currentPlaylist
+        if (currentIndex < playlist.size - 1) {
+            currentIndex++
+            playCurrentVerse()
+        } else {
+            advanceToNextChapter()
         }
-
-        // Rank by neural / network quality and modern dialect
-        return candidates.maxByOrNull { voice ->
-            var score = 0
-            if (voice.name.contains("network", ignoreCase = true)) score += 60
-            if (voice.name.contains("neural", ignoreCase = true)) score += 60
-            if (voice.quality >= Voice.QUALITY_VERY_HIGH) score += 40
-            else if (voice.quality >= Voice.QUALITY_HIGH) score += 20
-            if (voice.locale.country.equals("US", ignoreCase = true) || voice.locale.country.equals("MX", ignoreCase = true)) score += 15
-            score
-        } ?: spanishVoices.firstOrNull()
     }
 
     private fun advanceToNextChapter() {
@@ -443,7 +457,7 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
             val (nextBookId, nextChapter) = when {
                 book != null && chapter < book.chaptersCount -> Pair(bookId, chapter + 1)
                 bookId < 66 -> Pair(bookId + 1, 1)
-                else -> Pair(1, 1) // Loop back or stop
+                else -> Pair(1, 1)
             }
 
             val nextBook = BibleCatalog.books.firstOrNull { it.order == nextBookId }
@@ -470,11 +484,11 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
                 currentIndex = 0
 
                 BibleAudioController.updatePlaylist(newPlaylist)
-                updateCurrentVerseState()
+                updateCurrentVerseState(isBuffering = true)
                 updateNotificationAndMediaSession()
 
                 if (isPlaying) {
-                    startStreamingFromCurrentIndex()
+                    playCurrentVerse()
                 }
             } else {
                 stopPlayback()
@@ -482,7 +496,7 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         }
     }
 
-    private fun updateCurrentVerseState() {
+    private fun updateCurrentVerseState(isBuffering: Boolean = false, errorMessage: String? = null) {
         val playlist = BibleAudioController.currentPlaylist
         val currentVerse = playlist.getOrNull(currentIndex)
         val vNumber = currentVerse?.verseNumber ?: (currentIndex + 1)
@@ -501,7 +515,9 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
                 currentIndex = currentIndex,
                 speechRate = speechRate,
                 voiceGender = voiceGender,
-                bibleVersion = version
+                bibleVersion = version,
+                isBuffering = isBuffering,
+                errorMessage = errorMessage
             )
         }
     }
@@ -545,7 +561,7 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
         // 2. Update MediaSession Metadata
         val metadata = MediaMetadata.Builder()
             .putString(MediaMetadata.METADATA_KEY_TITLE, "$bookName $chapter:$vNumber")
-            .putString(MediaMetadata.METADATA_KEY_ARTIST, "Biblia $version • ${voiceGender.displayName}")
+            .putString(MediaMetadata.METADATA_KEY_ARTIST, "Biblia $version • ${voiceGender.displayName} (Estudio)")
             .putString(MediaMetadata.METADATA_KEY_ALBUM, "$bookName $chapter")
             .putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, "$bookName $chapter:$vNumber")
             .putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, vText)
@@ -621,7 +637,7 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
 
         builder.setContentTitle("$bookName $chapter:$verseNumber")
             .setContentText(if (verseText.isNotBlank()) verseText else "Versículo $verseNumber de $totalVerses")
-            .setSubText("Biblia $version • ${speechRate}x • ${voiceGender.shortLabel}")
+            .setSubText("Biblia $version • ${speechRate}x • ${voiceGender.shortLabel} Neural")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setContentIntent(openAppPendingIntent)
             .setOngoing(isPlaying)
@@ -698,7 +714,7 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
 
     private fun initWakeLock() {
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "BibleVerse:AudioTTSWakeLock").apply {
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "BibleVerse:StudioAudioWakeLock").apply {
             setReferenceCounted(false)
         }
     }
@@ -767,9 +783,18 @@ class BibleAudioService : Service(), TextToSpeech.OnInitListener {
 
     override fun onDestroy() {
         isPlaying = false
-        tts?.stop()
-        tts?.shutdown()
-        tts = null
+        currentPlayJob?.cancel()
+        prefetchJob?.cancel()
+
+        try {
+            if (mediaPlayer?.isPlaying == true) {
+                mediaPlayer?.stop()
+            }
+            mediaPlayer?.release()
+            mediaPlayer = null
+        } catch (e: Exception) {
+            Log.w(TAG, "Error releasing MediaPlayer", e)
+        }
 
         releaseWakeLock()
         abandonAudioFocus()

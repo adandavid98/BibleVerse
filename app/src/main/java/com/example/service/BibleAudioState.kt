@@ -3,9 +3,9 @@ package com.example.service
 /**
  * Available voice genders for natural neural narration.
  */
-enum class AudioVoiceGender(val displayName: String, val shortLabel: String) {
-    FEMALE("Voz Femenina", "Femenina"),
-    MALE("Voz Masculina", "Masculina")
+enum class AudioVoiceGender(val displayName: String, val shortLabel: String, val cloudVoice: String) {
+    FEMALE("Voz Femenina", "Femenina", "Kore"),
+    MALE("Voz Masculina", "Masculina", "Charon")
 }
 
 /**
