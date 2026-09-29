@@ -117,6 +117,27 @@ object BibleAudioController {
         sendCommand(context, BibleAudioService.ACTION_PREVIOUS)
     }
 
+    fun seekToPosition(context: Context, positionMs: Long) {
+        val intent = Intent(context, BibleAudioService::class.java).apply {
+            action = BibleAudioService.ACTION_SEEK_POSITION
+            putExtra(BibleAudioService.EXTRA_SEEK_POSITION_MS, positionMs)
+        }
+        startService(context, intent)
+    }
+
+    fun rewind10s(context: Context) {
+        val current = _audioState.value.currentPositionMs
+        val target = (current - 10000L).coerceAtLeast(0L)
+        seekToPosition(context, target)
+    }
+
+    fun forward10s(context: Context) {
+        val current = _audioState.value.currentPositionMs
+        val total = _audioState.value.totalDurationMs
+        val target = if (total > 0) (current + 10000L).coerceAtMost(total) else current + 10000L
+        seekToPosition(context, target)
+    }
+
     fun seekToVerse(context: Context, verseNumber: Int) {
         val index = currentPlaylist.indexOfFirst { it.verseNumber == verseNumber }
         if (index >= 0) {

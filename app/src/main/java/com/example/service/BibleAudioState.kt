@@ -1,5 +1,7 @@
 package com.example.service
 
+import java.util.Locale
+
 /**
  * Available voice genders for natural neural narration.
  */
@@ -36,8 +38,33 @@ data class BibleAudioState(
     val voiceGender: AudioVoiceGender = AudioVoiceGender.FEMALE,
     val bibleVersion: String = "RVR1960",
     val isBuffering: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val currentPositionMs: Long = 0L,
+    val totalDurationMs: Long = 0L
 ) {
+    val trackProgressFraction: Float
+        get() = if (totalDurationMs > 0) {
+            (currentPositionMs.toFloat() / totalDurationMs.toFloat()).coerceIn(0f, 1f)
+        } else {
+            0f
+        }
+
+    val currentPositionFormatted: String
+        get() = formatTime(currentPositionMs)
+
+    val totalDurationFormatted: String
+        get() = formatTime(totalDurationMs)
+
     val progressFraction: Float
-        get() = if (totalVerses > 0) (currentIndex + 1).toFloat() / totalVerses.toFloat() else 0f
+        get() = if (totalDurationMs > 0) trackProgressFraction else (if (totalVerses > 0) (currentIndex + 1).toFloat() / totalVerses.toFloat() else 0f)
+
+    companion object {
+        fun formatTime(millis: Long): String {
+            if (millis <= 0) return "00:00"
+            val totalSeconds = millis / 1000
+            val minutes = totalSeconds / 60
+            val seconds = totalSeconds % 60
+            return String.format(Locale.US, "%02d:%02d", minutes, seconds)
+        }
+    }
 }

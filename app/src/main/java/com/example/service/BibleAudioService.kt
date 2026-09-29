@@ -29,14 +29,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Background Service for Ultra-Realistic Studio Neural Bible Audio.
- * Powered by Google's generative speech engine (24kHz studio PCM) with MediaSession,
- * lock-screen controls, ForegroundService notification, and 0ms lookahead pre-caching.
+ * Professional Hands-Free Background Bible Audio Service.
+ * Plays official studio recordings per chapter as continuous "song-like" audio tracks.
+ * Supports instant pause/resume, scrubber seeking, 10s rewind/forward, lock-screen controls,
+ * and automatic chapter-to-chapter continuous progression.
  */
 class BibleAudioService : Service() {
 
@@ -51,6 +53,7 @@ class BibleAudioService : Service() {
         const val ACTION_TOGGLE = "com.example.action.AUDIO_TOGGLE"
         const val ACTION_NEXT = "com.example.action.AUDIO_NEXT"
         const val ACTION_PREVIOUS = "com.example.action.AUDIO_PREVIOUS"
+        const val ACTION_SEEK_POSITION = "com.example.action.AUDIO_SEEK_POSITION"
         const val ACTION_SEEK_INDEX = "com.example.action.AUDIO_SEEK_INDEX"
         const val ACTION_SET_SPEED = "com.example.action.AUDIO_SET_SPEED"
         const val ACTION_SET_VOICE_GENDER = "com.example.action.AUDIO_SET_VOICE_GENDER"
@@ -63,13 +66,14 @@ class BibleAudioService : Service() {
         const val EXTRA_START_INDEX = "extra_start_index"
         const val EXTRA_SPEED = "extra_speed"
         const val EXTRA_VOICE_GENDER = "extra_voice_gender"
+        const val EXTRA_SEEK_POSITION_MS = "extra_seek_position_ms"
     }
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     private var mediaPlayer: MediaPlayer? = null
-    private var currentPlayJob: Job? = null
-    private var prefetchJob: Job? = null
+    private var loadJob: Job? = null
+    private var progressTickerJob: Job? = null
 
     private var mediaSession: MediaSession? = null
     private var wakeLock: PowerManager.WakeLock? = null
@@ -85,6 +89,8 @@ class BibleAudioService : Service() {
     private var currentIndex = 0
     private var speechRate = 1.0f
     private var voiceGender = AudioVoiceGender.FEMALE
+    private var currentPositionMs = 0L
+    private var totalDurationMs = 0L
 
     override fun onCreate() {
         super.onCreate()
@@ -104,11 +110,11 @@ class BibleAudioService : Service() {
                     .build()
             )
             setOnCompletionListener {
-                onVersePlaybackCompleted()
+                onChapterPlaybackCompleted()
             }
             setOnErrorListener { _, what, extra ->
                 Log.e(TAG, "MediaPlayer error: what=$what, extra=$extra")
-                skipNext()
+                advanceToNextChapter()
                 true
             }
         }
@@ -119,10 +125,10 @@ class BibleAudioService : Service() {
 
         when (action) {
             ACTION_START -> {
-                bookId = intent.getIntExtra(EXTRA_BOOK_ID, bookId)
-                bookName = intent.getStringExtra(EXTRA_BOOK_NAME) ?: bookName
-                chapter = intent.getIntExtra(EXTRA_CHAPTER, chapter)
-                version = intent.getStringExtra(EXTRA_VERSION) ?: version
+                val newBookId = intent.getIntExtra(EXTRA_BOOK_ID, bookId)
+                val newBookName = intent.getStringExtra(EXTRA_BOOK_NAME) ?: bookName
+                val newChapter = intent.getIntExtra(EXTRA_CHAPTER, chapter)
+                val newVersion = intent.getStringExtra(EXTRA_VERSION) ?: version
                 currentIndex = intent.getIntExtra(EXTRA_START_INDEX, 0)
                 speechRate = intent.getFloatExtra(EXTRA_SPEED, 1.0f)
                 val genderStr = intent.getStringExtra(EXTRA_VOICE_GENDER)
@@ -134,17 +140,32 @@ class BibleAudioService : Service() {
                     }
                 }
 
+                val chapterChanged = (newBookId != bookId || newChapter != chapter || newVersion != version)
+                bookId = newBookId
+                bookName = newBookName
+                chapter = newChapter
+                version = newVersion
+
                 startForegroundWithNotification()
-                playCurrentVerse()
+                if (chapterChanged || mediaPlayer == null || totalDurationMs == 0L) {
+                    loadAndPlayChapter()
+                } else {
+                    play()
+                }
             }
             ACTION_PLAY -> play()
             ACTION_PAUSE -> pause()
             ACTION_TOGGLE -> if (isPlaying) pause() else play()
-            ACTION_NEXT -> skipNext()
-            ACTION_PREVIOUS -> skipPrevious()
+            ACTION_NEXT -> advanceToNextChapter()
+            ACTION_PREVIOUS -> previousOrRewind()
+            ACTION_SEEK_POSITION -> {
+                val posMs = intent.getLongExtra(EXTRA_SEEK_POSITION_MS, 0L)
+                seekToPositionInternal(posMs)
+            }
             ACTION_SEEK_INDEX -> {
                 val index = intent.getIntExtra(EXTRA_START_INDEX, currentIndex)
-                seekToIndex(index)
+                currentIndex = index
+                updateCurrentVerseState(isBuffering = false)
             }
             ACTION_SET_SPEED -> {
                 val speed = intent.getFloatExtra(EXTRA_SPEED, speechRate)
@@ -158,7 +179,8 @@ class BibleAudioService : Service() {
                     } catch (e: Exception) {
                         AudioVoiceGender.FEMALE
                     }
-                    setVoiceGenderInternal(newGender)
+                    voiceGender = newGender
+                    BibleAudioController.updateState { it.copy(voiceGender = newGender) }
                 }
             }
             ACTION_STOP -> stopPlayback()
@@ -172,26 +194,26 @@ class BibleAudioService : Service() {
         acquireWakeLock()
         isPlaying = true
 
-        try {
-            val player = mediaPlayer
-            if (player != null && !player.isPlaying && player.currentPosition > 0) {
+        val player = mediaPlayer
+        if (player != null && totalDurationMs > 0L) {
+            try {
                 applyPlaybackSpeed(player)
                 player.start()
+                startProgressTicker()
                 updateCurrentVerseState(isBuffering = false)
                 updateNotificationAndMediaSession()
-                triggerLookaheadPrefetch()
                 return
+            } catch (e: Exception) {
+                Log.w(TAG, "Error resuming player, reloading chapter", e)
             }
-        } catch (e: Exception) {
-            Log.w(TAG, "Error resuming player directly, restarting verse", e)
         }
 
-        playCurrentVerse()
+        loadAndPlayChapter()
     }
 
     private fun pause() {
         isPlaying = false
-        currentPlayJob?.cancel()
+        stopProgressTicker()
         try {
             if (mediaPlayer?.isPlaying == true) {
                 mediaPlayer?.pause()
@@ -205,43 +227,28 @@ class BibleAudioService : Service() {
         updateNotificationAndMediaSession()
     }
 
-    private fun skipNext() {
-        val playlist = BibleAudioController.currentPlaylist
-        if (currentIndex < playlist.size - 1) {
-            currentIndex++
-            if (isPlaying) {
-                playCurrentVerse()
-            } else {
-                updateCurrentVerseState(isBuffering = false)
-                updateNotificationAndMediaSession()
-            }
-        } else {
-            advanceToNextChapter()
-        }
-    }
-
-    private fun skipPrevious() {
-        if (currentIndex > 0) {
-            currentIndex--
-        }
-        if (isPlaying) {
-            playCurrentVerse()
-        } else {
+    private fun previousOrRewind() {
+        val player = mediaPlayer
+        if (player != null && player.currentPosition > 5000) {
+            // If already played more than 5s, rewind to start of current chapter
+            player.seekTo(0)
+            currentPositionMs = 0L
             updateCurrentVerseState(isBuffering = false)
             updateNotificationAndMediaSession()
+        } else {
+            // Go to previous chapter
+            advanceToPreviousChapter()
         }
     }
 
-    private fun seekToIndex(index: Int) {
-        val playlist = BibleAudioController.currentPlaylist
-        if (index in playlist.indices) {
-            currentIndex = index
-            if (isPlaying) {
-                playCurrentVerse()
-            } else {
-                updateCurrentVerseState(isBuffering = false)
-                updateNotificationAndMediaSession()
-            }
+    private fun seekToPositionInternal(posMs: Long) {
+        val player = mediaPlayer
+        if (player != null && totalDurationMs > 0L) {
+            val clamped = posMs.coerceIn(0L, totalDurationMs)
+            player.seekTo(clamped.toInt())
+            currentPositionMs = clamped
+            updateCurrentVerseState(isBuffering = false)
+            updateNotificationAndMediaSession()
         }
     }
 
@@ -257,17 +264,6 @@ class BibleAudioService : Service() {
         updateNotificationAndMediaSession()
     }
 
-    private fun setVoiceGenderInternal(gender: AudioVoiceGender) {
-        if (voiceGender == gender) return
-        voiceGender = gender
-        BibleAudioController.updateState { it.copy(voiceGender = gender) }
-
-        if (isPlaying) {
-            playCurrentVerse()
-        }
-        updateNotificationAndMediaSession()
-    }
-
     private fun applyPlaybackSpeed(player: MediaPlayer) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             try {
@@ -279,87 +275,43 @@ class BibleAudioService : Service() {
         }
     }
 
-    private fun stopPlayback() {
-        isPlaying = false
-        currentPlayJob?.cancel()
-        prefetchJob?.cancel()
-
-        try {
-            if (mediaPlayer?.isPlaying == true) {
-                mediaPlayer?.stop()
-            }
-            mediaPlayer?.reset()
-        } catch (e: Exception) {
-            Log.w(TAG, "Error stopping MediaPlayer", e)
-        }
-
-        releaseWakeLock()
-        abandonAudioFocus()
-
-        BibleAudioController.updateState {
-            it.copy(isPlaying = false, isActive = false, isBuffering = false)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            stopForeground(STOP_FOREGROUND_REMOVE)
-        } else {
-            @Suppress("DEPRECATION")
-            stopForeground(true)
-        }
-        stopSelf()
-    }
-
     /**
-     * Fetches studio-quality neural audio for the current verse, plays it with MediaPlayer,
-     * and immediately schedules lookahead pre-caching for upcoming verses.
+     * Loads the official studio recorded audio track for the entire chapter (YouVersion CDN).
+     * Plays seamlessly as a single song track.
      */
-    private fun playCurrentVerse() {
-        val playlist = BibleAudioController.currentPlaylist
-        if (currentIndex !in playlist.indices) return
-
+    private fun loadAndPlayChapter() {
         requestAudioFocus()
         acquireWakeLock()
         isPlaying = true
 
-        currentPlayJob?.cancel()
+        loadJob?.cancel()
+        stopProgressTicker()
+
         try {
             mediaPlayer?.reset()
         } catch (e: Exception) {
             Log.w(TAG, "Error resetting MediaPlayer", e)
         }
 
-        val currentVerse = playlist[currentIndex]
-        val isCached = StudioAudioGenerator.isVerseCached(
-            context = applicationContext,
-            version = version,
-            bookId = bookId,
-            chapter = chapter,
-            verseNumber = currentVerse.verseNumber,
-            gender = voiceGender
-        )
-
-        updateCurrentVerseState(isBuffering = !isCached)
+        updateCurrentVerseState(isBuffering = true)
         updateNotificationAndMediaSession()
 
-        currentPlayJob = serviceScope.launch {
-            val audioFile = StudioAudioGenerator.getOrGenerateVerseAudio(
+        loadJob = serviceScope.launch {
+            val audioSource = OfficialAudioResolver.resolveChapterAudio(
                 context = applicationContext,
                 version = version,
-                bookId = bookId,
-                chapter = chapter,
-                verseNumber = currentVerse.verseNumber,
-                rawText = currentVerse.text,
-                gender = voiceGender
+                bookOrder = bookId,
+                chapter = chapter
             )
 
             if (!coroutineContext.isActive) return@launch
 
-            if (audioFile != null && audioFile.exists()) {
+            if (audioSource != null) {
                 withContext(Dispatchers.Main) {
                     try {
                         val player = mediaPlayer ?: MediaPlayer().also { mediaPlayer = it }
                         player.reset()
-                        player.setDataSource(audioFile.absolutePath)
+                        player.setDataSource(audioSource)
                         player.setAudioAttributes(
                             AudioAttributes.Builder()
                                 .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
@@ -367,88 +319,83 @@ class BibleAudioService : Service() {
                                 .build()
                         )
                         player.setOnCompletionListener {
-                            onVersePlaybackCompleted()
+                            onChapterPlaybackCompleted()
                         }
                         player.setOnErrorListener { _, what, extra ->
-                            Log.e(TAG, "MediaPlayer error playing verse: what=$what, extra=$extra")
-                            skipNext()
+                            Log.e(TAG, "MediaPlayer error playing chapter: what=$what, extra=$extra")
+                            advanceToNextChapter()
                             true
                         }
                         player.prepare()
+                        totalDurationMs = player.duration.toLong().coerceAtLeast(0L)
+                        currentPositionMs = 0L
+
                         applyPlaybackSpeed(player)
                         player.start()
-
                         isPlaying = true
+
+                        startProgressTicker()
                         updateCurrentVerseState(isBuffering = false)
                         updateNotificationAndMediaSession()
-
-                        // Trigger prefetch for next 2 verses for seamless 0ms transition
-                        triggerLookaheadPrefetch()
                     } catch (e: Exception) {
-                        Log.e(TAG, "Error starting MediaPlayer on verse file", e)
+                        Log.e(TAG, "Error starting MediaPlayer on chapter audio", e)
                         isPlaying = false
                         updateCurrentVerseState(
                             isBuffering = false,
-                            errorMessage = "Error al reproducir audio"
+                            errorMessage = "Error al iniciar reproducción del capítulo"
                         )
                         updateNotificationAndMediaSession()
                     }
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    Log.w(TAG, "Could not obtain studio audio for verse $bookId $chapter:${currentVerse.verseNumber}")
-                    // Try next verse or notify
-                    if (currentIndex < playlist.size - 1) {
-                        currentIndex++
-                        playCurrentVerse()
-                    } else {
-                        isPlaying = false
-                        updateCurrentVerseState(
-                            isBuffering = false,
-                            errorMessage = "No se pudo conectar con el servicio de voz neuronal"
-                        )
-                        updateNotificationAndMediaSession()
+                    Log.w(TAG, "Could not resolve audio for $bookName $chapter ($version)")
+                    isPlaying = false
+                    updateCurrentVerseState(
+                        isBuffering = false,
+                        errorMessage = "Audio no disponible para esta versión o sin conexión"
+                    )
+                    updateNotificationAndMediaSession()
+                }
+            }
+        }
+    }
+
+    private fun startProgressTicker() {
+        progressTickerJob?.cancel()
+        progressTickerJob = serviceScope.launch {
+            while (isActive && isPlaying) {
+                val player = mediaPlayer
+                if (player != null && player.isPlaying) {
+                    try {
+                        currentPositionMs = player.currentPosition.toLong()
+                        val dur = player.duration.toLong()
+                        if (dur > 0L) totalDurationMs = dur
+
+                        BibleAudioController.updateState {
+                            it.copy(
+                                isPlaying = true,
+                                currentPositionMs = currentPositionMs,
+                                totalDurationMs = totalDurationMs
+                            )
+                        }
+                    } catch (e: Exception) {
+                        // ignore state errors during seek
                     }
                 }
+                delay(500)
             }
         }
     }
 
-    /**
-     * Background lookahead pre-fetch of the next 2 verses so they are ready on disk
-     * before the current verse finishes, delivering 0ms perceived latency.
-     */
-    private fun triggerLookaheadPrefetch() {
-        prefetchJob?.cancel()
-        prefetchJob = serviceScope.launch(Dispatchers.IO) {
-            val playlist = BibleAudioController.currentPlaylist
-            for (offset in 1..2) {
-                if (!coroutineContext.isActive) break
-                val targetIdx = currentIndex + offset
-                if (targetIdx in playlist.indices) {
-                    val verse = playlist[targetIdx]
-                    StudioAudioGenerator.prefetchVerseAudio(
-                        context = applicationContext,
-                        version = version,
-                        bookId = bookId,
-                        chapter = chapter,
-                        verseNumber = verse.verseNumber,
-                        rawText = verse.text,
-                        gender = voiceGender
-                    )
-                }
-            }
-        }
+    private fun stopProgressTicker() {
+        progressTickerJob?.cancel()
+        progressTickerJob = null
     }
 
-    private fun onVersePlaybackCompleted() {
-        val playlist = BibleAudioController.currentPlaylist
-        if (currentIndex < playlist.size - 1) {
-            currentIndex++
-            playCurrentVerse()
-        } else {
-            advanceToNextChapter()
-        }
+    private fun onChapterPlaybackCompleted() {
+        stopProgressTicker()
+        advanceToNextChapter()
     }
 
     private fun advanceToNextChapter() {
@@ -467,6 +414,13 @@ class BibleAudioService : Service() {
                 OfflineBibleManager.getVerses(applicationContext, nextBookId, nextChapter)
             }
 
+            bookId = nextBookId
+            bookName = nextBookName
+            chapter = nextChapter
+            currentIndex = 0
+            currentPositionMs = 0L
+            totalDurationMs = 0L
+
             if (nextVersesRaw.isNotEmpty()) {
                 val newPlaylist = nextVersesRaw.map {
                     AudioVerseItem(
@@ -477,29 +431,105 @@ class BibleAudioService : Service() {
                         text = it.text
                     )
                 }
-
-                bookId = nextBookId
-                bookName = nextBookName
-                chapter = nextChapter
-                currentIndex = 0
-
                 BibleAudioController.updatePlaylist(newPlaylist)
-                updateCurrentVerseState(isBuffering = true)
-                updateNotificationAndMediaSession()
+            }
 
-                if (isPlaying) {
-                    playCurrentVerse()
-                }
-            } else {
-                stopPlayback()
+            updateCurrentVerseState(isBuffering = true)
+            updateNotificationAndMediaSession()
+
+            if (isPlaying) {
+                loadAndPlayChapter()
             }
         }
+    }
+
+    private fun advanceToPreviousChapter() {
+        serviceScope.launch {
+            val (prevBookId, prevChapter) = when {
+                chapter > 1 -> Pair(bookId, chapter - 1)
+                bookId > 1 -> {
+                    val prevBook = BibleCatalog.books.firstOrNull { it.order == bookId - 1 }
+                    Pair(bookId - 1, prevBook?.chaptersCount ?: 1)
+                }
+                else -> Pair(66, 22)
+            }
+
+            val prevBook = BibleCatalog.books.firstOrNull { it.order == prevBookId }
+            val prevBookName = prevBook?.name ?: "Libro $prevBookId"
+
+            val prevVersesRaw = withContext(Dispatchers.IO) {
+                OfflineBibleManager.getVerses(applicationContext, prevBookId, prevChapter)
+            }
+
+            bookId = prevBookId
+            bookName = prevBookName
+            chapter = prevChapter
+            currentIndex = 0
+            currentPositionMs = 0L
+            totalDurationMs = 0L
+
+            if (prevVersesRaw.isNotEmpty()) {
+                val newPlaylist = prevVersesRaw.map {
+                    AudioVerseItem(
+                        bookId = it.bookId,
+                        bookName = prevBookName,
+                        chapter = it.chapter,
+                        verseNumber = it.verseNumber,
+                        text = it.text
+                    )
+                }
+                BibleAudioController.updatePlaylist(newPlaylist)
+            }
+
+            updateCurrentVerseState(isBuffering = true)
+            updateNotificationAndMediaSession()
+
+            if (isPlaying) {
+                loadAndPlayChapter()
+            }
+        }
+    }
+
+    private fun stopPlayback() {
+        isPlaying = false
+        loadJob?.cancel()
+        stopProgressTicker()
+
+        try {
+            if (mediaPlayer?.isPlaying == true) {
+                mediaPlayer?.stop()
+            }
+            mediaPlayer?.reset()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error stopping MediaPlayer", e)
+        }
+
+        releaseWakeLock()
+        abandonAudioFocus()
+
+        BibleAudioController.updateState {
+            it.copy(
+                isPlaying = false,
+                isActive = false,
+                isBuffering = false,
+                currentPositionMs = 0L,
+                totalDurationMs = 0L
+            )
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } else {
+            @Suppress("DEPRECATION")
+            stopForeground(true)
+        }
+        stopSelf()
     }
 
     private fun updateCurrentVerseState(isBuffering: Boolean = false, errorMessage: String? = null) {
         val playlist = BibleAudioController.currentPlaylist
         val currentVerse = playlist.getOrNull(currentIndex)
-        val vNumber = currentVerse?.verseNumber ?: (currentIndex + 1)
+        val vNumber = currentVerse?.verseNumber ?: 1
         val vText = currentVerse?.text ?: ""
 
         BibleAudioController.updateState {
@@ -517,7 +547,9 @@ class BibleAudioService : Service() {
                 voiceGender = voiceGender,
                 bibleVersion = version,
                 isBuffering = isBuffering,
-                errorMessage = errorMessage
+                errorMessage = errorMessage,
+                currentPositionMs = currentPositionMs,
+                totalDurationMs = totalDurationMs
             )
         }
     }
@@ -527,8 +559,9 @@ class BibleAudioService : Service() {
             setCallback(object : MediaSession.Callback() {
                 override fun onPlay() { play() }
                 override fun onPause() { pause() }
-                override fun onSkipToNext() { skipNext() }
-                override fun onSkipToPrevious() { skipPrevious() }
+                override fun onSkipToNext() { advanceToNextChapter() }
+                override fun onSkipToPrevious() { previousOrRewind() }
+                override fun onSeekTo(pos: Long) { seekToPositionInternal(pos) }
                 override fun onStop() { stopPlayback() }
             })
             isActive = true
@@ -536,12 +569,7 @@ class BibleAudioService : Service() {
     }
 
     private fun updateNotificationAndMediaSession() {
-        val playlist = BibleAudioController.currentPlaylist
-        val currentVerse = playlist.getOrNull(currentIndex)
-        val vNumber = currentVerse?.verseNumber ?: (currentIndex + 1)
-        val vText = OfflineBibleManager.cleanVerseText(currentVerse?.text)
-
-        // 1. Update MediaSession state
+        // 1. Update MediaSession state with duration and current position
         val stateBuilder = PlaybackState.Builder()
             .setActions(
                 PlaybackState.ACTION_PLAY or
@@ -549,38 +577,35 @@ class BibleAudioService : Service() {
                 PlaybackState.ACTION_PLAY_PAUSE or
                 PlaybackState.ACTION_SKIP_TO_NEXT or
                 PlaybackState.ACTION_SKIP_TO_PREVIOUS or
+                PlaybackState.ACTION_SEEK_TO or
                 PlaybackState.ACTION_STOP
             )
             .setState(
                 if (isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
-                currentIndex.toLong(),
+                currentPositionMs,
                 speechRate
             )
         mediaSession?.setPlaybackState(stateBuilder.build())
 
         // 2. Update MediaSession Metadata
         val metadata = MediaMetadata.Builder()
-            .putString(MediaMetadata.METADATA_KEY_TITLE, "$bookName $chapter:$vNumber")
-            .putString(MediaMetadata.METADATA_KEY_ARTIST, "Biblia $version • ${voiceGender.displayName} (Estudio)")
-            .putString(MediaMetadata.METADATA_KEY_ALBUM, "$bookName $chapter")
-            .putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, "$bookName $chapter:$vNumber")
-            .putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, vText)
+            .putString(MediaMetadata.METADATA_KEY_TITLE, "$bookName $chapter")
+            .putString(MediaMetadata.METADATA_KEY_ARTIST, "Biblia $version • Audio Oficial")
+            .putString(MediaMetadata.METADATA_KEY_ALBUM, bookName)
+            .putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, "$bookName $chapter")
+            .putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, "Capítulo completo • Biblia $version")
+            .putLong(MediaMetadata.METADATA_KEY_DURATION, totalDurationMs)
             .build()
         mediaSession?.setMetadata(metadata)
 
         // 3. Update Notification
-        val notification = buildNotification(vNumber, vText, playlist.size)
+        val notification = buildNotification()
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
     private fun startForegroundWithNotification() {
-        val playlist = BibleAudioController.currentPlaylist
-        val currentVerse = playlist.getOrNull(currentIndex)
-        val vNumber = currentVerse?.verseNumber ?: (currentIndex + 1)
-        val vText = OfflineBibleManager.cleanVerseText(currentVerse?.text)
-
-        val notification = buildNotification(vNumber, vText, playlist.size)
+        val notification = buildNotification()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
@@ -593,7 +618,7 @@ class BibleAudioService : Service() {
         }
     }
 
-    private fun buildNotification(verseNumber: Int, verseText: String, totalVerses: Int): Notification {
+    private fun buildNotification(): Notification {
         val openAppIntent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -635,9 +660,12 @@ class BibleAudioService : Service() {
             Notification.Builder(this)
         }
 
-        builder.setContentTitle("$bookName $chapter:$verseNumber")
-            .setContentText(if (verseText.isNotBlank()) verseText else "Versículo $verseNumber de $totalVerses")
-            .setSubText("Biblia $version • ${speechRate}x • ${voiceGender.shortLabel} Neural")
+        val posStr = BibleAudioState.formatTime(currentPositionMs)
+        val durStr = BibleAudioState.formatTime(totalDurationMs)
+
+        builder.setContentTitle("$bookName $chapter")
+            .setContentText("Biblia $version • $posStr / $durStr")
+            .setSubText("${speechRate}x • Audio Oficial")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setContentIntent(openAppPendingIntent)
             .setOngoing(isPlaying)
@@ -700,7 +728,7 @@ class BibleAudioService : Service() {
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Reproducción de Audio Bíblico"
-            val descriptionText = "Controles de reproducción para escuchar la Biblia con la pantalla apagada o en segundo plano"
+            val descriptionText = "Controles de reproducción oficial para escuchar la Biblia con la pantalla apagada o en segundo plano"
             val importance = NotificationManager.IMPORTANCE_LOW
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
@@ -714,7 +742,7 @@ class BibleAudioService : Service() {
 
     private fun initWakeLock() {
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "BibleVerse:StudioAudioWakeLock").apply {
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "BibleVerse:OfficialAudioWakeLock").apply {
             setReferenceCounted(false)
         }
     }
@@ -783,8 +811,8 @@ class BibleAudioService : Service() {
 
     override fun onDestroy() {
         isPlaying = false
-        currentPlayJob?.cancel()
-        prefetchJob?.cancel()
+        loadJob?.cancel()
+        stopProgressTicker()
 
         try {
             if (mediaPlayer?.isPlaying == true) {

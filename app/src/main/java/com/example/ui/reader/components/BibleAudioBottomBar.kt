@@ -27,6 +27,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -149,7 +151,7 @@ fun BibleAudioBottomBar(
 
                         Column {
                             Text(
-                                text = "${audioState.currentBookName} ${audioState.currentChapter}:${audioState.currentVerseNumber}",
+                                text = "${audioState.currentBookName} ${audioState.currentChapter}",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.5.sp,
                                 color = themeText,
@@ -157,7 +159,11 @@ fun BibleAudioBottomBar(
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = "V. ${audioState.currentIndex + 1} de ${audioState.totalVerses} • ${audioState.bibleVersion}",
+                                text = if (audioState.totalDurationMs > 0L) {
+                                    "${audioState.currentPositionFormatted} / ${audioState.totalDurationFormatted} • ${audioState.bibleVersion}"
+                                } else {
+                                    "Capítulo ${audioState.currentChapter} • ${audioState.bibleVersion}"
+                                },
                                 fontSize = 11.sp,
                                 color = themeSecondary,
                                 maxLines = 1,
@@ -326,13 +332,13 @@ private fun BibleAudioDetailBottomSheet(
             )
 
             Text(
-                text = "Biblia ${audioState.bibleVersion} • Voz Estudio Neural",
+                text = "Biblia ${audioState.bibleVersion} • Audio Oficial YouVersion",
                 fontSize = 13.sp,
                 color = themeSecondary,
                 modifier = Modifier.padding(top = 2.dp, bottom = 16.dp)
             )
 
-            // Current Verse Box
+            // Current Chapter Box
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -348,13 +354,13 @@ private fun BibleAudioDetailBottomSheet(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Versículo ${audioState.currentVerseNumber}",
+                            text = "Capítulo Completo",
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
                             color = themeAccent
                         )
                         Text(
-                            text = "${audioState.currentIndex + 1} / ${audioState.totalVerses}",
+                            text = if (audioState.isBuffering) "Cargando audio..." else if (audioState.isPlaying) "Reproduciendo" else "En pausa",
                             fontSize = 12.sp,
                             color = themeSecondary
                         )
@@ -363,16 +369,10 @@ private fun BibleAudioDetailBottomSheet(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = if (audioState.currentVerseText.isNotBlank()) {
-                            "\"${audioState.currentVerseText}\""
-                        } else {
-                            "Preparando lectura de audio..."
-                        },
-                        fontSize = 15.sp,
-                        lineHeight = 22.sp,
-                        color = themeText,
-                        maxLines = 4,
-                        overflow = TextOverflow.Ellipsis
+                        text = "${audioState.currentBookName} capítulo ${audioState.currentChapter} narrado de principio a fin.",
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        color = themeText
                     )
 
                     if (audioState.errorMessage != null) {
@@ -389,45 +389,78 @@ private fun BibleAudioDetailBottomSheet(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Verse Scrubber Slider
-            if (audioState.totalVerses > 1) {
-                Slider(
-                    value = audioState.currentIndex.toFloat(),
-                    onValueChange = { targetIdx ->
-                        val verseNumber = BibleAudioController.currentPlaylist.getOrNull(targetIdx.toInt())?.verseNumber
-                        if (verseNumber != null) {
-                            BibleAudioController.seekToVerse(context, verseNumber)
-                        }
-                    },
-                    valueRange = 0f..(audioState.totalVerses - 1).toFloat(),
-                    steps = (audioState.totalVerses - 2).coerceAtLeast(0),
-                    colors = SliderDefaults.colors(
-                        thumbColor = themeAccent,
-                        activeTrackColor = themeAccent,
-                        inactiveTrackColor = themeSecondary.copy(alpha = 0.2f)
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+            // Time Labels Row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = audioState.currentPositionFormatted,
+                    fontSize = 12.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = themeAccent
+                )
+                Text(
+                    text = audioState.totalDurationFormatted,
+                    fontSize = 12.5.sp,
+                    color = themeSecondary
                 )
             }
 
+            // Continuous Song-Style Scrubber Slider
+            val maxDur = audioState.totalDurationMs.coerceAtLeast(1L).toFloat()
+            val curPos = audioState.currentPositionMs.toFloat().coerceIn(0f, maxDur)
+            Slider(
+                value = curPos,
+                onValueChange = { targetMs ->
+                    BibleAudioController.seekToPosition(context, targetMs.toLong())
+                },
+                valueRange = 0f..maxDur,
+                colors = SliderDefaults.colors(
+                    thumbColor = themeAccent,
+                    activeTrackColor = themeAccent,
+                    inactiveTrackColor = themeSecondary.copy(alpha = 0.2f)
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Playback Controls Row (YouVersion Style)
+            // Playback Controls Row (Song Style: Rewind 10s, Prev, Play/Pause, Next, Forward 10s)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Previous
+                // Rewind 10s
+                IconButton(
+                    onClick = { BibleAudioController.rewind10s(context) },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.FastRewind,
+                            contentDescription = "Retroceder 10s",
+                            tint = themeText,
+                            modifier = Modifier.size(26.dp)
+                        )
+                        Text("-10s", fontSize = 9.sp, color = themeSecondary, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                // Previous Chapter
                 IconButton(
                     onClick = { BibleAudioController.previous(context) },
-                    modifier = Modifier.size(54.dp)
+                    modifier = Modifier.size(48.dp)
                 ) {
                     Icon(
                         Icons.Default.SkipPrevious,
-                        contentDescription = "Anterior",
+                        contentDescription = "Capítulo anterior",
                         tint = themeText,
-                        modifier = Modifier.size(34.dp)
+                        modifier = Modifier.size(32.dp)
                     )
                 }
 
@@ -459,17 +492,33 @@ private fun BibleAudioDetailBottomSheet(
                     }
                 }
 
-                // Next
+                // Next Chapter
                 IconButton(
                     onClick = { BibleAudioController.next(context) },
-                    modifier = Modifier.size(54.dp)
+                    modifier = Modifier.size(48.dp)
                 ) {
                     Icon(
                         Icons.Default.SkipNext,
-                        contentDescription = "Siguiente",
+                        contentDescription = "Capítulo siguiente",
                         tint = themeText,
-                        modifier = Modifier.size(34.dp)
+                        modifier = Modifier.size(32.dp)
                     )
+                }
+
+                // Forward 10s
+                IconButton(
+                    onClick = { BibleAudioController.forward10s(context) },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.FastForward,
+                            contentDescription = "Adelantar 10s",
+                            tint = themeText,
+                            modifier = Modifier.size(26.dp)
+                        )
+                        Text("+10s", fontSize = 9.sp, color = themeSecondary, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
 
