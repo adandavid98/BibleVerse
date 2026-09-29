@@ -2,7 +2,9 @@ package com.example.service
 
 import android.content.Context
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -38,8 +40,8 @@ object OfficialAudioResolver {
 
     private val httpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .readTimeout(5, TimeUnit.SECONDS)
             .followRedirects(true)
             .retryOnConnectionFailure(true)
             .build()
@@ -67,7 +69,8 @@ object OfficialAudioResolver {
     }
 
     /**
-     * Resolves the official chapter audio URL or downloads it to local cache.
+     * Resolves the official chapter audio URL or returns local cache.
+     * Starts background download without blocking playback.
      */
     suspend fun resolveChapterAudio(
         context: Context,
@@ -88,7 +91,17 @@ object OfficialAudioResolver {
         try {
             val pageRequest = Request.Builder()
                 .url(pageUrl)
-                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
+                .header("Accept-Language", "es-ES,es;q=0.9,en;q=0.8")
+                .header("Sec-Ch-Ua", "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"")
+                .header("Sec-Ch-Ua-Mobile", "?0")
+                .header("Sec-Ch-Ua-Platform", "\"Windows\"")
+                .header("Sec-Fetch-Dest", "document")
+                .header("Sec-Fetch-Mode", "navigate")
+                .header("Sec-Fetch-Site", "none")
+                .header("Sec-Fetch-User", "?1")
+                .header("Upgrade-Insecure-Requests", "1")
                 .build()
 
             val pageResponse = httpClient.newCall(pageRequest).execute()
@@ -99,33 +112,39 @@ object OfficialAudioResolver {
 
             val html = pageResponse.body?.string() ?: return@withContext null
 
-            // Regex extraction of the MP3 stream URL
-            val pattern = Pattern.compile("format_mp3_32k[^/]+(//[^\"\\\\]+\\.mp3[^\"\\\\]*)")
+            // Regex extraction of the MP3 stream URL (handles both // and \/\/)
+            val pattern = Pattern.compile("format_mp3_32k[\":\\s\\\\]+((?:https?:)?(?://|\\\\/\\\\/)[^\"'\\s]+?\\.mp3[^\"'\\s]*?)[\"']")
             val matcher = pattern.matcher(html)
             val audioUrl = if (matcher.find()) {
                 val rawMatch = matcher.group(1) ?: return@withContext null
-                "https:" + rawMatch.replace("\\/", "/").replace("\\", "")
+                val cleanUrl = rawMatch.replace("\\/", "/").replace("\\", "")
+                if (cleanUrl.startsWith("//")) {
+                    "https:$cleanUrl"
+                } else if (!cleanUrl.startsWith("http")) {
+                    "https://$cleanUrl"
+                } else {
+                    cleanUrl
+                }
             } else {
                 Log.w(TAG, "No audio URL found for $usfm.$chapter ($version)")
                 return@withContext null
             }
 
-            // Download MP3 asynchronously into local cache so subsequent playback is 100% offline
-            downloadAndCacheAudio(context, audioUrl, cacheFile)
-
-            if (cacheFile.exists() && cacheFile.length() > 50000L) {
-                return@withContext cacheFile.absolutePath
-            } else {
-                // If download did not finish yet, return the live streaming CDN URL for immediate playback!
-                return@withContext audioUrl
+            // Trigger non-blocking background download to cache for offline use
+            CoroutineScope(Dispatchers.IO).launch {
+                downloadAndCacheAudio(context, audioUrl, cacheFile)
             }
+
+            // Return live streaming CDN URL immediately so playback starts instantly
+            return@withContext audioUrl
         } catch (e: Exception) {
-            Log.e(TAG, "Error resolving official audio for $bookOrder:$chapter", e)
+            Log.w(TAG, "Error resolving official audio for $bookOrder:$chapter: ${e.message}")
             return@withContext null
         }
     }
 
     private fun downloadAndCacheAudio(context: Context, audioUrl: String, destinationFile: File) {
+        if (destinationFile.exists() && destinationFile.length() > 50000L) return
         try {
             val tempFile = File(destinationFile.parentFile, "${destinationFile.name}.tmp")
             val downloadRequest = Request.Builder()
@@ -149,7 +168,7 @@ object OfficialAudioResolver {
                 }
             }
         } catch (e: Exception) {
-            Log.w(TAG, "Could not cache audio file in background", e)
+            Log.w(TAG, "Could not cache audio file in background: ${e.message}")
         }
     }
 

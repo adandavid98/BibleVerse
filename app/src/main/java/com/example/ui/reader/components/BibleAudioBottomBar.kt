@@ -332,7 +332,7 @@ private fun BibleAudioDetailBottomSheet(
             )
 
             Text(
-                text = "Biblia ${audioState.bibleVersion} • Audio Oficial YouVersion",
+                text = "Biblia ${audioState.bibleVersion} • Audio Narrado Continuo",
                 fontSize = 13.sp,
                 color = themeSecondary,
                 modifier = Modifier.padding(top = 2.dp, bottom = 16.dp)

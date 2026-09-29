@@ -99,6 +99,7 @@ class BibleAudioService : Service() {
         initWakeLock()
         initAudioManager()
         initMediaPlayer()
+        ChapterAudioSynthesizer.initialize(applicationContext)
     }
 
     private fun initMediaPlayer() {
@@ -179,8 +180,13 @@ class BibleAudioService : Service() {
                     } catch (e: Exception) {
                         AudioVoiceGender.FEMALE
                     }
-                    voiceGender = newGender
-                    BibleAudioController.updateState { it.copy(voiceGender = newGender) }
+                    if (voiceGender != newGender) {
+                        voiceGender = newGender
+                        BibleAudioController.updateState { it.copy(voiceGender = newGender) }
+                        if (isPlaying) {
+                            loadAndPlayChapter()
+                        }
+                    }
                 }
             }
             ACTION_STOP -> stopPlayback()
@@ -297,12 +303,47 @@ class BibleAudioService : Service() {
         updateNotificationAndMediaSession()
 
         loadJob = serviceScope.launch {
-            val audioSource = OfficialAudioResolver.resolveChapterAudio(
+            // 1. Attempt official chapter audio resolution (fast timeout)
+            var audioSource = OfficialAudioResolver.resolveChapterAudio(
                 context = applicationContext,
                 version = version,
                 bookOrder = bookId,
                 chapter = chapter
             )
+
+            // 2. High-definition native speech fallback: if official audio is unreachable or offline
+            if (audioSource == null) {
+                Log.i(TAG, "Official audio not available, preparing chapter audio via high-definition synthesizer for $bookName $chapter")
+                val playlist = BibleAudioController.currentPlaylist
+                val verses = if (playlist.isNotEmpty()) {
+                    playlist
+                } else {
+                    withContext(Dispatchers.IO) {
+                        OfflineBibleManager.getVerses(applicationContext, bookId, chapter).map {
+                            AudioVerseItem(
+                                bookId = it.bookId,
+                                bookName = bookName,
+                                chapter = it.chapter,
+                                verseNumber = it.verseNumber,
+                                text = it.text
+                            )
+                        }
+                    }
+                }
+
+                val synthFile = ChapterAudioSynthesizer.synthesizeChapterAudio(
+                    context = applicationContext,
+                    version = version,
+                    bookId = bookId,
+                    bookName = bookName,
+                    chapter = chapter,
+                    verses = verses,
+                    gender = voiceGender
+                )
+                if (synthFile != null && synthFile.exists()) {
+                    audioSource = synthFile.absolutePath
+                }
+            }
 
             if (!coroutineContext.isActive) return@launch
 
@@ -349,11 +390,11 @@ class BibleAudioService : Service() {
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    Log.w(TAG, "Could not resolve audio for $bookName $chapter ($version)")
+                    Log.w(TAG, "Could not resolve or synthesize audio for $bookName $chapter ($version)")
                     isPlaying = false
                     updateCurrentVerseState(
                         isBuffering = false,
-                        errorMessage = "Audio no disponible para esta versión o sin conexión"
+                        errorMessage = "Audio temporalmente no disponible"
                     )
                     updateNotificationAndMediaSession()
                 }
