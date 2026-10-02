@@ -158,16 +158,15 @@ fun BibleAudioBottomBar(
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
+                            val subtitleText = audioState.errorMessage ?: if (audioState.totalDurationMs > 0L) {
+                                "${audioState.currentPositionFormatted} / ${audioState.totalDurationFormatted} • ${audioState.bibleVersion}"
+                            } else if (audioState.isBuffering) {
+                                "Cargando audio oficial..."
+                            } else {
+                                "Capítulo ${audioState.currentChapter} • ${audioState.bibleVersion}"
+                            }
                             Text(
-                                text = if (audioState.errorMessage != null) {
-                                    audioState.errorMessage
-                                } else if (audioState.totalDurationMs > 0L) {
-                                    "${audioState.currentPositionFormatted} / ${audioState.totalDurationFormatted} • ${audioState.bibleVersion}"
-                                } else if (audioState.isBuffering) {
-                                    "Cargando audio oficial..."
-                                } else {
-                                    "Capítulo ${audioState.currentChapter} • ${audioState.bibleVersion}"
-                                },
+                                text = subtitleText,
                                 fontSize = 11.sp,
                                 color = if (audioState.errorMessage != null) MaterialTheme.colorScheme.error else themeSecondary,
                                 maxLines = 1,
