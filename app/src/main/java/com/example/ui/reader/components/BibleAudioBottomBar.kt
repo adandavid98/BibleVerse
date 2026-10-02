@@ -159,13 +159,17 @@ fun BibleAudioBottomBar(
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = if (audioState.totalDurationMs > 0L) {
+                                text = if (audioState.errorMessage != null) {
+                                    audioState.errorMessage
+                                } else if (audioState.totalDurationMs > 0L) {
                                     "${audioState.currentPositionFormatted} / ${audioState.totalDurationFormatted} • ${audioState.bibleVersion}"
+                                } else if (audioState.isBuffering) {
+                                    "Cargando audio oficial..."
                                 } else {
                                     "Capítulo ${audioState.currentChapter} • ${audioState.bibleVersion}"
                                 },
                                 fontSize = 11.sp,
-                                color = themeSecondary,
+                                color = if (audioState.errorMessage != null) MaterialTheme.colorScheme.error else themeSecondary,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )

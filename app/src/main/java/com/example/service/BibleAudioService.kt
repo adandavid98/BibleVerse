@@ -82,6 +82,7 @@ class BibleAudioService : Service() {
 
     // Playback state
     private var isPlaying = false
+    private var isPlayerPrepared = false
     private var bookId = 1
     private var bookName = "Génesis"
     private var chapter = 1
@@ -99,7 +100,6 @@ class BibleAudioService : Service() {
         initWakeLock()
         initAudioManager()
         initMediaPlayer()
-        ChapterAudioSynthesizer.initialize(applicationContext)
     }
 
     private fun initMediaPlayer() {
@@ -115,7 +115,13 @@ class BibleAudioService : Service() {
             }
             setOnErrorListener { _, what, extra ->
                 Log.e(TAG, "MediaPlayer error: what=$what, extra=$extra")
-                advanceToNextChapter()
+                isPlayerPrepared = false
+                isPlaying = false
+                updateCurrentVerseState(
+                    isBuffering = false,
+                    errorMessage = "Error en reproducción de audio"
+                )
+                updateNotificationAndMediaSession()
                 true
             }
         }
@@ -201,7 +207,7 @@ class BibleAudioService : Service() {
         isPlaying = true
 
         val player = mediaPlayer
-        if (player != null && totalDurationMs > 0L) {
+        if (player != null && isPlayerPrepared) {
             try {
                 applyPlaybackSpeed(player)
                 player.start()
@@ -211,6 +217,7 @@ class BibleAudioService : Service() {
                 return
             } catch (e: Exception) {
                 Log.w(TAG, "Error resuming player, reloading chapter", e)
+                isPlayerPrepared = false
             }
         }
 
@@ -249,8 +256,9 @@ class BibleAudioService : Service() {
 
     private fun seekToPositionInternal(posMs: Long) {
         val player = mediaPlayer
-        if (player != null && totalDurationMs > 0L) {
-            val clamped = posMs.coerceIn(0L, totalDurationMs)
+        if (player != null && (totalDurationMs > 0L || isPlayerPrepared)) {
+            val maxDur = if (totalDurationMs > 0L) totalDurationMs else player.duration.toLong().coerceAtLeast(0L)
+            val clamped = if (maxDur > 0L) posMs.coerceIn(0L, maxDur) else posMs
             player.seekTo(clamped.toInt())
             currentPositionMs = clamped
             updateCurrentVerseState(isBuffering = false)
@@ -289,6 +297,7 @@ class BibleAudioService : Service() {
         requestAudioFocus()
         acquireWakeLock()
         isPlaying = true
+        isPlayerPrepared = false
 
         loadJob?.cancel()
         stopProgressTicker()
@@ -303,47 +312,13 @@ class BibleAudioService : Service() {
         updateNotificationAndMediaSession()
 
         loadJob = serviceScope.launch {
-            // 1. Attempt official chapter audio resolution (fast timeout)
-            var audioSource = OfficialAudioResolver.resolveChapterAudio(
+            // Attempt official chapter audio resolution (checks offline disk cache first, else resolves live)
+            val audioSource = OfficialAudioResolver.resolveChapterAudio(
                 context = applicationContext,
                 version = version,
                 bookOrder = bookId,
                 chapter = chapter
             )
-
-            // 2. High-definition native speech fallback: if official audio is unreachable or offline
-            if (audioSource == null) {
-                Log.i(TAG, "Official audio not available, preparing chapter audio via high-definition synthesizer for $bookName $chapter")
-                val playlist = BibleAudioController.currentPlaylist
-                val verses = if (playlist.isNotEmpty()) {
-                    playlist
-                } else {
-                    withContext(Dispatchers.IO) {
-                        OfflineBibleManager.getVerses(applicationContext, bookId, chapter).map {
-                            AudioVerseItem(
-                                bookId = it.bookId,
-                                bookName = bookName,
-                                chapter = it.chapter,
-                                verseNumber = it.verseNumber,
-                                text = it.text
-                            )
-                        }
-                    }
-                }
-
-                val synthFile = ChapterAudioSynthesizer.synthesizeChapterAudio(
-                    context = applicationContext,
-                    version = version,
-                    bookId = bookId,
-                    bookName = bookName,
-                    chapter = chapter,
-                    verses = verses,
-                    gender = voiceGender
-                )
-                if (synthFile != null && synthFile.exists()) {
-                    audioSource = synthFile.absolutePath
-                }
-            }
 
             if (!coroutineContext.isActive) return@launch
 
@@ -352,6 +327,7 @@ class BibleAudioService : Service() {
                     try {
                         val player = mediaPlayer ?: MediaPlayer().also { mediaPlayer = it }
                         player.reset()
+                        isPlayerPrepared = false
                         player.setDataSource(audioSource)
                         player.setAudioAttributes(
                             AudioAttributes.Builder()
@@ -364,23 +340,35 @@ class BibleAudioService : Service() {
                         }
                         player.setOnErrorListener { _, what, extra ->
                             Log.e(TAG, "MediaPlayer error playing chapter: what=$what, extra=$extra")
-                            advanceToNextChapter()
+                            isPlayerPrepared = false
+                            isPlaying = false
+                            updateCurrentVerseState(
+                                isBuffering = false,
+                                errorMessage = "Error al reproducir audio del capítulo"
+                            )
+                            updateNotificationAndMediaSession()
                             true
                         }
-                        player.prepare()
-                        totalDurationMs = player.duration.toLong().coerceAtLeast(0L)
-                        currentPositionMs = 0L
 
-                        applyPlaybackSpeed(player)
-                        player.start()
-                        isPlaying = true
+                        // Prepare asynchronously so main UI thread is never blocked
+                        player.setOnPreparedListener { mp ->
+                            isPlayerPrepared = true
+                            totalDurationMs = mp.duration.toLong().coerceAtLeast(0L)
+                            currentPositionMs = 0L
 
-                        startProgressTicker()
-                        updateCurrentVerseState(isBuffering = false)
-                        updateNotificationAndMediaSession()
+                            applyPlaybackSpeed(mp)
+                            mp.start()
+                            isPlaying = true
+
+                            startProgressTicker()
+                            updateCurrentVerseState(isBuffering = false)
+                            updateNotificationAndMediaSession()
+                        }
+                        player.prepareAsync()
                     } catch (e: Exception) {
                         Log.e(TAG, "Error starting MediaPlayer on chapter audio", e)
                         isPlaying = false
+                        isPlayerPrepared = false
                         updateCurrentVerseState(
                             isBuffering = false,
                             errorMessage = "Error al iniciar reproducción del capítulo"
@@ -390,11 +378,12 @@ class BibleAudioService : Service() {
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    Log.w(TAG, "Could not resolve or synthesize audio for $bookName $chapter ($version)")
+                    Log.w(TAG, "Official human audio not available offline or online for $bookName $chapter ($version)")
                     isPlaying = false
+                    isPlayerPrepared = false
                     updateCurrentVerseState(
                         isBuffering = false,
-                        errorMessage = "Audio temporalmente no disponible"
+                        errorMessage = "Conexión requerida para descargar el audio oficial de este capítulo"
                     )
                     updateNotificationAndMediaSession()
                 }
@@ -540,6 +529,7 @@ class BibleAudioService : Service() {
             if (mediaPlayer?.isPlaying == true) {
                 mediaPlayer?.stop()
             }
+            isPlayerPrepared = false
             mediaPlayer?.reset()
         } catch (e: Exception) {
             Log.w(TAG, "Error stopping MediaPlayer", e)

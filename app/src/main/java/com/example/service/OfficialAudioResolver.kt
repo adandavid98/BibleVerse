@@ -14,12 +14,13 @@ import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
 /**
- * Resolves and caches official pre-recorded human audio tracks by chapter (exact YouVersion CDN).
- * Enables seamless, continuous "song-like" playback with 0 rate-limits and instant seek/pause.
+ * Resolves and caches official pre-recorded human audio tracks by chapter (Faith Comes By Hearing / YouVersion CDN).
+ * Ensures smooth streaming, instant offline playback when cached, and automatic cleaning of corrupted cache files.
  */
 object OfficialAudioResolver {
 
     private const val TAG = "OfficialAudioResolver"
+    private const val MIN_VALID_AUDIO_BYTES = 50000L // 50 KB minimum for a real MP3 file
 
     private val USFM_CODES = listOf(
         "GEN", "EXO", "LEV", "NUM", "DEU", "JOS", "JDG", "RUT", "1SA", "2SA",
@@ -40,14 +41,14 @@ object OfficialAudioResolver {
 
     private val httpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
-            .connectTimeout(5, TimeUnit.SECONDS)
-            .readTimeout(5, TimeUnit.SECONDS)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
             .followRedirects(true)
             .retryOnConnectionFailure(true)
             .build()
     }
 
-    private fun getCacheDirectory(context: Context): File {
+    fun getCacheDirectory(context: Context): File {
         val dir = File(context.cacheDir, "bible_audio_official")
         if (!dir.exists()) {
             dir.mkdirs()
@@ -69,8 +70,36 @@ object OfficialAudioResolver {
     }
 
     /**
-     * Resolves the official chapter audio URL or returns local cache.
-     * Starts background download without blocking playback.
+     * Cleans up incomplete or corrupted cache files (less than 50KB or temporary files).
+     */
+    fun cleanCorruptedCache(context: Context) {
+        try {
+            val cacheDir = getCacheDirectory(context)
+            val files = cacheDir.listFiles() ?: return
+            val now = System.currentTimeMillis()
+            for (file in files) {
+                val isStaleTmp = file.name.endsWith(".tmp") && (now - file.lastModified() > 60000L)
+                val isCorruptMp3 = file.name.endsWith(".mp3") && file.length() < MIN_VALID_AUDIO_BYTES
+                if (isStaleTmp || isCorruptMp3) {
+                    file.delete()
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Error cleaning corrupted cache", e)
+        }
+    }
+
+    /**
+     * Checks if the chapter audio is already downloaded and valid for offline listening.
+     */
+    fun isChapterCached(context: Context, version: String, bookOrder: Int, chapter: Int): Boolean {
+        val cacheFile = getLocalCacheFile(context, version, bookOrder, chapter)
+        return cacheFile.exists() && cacheFile.length() >= MIN_VALID_AUDIO_BYTES
+    }
+
+    /**
+     * Resolves the official human chapter audio URL or returns the local cache if already present.
+     * When streaming from online, initiates background download to save for offline use.
      */
     suspend fun resolveChapterAudio(
         context: Context,
@@ -78,59 +107,66 @@ object OfficialAudioResolver {
         bookOrder: Int,
         chapter: Int
     ): String? = withContext(Dispatchers.IO) {
+        // 1. Clean any corrupted remnants
+        cleanCorruptedCache(context)
+
+        // 2. Check local offline cache first
         val cacheFile = getLocalCacheFile(context, version, bookOrder, chapter)
-        if (cacheFile.exists() && cacheFile.length() > 50000L) {
+        if (cacheFile.exists() && cacheFile.length() >= MIN_VALID_AUDIO_BYTES) {
+            Log.i(TAG, "Playing from local offline cache: ${cacheFile.name} (${cacheFile.length()} bytes)")
             return@withContext cacheFile.absolutePath
         }
 
+        // 3. Resolve live audio stream URL dynamically at play time
         val versionId = VERSION_IDS[version.uppercase()] ?: VERSION_IDS["RVR1960"]!!
         val usfm = getUsfmCode(bookOrder)
         val safeVerName = if (VERSION_IDS.containsKey(version.uppercase())) version.uppercase() else "RVR1960"
         val pageUrl = "https://www.bible.com/bible/$versionId/$usfm.$chapter.$safeVerName"
 
         try {
+            // Clean standard browser headers that pass through CDN without bot challenges
             val pageRequest = Request.Builder()
                 .url(pageUrl)
-                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
                 .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
                 .header("Accept-Language", "es-ES,es;q=0.9,en;q=0.8")
-                .header("Sec-Ch-Ua", "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"")
-                .header("Sec-Ch-Ua-Mobile", "?0")
-                .header("Sec-Ch-Ua-Platform", "\"Windows\"")
-                .header("Sec-Fetch-Dest", "document")
-                .header("Sec-Fetch-Mode", "navigate")
-                .header("Sec-Fetch-Site", "none")
-                .header("Sec-Fetch-User", "?1")
                 .header("Upgrade-Insecure-Requests", "1")
                 .build()
 
             val pageResponse = httpClient.newCall(pageRequest).execute()
             if (!pageResponse.isSuccessful) {
-                Log.w(TAG, "Failed to load chapter page: HTTP ${pageResponse.code}")
+                Log.w(TAG, "Failed to load chapter audio page: HTTP ${pageResponse.code}")
                 return@withContext null
             }
 
             val html = pageResponse.body?.string() ?: return@withContext null
 
-            // Regex extraction of the MP3 stream URL (handles both // and \/\/)
+            // Regex extraction of the MP3 stream URL
             val pattern = Pattern.compile("format_mp3_32k[\":\\s\\\\]+((?:https?:)?(?://|\\\\/\\\\/)[^\"'\\s]+?\\.mp3[^\"'\\s]*?)[\"']")
             val matcher = pattern.matcher(html)
             val audioUrl = if (matcher.find()) {
                 val rawMatch = matcher.group(1) ?: return@withContext null
-                val cleanUrl = rawMatch.replace("\\/", "/").replace("\\", "")
+                var cleanUrl = rawMatch
+                    .replace("\\/", "/")
+                    .replace("\\", "")
+                    .replace("\"", "")
+                    .replace("'", "")
+                    .trim()
+
                 if (cleanUrl.startsWith("//")) {
-                    "https:$cleanUrl"
+                    cleanUrl = "https:$cleanUrl"
                 } else if (!cleanUrl.startsWith("http")) {
-                    "https://$cleanUrl"
-                } else {
-                    cleanUrl
+                    cleanUrl = "https://$cleanUrl"
                 }
+                cleanUrl
             } else {
-                Log.w(TAG, "No audio URL found for $usfm.$chapter ($version)")
+                Log.w(TAG, "No audio URL found in response for $usfm.$chapter ($version)")
                 return@withContext null
             }
 
-            // Trigger non-blocking background download to cache for offline use
+            Log.i(TAG, "Resolved live official human audio URL: $audioUrl")
+
+            // 4. Trigger non-blocking background download so it's stored permanently for offline playback
             CoroutineScope(Dispatchers.IO).launch {
                 downloadAndCacheAudio(context, audioUrl, cacheFile)
             }
@@ -144,12 +180,13 @@ object OfficialAudioResolver {
     }
 
     private fun downloadAndCacheAudio(context: Context, audioUrl: String, destinationFile: File) {
-        if (destinationFile.exists() && destinationFile.length() > 50000L) return
+        if (destinationFile.exists() && destinationFile.length() >= MIN_VALID_AUDIO_BYTES) return
         try {
             val tempFile = File(destinationFile.parentFile, "${destinationFile.name}.tmp")
             val downloadRequest = Request.Builder()
                 .url(audioUrl)
-                .header("User-Agent", "Mozilla/5.0")
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+                .header("Accept", "*/*")
                 .build()
 
             val downloadResponse = httpClient.newCall(downloadRequest).execute()
@@ -160,12 +197,20 @@ object OfficialAudioResolver {
                         output.flush()
                     }
                 }
-                if (tempFile.exists() && tempFile.length() > 50000L) {
-                    tempFile.renameTo(destinationFile)
-                    cleanOldCacheFilesIfNeeded(context)
+                if (tempFile.exists() && tempFile.length() >= MIN_VALID_AUDIO_BYTES) {
+                    if (destinationFile.exists()) destinationFile.delete()
+                    val renamed = tempFile.renameTo(destinationFile)
+                    if (renamed) {
+                        Log.i(TAG, "Successfully cached audio for offline: ${destinationFile.name} (${destinationFile.length()} bytes)")
+                        cleanOldCacheFilesIfNeeded(context)
+                    } else {
+                        tempFile.delete()
+                    }
                 } else {
                     tempFile.delete()
                 }
+            } else {
+                tempFile.delete()
             }
         } catch (e: Exception) {
             Log.w(TAG, "Could not cache audio file in background: ${e.message}")
@@ -176,7 +221,7 @@ object OfficialAudioResolver {
         try {
             val cacheDir = getCacheDirectory(context)
             val files = cacheDir.listFiles() ?: return
-            val maxSizeBytes = 300L * 1024L * 1024L // 300 MB
+            val maxSizeBytes = 500L * 1024L * 1024L // 500 MB limit
 
             var totalSize = files.sumOf { it.length() }
             if (totalSize > maxSizeBytes) {
