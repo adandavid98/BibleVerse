@@ -161,7 +161,7 @@ fun BibleAudioBottomBar(
                             val subtitleText = audioState.errorMessage ?: if (audioState.totalDurationMs > 0L) {
                                 "${audioState.currentPositionFormatted} / ${audioState.totalDurationFormatted} • ${audioState.bibleVersion}"
                             } else if (audioState.isBuffering) {
-                                "Cargando audio oficial..."
+                                "Generando voz humana (IA)..."
                             } else {
                                 "Capítulo ${audioState.currentChapter} • ${audioState.bibleVersion}"
                             }
@@ -335,7 +335,7 @@ private fun BibleAudioDetailBottomSheet(
             )
 
             Text(
-                text = "Biblia ${audioState.bibleVersion} • Audio Narrado Continuo",
+                text = "Biblia ${audioState.bibleVersion} • Voz Humana IA",
                 fontSize = 13.sp,
                 color = themeSecondary,
                 modifier = Modifier.padding(top = 2.dp, bottom = 16.dp)
@@ -363,7 +363,7 @@ private fun BibleAudioDetailBottomSheet(
                             color = themeAccent
                         )
                         Text(
-                            text = if (audioState.isBuffering) "Cargando audio..." else if (audioState.isPlaying) "Reproduciendo" else "En pausa",
+                            text = if (audioState.isBuffering) "Generando voz humana..." else if (audioState.isPlaying) "Reproduciendo" else "En pausa",
                             fontSize = 12.sp,
                             color = themeSecondary
                         )

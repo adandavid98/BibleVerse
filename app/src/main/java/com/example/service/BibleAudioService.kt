@@ -312,12 +312,15 @@ class BibleAudioService : Service() {
         updateNotificationAndMediaSession()
 
         loadJob = serviceScope.launch {
-            // Attempt official chapter audio resolution (checks offline disk cache first, else resolves live)
-            val audioSource = OfficialAudioResolver.resolveChapterAudio(
+            // High-definition neural human narration (Google Gemini AI - NotebookLM style)
+            // Checks local offline cache first, else synthesizes with AI and saves permanently
+            val audioSource = GeminiAudioSynthesizer.resolveOrSynthesizeChapterAudio(
                 context = applicationContext,
                 version = version,
-                bookOrder = bookId,
-                chapter = chapter
+                bookId = bookId,
+                bookName = bookName,
+                chapter = chapter,
+                gender = voiceGender
             )
 
             if (!coroutineContext.isActive) return@launch
@@ -378,12 +381,12 @@ class BibleAudioService : Service() {
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    Log.w(TAG, "Official human audio not available offline or online for $bookName $chapter ($version)")
+                    Log.w(TAG, "Audio not available for $bookName $chapter ($version, $voiceGender)")
                     isPlaying = false
                     isPlayerPrepared = false
                     updateCurrentVerseState(
                         isBuffering = false,
-                        errorMessage = "Conexión requerida para descargar el audio oficial de este capítulo"
+                        errorMessage = "Conexión requerida para narrar este capítulo con voz humana"
                     )
                     updateNotificationAndMediaSession()
                 }
@@ -621,7 +624,7 @@ class BibleAudioService : Service() {
         // 2. Update MediaSession Metadata
         val metadata = MediaMetadata.Builder()
             .putString(MediaMetadata.METADATA_KEY_TITLE, "$bookName $chapter")
-            .putString(MediaMetadata.METADATA_KEY_ARTIST, "Biblia $version • Audio Oficial")
+            .putString(MediaMetadata.METADATA_KEY_ARTIST, "Biblia $version • Voz Humana IA")
             .putString(MediaMetadata.METADATA_KEY_ALBUM, bookName)
             .putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, "$bookName $chapter")
             .putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, "Capítulo completo • Biblia $version")
@@ -696,7 +699,7 @@ class BibleAudioService : Service() {
 
         builder.setContentTitle("$bookName $chapter")
             .setContentText("Biblia $version • $posStr / $durStr")
-            .setSubText("${speechRate}x • Audio Oficial")
+            .setSubText("${speechRate}x • Voz Humana IA")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setContentIntent(openAppPendingIntent)
             .setOngoing(isPlaying)
