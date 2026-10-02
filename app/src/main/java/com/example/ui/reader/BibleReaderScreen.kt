@@ -512,7 +512,6 @@ fun BibleReaderScreen(
                                         verse.verseNumber in uiState.transientHighlightedVerses,
                                 isPrevSameHighlight = isPrevSameHighlight,
                                 isNextSameHighlight = isNextSameHighlight,
-                                onCrossReferenceClick = { viewModel.openCrossReferences(verse) },
                                 onClick = {
                                     viewModel.clearTransientHighlights()
                                     viewModel.toggleVerseSelection(verse.verseNumber)
@@ -812,10 +811,8 @@ private fun CompactVerseRow(
     isTransientHighlighted: Boolean = false,
     isPrevSameHighlight: Boolean = false,
     isNextSameHighlight: Boolean = false,
-    onCrossReferenceClick: () -> Unit = {},
     onClick: () -> Unit
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
     val highlightColor = remember(verse.highlightColorHex, isDarkTheme) {
         if (!verse.highlightColorHex.isNullOrBlank()) {
             try {
@@ -826,10 +823,6 @@ private fun CompactVerseRow(
                 null
             }
         } else null
-    }
-
-    val hasCrossReferences = remember(verse.bookId, verse.chapter, verse.verseNumber) {
-        com.example.data.bible.BibleCrossReferencesCatalog.hasReferences(context, verse.bookId, verse.chapter, verse.verseNumber)
     }
 
     // Border is for active selection, transient highlight, or audio speech indicator
@@ -899,46 +892,11 @@ private fun CompactVerseRow(
             )
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = annotatedText,
-                lineHeight = lineHeight,
-                modifier = Modifier.weight(1f)
-            )
-
-            if (hasCrossReferences) {
-                Spacer(modifier = Modifier.width(6.dp))
-                Surface(
-                    onClick = onCrossReferenceClick,
-                    shape = RoundedCornerShape(12.dp),
-                    color = if (isDarkTheme) Color(0xFF1E293B) else Color(0xFFE2E8F0),
-                    modifier = Modifier.padding(top = 2.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        Text(
-                            text = "⊕",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isDarkTheme) Color(0xFF38BDF8) else Color(0xFF2563EB)
-                        )
-                        Text(
-                            text = "Ref",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = secondaryColor
-                        )
-                    }
-                }
-            }
-        }
+        Text(
+            text = annotatedText,
+            lineHeight = lineHeight,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
