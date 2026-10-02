@@ -37,6 +37,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '9.3.1'
+          cache-disabled: true
 
       - name: Extract Version
         id: get_version
