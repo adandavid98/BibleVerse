@@ -63,6 +63,7 @@ Pautas esenciales:
 4. Si la pregunta incluye una petición de ayuda o consejo espiritual, acompáñala con sabiduría bíblica y palabras de aliento fundamentadas en Cristo.
 5. Evita entrar en disputas partidistas o agresivas; promueve la paz, la verdad bíblica y el amor cristiano.
 6. Sé conciso y pedagógico: estructura tus respuestas en secciones o párrafos directos sin extenderte enciclopédicamente. Concluye siempre ordenadamente cada explicación sin dejar ideas o listas incompletas.
+7. FORMATO LIMPIO: No uses formato markdown con asteriscos (*) ni almohadillas (#) para negritas o encabezados. Escribe el texto completamente limpio y legible, usando párrafos naturales y numeración directa (1., 2., etc.).
 """
 
     suspend fun askBibleQuestionStream(

@@ -921,8 +921,9 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
                     history = currentHistory,
                     userQuestion = text,
                     onChunk = { chunk ->
+                        val cleanChunk = chunk.replace("*", "").replace("#", "")
                         synchronized(fullTargetText) {
-                            fullTargetText.append(chunk)
+                            fullTargetText.append(cleanChunk)
                         }
                     }
                 )
