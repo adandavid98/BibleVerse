@@ -115,8 +115,8 @@ class BibleAudioService : Service() {
             }
             setOnErrorListener { _, what, extra ->
                 Log.e(TAG, "MediaPlayer error: what=$what, extra=$extra")
-                isPlayerPrepared = false
-                isPlaying = false
+                this@BibleAudioService.isPlayerPrepared = false
+                this@BibleAudioService.isPlaying = false
                 updateCurrentVerseState(
                     isBuffering = false,
                     errorMessage = "Error en reproducción de audio"
