@@ -2,10 +2,8 @@ package com.example.data.bible
 
 import android.content.Context
 import android.util.Log
-import org.json.JSONObject
-import java.io.InputStreamReader
-import java.util.concurrent.ConcurrentHashMap
-import java.util.zip.GZIPInputStream
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 data class CrossReferenceItem(
     val targetCitation: String,
@@ -19,13 +17,16 @@ data class CrossReferenceItem(
 object BibleCrossReferencesCatalog {
 
     private const val TAG = "CrossReferencesCatalog"
+    private const val ASSET_FILE = "bible/cross_references.bin"
 
-    // In-memory cache for parsed chapter verses: "bookId_chapter" -> (verseNumber -> List<CrossReferenceItem>)
-    private val chapterCache = ConcurrentHashMap<String, Map<Int, List<CrossReferenceItem>>>()
-    
+    private val loadLock = Any()
     @Volatile
     private var isDatasetLoaded = false
-    private val loadLock = Any()
+
+    // Fast O(1) chapter index: (bookId * 1000 + chapter) -> Pair(startRecordIndex, recordCount)
+    private val chapterIndex = HashMap<Int, Pair<Int, Int>>(1200)
+    private var binaryBuffer: ByteBuffer? = null
+    private var recordsOffset: Int = 0
 
     // Canonical chapter-level parallel passages (Historical books, Synoptic Gospels, Prophets, Creation)
     private val chapterReferencesMap: Map<String, List<CrossReferenceItem>> = mapOf(
@@ -171,74 +172,102 @@ object BibleCrossReferencesCatalog {
         synchronized(loadLock) {
             if (isDatasetLoaded) return
             try {
-                context.assets.open("bible/cross_references.json.gz").use { inStream ->
-                    GZIPInputStream(inStream).use { gzStream ->
-                        val reader = InputStreamReader(gzStream, Charsets.UTF_8)
-                        val jsonStr = reader.readText()
-                        val jsonObj = JSONObject(jsonStr)
-                        val keys = jsonObj.keys()
-                        while (keys.hasNext()) {
-                            val chapKey = keys.next() // e.g. "53_1"
-                            val versesObj = jsonObj.getJSONObject(chapKey)
-                            val verseKeys = versesObj.keys()
-                            val verseMap = HashMap<Int, List<CrossReferenceItem>>()
-                            while (verseKeys.hasNext()) {
-                                val vStr = verseKeys.next()
-                                val vNum = vStr.toIntOrNull() ?: continue
-                                val arr = versesObj.getJSONArray(vStr)
-                                val items = ArrayList<CrossReferenceItem>(arr.length())
-                                for (i in 0 until arr.length()) {
-                                    val refArr = arr.getJSONArray(i)
-                                    val cit = refArr.getString(0)
-                                    val b = refArr.getInt(1)
-                                    val c = refArr.getInt(2)
-                                    val v = refArr.getInt(3)
-                                    val ev = if (refArr.length() > 4) refArr.getInt(4) else v
-                                    items.add(
-                                        CrossReferenceItem(
-                                            targetCitation = cit,
-                                            targetBookId = b,
-                                            targetChapter = c,
-                                            targetVerse = v,
-                                            targetEndVerse = ev,
-                                            note = ""
-                                        )
-                                    )
-                                }
-                                verseMap[vNum] = items
-                            }
-                            chapterCache[chapKey] = verseMap
-                        }
-                        isDatasetLoaded = true
-                        Log.i(TAG, "Successfully loaded ${chapterCache.size} chapters of canonical cross references")
-                    }
+                val bytes = context.assets.open(ASSET_FILE).use { it.readBytes() }
+                val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN)
+
+                val magic = ByteArray(4)
+                buffer.get(magic)
+                val magicStr = String(magic, Charsets.US_ASCII)
+                if (magicStr != "XREF") {
+                    Log.e(TAG, "Formato inválido en $ASSET_FILE: $magicStr")
+                    return
                 }
+
+                val version = buffer.short.toInt() and 0xFFFF
+                val numChapters = buffer.short.toInt() and 0xFFFF
+                val numRecords = buffer.int
+
+                for (i in 0 until numChapters) {
+                    val b = buffer.get().toInt() and 0xFF
+                    val c = buffer.get().toInt() and 0xFF
+                    val startIdx = buffer.int
+                    val count = buffer.short.toInt() and 0xFFFF
+                    chapterIndex[b * 1000 + c] = Pair(startIdx, count)
+                }
+
+                recordsOffset = buffer.position()
+                binaryBuffer = buffer
+                isDatasetLoaded = true
+                Log.i(TAG, "Referencias cruzadas binarias cargadas exitosamente: $numChapters capítulos, $numRecords referencias (v$version)")
             } catch (e: Exception) {
-                Log.e(TAG, "Error loading cross references dataset from assets", e)
+                Log.e(TAG, "Error cargando $ASSET_FILE desde assets", e)
             }
         }
     }
 
     /**
      * Checks if a verse has genuine, precise cross-references in the canonical index.
-     * Never returns false positives or generic placeholders.
+     * Instant O(1) binary direct lookup without heap allocations.
      */
     fun hasReferences(context: Context, bookId: Int, chapter: Int, verse: Int): Boolean {
         ensureLoaded(context)
-        val chapKey = "${bookId}_$chapter"
-        val verseMap = chapterCache[chapKey]
-        return !verseMap?.get(verse).isNullOrEmpty()
+        val buffer = binaryBuffer ?: return false
+        val entry = chapterIndex[bookId * 1000 + chapter] ?: return false
+        val (startIdx, count) = entry
+        if (count == 0) return false
+
+        val recOff = recordsOffset + startIdx * 5
+        for (i in 0 until count) {
+            val v = buffer.get(recOff + i * 5).toInt() and 0xFF
+            if (v == verse) return true
+            if (v > verse) break
+        }
+        return false
     }
 
     /**
-     * Retrieves the genuine, scholarly cross-references for a specific verse.
-     * Returns an empty list if this verse has no canonical cross-references.
+     * Retrieves genuine scholarly cross-references for a specific verse.
      */
     fun getReferences(context: Context, bookId: Int, chapter: Int, verse: Int): List<CrossReferenceItem> {
         ensureLoaded(context)
-        val chapKey = "${bookId}_$chapter"
-        val verseMap = chapterCache[chapKey]
-        return verseMap?.get(verse) ?: emptyList()
+        val buffer = binaryBuffer ?: return emptyList()
+        val entry = chapterIndex[bookId * 1000 + chapter] ?: return emptyList()
+        val (startIdx, count) = entry
+        if (count == 0) return emptyList()
+
+        val results = ArrayList<CrossReferenceItem>()
+        val recOff = recordsOffset + startIdx * 5
+        for (i in 0 until count) {
+            val offset = recOff + i * 5
+            val v = buffer.get(offset).toInt() and 0xFF
+            if (v == verse) {
+                val tb = buffer.get(offset + 1).toInt() and 0xFF
+                val tc = buffer.get(offset + 2).toInt() and 0xFF
+                val tv = buffer.get(offset + 3).toInt() and 0xFF
+                val tev = buffer.get(offset + 4).toInt() and 0xFF
+
+                val bookName = BibleCatalog.books.getOrNull(tb - 1)?.name ?: "Libro $tb"
+                val citation = if (tv == tev) {
+                    "$bookName $tc:$tv"
+                } else {
+                    "$bookName $tc:$tv-$tev"
+                }
+
+                results.add(
+                    CrossReferenceItem(
+                        targetCitation = citation,
+                        targetBookId = tb,
+                        targetChapter = tc,
+                        targetVerse = tv,
+                        targetEndVerse = tev,
+                        note = ""
+                    )
+                )
+            } else if (v > verse) {
+                break
+            }
+        }
+        return results
     }
 
     /**

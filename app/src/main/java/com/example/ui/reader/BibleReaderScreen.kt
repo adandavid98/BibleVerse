@@ -10,6 +10,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -75,9 +76,18 @@ fun BibleReaderScreen(
         }
     }
 
-    // Clear transient highlights as soon as the user starts scrolling
-    LaunchedEffect(listState.isScrollInProgress) {
-        if (listState.isScrollInProgress && uiState.transientHighlightedVerses.isNotEmpty()) {
+    // Clear transient highlights only when the user manually drags/scrolls the list
+    val isUserDragging by listState.interactionSource.collectIsDraggedAsState()
+    LaunchedEffect(isUserDragging) {
+        if (isUserDragging && uiState.transientHighlightedVerses.isNotEmpty()) {
+            viewModel.clearTransientHighlights()
+        }
+    }
+
+    // Auto-clear transient highlights after 8 seconds if not dismissed earlier by user touch
+    LaunchedEffect(uiState.transientHighlightedVerses) {
+        if (uiState.transientHighlightedVerses.isNotEmpty()) {
+            kotlinx.coroutines.delay(8000L)
             viewModel.clearTransientHighlights()
         }
     }
@@ -497,7 +507,9 @@ fun BibleReaderScreen(
                                 isDarkTheme = isDarkTheme,
                                 redLettersEnabled = uiState.preferences.redLettersEnabled,
                                 isSpeaking = isVerseSpeaking,
-                                isTransientHighlighted = verse.verseNumber in uiState.transientHighlightedVerses,
+                                isTransientHighlighted = verse.bookId == uiState.currentBook?.id &&
+                                        verse.chapter == uiState.currentChapter &&
+                                        verse.verseNumber in uiState.transientHighlightedVerses,
                                 isPrevSameHighlight = isPrevSameHighlight,
                                 isNextSameHighlight = isNextSameHighlight,
                                 onCrossReferenceClick = { viewModel.openCrossReferences(verse) },
@@ -824,7 +836,7 @@ private fun CompactVerseRow(
     val selectionBorder = when {
         isSpeaking -> BorderStroke(1.5.dp, accentColor.copy(alpha = 0.85f))
         verse.isSelected -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.85f))
-        isTransientHighlighted -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.70f))
+        isTransientHighlighted -> BorderStroke(2.dp, if (isDarkTheme) Color(0xFF38BDF8) else Color(0xFF0284C7))
         else -> null
     }
 
@@ -841,7 +853,7 @@ private fun CompactVerseRow(
     val rowBg = when {
         isSpeaking -> accentColor.copy(alpha = if (isDarkTheme) 0.22f else 0.16f)
         verse.isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
-        isTransientHighlighted -> MaterialTheme.colorScheme.primary.copy(alpha = if (isDarkTheme) 0.24f else 0.16f)
+        isTransientHighlighted -> if (isDarkTheme) Color(0xFF0284C7).copy(alpha = 0.32f) else Color(0xFF38BDF8).copy(alpha = 0.28f)
         highlightColor != null -> highlightColor
         else -> Color.Transparent
     }
