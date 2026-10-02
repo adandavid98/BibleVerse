@@ -92,6 +92,7 @@ class BibleAudioService : Service() {
     private var voiceGender = AudioVoiceGender.FEMALE
     private var currentPositionMs = 0L
     private var totalDurationMs = 0L
+    private var pendingSeekPositionMs = 0L
 
     override fun onCreate() {
         super.onCreate()
@@ -209,27 +210,38 @@ class BibleAudioService : Service() {
         val player = mediaPlayer
         if (player != null && isPlayerPrepared) {
             try {
-                applyPlaybackSpeed(player)
                 player.start()
+                applyPlaybackSpeed(player)
                 startProgressTicker()
                 updateCurrentVerseState(isBuffering = false)
                 updateNotificationAndMediaSession()
                 return
             } catch (e: Exception) {
-                Log.w(TAG, "Error resuming player, reloading chapter", e)
+                Log.w(TAG, "Error resuming player, reloading chapter at $currentPositionMs", e)
                 isPlayerPrepared = false
+                pendingSeekPositionMs = currentPositionMs
             }
+        } else {
+            pendingSeekPositionMs = currentPositionMs
         }
 
-        loadAndPlayChapter()
+        loadAndPlayChapter(pendingSeekPositionMs)
     }
 
     private fun pause() {
         isPlaying = false
         stopProgressTicker()
         try {
-            if (mediaPlayer?.isPlaying == true) {
-                mediaPlayer?.pause()
+            val player = mediaPlayer
+            if (player != null && isPlayerPrepared) {
+                try {
+                    if (player.isPlaying) {
+                        currentPositionMs = player.currentPosition.toLong()
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Error reading position before pause", e)
+                }
+                player.pause()
             }
         } catch (e: Exception) {
             Log.w(TAG, "Error pausing MediaPlayer", e)
@@ -293,7 +305,7 @@ class BibleAudioService : Service() {
      * Loads the official studio recorded audio track for the entire chapter (YouVersion CDN).
      * Plays seamlessly as a single song track.
      */
-    private fun loadAndPlayChapter() {
+    private fun loadAndPlayChapter(seekToMs: Long = 0L) {
         requestAudioFocus()
         acquireWakeLock()
         isPlaying = true
@@ -355,10 +367,18 @@ class BibleAudioService : Service() {
                         player.setOnPreparedListener { mp ->
                             isPlayerPrepared = true
                             totalDurationMs = mp.duration.toLong().coerceAtLeast(0L)
-                            currentPositionMs = 0L
+                            
+                            val targetSeek = if (seekToMs > 0L) seekToMs else pendingSeekPositionMs
+                            if (targetSeek > 0L && targetSeek < totalDurationMs) {
+                                mp.seekTo(targetSeek.toInt())
+                                currentPositionMs = targetSeek
+                            } else {
+                                currentPositionMs = 0L
+                            }
+                            pendingSeekPositionMs = 0L
 
-                            applyPlaybackSpeed(mp)
                             mp.start()
+                            applyPlaybackSpeed(mp)
                             isPlaying = true
 
                             startProgressTicker()
@@ -468,9 +488,8 @@ class BibleAudioService : Service() {
             updateCurrentVerseState(isBuffering = true)
             updateNotificationAndMediaSession()
 
-            if (isPlaying) {
-                loadAndPlayChapter()
-            }
+            isPlaying = true
+            loadAndPlayChapter(0L)
         }
     }
 
@@ -515,9 +534,8 @@ class BibleAudioService : Service() {
             updateCurrentVerseState(isBuffering = true)
             updateNotificationAndMediaSession()
 
-            if (isPlaying) {
-                loadAndPlayChapter()
-            }
+            isPlaying = true
+            loadAndPlayChapter(0L)
         }
     }
 

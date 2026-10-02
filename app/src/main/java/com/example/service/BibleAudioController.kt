@@ -201,18 +201,20 @@ object BibleAudioController {
     }
 
     private fun sendCommand(context: Context, action: String) {
-        val intent = Intent(context, BibleAudioService::class.java).apply {
+        val appContext = context.applicationContext ?: context
+        val intent = Intent(appContext, BibleAudioService::class.java).apply {
             this.action = action
         }
-        startService(context, intent)
+        startService(appContext, intent)
     }
 
     private fun startService(context: Context, intent: Intent) {
         try {
+            val appContext = context.applicationContext ?: context
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
+                appContext.startForegroundService(intent)
             } else {
-                context.startService(intent)
+                appContext.startService(intent)
             }
         } catch (e: Exception) {
             e.printStackTrace()

@@ -41,32 +41,33 @@ object OfficialAudioResolver {
     )
 
     private val liveUrlCache = java.util.concurrent.ConcurrentHashMap<String, String>()
-    private var rvr1960Catalog: Map<String, String>? = null
+    private val versionCatalogs = java.util.concurrent.ConcurrentHashMap<String, Map<String, String>>()
 
     @Synchronized
     private fun getCatalogUrl(context: Context, version: String, bookOrder: Int, chapter: Int): String? {
-        if (version.equals("RVR1960", ignoreCase = true)) {
-            if (rvr1960Catalog == null) {
-                try {
-                    context.assets.open("audio_catalog_rvr1960.json").use { input ->
-                        val jsonStr = input.bufferedReader().readText()
-                        val jsonObj = org.json.JSONObject(jsonStr)
-                        val map = HashMap<String, String>()
-                        val keys = jsonObj.keys()
-                        while (keys.hasNext()) {
-                            val k = keys.next()
-                            map[k] = jsonObj.getString(k)
-                        }
-                        rvr1960Catalog = map
-                        Log.i(TAG, "Loaded RVR1960 audio catalog with ${map.size} chapters from assets")
+        val normVersion = version.lowercase().trim().replace("[^a-z0-9]".toRegex(), "")
+        var catalog = versionCatalogs[normVersion]
+        if (catalog == null) {
+            val fileName = "audio_catalog_${normVersion}.json"
+            try {
+                context.assets.open(fileName).use { input ->
+                    val jsonStr = input.bufferedReader().readText()
+                    val jsonObj = org.json.JSONObject(jsonStr)
+                    val map = HashMap<String, String>()
+                    val keys = jsonObj.keys()
+                    while (keys.hasNext()) {
+                        val k = keys.next()
+                        map[k] = jsonObj.getString(k)
                     }
-                } catch (e: Exception) {
-                    Log.w(TAG, "Could not load audio_catalog_rvr1960.json from assets", e)
+                    catalog = map
+                    versionCatalogs[normVersion] = map
+                    Log.i(TAG, "Loaded $fileName with ${map.size} chapters from assets")
                 }
+            } catch (e: Exception) {
+                Log.d(TAG, "Catalog $fileName not found in assets: ${e.message}")
             }
-            return rvr1960Catalog?.get("${bookOrder}_${chapter}")
         }
-        return null
+        return catalog?.get("${bookOrder}_${chapter}")
     }
 
     private val httpClient: OkHttpClient by lazy {
