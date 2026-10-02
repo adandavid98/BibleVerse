@@ -131,6 +131,10 @@ class BibleAudioService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action ?: return START_NOT_STICKY
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundWithNotification()
+        }
+
         when (action) {
             ACTION_START -> {
                 val newBookId = intent.getIntExtra(EXTRA_BOOK_ID, bookId)
@@ -154,7 +158,6 @@ class BibleAudioService : Service() {
                 chapter = newChapter
                 version = newVersion
 
-                startForegroundWithNotification()
                 if (chapterChanged || mediaPlayer == null || totalDurationMs == 0L) {
                     loadAndPlayChapter()
                 } else {
@@ -211,20 +214,25 @@ class BibleAudioService : Service() {
         if (player != null && isPlayerPrepared) {
             try {
                 player.start()
-                applyPlaybackSpeed(player)
-                startProgressTicker()
-                updateCurrentVerseState(isBuffering = false)
-                updateNotificationAndMediaSession()
-                return
+                if (player.isPlaying) {
+                    if (speechRate != 1.0f) {
+                        applyPlaybackSpeed(player)
+                    }
+                    startProgressTicker()
+                    updateCurrentVerseState(isBuffering = false)
+                    updateNotificationAndMediaSession()
+                    return
+                } else {
+                    Log.w(TAG, "player.start() was called but player.isPlaying is false, reloading")
+                }
             } catch (e: Exception) {
                 Log.w(TAG, "Error resuming player, reloading chapter at $currentPositionMs", e)
-                isPlayerPrepared = false
-                pendingSeekPositionMs = currentPositionMs
             }
-        } else {
-            pendingSeekPositionMs = currentPositionMs
         }
 
+        // If player couldn't cleanly resume (e.g. stalled remote socket or error), reload from current position!
+        isPlayerPrepared = false
+        pendingSeekPositionMs = currentPositionMs
         loadAndPlayChapter(pendingSeekPositionMs)
     }
 
@@ -235,8 +243,9 @@ class BibleAudioService : Service() {
             val player = mediaPlayer
             if (player != null && isPlayerPrepared) {
                 try {
-                    if (player.isPlaying) {
-                        currentPositionMs = player.currentPosition.toLong()
+                    val pos = player.currentPosition.toLong()
+                    if (pos > 0L) {
+                        currentPositionMs = pos
                     }
                 } catch (e: Exception) {
                     Log.w(TAG, "Error reading position before pause", e)
@@ -415,9 +424,11 @@ class BibleAudioService : Service() {
     private fun startProgressTicker() {
         progressTickerJob?.cancel()
         progressTickerJob = serviceScope.launch {
+            var stalledTicks = 0
             while (isActive && isPlaying) {
                 val player = mediaPlayer
                 if (player != null && player.isPlaying) {
+                    stalledTicks = 0
                     try {
                         currentPositionMs = player.currentPosition.toLong()
                         val dur = player.duration.toLong()
@@ -432,6 +443,16 @@ class BibleAudioService : Service() {
                         }
                     } catch (e: Exception) {
                         // ignore state errors during seek
+                    }
+                } else if (player != null && isPlayerPrepared && isPlaying) {
+                    stalledTicks++
+                    if (stalledTicks >= 4) { // 2 seconds stalled without progress
+                        Log.w(TAG, "Audio playback stall detected, auto-recovering at $currentPositionMs")
+                        stalledTicks = 0
+                        withContext(Dispatchers.Main) {
+                            loadAndPlayChapter(currentPositionMs)
+                        }
+                        break
                     }
                 }
                 delay(500)

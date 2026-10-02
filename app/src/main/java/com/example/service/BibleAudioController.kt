@@ -98,15 +98,21 @@ object BibleAudioController {
     }
 
     fun play(context: Context) {
+        _audioState.update { it.copy(isPlaying = true) }
         sendCommand(context, BibleAudioService.ACTION_PLAY)
     }
 
     fun pause(context: Context) {
+        _audioState.update { it.copy(isPlaying = false) }
         sendCommand(context, BibleAudioService.ACTION_PAUSE)
     }
 
     fun togglePlayPause(context: Context) {
-        sendCommand(context, BibleAudioService.ACTION_TOGGLE)
+        if (_audioState.value.isPlaying) {
+            pause(context)
+        } else {
+            play(context)
+        }
     }
 
     fun next(context: Context) {
@@ -212,7 +218,15 @@ object BibleAudioController {
         try {
             val appContext = context.applicationContext ?: context
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                appContext.startForegroundService(intent)
+                if (_audioState.value.isActive && intent.action != BibleAudioService.ACTION_START) {
+                    try {
+                        appContext.startService(intent)
+                    } catch (e: Exception) {
+                        appContext.startForegroundService(intent)
+                    }
+                } else {
+                    appContext.startForegroundService(intent)
+                }
             } else {
                 appContext.startService(intent)
             }
