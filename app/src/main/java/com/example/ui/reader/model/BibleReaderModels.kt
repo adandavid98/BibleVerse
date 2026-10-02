@@ -59,7 +59,10 @@ data class BibleReaderUiState(
     val isCompareModalOpen: Boolean = false,
     val isCrossReferencesOpen: Boolean = false,
     val selectedCrossReferenceVerse: ReaderVerseUiModel? = null,
+    val chapterParallelTitle: String? = null,
+    val chapterParallelReferences: List<com.example.data.bible.CrossReferenceItem>? = null,
     val targetScrollVerse: Int? = null,
+    val transientHighlightedVerses: Set<Int> = emptySet(),
     val userMessage: String? = null,
     val isReaderBarsVisible: Boolean = true
 )

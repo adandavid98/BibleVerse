@@ -108,7 +108,7 @@ class BibleReaderViewModel(
         loadChapter(book, validChapter, _uiState.value.preferences.bibleVersion)
     }
 
-    fun navigateToVerse(bookId: Int, chapter: Int, verse: Int = 1) {
+    fun navigateToVerse(bookId: Int, chapter: Int, startVerse: Int = 1, endVerse: Int = startVerse) {
         val book = _uiState.value.books.firstOrNull { it.id == bookId }
             ?: com.example.data.model.BibleBookEntity(
                 id = bookId,
@@ -119,7 +119,31 @@ class BibleReaderViewModel(
                 abbreviation = com.example.data.bible.BibleCatalog.books.getOrNull(bookId - 1)?.abbreviation ?: "",
                 orderIndex = bookId
             )
-        selectBookChapterVerse(book, chapter, verse)
+        val validChapter = chapter.coerceIn(1, book.chaptersCount)
+        val validEndVerse = endVerse.coerceAtLeast(startVerse)
+        val range = (startVerse..validEndVerse).toSet()
+
+        _uiState.update {
+            it.copy(
+                currentBook = book,
+                currentChapter = validChapter,
+                selectedVerseNumbers = emptySet(),
+                targetScrollVerse = startVerse,
+                transientHighlightedVerses = range,
+                isBookChapterSelectorOpen = false,
+                isCrossReferencesOpen = false
+            )
+        }
+        viewModelScope.launch {
+            preferencesRepository.updateLastPosition(book.id, validChapter, startVerse)
+        }
+        loadChapter(book, validChapter, _uiState.value.preferences.bibleVersion)
+    }
+
+    fun clearTransientHighlights() {
+        if (_uiState.value.transientHighlightedVerses.isNotEmpty()) {
+            _uiState.update { it.copy(transientHighlightedVerses = emptySet()) }
+        }
     }
 
     fun clearTargetScrollVerse() {
@@ -419,7 +443,20 @@ class BibleReaderViewModel(
         _uiState.update {
             it.copy(
                 isCrossReferencesOpen = true,
-                selectedCrossReferenceVerse = verse
+                selectedCrossReferenceVerse = verse,
+                chapterParallelTitle = null,
+                chapterParallelReferences = null
+            )
+        }
+    }
+
+    fun openChapterParallelReferences(title: String, references: List<com.example.data.bible.CrossReferenceItem>) {
+        _uiState.update {
+            it.copy(
+                isCrossReferencesOpen = true,
+                selectedCrossReferenceVerse = null,
+                chapterParallelTitle = title,
+                chapterParallelReferences = references
             )
         }
     }
@@ -428,7 +465,9 @@ class BibleReaderViewModel(
         _uiState.update {
             it.copy(
                 isCrossReferencesOpen = false,
-                selectedCrossReferenceVerse = null
+                selectedCrossReferenceVerse = null,
+                chapterParallelTitle = null,
+                chapterParallelReferences = null
             )
         }
     }

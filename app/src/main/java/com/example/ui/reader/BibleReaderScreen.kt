@@ -75,6 +75,13 @@ fun BibleReaderScreen(
         }
     }
 
+    // Clear transient highlights as soon as the user starts scrolling
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (listState.isScrollInProgress && uiState.transientHighlightedVerses.isNotEmpty()) {
+            viewModel.clearTransientHighlights()
+        }
+    }
+
     // Scroll to specific target verse when selected from modal or navigation
     LaunchedEffect(uiState.targetScrollVerse, uiState.verses.size) {
         val target = uiState.targetScrollVerse
@@ -159,6 +166,8 @@ fun BibleReaderScreen(
             Color(0xFF818CF8)
         )
     }
+
+    val isDarkTheme = uiState.preferences.themeMode == ReaderThemeMode.DARK || uiState.preferences.themeMode == ReaderThemeMode.NIGHT
 
     val selectedFontFamily = when (uiState.preferences.fontFamily) {
         ReaderFontFamily.SERIF -> FontFamily.Serif
@@ -397,13 +406,63 @@ fun BibleReaderScreen(
                                 nextVerse.bookId == verse.bookId
 
                         Column(modifier = Modifier.fillMaxWidth()) {
+                            if (index == 0) {
+                                val topParallelRefs = remember(verse.bookId, verse.chapter) {
+                                    com.example.data.bible.BibleCrossReferencesCatalog.getChapterParallelReferences(verse.bookId, verse.chapter)
+                                }
+                                if (topParallelRefs.isNotEmpty()) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 4.dp, bottom = 10.dp),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Surface(
+                                            onClick = {
+                                                viewModel.openChapterParallelReferences(
+                                                    "${verse.bookName} ${verse.chapter} - Pasajes paralelos",
+                                                    topParallelRefs
+                                                )
+                                            },
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = if (isDarkTheme) Color(0xFF1E293B) else Color(0xFFE2E8F0)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
+                                                Text(
+                                                    text = "⊕",
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = if (isDarkTheme) Color(0xFF38BDF8) else Color(0xFF2563EB)
+                                                )
+                                                Text(
+                                                    text = "Pasajes paralelos del capítulo",
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Medium,
+                                                    color = themeSecondary
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                             if (isNewChapter) {
                                 ChapterBreakHeader(
+                                    bookId = verse.bookId,
                                     bookName = verse.bookName,
                                     chapter = verse.chapter,
                                     fontFamily = selectedFontFamily,
                                     themeText = themeText,
-                                    themeSecondary = themeSecondary
+                                    themeSecondary = themeSecondary,
+                                    isDarkTheme = isDarkTheme,
+                                    onOpenChapterReferences = { title, refs ->
+                                        viewModel.openChapterParallelReferences(title, refs)
+                                    }
                                 )
                             }
 
@@ -435,13 +494,17 @@ fun BibleReaderScreen(
                                 textColor = themeText,
                                 secondaryColor = themeSecondary,
                                 accentColor = themeAccent,
-                                isDarkTheme = uiState.preferences.themeMode == ReaderThemeMode.DARK || uiState.preferences.themeMode == ReaderThemeMode.NIGHT,
+                                isDarkTheme = isDarkTheme,
                                 redLettersEnabled = uiState.preferences.redLettersEnabled,
                                 isSpeaking = isVerseSpeaking,
+                                isTransientHighlighted = verse.verseNumber in uiState.transientHighlightedVerses,
                                 isPrevSameHighlight = isPrevSameHighlight,
                                 isNextSameHighlight = isNextSameHighlight,
                                 onCrossReferenceClick = { viewModel.openCrossReferences(verse) },
-                                onClick = { viewModel.toggleVerseSelection(verse.verseNumber) }
+                                onClick = {
+                                    viewModel.clearTransientHighlights()
+                                    viewModel.toggleVerseSelection(verse.verseNumber)
+                                }
                             )
                         }
                     }
@@ -681,15 +744,25 @@ fun BibleReaderScreen(
     }
 
     // Bottom Sheet: Cross References
-    if (uiState.isCrossReferencesOpen && uiState.selectedCrossReferenceVerse != null) {
-        val selected = uiState.selectedCrossReferenceVerse!!
+    if (uiState.isCrossReferencesOpen && (uiState.selectedCrossReferenceVerse != null || uiState.chapterParallelReferences != null)) {
+        val selected = uiState.selectedCrossReferenceVerse
+        val citation = when {
+            selected != null -> "${selected.bookName} ${selected.chapter}:${selected.verseNumber}"
+            !uiState.chapterParallelTitle.isNullOrBlank() -> uiState.chapterParallelTitle!!
+            else -> "Pasajes paralelos"
+        }
+        val bId = selected?.bookId ?: uiState.currentBook?.id ?: 1
+        val chap = selected?.chapter ?: uiState.currentChapter
+        val vNum = selected?.verseNumber ?: 1
+
         CrossReferencesBottomSheet(
-            sourceCitation = "${selected.bookName} ${selected.chapter}:${selected.verseNumber}",
-            bookId = selected.bookId,
-            chapter = selected.chapter,
-            verse = selected.verseNumber,
-            onNavigateToVerse = { bId, chap, vNum ->
-                viewModel.navigateToVerse(bId, chap, vNum)
+            sourceCitation = citation,
+            bookId = bId,
+            chapter = chap,
+            verse = vNum,
+            customReferences = uiState.chapterParallelReferences,
+            onNavigateToVerse = { targetBId, targetChap, startV, endV ->
+                viewModel.navigateToVerse(targetBId, targetChap, startV, endV)
             },
             onDismiss = { viewModel.closeCrossReferences() }
         )
@@ -724,11 +797,13 @@ private fun CompactVerseRow(
     isDarkTheme: Boolean,
     redLettersEnabled: Boolean,
     isSpeaking: Boolean = false,
+    isTransientHighlighted: Boolean = false,
     isPrevSameHighlight: Boolean = false,
     isNextSameHighlight: Boolean = false,
     onCrossReferenceClick: () -> Unit = {},
     onClick: () -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val highlightColor = remember(verse.highlightColorHex, isDarkTheme) {
         if (!verse.highlightColorHex.isNullOrBlank()) {
             try {
@@ -742,19 +817,21 @@ private fun CompactVerseRow(
     }
 
     val hasCrossReferences = remember(verse.bookId, verse.chapter, verse.verseNumber) {
-        com.example.data.bible.BibleCrossReferencesCatalog.hasReferences(verse.bookId, verse.chapter, verse.verseNumber)
+        com.example.data.bible.BibleCrossReferencesCatalog.hasReferences(context, verse.bookId, verse.chapter, verse.verseNumber)
     }
 
-    // Border is for active selection or audio speech indicator
+    // Border is for active selection, transient highlight, or audio speech indicator
     val selectionBorder = when {
         isSpeaking -> BorderStroke(1.5.dp, accentColor.copy(alpha = 0.85f))
         verse.isSelected -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.85f))
+        isTransientHighlighted -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.70f))
         else -> null
     }
 
     // Seamless, connected shape for consecutive highlighted verses like YouVersion
     val highlightShape = when {
         isSpeaking -> RoundedCornerShape(6.dp)
+        isTransientHighlighted -> RoundedCornerShape(6.dp)
         isPrevSameHighlight && isNextSameHighlight -> RoundedCornerShape(0.dp)
         isPrevSameHighlight -> RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
         isNextSameHighlight -> RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
@@ -764,6 +841,7 @@ private fun CompactVerseRow(
     val rowBg = when {
         isSpeaking -> accentColor.copy(alpha = if (isDarkTheme) 0.22f else 0.16f)
         verse.isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+        isTransientHighlighted -> MaterialTheme.colorScheme.primary.copy(alpha = if (isDarkTheme) 0.24f else 0.16f)
         highlightColor != null -> highlightColor
         else -> Color.Transparent
     }
@@ -780,7 +858,7 @@ private fun CompactVerseRow(
             .clickable { onClick() }
             .padding(
                 horizontal = 6.dp,
-                vertical = if (isSpeaking) 4.dp else if (isPrevSameHighlight || isNextSameHighlight) 2.dp else 3.dp
+                vertical = if (isSpeaking || isTransientHighlighted) 4.dp else if (isPrevSameHighlight || isNextSameHighlight) 2.dp else 3.dp
             )
     ) {
         val annotatedText = buildAnnotatedString {
@@ -854,12 +932,19 @@ private fun CompactVerseRow(
 
 @Composable
 private fun ChapterBreakHeader(
+    bookId: Int = 1,
     bookName: String,
     chapter: Int,
     fontFamily: FontFamily,
     themeText: Color,
-    themeSecondary: Color
+    themeSecondary: Color,
+    isDarkTheme: Boolean = false,
+    onOpenChapterReferences: ((String, List<com.example.data.bible.CrossReferenceItem>) -> Unit)? = null
 ) {
+    val parallelRefs = remember(bookId, chapter) {
+        com.example.data.bible.BibleCrossReferencesCatalog.getChapterParallelReferences(bookId, chapter)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -872,14 +957,46 @@ private fun ChapterBreakHeader(
             modifier = Modifier.fillMaxWidth(0.9f)
         )
         Spacer(modifier = Modifier.height(14.dp))
-        Text(
-            text = "$bookName $chapter",
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
-                fontFamily = fontFamily
-            ),
-            color = themeText
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "$bookName $chapter",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = fontFamily
+                ),
+                color = themeText
+            )
+            if (parallelRefs.isNotEmpty() && onOpenChapterReferences != null) {
+                Spacer(modifier = Modifier.width(10.dp))
+                Surface(
+                    onClick = { onOpenChapterReferences("$bookName $chapter - Pasajes paralelos", parallelRefs) },
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (isDarkTheme) Color(0xFF1E293B) else Color(0xFFE2E8F0)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "⊕",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isDarkTheme) Color(0xFF38BDF8) else Color(0xFF2563EB)
+                        )
+                        Text(
+                            text = "Paralelos",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = themeSecondary
+                        )
+                    }
+                }
+            }
+        }
         Spacer(modifier = Modifier.height(14.dp))
         Divider(
             color = themeSecondary.copy(alpha = 0.25f),

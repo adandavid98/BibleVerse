@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,8 +17,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,12 +35,13 @@ fun CrossReferencesBottomSheet(
     bookId: Int,
     chapter: Int,
     verse: Int,
-    onNavigateToVerse: (bookId: Int, chapter: Int, verse: Int) -> Unit,
+    customReferences: List<CrossReferenceItem>? = null,
+    onNavigateToVerse: (bookId: Int, chapter: Int, startVerse: Int, endVerse: Int) -> Unit,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    val references = remember(bookId, chapter, verse) {
-        BibleCrossReferencesCatalog.getReferences(bookId, chapter, verse)
+    val references = remember(bookId, chapter, verse, customReferences) {
+        customReferences ?: BibleCrossReferencesCatalog.getReferences(context, bookId, chapter, verse)
     }
 
     var verseTexts by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
@@ -53,10 +51,18 @@ fun CrossReferencesBottomSheet(
             launch(Dispatchers.IO) {
                 try {
                     val verses = OfflineBibleManager.getVerses(context, ref.targetBookId, ref.targetChapter)
-                    val raw = verses.firstOrNull { it.verseNumber == ref.targetVerse }?.text ?: ""
-                    val text = OfflineBibleManager.cleanVerseText(raw)
-                    withContext(Dispatchers.Main) {
-                        verseTexts = verseTexts + (ref.targetCitation to text)
+                    val matching = verses.filter { it.verseNumber in ref.targetVerse..ref.targetEndVerse }
+                    val text = if (matching.size > 1) {
+                        matching.joinToString("\n\n") { v ->
+                            "${v.verseNumber}. ${OfflineBibleManager.cleanVerseText(v.text)}"
+                        }
+                    } else {
+                        OfflineBibleManager.cleanVerseText(matching.firstOrNull()?.text ?: "")
+                    }
+                    if (text.isNotBlank()) {
+                        withContext(Dispatchers.Main) {
+                            verseTexts = verseTexts + (ref.targetCitation to text)
+                        }
                     }
                 } catch (_: Exception) {}
             }
@@ -72,7 +78,7 @@ fun CrossReferencesBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.80f)
+                .fillMaxHeight(0.82f)
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 8.dp)
         ) {
@@ -82,7 +88,7 @@ fun CrossReferencesBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -102,11 +108,12 @@ fun CrossReferencesBottomSheet(
                             }
                         }
                         Text(
-                            text = "Referencias Cruzadas",
+                            text = "Referencias Bíblicas",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = "Pasajes correlacionados para $sourceCitation",
                         style = MaterialTheme.typography.bodySmall,
@@ -133,7 +140,7 @@ fun CrossReferencesBottomSheet(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No hay referencias cruzadas registradas para este versículo.",
+                        text = "No hay referencias registradas para este versículo.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -145,13 +152,13 @@ fun CrossReferencesBottomSheet(
                     contentPadding = PaddingValues(bottom = 20.dp)
                 ) {
                     items(references) { ref ->
-                        val previewText = verseTexts[ref.targetCitation]
+                        val fullVerseText = verseTexts[ref.targetCitation] ?: ref.note
 
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f)
                             )
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
@@ -162,16 +169,16 @@ fun CrossReferencesBottomSheet(
                                 ) {
                                     Text(
                                         text = ref.targetCitation,
-                                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.colorScheme.primary
                                     )
 
                                     IconButton(
                                         onClick = {
-                                            val textToCopy = "${ref.targetCitation}: ${ref.note}"
+                                            val textToCopy = "${ref.targetCitation}\n$fullVerseText"
                                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                             clipboard.setPrimaryClip(ClipData.newPlainText("Referencia Bíblica", textToCopy))
-                                            Toast.makeText(context, "Cita copiada", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, "Pasaje copiado", Toast.LENGTH_SHORT).show()
                                         },
                                         modifier = Modifier.size(32.dp)
                                     ) {
@@ -184,37 +191,21 @@ fun CrossReferencesBottomSheet(
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.height(6.dp))
-
-                                // Note / Connection
-                                Text(
-                                    text = ref.note,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-
-                                if (!previewText.isNullOrBlank()) {
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Surface(
-                                        shape = RoundedCornerShape(8.dp),
-                                        color = MaterialTheme.colorScheme.background.copy(alpha = 0.6f),
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Text(
-                                            text = "«$previewText»",
-                                            style = MaterialTheme.typography.bodySmall.copy(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic),
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.padding(8.dp)
-                                        )
-                                    }
+                                if (fullVerseText.isNotBlank()) {
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Text(
+                                        text = fullVerseText,
+                                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
                                 }
 
-                                Spacer(modifier = Modifier.height(10.dp))
+                                Spacer(modifier = Modifier.height(14.dp))
 
                                 Button(
                                     onClick = {
                                         onDismiss()
-                                        onNavigateToVerse(ref.targetBookId, ref.targetChapter, ref.targetVerse)
+                                        onNavigateToVerse(ref.targetBookId, ref.targetChapter, ref.targetVerse, ref.targetEndVerse)
                                     },
                                     modifier = Modifier.align(Alignment.End),
                                     shape = RoundedCornerShape(12.dp),

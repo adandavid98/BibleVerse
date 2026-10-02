@@ -35,13 +35,12 @@ object OfficialAudioResolver {
     private val VERSION_IDS = mapOf(
         "RVR1960" to "149",
         "NVI" to "128",
-        "DHH" to "52",
         "NTV" to "127",
         "NBLA" to "103",
         "LBLA" to "89"
     )
 
-    val SUPPORTED_AUDIO_VERSIONS = setOf("RVR1960", "NTV", "NVI", "DHH", "NBLA", "LBLA")
+    val SUPPORTED_AUDIO_VERSIONS = setOf("RVR1960", "NTV", "NVI", "NBLA", "LBLA")
 
     fun isVersionAudioSupported(version: String): Boolean {
         val norm = version.uppercase().trim().replace("[^A-Z0-9]".toRegex(), "")
@@ -51,7 +50,7 @@ object OfficialAudioResolver {
     fun isAudioAvailable(version: String, bookOrder: Int? = null): Boolean {
         val norm = version.uppercase().trim().replace("[^A-Z0-9]".toRegex(), "")
         if (!SUPPORTED_AUDIO_VERSIONS.contains(norm)) return false
-        if ((norm == "LBLA" || norm == "DHH") && bookOrder != null && bookOrder < 40) return false
+        if (norm == "LBLA" && bookOrder != null && bookOrder < 40) return false
         return true
     }
 
@@ -187,10 +186,7 @@ object OfficialAudioResolver {
         // 4. Fallback: Resolve live audio stream URL dynamically at play time
         val versionId = VERSION_IDS[version.uppercase()] ?: VERSION_IDS["RVR1960"]!!
         val usfm = getUsfmCode(bookOrder)
-        val safeVerName = when (version.uppercase()) {
-            "DHH" -> "DHH94I"
-            else -> if (VERSION_IDS.containsKey(version.uppercase())) version.uppercase() else "RVR1960"
-        }
+        val safeVerName = if (VERSION_IDS.containsKey(version.uppercase())) version.uppercase() else "RVR1960"
 
         // Candidate URLs: /audio-bible/ is the official player endpoint, fallback to /bible/
         val candidateUrls = listOf(
