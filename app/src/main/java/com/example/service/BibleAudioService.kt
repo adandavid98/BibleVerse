@@ -312,15 +312,13 @@ class BibleAudioService : Service() {
         updateNotificationAndMediaSession()
 
         loadJob = serviceScope.launch {
-            // High-definition neural human narration (Google Gemini AI - NotebookLM style)
-            // Checks local offline cache first, else synthesizes with AI and saves permanently
-            val audioSource = GeminiAudioSynthesizer.resolveOrSynthesizeChapterAudio(
+            // Official studio recorded human narration (Faith Comes By Hearing / YouVersion CDN)
+            // Checks local offline cache first, else streams CDN URL and downloads for permanent offline playback
+            val audioSource = OfficialAudioResolver.resolveChapterAudio(
                 context = applicationContext,
                 version = version,
-                bookId = bookId,
-                bookName = bookName,
-                chapter = chapter,
-                gender = voiceGender
+                bookOrder = bookId,
+                chapter = chapter
             )
 
             if (!coroutineContext.isActive) return@launch
@@ -381,12 +379,12 @@ class BibleAudioService : Service() {
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    Log.w(TAG, "Audio not available for $bookName $chapter ($version, $voiceGender)")
+                    Log.w(TAG, "Audio not available for $bookName $chapter ($version)")
                     isPlaying = false
                     isPlayerPrepared = false
                     updateCurrentVerseState(
                         isBuffering = false,
-                        errorMessage = "Conexión requerida para narrar este capítulo con voz humana"
+                        errorMessage = "Audio no disponible para este capítulo. Comprueba tu conexión."
                     )
                     updateNotificationAndMediaSession()
                 }
@@ -699,7 +697,7 @@ class BibleAudioService : Service() {
 
         builder.setContentTitle("$bookName $chapter")
             .setContentText("Biblia $version • $posStr / $durStr")
-            .setSubText("${speechRate}x • Voz Humana IA")
+            .setSubText("${speechRate}x • Audio Narrado Oficial")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setContentIntent(openAppPendingIntent)
             .setOngoing(isPlaying)

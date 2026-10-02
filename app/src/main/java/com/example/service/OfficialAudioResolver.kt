@@ -36,8 +36,11 @@ object OfficialAudioResolver {
         "RVR1960" to "149",
         "NVI" to "128",
         "DHH" to "414",
-        "NTV" to "127"
+        "NTV" to "127",
+        "NBLA" to "103"
     )
+
+    private val liveUrlCache = java.util.concurrent.ConcurrentHashMap<String, String>()
 
     private val httpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
@@ -117,6 +120,16 @@ object OfficialAudioResolver {
             return@withContext cacheFile.absolutePath
         }
 
+        val cacheKey = "${version.uppercase()}:$bookOrder:$chapter"
+        val cachedLiveUrl = liveUrlCache[cacheKey]
+        if (cachedLiveUrl != null) {
+            Log.i(TAG, "Using in-memory cached audio URL: $cachedLiveUrl")
+            CoroutineScope(Dispatchers.IO).launch {
+                downloadAndCacheAudio(context, cachedLiveUrl, cacheFile)
+            }
+            return@withContext cachedLiveUrl
+        }
+
         // 3. Resolve live audio stream URL dynamically at play time
         val versionId = VERSION_IDS[version.uppercase()] ?: VERSION_IDS["RVR1960"]!!
         val usfm = getUsfmCode(bookOrder)
@@ -189,6 +202,7 @@ object OfficialAudioResolver {
                     }
 
                     Log.i(TAG, "Resolved live official human audio URL from $pageUrl: $cleanUrl")
+                    liveUrlCache[cacheKey] = cleanUrl
 
                     // 4. Trigger non-blocking background download so it's stored permanently for offline playback
                     CoroutineScope(Dispatchers.IO).launch {

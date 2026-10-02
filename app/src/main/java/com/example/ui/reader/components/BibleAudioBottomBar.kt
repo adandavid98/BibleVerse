@@ -161,7 +161,7 @@ fun BibleAudioBottomBar(
                             val subtitleText = audioState.errorMessage ?: if (audioState.totalDurationMs > 0L) {
                                 "${audioState.currentPositionFormatted} / ${audioState.totalDurationFormatted} • ${audioState.bibleVersion}"
                             } else if (audioState.isBuffering) {
-                                "Generando voz humana (IA)..."
+                                "Cargando audio..."
                             } else {
                                 "Capítulo ${audioState.currentChapter} • ${audioState.bibleVersion}"
                             }
@@ -175,28 +175,11 @@ fun BibleAudioBottomBar(
                         }
                     }
 
-                    // Right: Voice Gender, Speed pill & Playback Controls
+                    // Right: Speed pill & Playback Controls
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        // Voice Gender Toggle (Mujer / Hombre)
-                        Surface(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable { BibleAudioController.toggleVoiceGender(context) },
-                            shape = RoundedCornerShape(12.dp),
-                            color = themeAccent.copy(alpha = 0.12f),
-                            border = BorderStroke(1.dp, themeAccent.copy(alpha = 0.3f))
-                        ) {
-                            Text(
-                                text = if (audioState.voiceGender == AudioVoiceGender.FEMALE) "👩 Fem" else "👨 Masc",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 11.5.sp,
-                                color = themeAccent,
-                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 4.dp)
-                            )
-                        }
 
                         // Speed Cycle Button
                         Surface(
@@ -335,7 +318,7 @@ private fun BibleAudioDetailBottomSheet(
             )
 
             Text(
-                text = "Biblia ${audioState.bibleVersion} • Voz Humana IA",
+                text = "Biblia ${audioState.bibleVersion} • Audio Narrado Oficial",
                 fontSize = 13.sp,
                 color = themeSecondary,
                 modifier = Modifier.padding(top = 2.dp, bottom = 16.dp)
@@ -363,7 +346,7 @@ private fun BibleAudioDetailBottomSheet(
                             color = themeAccent
                         )
                         Text(
-                            text = if (audioState.isBuffering) "Generando voz humana..." else if (audioState.isPlaying) "Reproduciendo" else "En pausa",
+                            text = if (audioState.isBuffering) "Cargando audio oficial..." else if (audioState.isPlaying) "Reproduciendo" else "En pausa",
                             fontSize = 12.sp,
                             color = themeSecondary
                         )
@@ -527,58 +510,29 @@ private fun BibleAudioDetailBottomSheet(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Voice Gender Selector Buttons (Voz Femenina / Voz Masculina)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+            // Studio narration badge
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = themeAccent.copy(alpha = 0.10f),
+                border = BorderStroke(1.dp, themeAccent.copy(alpha = 0.25f))
             ) {
-                Icon(
-                    Icons.Default.RecordVoiceOver,
-                    contentDescription = null,
-                    tint = themeSecondary,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Voz:",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = themeSecondary
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-
-                AudioVoiceGender.values().forEach { gender ->
-                    val isSelected = (audioState.voiceGender == gender)
-                    Surface(
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable { BibleAudioController.setVoiceGender(context, gender) },
-                        shape = RoundedCornerShape(12.dp),
-                        color = if (isSelected) themeAccent else themeAccent.copy(alpha = 0.10f),
-                        border = BorderStroke(
-                            1.dp,
-                            if (isSelected) themeAccent else themeSecondary.copy(alpha = 0.25f)
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = if (gender == AudioVoiceGender.FEMALE) "👩" else "👨",
-                                fontSize = 13.sp
-                            )
-                            Spacer(modifier = Modifier.width(5.dp))
-                            Text(
-                                text = gender.displayName,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                fontSize = 12.5.sp,
-                                color = if (isSelected) Color.White else themeText
-                            )
-                        }
-                    }
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.RecordVoiceOver,
+                        contentDescription = null,
+                        tint = themeAccent,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Voz Humana de Estudio • Guardado Offline Automático",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = themeAccent
+                    )
                 }
             }
 
