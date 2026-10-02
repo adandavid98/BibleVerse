@@ -214,58 +214,64 @@ fun BibleReaderScreen(
                     val isAudioCurrent = audioState.isActive &&
                             audioState.currentBookId == (uiState.currentBook?.id ?: 0) &&
                             audioState.currentChapter == uiState.currentChapter
+                    val isAudioSupported = com.example.service.OfficialAudioResolver.isAudioAvailable(
+                        version = uiState.preferences.bibleVersion,
+                        bookOrder = uiState.currentBook?.id
+                    )
 
-                    IconButton(
-                        onClick = {
-                            val currentBook = uiState.currentBook
-                            val verses = uiState.verses
-                            if (currentBook != null && verses.isNotEmpty()) {
-                                if (isAudioCurrent) {
-                                    BibleAudioController.togglePlayPause(context)
-                                } else {
-                                    val audioVerses = verses.map {
-                                        AudioVerseItem(
-                                            bookId = it.bookId,
+                    if (isAudioSupported || isAudioCurrent) {
+                        IconButton(
+                            onClick = {
+                                val currentBook = uiState.currentBook
+                                val verses = uiState.verses
+                                if (currentBook != null && verses.isNotEmpty()) {
+                                    if (isAudioCurrent) {
+                                        BibleAudioController.togglePlayPause(context)
+                                    } else {
+                                        val audioVerses = verses.map {
+                                            AudioVerseItem(
+                                                bookId = it.bookId,
+                                                bookName = currentBook.name,
+                                                chapter = it.chapter,
+                                                verseNumber = it.verseNumber,
+                                                text = it.text
+                                            )
+                                        }
+                                        BibleAudioController.startChapter(
+                                            context = context,
+                                            bookId = currentBook.id,
                                             bookName = currentBook.name,
-                                            chapter = it.chapter,
-                                            verseNumber = it.verseNumber,
-                                            text = it.text
+                                            chapter = uiState.currentChapter,
+                                            version = uiState.preferences.bibleVersion,
+                                            verses = audioVerses,
+                                            startVerseNumber = 1
                                         )
                                     }
-                                    BibleAudioController.startChapter(
-                                        context = context,
-                                        bookId = currentBook.id,
-                                        bookName = currentBook.name,
-                                        chapter = uiState.currentChapter,
-                                        version = uiState.preferences.bibleVersion,
-                                        verses = audioVerses,
-                                        startVerseNumber = 1
-                                    )
                                 }
                             }
-                        }
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .then(
-                                    if (isAudioCurrent && audioState.isPlaying)
-                                        Modifier.background(themeAccent.copy(alpha = 0.18f))
-                                    else Modifier
-                                ),
-                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = if (isAudioCurrent && audioState.isPlaying) Icons.Default.VolumeUp else Icons.Default.Headphones,
-                                contentDescription = "Escuchar capítulo",
-                                tint = if (isAudioCurrent) themeAccent else themeText,
-                                modifier = Modifier.size(22.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .then(
+                                        if (isAudioCurrent && audioState.isPlaying)
+                                            Modifier.background(themeAccent.copy(alpha = 0.18f))
+                                        else Modifier
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (isAudioCurrent && audioState.isPlaying) Icons.Default.VolumeUp else Icons.Default.Headphones,
+                                    contentDescription = "Escuchar capítulo",
+                                    tint = if (isAudioCurrent) themeAccent else themeText,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
                         }
-                    }
 
-                    Spacer(modifier = Modifier.width(2.dp))
+                        Spacer(modifier = Modifier.width(2.dp))
+                    }
 
                     // Direct Bible Version Selector Modal Pill in top-right
                     Surface(

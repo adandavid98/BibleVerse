@@ -37,8 +37,23 @@ object OfficialAudioResolver {
         "NVI" to "128",
         "DHH" to "414",
         "NTV" to "127",
-        "NBLA" to "103"
+        "NBLA" to "103",
+        "LBLA" to "89"
     )
+
+    val SUPPORTED_AUDIO_VERSIONS = setOf("RVR1960", "NTV", "NVI", "DHH", "NBLA", "LBLA")
+
+    fun isVersionAudioSupported(version: String): Boolean {
+        val norm = version.uppercase().trim().replace("[^A-Z0-9]".toRegex(), "")
+        return SUPPORTED_AUDIO_VERSIONS.contains(norm)
+    }
+
+    fun isAudioAvailable(version: String, bookOrder: Int? = null): Boolean {
+        val norm = version.uppercase().trim().replace("[^A-Z0-9]".toRegex(), "")
+        if (!SUPPORTED_AUDIO_VERSIONS.contains(norm)) return false
+        if (norm == "LBLA" && bookOrder != null && bookOrder < 40) return false
+        return true
+    }
 
     private val liveUrlCache = java.util.concurrent.ConcurrentHashMap<String, String>()
     private val versionCatalogs = java.util.concurrent.ConcurrentHashMap<String, Map<String, String>>()
