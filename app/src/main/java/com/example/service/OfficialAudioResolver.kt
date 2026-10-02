@@ -121,62 +121,90 @@ object OfficialAudioResolver {
         val versionId = VERSION_IDS[version.uppercase()] ?: VERSION_IDS["RVR1960"]!!
         val usfm = getUsfmCode(bookOrder)
         val safeVerName = if (VERSION_IDS.containsKey(version.uppercase())) version.uppercase() else "RVR1960"
-        val pageUrl = "https://www.bible.com/bible/$versionId/$usfm.$chapter.$safeVerName"
 
-        try {
-            // Clean standard browser headers that pass through CDN without bot challenges
-            val pageRequest = Request.Builder()
-                .url(pageUrl)
-                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
-                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
-                .header("Accept-Language", "es-ES,es;q=0.9,en;q=0.8")
-                .header("Upgrade-Insecure-Requests", "1")
-                .build()
+        // Candidate URLs: /audio-bible/ is the official player endpoint, fallback to /bible/
+        val candidateUrls = listOf(
+            "https://www.bible.com/audio-bible/$versionId/$usfm.$chapter.$safeVerName",
+            "https://www.bible.com/bible/$versionId/$usfm.$chapter.$safeVerName"
+        )
 
-            val pageResponse = httpClient.newCall(pageRequest).execute()
-            if (!pageResponse.isSuccessful) {
-                Log.w(TAG, "Failed to load chapter audio page: HTTP ${pageResponse.code}")
-                return@withContext null
-            }
+        for (pageUrl in candidateUrls) {
+            try {
+                // Clean standard browser headers that pass through CDN without bot challenges
+                val pageRequest = Request.Builder()
+                    .url(pageUrl)
+                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+                    .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
+                    .header("Accept-Language", "es-ES,es;q=0.9,en;q=0.8")
+                    .header("Upgrade-Insecure-Requests", "1")
+                    .build()
 
-            val html = pageResponse.body?.string() ?: return@withContext null
-
-            // Regex extraction of the MP3 stream URL
-            val pattern = Pattern.compile("format_mp3_32k[\":\\s\\\\]+((?:https?:)?(?://|\\\\/\\\\/)[^\"'\\s]+?\\.mp3[^\"'\\s]*?)[\"']")
-            val matcher = pattern.matcher(html)
-            val audioUrl = if (matcher.find()) {
-                val rawMatch = matcher.group(1) ?: return@withContext null
-                var cleanUrl = rawMatch
-                    .replace("\\/", "/")
-                    .replace("\\", "")
-                    .replace("\"", "")
-                    .replace("'", "")
-                    .trim()
-
-                if (cleanUrl.startsWith("//")) {
-                    cleanUrl = "https:$cleanUrl"
-                } else if (!cleanUrl.startsWith("http")) {
-                    cleanUrl = "https://$cleanUrl"
+                val pageResponse = httpClient.newCall(pageRequest).execute()
+                if (!pageResponse.isSuccessful) {
+                    Log.w(TAG, "HTTP ${pageResponse.code} for $pageUrl")
+                    continue
                 }
-                cleanUrl
-            } else {
-                Log.w(TAG, "No audio URL found in response for $usfm.$chapter ($version)")
-                return@withContext null
+
+                val html = pageResponse.body?.string() ?: continue
+
+                var rawUrl: String? = null
+
+                // Strategy 1: Direct CDN URL matching (YouVersion audio CDN)
+                val cdnPattern = Pattern.compile("https?://audio-bible-cdn\\.youversionapi\\.com/[^\"'\\s<>]+\\.mp3[^\"'\\s<>]*")
+                val cdnMatcher = cdnPattern.matcher(html)
+                if (cdnMatcher.find()) {
+                    rawUrl = cdnMatcher.group(0)
+                }
+
+                // Strategy 2: format_mp3_32k key in embedded script/JSON
+                if (rawUrl == null) {
+                    val keyPattern = Pattern.compile("format_mp3_32k[\":\\s\\\\]+((?:https?:)?(?://|\\\\/\\\\/)[^\"'\\s]+?\\.mp3[^\"'\\s]*?)[\"']")
+                    val keyMatcher = keyPattern.matcher(html)
+                    if (keyMatcher.find()) {
+                        rawUrl = keyMatcher.group(1)
+                    }
+                }
+
+                // Strategy 3: Any MP3 URL in response
+                if (rawUrl == null) {
+                    val anyMp3Pattern = Pattern.compile("((?:https?:)?(?://|\\\\/\\\\/)[^\"'\\s<>]+\\.mp3(?:\\?[^\"'\\s<>]*)?)")
+                    val anyMp3Matcher = anyMp3Pattern.matcher(html)
+                    if (anyMp3Matcher.find()) {
+                        rawUrl = anyMp3Matcher.group(1)
+                    }
+                }
+
+                if (!rawUrl.isNullOrBlank()) {
+                    var cleanUrl = rawUrl
+                        .replace("\\/", "/")
+                        .replace("\\", "")
+                        .replace("\"", "")
+                        .replace("'", "")
+                        .trim()
+
+                    if (cleanUrl.startsWith("//")) {
+                        cleanUrl = "https:$cleanUrl"
+                    } else if (!cleanUrl.startsWith("http")) {
+                        cleanUrl = "https://$cleanUrl"
+                    }
+
+                    Log.i(TAG, "Resolved live official human audio URL from $pageUrl: $cleanUrl")
+
+                    // 4. Trigger non-blocking background download so it's stored permanently for offline playback
+                    CoroutineScope(Dispatchers.IO).launch {
+                        downloadAndCacheAudio(context, cleanUrl, cacheFile)
+                    }
+
+                    // Return live streaming CDN URL immediately so playback starts instantly
+                    return@withContext cleanUrl
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Error resolving official audio from $pageUrl: ${e.message}")
             }
-
-            Log.i(TAG, "Resolved live official human audio URL: $audioUrl")
-
-            // 4. Trigger non-blocking background download so it's stored permanently for offline playback
-            CoroutineScope(Dispatchers.IO).launch {
-                downloadAndCacheAudio(context, audioUrl, cacheFile)
-            }
-
-            // Return live streaming CDN URL immediately so playback starts instantly
-            return@withContext audioUrl
-        } catch (e: Exception) {
-            Log.w(TAG, "Error resolving official audio for $bookOrder:$chapter: ${e.message}")
-            return@withContext null
         }
+
+        Log.w(TAG, "No audio URL found in response for $usfm.$chapter ($version)")
+        return@withContext null
     }
 
     private fun downloadAndCacheAudio(context: Context, audioUrl: String, destinationFile: File) {
