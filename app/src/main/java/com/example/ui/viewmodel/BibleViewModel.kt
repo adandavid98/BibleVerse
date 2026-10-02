@@ -175,13 +175,20 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         Pair(theme, fontScale)
     }
 
+    private data class DialogState(
+        val showAdd: Boolean,
+        val showExport: Boolean,
+        val showSync: Boolean,
+        val initialRef: String?
+    )
+
     private val _dialogState = combine(
         _showAddDialog,
         _showExportDialog,
         _showSyncDialog,
         _initialReferenceForAdd
     ) { showAdd, showExport, showSync, initialRef ->
-        Triple(showAdd, showExport, showSync)
+        DialogState(showAdd, showExport, showSync, initialRef)
     }
 
     private data class DetailAndSyncState(
@@ -223,7 +230,7 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
 
         val (query, filter, topic) = filterParams
         val (theme, fontScale) = displayParams
-        val (showAdd, showExport, showSync) = dialogParams
+        val (showAdd, showExport, showSync, initialRef) = dialogParams
         val currentDetail = detailSync.selectedVerse
         val syncMsg = detailSync.syncMessage
 

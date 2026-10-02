@@ -166,7 +166,7 @@ fun AddVerseDialog(
         if (initialReference != null) {
             try {
                 // simple parsing for "Book Chapter:Verse" (e.g. "1 Juan 3:16", "Tito 2:13", "Cantares 1:1")
-                val parts = initialReference.trim().split(Regex("\s+(?=\d+:\d+$)"))
+                val parts = initialReference.trim().split(Regex("""\s+(?=\d+:\d+$)"""))
                 if (parts.size == 2) {
                     val bName = parts[0].trim()
                     val cvParts = parts[1].split(":")
@@ -176,11 +176,11 @@ fun AddVerseDialog(
                         
                         // find book
                         val norm = java.text.Normalizer.normalize(bName, java.text.Normalizer.Form.NFD)
-                                    .replace(Regex("\p{InCombiningDiacriticalMarks}+"), "").lowercase()
+                                    .replace(Regex("""\p{InCombiningDiacriticalMarks}+"""), "").lowercase()
                         
                         val matchedBook = BibleCatalog.books.find { b ->
                             val bNorm = java.text.Normalizer.normalize(b.name, java.text.Normalizer.Form.NFD)
-                                        .replace(Regex("\p{InCombiningDiacriticalMarks}+"), "").lowercase()
+                                        .replace(Regex("""\p{InCombiningDiacriticalMarks}+"""), "").lowercase()
                             bNorm == norm || bNorm.contains(norm) || norm.contains(bNorm)
                         }
                         
