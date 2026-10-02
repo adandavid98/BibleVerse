@@ -41,6 +41,33 @@ object OfficialAudioResolver {
     )
 
     private val liveUrlCache = java.util.concurrent.ConcurrentHashMap<String, String>()
+    private var rvr1960Catalog: Map<String, String>? = null
+
+    @Synchronized
+    private fun getCatalogUrl(context: Context, version: String, bookOrder: Int, chapter: Int): String? {
+        if (version.equals("RVR1960", ignoreCase = true)) {
+            if (rvr1960Catalog == null) {
+                try {
+                    context.assets.open("audio_catalog_rvr1960.json").use { input ->
+                        val jsonStr = input.bufferedReader().readText()
+                        val jsonObj = org.json.JSONObject(jsonStr)
+                        val map = HashMap<String, String>()
+                        val keys = jsonObj.keys()
+                        while (keys.hasNext()) {
+                            val k = keys.next()
+                            map[k] = jsonObj.getString(k)
+                        }
+                        rvr1960Catalog = map
+                        Log.i(TAG, "Loaded RVR1960 audio catalog with ${map.size} chapters from assets")
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Could not load audio_catalog_rvr1960.json from assets", e)
+                }
+            }
+            return rvr1960Catalog?.get("${bookOrder}_${chapter}")
+        }
+        return null
+    }
 
     private val httpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
@@ -130,7 +157,18 @@ object OfficialAudioResolver {
             return@withContext cachedLiveUrl
         }
 
-        // 3. Resolve live audio stream URL dynamically at play time
+        // 3. Check embedded pre-indexed audio catalog (instant, 0ms, zero scraping, no Cloudflare block)
+        val catalogUrl = getCatalogUrl(context, version, bookOrder, chapter)
+        if (!catalogUrl.isNullOrBlank()) {
+            Log.i(TAG, "Playing direct audio from embedded catalog for b${bookOrder}_c${chapter}: $catalogUrl")
+            liveUrlCache[cacheKey] = catalogUrl
+            CoroutineScope(Dispatchers.IO).launch {
+                downloadAndCacheAudio(context, catalogUrl, cacheFile)
+            }
+            return@withContext catalogUrl
+        }
+
+        // 4. Fallback: Resolve live audio stream URL dynamically at play time
         val versionId = VERSION_IDS[version.uppercase()] ?: VERSION_IDS["RVR1960"]!!
         val usfm = getUsfmCode(bookOrder)
         val safeVerName = if (VERSION_IDS.containsKey(version.uppercase())) version.uppercase() else "RVR1960"
