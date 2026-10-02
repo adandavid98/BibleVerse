@@ -98,6 +98,7 @@ import com.example.data.initial.InitialVersesData
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AddVerseDialog(
+    initialReference: String? = null,
     onDismiss: () -> Unit,
     onAddVerse: (
         book: String,
@@ -160,6 +161,41 @@ fun AddVerseDialog(
 
     // Quick common topics
     val suggestedTopics = listOf("Fe", "Amor", "Esperanza", "Fortaleza", "Paz", "Salvación", "Sabiduría", "Oración", "Promesa", "Gracia")
+
+    LaunchedEffect(initialReference) {
+        if (initialReference != null) {
+            try {
+                // simple parsing for "Book Chapter:Verse" (e.g. "1 Juan 3:16", "Tito 2:13", "Cantares 1:1")
+                val parts = initialReference.trim().split(Regex("\s+(?=\d+:\d+$)"))
+                if (parts.size == 2) {
+                    val bName = parts[0].trim()
+                    val cvParts = parts[1].split(":")
+                    if (cvParts.size == 2) {
+                        val cNum = cvParts[0].toIntOrNull()
+                        val vNum = cvParts[1].toIntOrNull()
+                        
+                        // find book
+                        val norm = java.text.Normalizer.normalize(bName, java.text.Normalizer.Form.NFD)
+                                    .replace(Regex("\p{InCombiningDiacriticalMarks}+"), "").lowercase()
+                        
+                        val matchedBook = BibleCatalog.books.find { b ->
+                            val bNorm = java.text.Normalizer.normalize(b.name, java.text.Normalizer.Form.NFD)
+                                        .replace(Regex("\p{InCombiningDiacriticalMarks}+"), "").lowercase()
+                            bNorm == norm || bNorm.contains(norm) || norm.contains(bNorm)
+                        }
+                        
+                        if (matchedBook != null && cNum != null && vNum != null) {
+                            selectedBook = matchedBook
+                            selectedChapter = cNum
+                            verseInput = vNum.toString()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // fallback to Genesis if parsing fails
+            }
+        }
+    }
 
     // Intelligent hybrid filling for Book & Chapter selection:
     // Resolves genuine biblical text across Offline SQLite, Room Cache, Network (Bolls API) & Canonical fallbacks

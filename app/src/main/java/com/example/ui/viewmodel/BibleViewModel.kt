@@ -61,6 +61,7 @@ data class BibleUiState(
     val syncStatusMessage: String? = null,
     val selectedVerseForDetail: VerseEntity? = null,
     val showAddDialog: Boolean = false,
+    val initialReferenceForAdd: String? = null,
     val showExportDialog: Boolean = false,
     val showSyncDialog: Boolean = false,
     val availableTopics: List<String> = emptyList()
@@ -86,6 +87,7 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     private val _syncStatusMessage = MutableStateFlow<String?>(null)
     private val _selectedVerseForDetail = MutableStateFlow<VerseEntity?>(null)
     private val _showAddDialog = MutableStateFlow(false)
+    private val _initialReferenceForAdd = MutableStateFlow<String?>(null)
     private val _showExportDialog = MutableStateFlow(false)
     private val _showSyncDialog = MutableStateFlow(false)
 
@@ -176,8 +178,9 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     private val _dialogState = combine(
         _showAddDialog,
         _showExportDialog,
-        _showSyncDialog
-    ) { showAdd, showExport, showSync ->
+        _showSyncDialog,
+        _initialReferenceForAdd
+    ) { showAdd, showExport, showSync, initialRef ->
         Triple(showAdd, showExport, showSync)
     }
 
@@ -276,6 +279,7 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
             syncStatusMessage = syncMsg,
             selectedVerseForDetail = updatedDetail,
             showAddDialog = showAdd,
+            initialReferenceForAdd = initialRef,
             showExportDialog = showExport,
             showSyncDialog = showSync,
             availableTopics = topics
@@ -542,6 +546,7 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
 
     fun showAddVerseDialog(show: Boolean) {
         _showAddDialog.value = show
+        if (!show) _initialReferenceForAdd.value = null
     }
 
     fun showExportDialog(show: Boolean) {
@@ -951,6 +956,7 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
 
     fun openAddVerseForReference(reference: String) {
         _showBibleChatDialog.value = false
+        _initialReferenceForAdd.value = reference
         _showAddDialog.value = true
     }
 

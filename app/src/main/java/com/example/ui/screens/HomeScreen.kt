@@ -406,6 +406,7 @@ fun HomeScreen(
 
     if (uiState.showAddDialog) {
         AddVerseDialog(
+            initialReference = uiState.initialReferenceForAdd,
             onDismiss = { viewModel.showAddVerseDialog(false) },
             onAddVerse = { book, chv, testm, txt, ctx, top, nts, bibleVer ->
                 viewModel.addCustomVerse(book, chv, testm, txt, ctx, top, nts, bibleVer)

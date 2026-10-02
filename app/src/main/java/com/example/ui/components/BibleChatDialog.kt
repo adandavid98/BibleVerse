@@ -236,7 +236,7 @@ fun BibleChatDialog(
                             items(chatMessages, key = { it.id }) { message ->
                                 ChatMessageBubble(
                                     message = message,
-                                    onCopy = { clipboardManager.setText(AnnotatedString(message.text)) },
+                                    onCopy = { clipboardManager.setText(AnnotatedString(message.text.replace("*", "").replace("#", ""))) },
                                     onAddVerse = onAddSuggestedVerse
                                 )
                             }
@@ -380,6 +380,7 @@ fun ChatMessageBubble(
     onAddVerse: ((String) -> Unit)?
 ) {
     val isUser = message.isUser
+    val cleanText = message.text.replace("*", "").replace("#", "")
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -408,7 +409,7 @@ fun ChatMessageBubble(
                     .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
                 Text(
-                    text = message.text,
+                    text = cleanText,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontSize = 16.sp,
                         lineHeight = 23.sp
