@@ -84,12 +84,11 @@ class BibleReaderRepository(
 
     suspend fun ensureChapterVerses(bookId: Int, chapter: Int, version: String = "RVR1960") = withContext(Dispatchers.IO) {
         val normVersion = normalizeVersion(version)
-        val isRvr1960 = normVersion == "RVR1960"
+        val isOfflineOnly = normVersion in listOf("RVR1960", "TLA", "DHH")
 
-        // 1. For RVR1960 (primary translation), ALWAYS use the complete pre-packaged offline SQLite (31,102 verses).
-        //    OfflineBibleManager guarantees all 31,102 verses are available offline, self-healing from asset if necessary.
-        if (isRvr1960) {
-            val offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter)
+        // 1. For fully bundled versions (RVR1960, TLA, DHH), ALWAYS use the complete pre-packaged offline SQLite.
+        if (isOfflineOnly) {
+            val offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter, normVersion)
             if (offlineVerses.isNotEmpty()) {
                 val existing = dao.getVersesSync(bookId, chapter, normVersion)
                 val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
@@ -100,7 +99,6 @@ class BibleReaderRepository(
                 }
                 val hasHtmlTags = existing.any { it.text.contains("<br", ignoreCase = true) || it.text.contains("<") }
 
-                // If not cached in Room yet, or incomplete, or contains synthetic placeholder, or headings need update, or has HTML tags, reload completely
                 if (existing.size != offlineVerses.size || hasSynthetic || needsHeadingRefresh || hasHtmlTags) {
                     dao.deleteVersesForChapter(bookId, chapter, normVersion)
                     val entities = offlineVerses.map { dto ->
@@ -124,7 +122,7 @@ class BibleReaderRepository(
             }
         }
 
-        // 2. Check if we already have valid verses in Room for this chapter and version
+        // 2. Check if we already have valid verses in Room for this chapter and version (Online APIs)
         val existing = dao.getVersesSync(bookId, chapter, normVersion)
         val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
         val hasHeadingsInCatalog = BiblePericopesCatalog.hasHeadingsForChapter(bookId, chapter)
@@ -152,8 +150,8 @@ class BibleReaderRepository(
             dao.deleteVersesForChapter(bookId, chapter, normVersion)
         }
 
-        // 3. For other versions: check if the version was fully downloaded offline in Room
-        if (!isRvr1960) {
+        // 3. For online versions: check if the version was fully downloaded offline in Room
+        if (!isOfflineOnly) {
             val cachedCount = dao.getVerseCountForVersion(normVersion)
             if (cachedCount > 5000) {
                 // Version is fully downloaded in Room, check if chapter is now present
