@@ -214,17 +214,13 @@ class BibleAudioService : Service() {
         if (player != null && isPlayerPrepared) {
             try {
                 player.start()
-                if (player.isPlaying) {
-                    if (speechRate != 1.0f) {
-                        applyPlaybackSpeed(player)
-                    }
-                    startProgressTicker()
-                    updateCurrentVerseState(isBuffering = false)
-                    updateNotificationAndMediaSession()
-                    return
-                } else {
-                    Log.w(TAG, "player.start() was called but player.isPlaying is false, reloading")
+                if (speechRate != 1.0f) {
+                    applyPlaybackSpeed(player)
                 }
+                startProgressTicker()
+                updateCurrentVerseState(isBuffering = false)
+                updateNotificationAndMediaSession()
+                return
             } catch (e: Exception) {
                 Log.w(TAG, "Error resuming player, reloading chapter at $currentPositionMs", e)
             }
