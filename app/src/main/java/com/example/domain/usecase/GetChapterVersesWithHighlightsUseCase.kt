@@ -24,6 +24,12 @@ class GetChapterVersesWithHighlightsUseCase(
             val highlightMap = highlights.associateBy { it.verseNumber }
             verses.map { verse ->
                 val isJesusSpoken = verse.isRedLetter || WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, verse.verseNumber)
+                val catalogHeading = com.example.data.bible.BiblePericopesCatalog.getHeading(
+                    bookId = bookId,
+                    chapter = chapter,
+                    verse = verse.verseNumber,
+                    version = version
+                )
                 ReaderVerseUiModel(
                     bookId = bookId,
                     bookName = bookName,
@@ -32,12 +38,7 @@ class GetChapterVersesWithHighlightsUseCase(
                     text = verse.text,
                     highlightColorHex = highlightMap[verse.verseNumber]?.colorHex,
                     isSelected = false,
-                    sectionHeading = verse.sectionHeading ?: com.example.data.bible.BiblePericopesCatalog.getHeading(
-                        bookId = bookId,
-                        chapter = chapter,
-                        verse = verse.verseNumber,
-                        version = version
-                    ),
+                    sectionHeading = catalogHeading ?: verse.sectionHeading,
                     isRedLetter = isJesusSpoken
                 )
             }

@@ -40,6 +40,15 @@ object BiblePericopesCatalog {
         return chaptersWithHeadings.contains("${bookId}_${chapter}")
     }
 
+    fun hasHeadingsForChapter(bookId: Int, chapter: Int, version: String): Boolean {
+        val norm = when (version.uppercase().trim()) {
+            "RV1960", "REINA-VALERA 1960" -> "RVR1960"
+            else -> version.uppercase().trim()
+        }
+        return chaptersWithHeadings.contains("${bookId}_${chapter}@$norm") ||
+               chaptersWithHeadings.contains("${bookId}_${chapter}")
+    }
+
     fun getHeading(
         context: Context? = null,
         bookId: Int,
@@ -71,49 +80,62 @@ object BiblePericopesCatalog {
     }
 
     private fun loadFromAssets(context: Context) {
-        val assetNames = listOf(
-            "bible/pericopes_es.json",
-            "bible/pericopes_es.json.gz"
-        )
+        // 1. Base canónica RVR1960 (fallback universal para los 1,189 capítulos)
+        loadAssetFile(context, "bible/pericopes_es.json", null)
 
-        for (name in assetNames) {
-            try {
-                context.assets.open(name).use { rawStream ->
-                    val bis = BufferedInputStream(rawStream)
-                    bis.mark(4)
-                    val b1 = bis.read()
-                    val b2 = bis.read()
-                    bis.reset()
-
-                    val jsonString = if (b1 == 0x1f && b2 == 0x8b) {
-                        GZIPInputStream(bis).bufferedReader(Charsets.UTF_8).use { it.readText() }
-                    } else {
-                        bis.bufferedReader(Charsets.UTF_8).use { it.readText() }
-                    }
-                    parseJson(jsonString)
-                    Log.d(TAG, "Cargadas exitosamente ${headings.size} perícopas desde asset: $name")
-                    return
-                }
-            } catch (e: Exception) {
-                Log.w(TAG, "No se pudo cargar desde asset: $name", e)
-            }
-        }
-        Log.e(TAG, "ADVERTENCIA: No se pudo cargar perícopas de ningún asset disponible.")
+        // 2. Catálogos dedicados por versión con redacción y estilo editorial propio
+        loadAssetFile(context, "bible/pericopes_nvi.json", "NVI")
+        loadAssetFile(context, "bible/pericopes_ntv.json", "NTV")
+        loadAssetFile(context, "bible/pericopes_tla.json", "TLA")
+        loadAssetFile(context, "bible/pericopes_dhh.json", "DHH")
+        loadAssetFile(context, "bible/pericopes_lbla.json", "LBLA")
+        loadAssetFile(context, "bible/pericopes_nbla.json", "NBLA")
     }
 
-    private fun parseJson(jsonString: String) {
+    private fun loadAssetFile(context: Context, assetPath: String, versionTag: String?) {
+        try {
+            context.assets.open(assetPath).use { rawStream ->
+                val bis = BufferedInputStream(rawStream)
+                bis.mark(4)
+                val b1 = bis.read()
+                val b2 = bis.read()
+                bis.reset()
+
+                val jsonString = if (b1 == 0x1f && b2 == 0x8b) {
+                    GZIPInputStream(bis).bufferedReader(Charsets.UTF_8).use { it.readText() }
+                } else {
+                    bis.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                }
+                parseJson(jsonString, versionTag)
+                Log.d(TAG, "Cargado asset $assetPath (Versión: ${versionTag ?: "CANÓNICA"})")
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "No se pudo cargar asset: $assetPath", e)
+        }
+    }
+
+    private fun parseJson(jsonString: String, versionTag: String? = null) {
         val root = JSONObject(jsonString)
         val keys = root.keys()
         while (keys.hasNext()) {
             val key = keys.next()
             val title = root.optString(key, "").trim()
             if (title.isNotEmpty()) {
-                headings[key] = title
+                val finalKey = when {
+                    key.contains('@') -> key
+                    versionTag != null -> "${key}@${versionTag.uppercase()}"
+                    else -> key
+                }
 
-                val base = if (key.contains('@')) key.substringBefore('@') else key
+                headings[finalKey] = title
+
+                val base = if (finalKey.contains('@')) finalKey.substringBefore('@') else finalKey
                 val parts = base.split('_')
                 if (parts.size >= 2) {
                     chaptersWithHeadings.add("${parts[0]}_${parts[1]}")
+                    if (versionTag != null) {
+                        chaptersWithHeadings.add("${parts[0]}_${parts[1]}@${versionTag.uppercase()}")
+                    }
                 }
             }
         }
