@@ -21,6 +21,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
@@ -266,7 +268,7 @@ fun BibleChatDialog(
                                                 Text(
                                                     text = "Escudriñando las Escrituras con IA...",
                                                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    color = if (MaterialTheme.colorScheme.surface.luminance() < 0.5f) Color(0xFFE2E8F0) else MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
                                         }
@@ -380,6 +382,7 @@ fun ChatMessageBubble(
     onAddVerse: ((String) -> Unit)?
 ) {
     val isUser = message.isUser
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     val cleanText = message.text.replace("*", "").replace("#", "")
 
     Row(
@@ -408,16 +411,17 @@ fun ChatMessageBubble(
                     )
                     .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
+                val assistantTextColor = if (isDark) Color(0xFFF8FAFC) else MaterialTheme.colorScheme.onSurface
                 Text(
                     text = cleanText,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontSize = 16.sp,
-                        lineHeight = 23.sp
+                        lineHeight = 24.sp
                     ),
                     color = if (isUser)
                         MaterialTheme.colorScheme.onPrimary
                     else
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                        assistantTextColor
                 )
             }
 
@@ -433,7 +437,7 @@ fun ChatMessageBubble(
                         Icon(
                             imageVector = Icons.Filled.ContentCopy,
                             contentDescription = "Copiar respuesta",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = if (isDark) Color(0xFFCBD5E1) else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(14.dp)
                         )
                     }
