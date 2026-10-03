@@ -90,7 +90,7 @@ fun ReadingPlansBottomSheet(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "365 Días • Lee toda la Escritura en 1 año",
+                            text = "${progress.totalDays} Días • ${progress.activePlanType.title}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -108,9 +108,14 @@ fun ReadingPlansBottomSheet(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Plan Selector Tabs: Clásico vs Cronológico
+            // Plan Selector Tabs: Clásico vs Cronológico vs Historias
+            val selectedTab = when (progress.activePlanType) {
+                ReadingPlanType.TRADITIONAL -> 0
+                ReadingPlanType.CHRONOLOGICAL -> 1
+                ReadingPlanType.BIBLE_STORIES -> 2
+            }
             TabRow(
-                selectedTabIndex = if (progress.activePlanType == ReadingPlanType.TRADITIONAL) 0 else 1,
+                selectedTabIndex = selectedTab,
                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -121,7 +126,8 @@ fun ReadingPlansBottomSheet(
                     onClick = { preferences.setPlanType(ReadingPlanType.TRADITIONAL) },
                     text = {
                         Text(
-                            "Plan Clásico",
+                            "Clásico",
+                            fontSize = 13.sp,
                             fontWeight = if (progress.activePlanType == ReadingPlanType.TRADITIONAL) FontWeight.Bold else FontWeight.Normal
                         )
                     }
@@ -131,8 +137,20 @@ fun ReadingPlansBottomSheet(
                     onClick = { preferences.setPlanType(ReadingPlanType.CHRONOLOGICAL) },
                     text = {
                         Text(
-                            "Plan Cronológico",
+                            "Cronológico",
+                            fontSize = 13.sp,
                             fontWeight = if (progress.activePlanType == ReadingPlanType.CHRONOLOGICAL) FontWeight.Bold else FontWeight.Normal
+                        )
+                    }
+                )
+                Tab(
+                    selected = progress.activePlanType == ReadingPlanType.BIBLE_STORIES,
+                    onClick = { preferences.setPlanType(ReadingPlanType.BIBLE_STORIES) },
+                    text = {
+                        Text(
+                            "Historias",
+                            fontSize = 13.sp,
+                            fontWeight = if (progress.activePlanType == ReadingPlanType.BIBLE_STORIES) FontWeight.Bold else FontWeight.Normal
                         )
                     }
                 )
@@ -155,7 +173,7 @@ fun ReadingPlansBottomSheet(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "${progress.totalCompleted} de 365 días leídos",
+                            text = "${progress.totalCompleted} de ${progress.totalDays} días leídos",
                             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface
                         )

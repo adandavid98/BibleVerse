@@ -11,9 +11,10 @@ data class ReadingPlanProgress(
     val activePlanType: ReadingPlanType = ReadingPlanType.TRADITIONAL,
     val completedDays: Set<Int> = emptySet()
 ) {
+    val totalDays: Int get() = activePlanType.totalDays
     val totalCompleted: Int get() = completedDays.size
-    val progressPercentage: Float get() = (completedDays.size.toFloat() / 365f).coerceIn(0f, 1f)
-    val nextPendingDay: Int get() = (1..365).firstOrNull { !completedDays.contains(it) } ?: 365
+    val progressPercentage: Float get() = (completedDays.size.toFloat() / totalDays.toFloat().coerceAtLeast(1f)).coerceIn(0f, 1f)
+    val nextPendingDay: Int get() = (1..totalDays).firstOrNull { !completedDays.contains(it) } ?: totalDays
 }
 
 class ReadingPlanPreferences(context: Context) {

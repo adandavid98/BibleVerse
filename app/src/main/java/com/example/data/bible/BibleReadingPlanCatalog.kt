@@ -13,19 +13,35 @@ data class ReadingPlanDay(
     val primaryBookId: Int,
     val primaryChapter: Int,
     val primaryVerse: Int = 1,
-    val passages: List<PlanPassageSegment> = emptyList()
+    val passages: List<PlanPassageSegment> = emptyList(),
+    val historicalContext: String = "",
+    val spiritualLesson: String = "",
+    val storyNarrative: String = ""
 )
 
-enum class ReadingPlanType(val id: String, val title: String, val description: String) {
+enum class ReadingPlanType(
+    val id: String,
+    val title: String,
+    val description: String,
+    val totalDays: Int = 365
+) {
     TRADITIONAL(
         id = "TRADITIONAL",
         title = "Plan Clásico en 1 Año",
-        description = "Lectura balanceada de la Biblia completa a través del Antiguo y Nuevo Testamento día a día."
+        description = "Lectura balanceada de la Biblia completa a través del Antiguo y Nuevo Testamento día a día.",
+        totalDays = 365
     ),
     CHRONOLOGICAL(
         id = "CHRONOLOGICAL",
         title = "Plan Cronológico en 1 Año",
-        description = "Lectura de toda la Biblia en el orden histórico y cronológico en que ocurrieron los eventos."
+        description = "Lectura de toda la Biblia en el orden histórico y cronológico en que ocurrieron los eventos.",
+        totalDays = 365
+    ),
+    BIBLE_STORIES(
+        id = "BIBLE_STORIES",
+        title = "Historias y Sucesos Bíblicos",
+        description = "180 días con todas las historias y sucesos de la Biblia, con contexto histórico-cultural y enseñanza práctica para memorizar.",
+        totalDays = 180
     )
 }
 
@@ -46,6 +62,7 @@ object BibleReadingPlanCatalog {
     fun getPlan(type: ReadingPlanType): List<ReadingPlanDay> = when (type) {
         ReadingPlanType.TRADITIONAL -> traditionalPlan
         ReadingPlanType.CHRONOLOGICAL -> chronologicalPlan
+        ReadingPlanType.BIBLE_STORIES -> BibleStoriesPlanCatalog.storiesPlan
     }
 
     private fun generateTraditionalPlan(): List<ReadingPlanDay> {
