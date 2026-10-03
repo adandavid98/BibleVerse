@@ -31,6 +31,8 @@ import com.example.data.bible.OfflineVerseDto
 import com.example.data.bible.PlanPassageSegment
 import com.example.data.bible.ReadingPlanDay
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 import androidx.compose.ui.window.Dialog
@@ -57,10 +59,27 @@ fun ReadingPlanDayReaderModal(
     var segmentsData by remember { mutableStateOf<List<DaySegmentWithVerses>>(emptyMap<Int, String>().let { emptyList() }) }
     var isVersesExpanded by remember(day) { mutableStateOf(day.storyNarrative.isBlank()) }
 
-    LaunchedEffect(day) {
+    val scope = rememberCoroutineScope()
+    val prefsRepo = remember { com.example.data.preferences.ReaderPreferencesRepository(context.applicationContext) }
+    val readerDao = remember { com.example.data.local.BibleDatabase.getDatabase(context.applicationContext).bibleReaderDao() }
+    val readerRepo = remember { com.example.data.repository.BibleReaderRepository(readerDao, context.applicationContext) }
+    val offlineStates by com.example.data.bible.OfflineBibleDownloadManager.downloadStates.collectAsState()
+
+    // Same version the main reader uses (shared preference), changeable right here.
+    var selectedVersion by remember { mutableStateOf("RVR1960") }
+    var showVersionSelector by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        selectedVersion = try {
+            prefsRepo.readerPreferences.first().bibleVersion
+        } catch (_: Exception) {
+            "RVR1960"
+        }
+    }
+
+    LaunchedEffect(day, selectedVersion) {
         isLoading = true
-        withContext(Dispatchers.IO) {
-            val list = mutableListOf<DaySegmentWithVerses>()
+        val list = withContext(Dispatchers.IO) {
+            val acc = mutableListOf<DaySegmentWithVerses>()
             val targetSegments = if (day.passages.isNotEmpty()) {
                 day.passages
             } else {
@@ -70,18 +89,23 @@ fun ReadingPlanDayReaderModal(
 
             for (seg in targetSegments) {
                 val verses = try {
-                    OfflineBibleManager.getVerses(context, seg.bookId, seg.chapter)
+                    if (selectedVersion.uppercase() == "RVR1960") {
+                        OfflineBibleManager.getVerses(context, seg.bookId, seg.chapter)
+                    } else {
+                        readerRepo.ensureChapterVerses(seg.bookId, seg.chapter, selectedVersion)
+                        readerRepo.getVerses(seg.bookId, seg.chapter, selectedVersion).first().map {
+                            OfflineVerseDto(it.bookId, it.chapter, it.verseNumber, it.text)
+                        }
+                    }
                 } catch (_: Exception) {
                     emptyList()
                 }
-                list.add(DaySegmentWithVerses(seg, verses))
+                acc.add(DaySegmentWithVerses(seg, verses))
             }
-
-            withContext(Dispatchers.Main) {
-                segmentsData = list
-                isLoading = false
-            }
+            acc
         }
+        segmentsData = list
+        isLoading = false
     }
 
     Dialog(
@@ -364,13 +388,38 @@ fun ReadingPlanDayReaderModal(
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
-                                            text = "${day.passagesSummary} (RVR1960)",
+                                            text = "${day.passagesSummary} ($selectedVersion)",
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
                                 }
                                 Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Surface(
+                                        onClick = { showVersionSelector = true },
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                        modifier = Modifier.padding(end = 2.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                        ) {
+                                            Text(
+                                                text = selectedVersion,
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                            Icon(
+                                                Icons.Default.ArrowDropDown,
+                                                contentDescription = "Seleccionar versión",
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    }
                                     IconButton(
                                         onClick = {
                                             onOpenInFullBible(day.primaryBookId, day.primaryChapter, day.primaryVerse)
@@ -584,4 +633,21 @@ fun ReadingPlanDayReaderModal(
         }
     }
 }
+
+    if (showVersionSelector) {
+        com.example.ui.reader.components.BibleVersionSelectorDialog(
+            currentVersion = selectedVersion,
+            onSelectVersion = { version ->
+                selectedVersion = version
+                scope.launch { prefsRepo.updateBibleVersion(version) }
+            },
+            downloadStates = offlineStates,
+            onDownloadVersion = { version ->
+                scope.launch {
+                    com.example.data.bible.OfflineBibleDownloadManager.downloadVersion(readerDao, version)
+                }
+            },
+            onDismiss = { showVersionSelector = false }
+        )
+    }
 }

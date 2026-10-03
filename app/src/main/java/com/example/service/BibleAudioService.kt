@@ -834,32 +834,50 @@ class BibleAudioService : Service() {
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
     }
 
+    private var resumeOnFocusGain = false
+
+    // Single stable listener: re-requesting focus with the SAME listener never sends LOSS to ourselves.
+    private val focusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                resumeOnFocusGain = false
+                if (isPlaying) pause()
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                if (isPlaying) {
+                    resumeOnFocusGain = true
+                    pause()
+                }
+            }
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                if (resumeOnFocusGain && !isPlaying) {
+                    resumeOnFocusGain = false
+                    play()
+                }
+            }
+        }
+    }
+
     private fun requestAudioFocus() {
         val am = audioManager ?: return
+        resumeOnFocusGain = false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val attributes = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_MEDIA)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                .build()
-            audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                .setAudioAttributes(attributes)
+            val request = audioFocusRequest ?: AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .build()
+                )
                 .setAcceptsDelayedFocusGain(false)
-                .setOnAudioFocusChangeListener { focusChange ->
-                    when (focusChange) {
-                        AudioManager.AUDIOFOCUS_LOSS,
-                        AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> pause()
-                    }
-                }
+                .setOnAudioFocusChangeListener(focusChangeListener)
                 .build()
-            audioFocusRequest?.let { am.requestAudioFocus(it) }
+                .also { audioFocusRequest = it }
+            am.requestAudioFocus(request)
         } else {
             @Suppress("DEPRECATION")
             am.requestAudioFocus(
-                { focusChange ->
-                    if (focusChange == AudioManager.AUDIOFOCUS_LOSS || focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
-                        pause()
-                    }
-                },
+                focusChangeListener,
                 AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN
             )
