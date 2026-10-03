@@ -162,15 +162,5 @@ object OfflineBibleDownloadManager {
         }
     }
 
-    private fun sanitizeVerseText(text: String): String {
-        return text
-            .replace(Regex("<[^>]*>"), "")
-            .replace("&nbsp;", " ")
-            .replace("&quot;", "\"")
-            .replace("&amp;", "&")
-            .replace("&lt;", "<")
-            .replace("&gt;", ">")
-            .replace("&#39;", "'")
-            .trim()
-    }
+    private fun sanitizeVerseText(text: String): String = BollsBibleApiService.sanitizeVerseText(text)
 }

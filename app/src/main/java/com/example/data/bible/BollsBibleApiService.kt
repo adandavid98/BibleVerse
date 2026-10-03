@@ -61,16 +61,33 @@ object BollsBibleApiService {
         }
     }
 
-    private fun sanitizeVerseText(text: String): String {
-        return text
-            .replace(Regex("<[^>]*>"), "") // Remove HTML tags
+    private val titleBlockRegex = Regex(
+        "(?is)<p[^>]*align\\s*=\\s*['\"]?center['\"]?[^>]*>.*?</p>|<h[1-6][^>]*>.*?</h[1-6]>"
+    )
+
+    /**
+     * Cleans a raw Bolls verse. Some translations (e.g. PDT) embed the section title inside the
+     * first verse of a section as `<p align='center'><b><i>Title</i></b></p>`; stripping only the tags
+     * would glue the title to the verse text, so the whole title block is removed first.
+     */
+    fun sanitizeVerseText(text: String): String {
+        var t = text
+            .replace(titleBlockRegex, "")
+            .replace(Regex("(?i)<br\\s*/?>"), " ")
+            .replace(Regex("<[^>]*>"), "")
             .replace("&nbsp;", " ")
             .replace("&quot;", "\"")
             .replace("&amp;", "&")
             .replace("&lt;", "<")
             .replace("&gt;", ">")
             .replace("&#39;", "'")
+            .replace(Regex("\\s+"), " ")
             .trim()
+        // Some sources wrap verses in stray single quotes: '...'
+        if (t.length >= 2 && t.startsWith("'") && t.endsWith("'")) {
+            t = t.substring(1, t.length - 1).trim()
+        }
+        return t
     }
 
     fun mapVersionToSlug(version: String): String {

@@ -41,6 +41,20 @@ class BibleReaderRepository(
             dao.deleteVersesLike("%Palabra de Dios para edificación%")
         } catch (_: Exception) {}
 
+        // One-time purge: earlier builds cached other-version text with section titles merged into the
+        // verse and stray quotes (e.g. TLA/PDT). Drop it so it is fetched again with the fixed cleaner.
+        try {
+            val prefs = context.getSharedPreferences("bible_cache_maintenance", Context.MODE_PRIVATE)
+            if (!prefs.getBoolean("clean_other_versions_v1", false)) {
+                for (v in BibleCatalog.versions) {
+                    if (!v.code.equals("RVR1960", ignoreCase = true)) {
+                        dao.deleteVersesForVersion(v.code.uppercase())
+                    }
+                }
+                prefs.edit().putBoolean("clean_other_versions_v1", true).apply()
+            }
+        } catch (_: Exception) {}
+
         // Pre-warm the offline RVR1960 database in background to avoid any delay
         try {
             OfflineBibleManager.ensureDatabase(context)
