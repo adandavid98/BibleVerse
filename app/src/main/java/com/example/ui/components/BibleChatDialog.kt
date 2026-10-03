@@ -42,6 +42,7 @@ fun BibleChatDialog(
     onSendMessage: (String) -> Unit,
     onClearChat: () -> Unit,
     onDismiss: () -> Unit,
+    onNavigateToVerse: ((String) -> Unit)? = null,
     onAddSuggestedVerse: ((String) -> Unit)? = null
 ) {
     var inputText by remember { mutableStateOf("") }
@@ -239,7 +240,7 @@ fun BibleChatDialog(
                                 ChatMessageBubble(
                                     message = message,
                                     onCopy = { clipboardManager.setText(AnnotatedString(message.text.replace("*", "").replace("#", ""))) },
-                                    onAddVerse = onAddSuggestedVerse
+                                    onNavigateToVerse = onNavigateToVerse ?: onAddSuggestedVerse
                                 )
                             }
 
@@ -379,7 +380,8 @@ fun BibleChatDialog(
 fun ChatMessageBubble(
     message: ChatMessage,
     onCopy: () -> Unit,
-    onAddVerse: ((String) -> Unit)?
+    onNavigateToVerse: ((String) -> Unit)? = null,
+    onAddVerse: ((String) -> Unit)? = null
 ) {
     val isUser = message.isUser
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
@@ -442,10 +444,11 @@ fun ChatMessageBubble(
                         )
                     }
 
-                    if (!message.suggestedVerseReference.isNullOrBlank() && onAddVerse != null) {
+                    val onVerseClick = onNavigateToVerse ?: onAddVerse
+                    if (!message.suggestedVerseReference.isNullOrBlank() && onVerseClick != null) {
                         Spacer(modifier = Modifier.width(6.dp))
                         SuggestionChip(
-                            onClick = { onAddVerse(message.suggestedVerseReference) },
+                            onClick = { onVerseClick(message.suggestedVerseReference) },
                             label = {
                                 Text(
                                     text = "📖 ${message.suggestedVerseReference}",

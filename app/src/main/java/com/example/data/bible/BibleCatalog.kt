@@ -161,6 +161,14 @@ object BibleCatalog {
         BibleBook("Apocalipsis", "Nuevo Testamento", 22, "Profecía", "Ap", 66)
     )
 
+data class BibleReferenceTarget(
+    val bookId: Int,
+    val bookName: String,
+    val chapter: Int,
+    val startVerse: Int = 1,
+    val endVerse: Int = startVerse
+)
+
     fun findVersion(code: String): BibleVersion {
         return versions.firstOrNull { it.code.equals(code, ignoreCase = true) }
             ?: versions.first()
@@ -171,5 +179,93 @@ object BibleCatalog {
         return books.firstOrNull {
             it.name.lowercase() == clean || it.abbreviation.lowercase() == clean
         }
+    }
+
+    private fun normalizeString(text: String): String {
+        return java.text.Normalizer.normalize(text, java.text.Normalizer.Form.NFD)
+            .replace(Regex("""\p{InCombiningDiacriticalMarks}+"""), "")
+            .lowercase()
+            .trim()
+    }
+
+    fun findBookFlexible(input: String): BibleBook? {
+        val rawClean = normalizeString(input)
+        if (rawClean.isBlank()) return null
+
+        // 1. Direct standard find
+        val direct = findBook(input)
+        if (direct != null) return direct
+
+        // 2. Common book title alias replacements
+        var normalized = rawClean
+            .replace(Regex("""^(el\s+libro\s+de\s+|libro\s+de\s+|carta\s+a\s+los\s+|epistola\s+a\s+los\s+|evangelio\s+segun\s+san\s+|evangelio\s+de\s+san\s+|evangelio\s+de\s+|san\s+)"""), "")
+            .replace(Regex("""^(1ra\s*de\s*|1ra\s+|1era\s*de\s*|1era\s+|1ero\s+|1ro\s+|primera\s+de\s+|1\s*de\s*)"""), "1 ")
+            .replace(Regex("""^(2da\s*de\s*|2da\s+|2nda\s*de\s*|2nda\s+|2do\s+|segunda\s+de\s+|2\s*de\s*)"""), "2 ")
+            .replace(Regex("""^(3ra\s*de\s*|3ra\s+|3era\s*de\s*|3era\s+|3ro\s+|tercera\s+de\s+|3\s*de\s*)"""), "3 ")
+            .trim()
+
+        if (normalized == "salmo") normalized = "salmos"
+        if (normalized.startsWith("cantar")) normalized = "cantares"
+        if (normalized.startsWith("hechos")) normalized = "hechos"
+
+        // 3. Exact normalized name or abbreviation
+        val exactMatch = books.firstOrNull { book ->
+            val bNorm = normalizeString(book.name)
+            val bAbbr = normalizeString(book.abbreviation)
+            bNorm == normalized || bAbbr == normalized
+        }
+        if (exactMatch != null) return exactMatch
+
+        // 4. Prefix / partial match
+        return books.firstOrNull { book ->
+            val bNorm = normalizeString(book.name)
+            bNorm.startsWith(normalized) || normalized.startsWith(bNorm)
+        }
+    }
+
+    fun parseReference(input: String): BibleReferenceTarget? {
+        if (input.isBlank()) return null
+        val clean = input
+            .replace(Regex("""[\uD83C-\uDBFF\uDC00-\uDFFF]"""), "") // remove emoji surrogate pairs (e.g. 📖)
+            .replace("📖", "")
+            .replace(Regex("""[^\p{L}\p{N}\s:,-]"""), "") // keep letters, numbers, spaces, colons, commas, hyphens
+            .trim()
+
+        // Pattern 1: Book name, chapter, colon/comma/dot, verse (optional end verse)
+        // Examples: "Tito 2:13", "1 Corintios 13:4-7", "2 Pedro 3:11", "Salmo 23:1"
+        val regexRange = Regex("""^(.+?)\s+(\d+)\s*[:.,]\s*(\d+)(?:\s*[-–—]\s*(\d+))?$""")
+        val matchRange = regexRange.find(clean)
+        if (matchRange != null) {
+            val bookStr = matchRange.groupValues[1].trim()
+            val chapter = matchRange.groupValues[2].toIntOrNull() ?: 1
+            val startVerse = matchRange.groupValues[3].toIntOrNull() ?: 1
+            val endVerse = matchRange.groupValues.getOrNull(4)?.takeIf { it.isNotBlank() }?.toIntOrNull() ?: startVerse
+            val book = findBookFlexible(bookStr) ?: return null
+            return BibleReferenceTarget(
+                bookId = book.order,
+                bookName = book.name,
+                chapter = chapter.coerceIn(1, book.chaptersCount),
+                startVerse = startVerse.coerceAtLeast(1),
+                endVerse = endVerse.coerceAtLeast(startVerse)
+            )
+        }
+
+        // Pattern 2: Book name and chapter only, e.g. "Salmos 23", "Juan 3"
+        val regexChapter = Regex("""^(.+?)\s+(\d+)$""")
+        val matchChapter = regexChapter.find(clean)
+        if (matchChapter != null) {
+            val bookStr = matchChapter.groupValues[1].trim()
+            val chapter = matchChapter.groupValues[2].toIntOrNull() ?: 1
+            val book = findBookFlexible(bookStr) ?: return null
+            return BibleReferenceTarget(
+                bookId = book.order,
+                bookName = book.name,
+                chapter = chapter.coerceIn(1, book.chaptersCount),
+                startVerse = 1,
+                endVerse = 1
+            )
+        }
+
+        return null
     }
 }

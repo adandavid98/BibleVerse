@@ -489,8 +489,20 @@ fun HomeScreen(
             },
             onClearChat = { viewModel.clearBibleChat() },
             onDismiss = { viewModel.showBibleChat(false) },
-            onAddSuggestedVerse = { reference ->
-                viewModel.openAddVerseForReference(reference)
+            onNavigateToVerse = { reference ->
+                val target = BibleCatalog.parseReference(reference)
+                if (target != null) {
+                    viewModel.showBibleChat(false)
+                    readerViewModel.navigateToVerse(
+                        bookId = target.bookId,
+                        chapter = target.chapter,
+                        startVerse = target.startVerse,
+                        endVerse = target.endVerse
+                    )
+                    selectedTab = 1
+                } else {
+                    viewModel.openAddVerseForReference(reference)
+                }
             }
         )
     }

@@ -825,11 +825,10 @@ private fun CompactVerseRow(
         } else null
     }
 
-    // Border is for active selection, transient highlight, or audio speech indicator
+    // Border is for active selection or audio speech indicator (transient highlight is borderless)
     val selectionBorder = when {
         isSpeaking -> BorderStroke(1.5.dp, accentColor.copy(alpha = 0.85f))
         verse.isSelected -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.85f))
-        isTransientHighlighted -> BorderStroke(2.dp, if (isDarkTheme) Color(0xFF38BDF8) else Color(0xFF0284C7))
         else -> null
     }
 
@@ -846,7 +845,7 @@ private fun CompactVerseRow(
     val rowBg = when {
         isSpeaking -> accentColor.copy(alpha = if (isDarkTheme) 0.22f else 0.16f)
         verse.isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
-        isTransientHighlighted -> if (isDarkTheme) Color(0xFF0284C7).copy(alpha = 0.32f) else Color(0xFF38BDF8).copy(alpha = 0.28f)
+        isTransientHighlighted -> if (isDarkTheme) Color(0xFF9E9E9E).copy(alpha = 0.20f) else Color(0xFF757575).copy(alpha = 0.14f)
         highlightColor != null -> highlightColor
         else -> Color.Transparent
     }
