@@ -107,21 +107,6 @@ fun BibleReaderScreen(
         }
     }
 
-    // Smoothly scroll to keep active audio verse visible in the reader
-    LaunchedEffect(audioState.currentVerseNumber, audioState.isPlaying, audioState.isActive) {
-        if (audioState.isActive && audioState.isPlaying &&
-            audioState.currentBookId == uiState.currentBook?.id &&
-            audioState.currentChapter == uiState.currentChapter
-        ) {
-            val targetIdx = uiState.verses.indexOfFirst { it.verseNumber == audioState.currentVerseNumber }
-            if (targetIdx >= 0) {
-                val visibleIndices = listState.layoutInfo.visibleItemsInfo.map { it.index }
-                if (targetIdx !in visibleIndices) {
-                    listState.animateScrollToItem((targetIdx - 1).coerceAtLeast(0))
-                }
-            }
-        }
-    }
 
     // Trigger continuous scroll load when user approaches the end of loaded chapters
     LaunchedEffect(listState, uiState.preferences.continuousScrollEnabled, uiState.verses.size) {
@@ -490,11 +475,6 @@ fun BibleReaderScreen(
                                 )
                             }
 
-                            val isVerseSpeaking = audioState.isActive && audioState.isPlaying &&
-                                    audioState.currentBookId == verse.bookId &&
-                                    audioState.currentChapter == verse.chapter &&
-                                    audioState.currentVerseNumber == verse.verseNumber
-
                             // Compact verse text with superscript number & red letters
                             CompactVerseRow(
                                 verse = verse,
@@ -503,10 +483,8 @@ fun BibleReaderScreen(
                                 lineHeight = lineHeight,
                                 textColor = themeText,
                                 secondaryColor = themeSecondary,
-                                accentColor = themeAccent,
                                 isDarkTheme = isDarkTheme,
                                 redLettersEnabled = uiState.preferences.redLettersEnabled,
-                                isSpeaking = isVerseSpeaking,
                                 isTransientHighlighted = verse.bookId == uiState.currentBook?.id &&
                                         verse.chapter == uiState.currentChapter &&
                                         verse.verseNumber in uiState.transientHighlightedVerses,
@@ -804,10 +782,8 @@ private fun CompactVerseRow(
     lineHeight: androidx.compose.ui.unit.TextUnit,
     textColor: Color,
     secondaryColor: Color,
-    accentColor: Color,
     isDarkTheme: Boolean,
     redLettersEnabled: Boolean,
-    isSpeaking: Boolean = false,
     isTransientHighlighted: Boolean = false,
     isPrevSameHighlight: Boolean = false,
     isNextSameHighlight: Boolean = false,
@@ -825,16 +801,14 @@ private fun CompactVerseRow(
         } else null
     }
 
-    // Border is for active selection or audio speech indicator (transient highlight is borderless)
+    // Border is for active selection (transient highlight is borderless)
     val selectionBorder = when {
-        isSpeaking -> BorderStroke(1.5.dp, accentColor.copy(alpha = 0.85f))
         verse.isSelected -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.85f))
         else -> null
     }
 
     // Seamless, connected shape for consecutive highlighted verses like YouVersion
     val highlightShape = when {
-        isSpeaking -> RoundedCornerShape(6.dp)
         isTransientHighlighted -> RoundedCornerShape(6.dp)
         isPrevSameHighlight && isNextSameHighlight -> RoundedCornerShape(0.dp)
         isPrevSameHighlight -> RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
@@ -843,7 +817,6 @@ private fun CompactVerseRow(
     }
 
     val rowBg = when {
-        isSpeaking -> accentColor.copy(alpha = if (isDarkTheme) 0.22f else 0.16f)
         verse.isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
         isTransientHighlighted -> if (isDarkTheme) Color(0xFF9E9E9E).copy(alpha = 0.20f) else Color(0xFF757575).copy(alpha = 0.14f)
         highlightColor != null -> highlightColor
@@ -862,20 +835,20 @@ private fun CompactVerseRow(
             .clickable { onClick() }
             .padding(
                 horizontal = 6.dp,
-                vertical = if (isSpeaking || isTransientHighlighted) 4.dp else if (isPrevSameHighlight || isNextSameHighlight) 2.dp else 3.dp
+                vertical = if (isTransientHighlighted) 4.dp else if (isPrevSameHighlight || isNextSameHighlight) 2.dp else 3.dp
             )
     ) {
         val annotatedText = buildAnnotatedString {
-            // Elegant superscript verse number with speech symbol when active
+            // Elegant superscript verse number
             withStyle(
                 style = SpanStyle(
-                    color = if (isSpeaking) accentColor else secondaryColor.copy(alpha = 0.75f),
+                    color = secondaryColor.copy(alpha = 0.75f),
                     fontWeight = FontWeight.Bold,
                     fontSize = (fontSize.value * 0.7f).sp,
                     baselineShift = BaselineShift.Superscript
                 )
             ) {
-                append(if (isSpeaking) "▶ ${verse.verseNumber} " else "${verse.verseNumber} ")
+                append("${verse.verseNumber} ")
             }
 
             // Append verse content with accurate red letters
