@@ -28,13 +28,13 @@ enum class ReadingPlanType(
     TRADITIONAL(
         id = "TRADITIONAL",
         title = "Plan Clásico en 1 Año",
-        description = "Lectura balanceada de la Biblia completa a través del Antiguo y Nuevo Testamento día a día.",
+        description = "Lectura canónica de la Biblia completa de Génesis a Apocalipsis cubriendo los 66 libros y 1,189 capítulos.",
         totalDays = 365
     ),
     CHRONOLOGICAL(
         id = "CHRONOLOGICAL",
         title = "Plan Cronológico en 1 Año",
-        description = "Lectura de toda la Biblia en el orden histórico y cronológico en que ocurrieron los eventos.",
+        description = "Lectura de toda la Biblia completa en orden cronológico e histórico cubriendo los 66 libros y 1,189 capítulos.",
         totalDays = 365
     ),
     BIBLE_STORIES(
@@ -48,16 +48,16 @@ enum class ReadingPlanType(
 object BibleReadingPlanCatalog {
 
     /**
-     * 365 Days Traditional Canonical Plan:
-     * Systematically covers the Old and New Testaments.
+     * Plan Clásico Canónico en 365 Días:
+     * Cubre el 100% de los 66 libros de la Biblia y los 1,189 capítulos en orden canónico (Génesis a Apocalipsis).
      */
-    val traditionalPlan: List<ReadingPlanDay> = generateTraditionalPlan()
+    val traditionalPlan: List<ReadingPlanDay> by lazy { buildTraditionalPlan() }
 
     /**
-     * 365 Days Chronological Plan:
-     * Historically ordered: Genesis + Job, Exodus-Deuteronomy, Joshua-Kings + Psalms & Prophets, Exile, Gospels harmonized, Acts + Epistles, Revelation.
+     * Plan Cronológico Histórico en 365 Días:
+     * Cubre el 100% de los 66 libros de la Biblia y los 1,189 capítulos en orden histórico de los sucesos.
      */
-    val chronologicalPlan: List<ReadingPlanDay> = generateChronologicalPlan()
+    val chronologicalPlan: List<ReadingPlanDay> by lazy { buildChronologicalPlan() }
 
     fun getPlan(type: ReadingPlanType): List<ReadingPlanDay> = when (type) {
         ReadingPlanType.TRADITIONAL -> traditionalPlan
@@ -65,401 +65,817 @@ object BibleReadingPlanCatalog {
         ReadingPlanType.BIBLE_STORIES -> BibleStoriesPlanCatalog.storiesPlan
     }
 
-    private fun generateTraditionalPlan(): List<ReadingPlanDay> {
-        val days = mutableListOf<ReadingPlanDay>()
+    private fun p(bId: Int, bName: String, c: Int) = PlanPassageSegment(bId, bName, c)
 
-        for (day in 1..365) {
-            val spec = when {
-                day <= 30 -> {
-                    val gnChap = ((day - 1) * 2 % 50) + 1
-                    val gnChap2 = (gnChap % 50) + 1
-                    val ntChap = ((day - 1) % 28) + 1
-                    DaySpec(
-                        title = "Día $day: Patriarcas y Evangelio",
-                        passagesSummary = "Génesis $gnChap-$gnChap2, Mateo $ntChap",
-                        primaryBookId = 1,
-                        primaryChapter = gnChap,
-                        segments = listOf(
-                            PlanPassageSegment(1, "Génesis", gnChap),
-                            PlanPassageSegment(1, "Génesis", gnChap2),
-                            PlanPassageSegment(40, "Mateo", ntChap)
-                        )
-                    )
-                }
-                day <= 60 -> {
-                    val exChap = ((day - 31) * 2 % 40) + 1
-                    val exChap2 = (exChap % 40) + 1
-                    val ntChap = ((day - 31) % 16) + 1
-                    DaySpec(
-                        title = "Día $day: Éxodo y Marcos",
-                        passagesSummary = "Éxodo $exChap-$exChap2, Marcos $ntChap",
-                        primaryBookId = 2,
-                        primaryChapter = exChap,
-                        segments = listOf(
-                            PlanPassageSegment(2, "Éxodo", exChap),
-                            PlanPassageSegment(2, "Éxodo", exChap2),
-                            PlanPassageSegment(41, "Marcos", ntChap)
-                        )
-                    )
-                }
-                day <= 90 -> {
-                    val lvChap = ((day - 61) % 27) + 1
-                    val ntChap = ((day - 61) % 24) + 1
-                    DaySpec(
-                        title = "Día $day: Ley y Evangelio",
-                        passagesSummary = "Levítico $lvChap, Lucas $ntChap",
-                        primaryBookId = 3,
-                        primaryChapter = lvChap,
-                        segments = listOf(
-                            PlanPassageSegment(3, "Levítico", lvChap),
-                            PlanPassageSegment(42, "Lucas", ntChap)
-                        )
-                    )
-                }
-                day <= 120 -> {
-                    val nmChap = ((day - 91) % 36) + 1
-                    val ntChap = ((day - 91) % 21) + 1
-                    DaySpec(
-                        title = "Día $day: Desierto y Gracia",
-                        passagesSummary = "Números $nmChap, Juan $ntChap",
-                        primaryBookId = 4,
-                        primaryChapter = nmChap,
-                        segments = listOf(
-                            PlanPassageSegment(4, "Números", nmChap),
-                            PlanPassageSegment(43, "Juan", ntChap)
-                        )
-                    )
-                }
-                day <= 150 -> {
-                    val dtChap = ((day - 121) % 34) + 1
-                    val actChap = ((day - 121) % 28) + 1
-                    DaySpec(
-                        title = "Día $day: Pacto y Reino",
-                        passagesSummary = "Deuteronomio $dtChap, Hechos $actChap",
-                        primaryBookId = 5,
-                        primaryChapter = dtChap,
-                        segments = listOf(
-                            PlanPassageSegment(5, "Deuteronomio", dtChap),
-                            PlanPassageSegment(44, "Hechos", actChap)
-                        )
-                    )
-                }
-                day <= 180 -> {
-                    val josChap = ((day - 151) % 24) + 1
-                    val romChap = ((day - 151) % 16) + 1
-                    DaySpec(
-                        title = "Día $day: Conquista y Fe",
-                        passagesSummary = "Josué $josChap, Romanos $romChap",
-                        primaryBookId = 6,
-                        primaryChapter = josChap,
-                        segments = listOf(
-                            PlanPassageSegment(6, "Josué", josChap),
-                            PlanPassageSegment(45, "Romanos", romChap)
-                        )
-                    )
-                }
-                day <= 210 -> {
-                    val jueChap = ((day - 181) % 21) + 1
-                    val coChap = ((day - 181) % 16) + 1
-                    DaySpec(
-                        title = "Día $day: Jueces y Cartas",
-                        passagesSummary = "Jueces $jueChap, 1 Corintios $coChap",
-                        primaryBookId = 7,
-                        primaryChapter = jueChap,
-                        segments = listOf(
-                            PlanPassageSegment(7, "Jueces", jueChap),
-                            PlanPassageSegment(46, "1 Corintios", coChap)
-                        )
-                    )
-                }
-                day <= 240 -> {
-                    val samChap = ((day - 211) % 31) + 1
-                    val galChap = ((day - 211) % 6) + 1
-                    DaySpec(
-                        title = "Día $day: Reino Unido",
-                        passagesSummary = "1 Samuel $samChap, Gálatas $galChap",
-                        primaryBookId = 9,
-                        primaryChapter = samChap,
-                        segments = listOf(
-                            PlanPassageSegment(9, "1 Samuel", samChap),
-                            PlanPassageSegment(48, "Gálatas", galChap)
-                        )
-                    )
-                }
-                day <= 270 -> {
-                    val reyChap = ((day - 241) % 22) + 1
-                    val efChap = ((day - 241) % 6) + 1
-                    DaySpec(
-                        title = "Día $day: Reyes y Gracia",
-                        passagesSummary = "1 Reyes $reyChap, Efesios $efChap",
-                        primaryBookId = 11,
-                        primaryChapter = reyChap,
-                        segments = listOf(
-                            PlanPassageSegment(11, "1 Reyes", reyChap),
-                            PlanPassageSegment(49, "Efesios", efChap)
-                        )
-                    )
-                }
-                day <= 300 -> {
-                    val salChap = ((day - 271) * 3 % 150) + 1
-                    val salChap2 = (salChap % 150) + 1
-                    val salChap3 = ((salChap + 1) % 150) + 1
-                    val filChap = ((day - 271) % 4) + 1
-                    DaySpec(
-                        title = "Día $day: Alabanza y Gozo",
-                        passagesSummary = "Salmos $salChap-$salChap3, Filipenses $filChap",
-                        primaryBookId = 19,
-                        primaryChapter = salChap,
-                        segments = listOf(
-                            PlanPassageSegment(19, "Salmos", salChap),
-                            PlanPassageSegment(19, "Salmos", salChap2),
-                            PlanPassageSegment(19, "Salmos", salChap3),
-                            PlanPassageSegment(50, "Filipenses", filChap)
-                        )
-                    )
-                }
-                day <= 330 -> {
-                    val isChap = ((day - 301) * 2 % 66) + 1
-                    val isChap2 = (isChap % 66) + 1
-                    val hebChap = ((day - 301) % 13) + 1
-                    DaySpec(
-                        title = "Día $day: Profecía y Esperanza",
-                        passagesSummary = "Isaías $isChap-$isChap2, Hebreos $hebChap",
-                        primaryBookId = 23,
-                        primaryChapter = isChap,
-                        segments = listOf(
-                            PlanPassageSegment(23, "Isaías", isChap),
-                            PlanPassageSegment(23, "Isaías", isChap2),
-                            PlanPassageSegment(58, "Hebreos", hebChap)
-                        )
-                    )
-                }
-                else -> {
-                    val prChap = ((day - 331) % 31) + 1
-                    val apChap = ((day - 331) % 22) + 1
-                    DaySpec(
-                        title = "Día $day: Sabiduría y Revelación",
-                        passagesSummary = "Proverbios $prChap, Apocalipsis $apChap",
-                        primaryBookId = 20,
-                        primaryChapter = prChap,
-                        segments = listOf(
-                            PlanPassageSegment(20, "Proverbios", prChap),
-                            PlanPassageSegment(66, "Apocalipsis", apChap)
-                        )
-                    )
-                }
-            }
-
-            days.add(
-                ReadingPlanDay(
-                    dayNumber = day,
-                    title = spec.title,
-                    passagesSummary = spec.passagesSummary,
-                    primaryBookId = spec.primaryBookId,
-                    primaryChapter = spec.primaryChapter,
-                    primaryVerse = 1,
-                    passages = spec.segments
-                )
-            )
-        }
-        return days
-    }
-
-    private fun generateChronologicalPlan(): List<ReadingPlanDay> {
-        val days = mutableListOf<ReadingPlanDay>()
-
-        for (day in 1..365) {
-            val spec = when {
-                day <= 15 -> {
-                    val c = ((day - 1) * 3 % 50) + 1
-                    val c2 = (c % 50) + 1
-                    val c3 = ((c + 1) % 50) + 1
-                    DaySpec(
-                        title = "Día $day: Creación y Orígenes",
-                        passagesSummary = "Génesis $c-$c3",
-                        primaryBookId = 1,
-                        primaryChapter = c,
-                        segments = listOf(
-                            PlanPassageSegment(1, "Génesis", c),
-                            PlanPassageSegment(1, "Génesis", c2),
-                            PlanPassageSegment(1, "Génesis", c3)
-                        )
-                    )
-                }
-                day <= 30 -> {
-                    val c = ((day - 16) * 3 % 42) + 1
-                    val c2 = (c % 42) + 1
-                    val c3 = ((c + 1) % 42) + 1
-                    DaySpec(
-                        title = "Día $day: Los Tiempos de Job",
-                        passagesSummary = "Job $c-$c3",
-                        primaryBookId = 18,
-                        primaryChapter = c,
-                        segments = listOf(
-                            PlanPassageSegment(18, "Job", c),
-                            PlanPassageSegment(18, "Job", c2),
-                            PlanPassageSegment(18, "Job", c3)
-                        )
-                    )
-                }
-                day <= 55 -> {
-                    val c = ((day - 31) * 2 % 50) + 1
-                    val c2 = (c % 50) + 1
-                    DaySpec(
-                        title = "Día $day: El Pacto Patriarcal",
-                        passagesSummary = "Génesis $c-$c2",
-                        primaryBookId = 1,
-                        primaryChapter = c,
-                        segments = listOf(
-                            PlanPassageSegment(1, "Génesis", c),
-                            PlanPassageSegment(1, "Génesis", c2)
-                        )
-                    )
-                }
-                day <= 85 -> {
-                    val c = ((day - 56) * 2 % 40) + 1
-                    val c2 = (c % 40) + 1
-                    DaySpec(
-                        title = "Día $day: La Liberación de Egipto",
-                        passagesSummary = "Éxodo $c-$c2",
-                        primaryBookId = 2,
-                        primaryChapter = c,
-                        segments = listOf(
-                            PlanPassageSegment(2, "Éxodo", c),
-                            PlanPassageSegment(2, "Éxodo", c2)
-                        )
-                    )
-                }
-                day <= 110 -> {
-                    val c = ((day - 86) % 27) + 1
-                    DaySpec(
-                        title = "Día $day: Santidad en el Desierto",
-                        passagesSummary = "Levítico $c",
-                        primaryBookId = 3,
-                        primaryChapter = c,
-                        segments = listOf(PlanPassageSegment(3, "Levítico", c))
-                    )
-                }
-                day <= 140 -> {
-                    val c = ((day - 111) % 36) + 1
-                    DaySpec(
-                        title = "Día $day: Camino a Canaán",
-                        passagesSummary = "Números $c",
-                        primaryBookId = 4,
-                        primaryChapter = c,
-                        segments = listOf(PlanPassageSegment(4, "Números", c))
-                    )
-                }
-                day <= 165 -> {
-                    val c = ((day - 141) % 24) + 1
-                    DaySpec(
-                        title = "Día $day: Conquista de Canaán",
-                        passagesSummary = "Josué $c",
-                        primaryBookId = 6,
-                        primaryChapter = c,
-                        segments = listOf(PlanPassageSegment(6, "Josué", c))
-                    )
-                }
-                day <= 195 -> {
-                    val sChap = ((day - 166) * 3 % 150) + 1
-                    val sChap2 = (sChap % 150) + 1
-                    DaySpec(
-                        title = "Día $day: El Reinado de David y Salmos",
-                        passagesSummary = "Salmos $sChap-$sChap2",
-                        primaryBookId = 19,
-                        primaryChapter = sChap,
-                        segments = listOf(
-                            PlanPassageSegment(19, "Salmos", sChap),
-                            PlanPassageSegment(19, "Salmos", sChap2)
-                        )
-                    )
-                }
-                day <= 225 -> {
-                    val c = ((day - 196) % 31) + 1
-                    DaySpec(
-                        title = "Día $day: Salomón y Sabiduría",
-                        passagesSummary = "Proverbios $c",
-                        primaryBookId = 20,
-                        primaryChapter = c,
-                        segments = listOf(PlanPassageSegment(20, "Proverbios", c))
-                    )
-                }
-                day <= 260 -> {
-                    val c = ((day - 226) * 2 % 66) + 1
-                    val c2 = (c % 66) + 1
-                    DaySpec(
-                        title = "Día $day: Los Profetas de Israel",
-                        passagesSummary = "Isaías $c-$c2",
-                        primaryBookId = 23,
-                        primaryChapter = c,
-                        segments = listOf(
-                            PlanPassageSegment(23, "Isaías", c),
-                            PlanPassageSegment(23, "Isaías", c2)
-                        )
-                    )
-                }
-                day <= 290 -> {
-                    val c = ((day - 261) % 12) + 1
-                    DaySpec(
-                        title = "Día $day: El Exilio Babilónico",
-                        passagesSummary = "Daniel $c",
-                        primaryBookId = 27,
-                        primaryChapter = c,
-                        segments = listOf(PlanPassageSegment(27, "Daniel", c))
-                    )
-                }
-                day <= 315 -> {
-                    val c = ((day - 291) % 13) + 1
-                    DaySpec(
-                        title = "Día $day: El Retorno del Remanente",
-                        passagesSummary = "Nehemías $c",
-                        primaryBookId = 16,
-                        primaryChapter = c,
-                        segments = listOf(PlanPassageSegment(16, "Nehemías", c))
-                    )
-                }
-                day <= 345 -> {
-                    val c = ((day - 316) % 21) + 1
-                    DaySpec(
-                        title = "Día $day: Vida y Ministerio de Jesús",
-                        passagesSummary = "Juan $c",
-                        primaryBookId = 43,
-                        primaryChapter = c,
-                        segments = listOf(PlanPassageSegment(43, "Juan", c))
-                    )
-                }
-                else -> {
-                    val c = ((day - 346) % 22) + 1
-                    DaySpec(
-                        title = "Día $day: La Iglesia y Victoria Final",
-                        passagesSummary = "Apocalipsis $c",
-                        primaryBookId = 66,
-                        primaryChapter = c,
-                        segments = listOf(PlanPassageSegment(66, "Apocalipsis", c))
-                    )
-                }
-            }
-
-            days.add(
-                ReadingPlanDay(
-                    dayNumber = day,
-                    title = spec.title,
-                    passagesSummary = spec.passagesSummary,
-                    primaryBookId = spec.primaryBookId,
-                    primaryChapter = spec.primaryChapter,
-                    primaryVerse = 1,
-                    passages = spec.segments
-                )
-            )
-        }
-        return days
-    }
-
-    private data class DaySpec(
-        val title: String,
-        val passagesSummary: String,
-        val primaryBookId: Int,
-        val primaryChapter: Int,
-        val segments: List<PlanPassageSegment>
+    private fun d(
+        num: Int,
+        title: String,
+        summary: String,
+        pBId: Int,
+        pC: Int,
+        passages: List<PlanPassageSegment>
+    ) = ReadingPlanDay(
+        dayNumber = num,
+        title = title,
+        passagesSummary = summary,
+        primaryBookId = pBId,
+        primaryChapter = pC,
+        primaryVerse = 1,
+        passages = passages
     )
+
+    private fun buildTraditionalPlan(): List<ReadingPlanDay> = traditionalBlock1() + traditionalBlock2() + traditionalBlock3() + traditionalBlock4() + traditionalBlock5() + traditionalBlock6() + traditionalBlock7() + traditionalBlock8() + traditionalBlock9() + traditionalBlock10()
+
+    private fun traditionalBlock1(): List<ReadingPlanDay> = listOf(
+        d(1, "Día 1: Génesis 1-3", "Génesis 1-3", 1, 1, listOf(p(1, "Génesis", 1), p(1, "Génesis", 2), p(1, "Génesis", 3))),
+        d(2, "Día 2: Génesis 4-7", "Génesis 4-7", 1, 4, listOf(p(1, "Génesis", 4), p(1, "Génesis", 5), p(1, "Génesis", 6), p(1, "Génesis", 7))),
+        d(3, "Día 3: Génesis 8-10", "Génesis 8-10", 1, 8, listOf(p(1, "Génesis", 8), p(1, "Génesis", 9), p(1, "Génesis", 10))),
+        d(4, "Día 4: Génesis 11-13", "Génesis 11-13", 1, 11, listOf(p(1, "Génesis", 11), p(1, "Génesis", 12), p(1, "Génesis", 13))),
+        d(5, "Día 5: Génesis 14-16", "Génesis 14-16", 1, 14, listOf(p(1, "Génesis", 14), p(1, "Génesis", 15), p(1, "Génesis", 16))),
+        d(6, "Día 6: Génesis 17-20", "Génesis 17-20", 1, 17, listOf(p(1, "Génesis", 17), p(1, "Génesis", 18), p(1, "Génesis", 19), p(1, "Génesis", 20))),
+        d(7, "Día 7: Génesis 21-23", "Génesis 21-23", 1, 21, listOf(p(1, "Génesis", 21), p(1, "Génesis", 22), p(1, "Génesis", 23))),
+        d(8, "Día 8: Génesis 24-26", "Génesis 24-26", 1, 24, listOf(p(1, "Génesis", 24), p(1, "Génesis", 25), p(1, "Génesis", 26))),
+        d(9, "Día 9: Génesis 27-29", "Génesis 27-29", 1, 27, listOf(p(1, "Génesis", 27), p(1, "Génesis", 28), p(1, "Génesis", 29))),
+        d(10, "Día 10: Génesis 30-33", "Génesis 30-33", 1, 30, listOf(p(1, "Génesis", 30), p(1, "Génesis", 31), p(1, "Génesis", 32), p(1, "Génesis", 33))),
+        d(11, "Día 11: Génesis 34-36", "Génesis 34-36", 1, 34, listOf(p(1, "Génesis", 34), p(1, "Génesis", 35), p(1, "Génesis", 36))),
+        d(12, "Día 12: Génesis 37-39", "Génesis 37-39", 1, 37, listOf(p(1, "Génesis", 37), p(1, "Génesis", 38), p(1, "Génesis", 39))),
+        d(13, "Día 13: Génesis 40-42", "Génesis 40-42", 1, 40, listOf(p(1, "Génesis", 40), p(1, "Génesis", 41), p(1, "Génesis", 42))),
+        d(14, "Día 14: Génesis 43-46", "Génesis 43-46", 1, 43, listOf(p(1, "Génesis", 43), p(1, "Génesis", 44), p(1, "Génesis", 45), p(1, "Génesis", 46))),
+        d(15, "Día 15: Génesis 47-49", "Génesis 47-49", 1, 47, listOf(p(1, "Génesis", 47), p(1, "Génesis", 48), p(1, "Génesis", 49))),
+        d(16, "Día 16: Génesis 50, Éxodo 1-2", "Génesis 50, Éxodo 1-2", 1, 50, listOf(p(1, "Génesis", 50), p(2, "Éxodo", 1), p(2, "Éxodo", 2))),
+        d(17, "Día 17: Éxodo 3-5", "Éxodo 3-5", 2, 3, listOf(p(2, "Éxodo", 3), p(2, "Éxodo", 4), p(2, "Éxodo", 5))),
+        d(18, "Día 18: Éxodo 6-9", "Éxodo 6-9", 2, 6, listOf(p(2, "Éxodo", 6), p(2, "Éxodo", 7), p(2, "Éxodo", 8), p(2, "Éxodo", 9))),
+        d(19, "Día 19: Éxodo 10-12", "Éxodo 10-12", 2, 10, listOf(p(2, "Éxodo", 10), p(2, "Éxodo", 11), p(2, "Éxodo", 12))),
+        d(20, "Día 20: Éxodo 13-15", "Éxodo 13-15", 2, 13, listOf(p(2, "Éxodo", 13), p(2, "Éxodo", 14), p(2, "Éxodo", 15))),
+        d(21, "Día 21: Éxodo 16-18", "Éxodo 16-18", 2, 16, listOf(p(2, "Éxodo", 16), p(2, "Éxodo", 17), p(2, "Éxodo", 18))),
+        d(22, "Día 22: Éxodo 19-22", "Éxodo 19-22", 2, 19, listOf(p(2, "Éxodo", 19), p(2, "Éxodo", 20), p(2, "Éxodo", 21), p(2, "Éxodo", 22))),
+        d(23, "Día 23: Éxodo 23-25", "Éxodo 23-25", 2, 23, listOf(p(2, "Éxodo", 23), p(2, "Éxodo", 24), p(2, "Éxodo", 25))),
+        d(24, "Día 24: Éxodo 26-28", "Éxodo 26-28", 2, 26, listOf(p(2, "Éxodo", 26), p(2, "Éxodo", 27), p(2, "Éxodo", 28))),
+        d(25, "Día 25: Éxodo 29-31", "Éxodo 29-31", 2, 29, listOf(p(2, "Éxodo", 29), p(2, "Éxodo", 30), p(2, "Éxodo", 31))),
+        d(26, "Día 26: Éxodo 32-35", "Éxodo 32-35", 2, 32, listOf(p(2, "Éxodo", 32), p(2, "Éxodo", 33), p(2, "Éxodo", 34), p(2, "Éxodo", 35))),
+        d(27, "Día 27: Éxodo 36-38", "Éxodo 36-38", 2, 36, listOf(p(2, "Éxodo", 36), p(2, "Éxodo", 37), p(2, "Éxodo", 38))),
+        d(28, "Día 28: Éxodo 39-40, Levítico 1", "Éxodo 39-40, Levítico 1", 2, 39, listOf(p(2, "Éxodo", 39), p(2, "Éxodo", 40), p(3, "Levítico", 1))),
+        d(29, "Día 29: Levítico 2-4", "Levítico 2-4", 3, 2, listOf(p(3, "Levítico", 2), p(3, "Levítico", 3), p(3, "Levítico", 4))),
+        d(30, "Día 30: Levítico 5-8", "Levítico 5-8", 3, 5, listOf(p(3, "Levítico", 5), p(3, "Levítico", 6), p(3, "Levítico", 7), p(3, "Levítico", 8))),
+        d(31, "Día 31: Levítico 9-11", "Levítico 9-11", 3, 9, listOf(p(3, "Levítico", 9), p(3, "Levítico", 10), p(3, "Levítico", 11))),
+        d(32, "Día 32: Levítico 12-14", "Levítico 12-14", 3, 12, listOf(p(3, "Levítico", 12), p(3, "Levítico", 13), p(3, "Levítico", 14))),
+        d(33, "Día 33: Levítico 15-17", "Levítico 15-17", 3, 15, listOf(p(3, "Levítico", 15), p(3, "Levítico", 16), p(3, "Levítico", 17))),
+        d(34, "Día 34: Levítico 18-21", "Levítico 18-21", 3, 18, listOf(p(3, "Levítico", 18), p(3, "Levítico", 19), p(3, "Levítico", 20), p(3, "Levítico", 21))),
+        d(35, "Día 35: Levítico 22-24", "Levítico 22-24", 3, 22, listOf(p(3, "Levítico", 22), p(3, "Levítico", 23), p(3, "Levítico", 24))),
+        d(36, "Día 36: Levítico 25-27", "Levítico 25-27", 3, 25, listOf(p(3, "Levítico", 25), p(3, "Levítico", 26), p(3, "Levítico", 27))),
+        d(37, "Día 37: Números 1-4", "Números 1-4", 4, 1, listOf(p(4, "Números", 1), p(4, "Números", 2), p(4, "Números", 3), p(4, "Números", 4))),
+        d(38, "Día 38: Números 5-7", "Números 5-7", 4, 5, listOf(p(4, "Números", 5), p(4, "Números", 6), p(4, "Números", 7))),
+        d(39, "Día 39: Números 8-10", "Números 8-10", 4, 8, listOf(p(4, "Números", 8), p(4, "Números", 9), p(4, "Números", 10))),
+        d(40, "Día 40: Números 11-13", "Números 11-13", 4, 11, listOf(p(4, "Números", 11), p(4, "Números", 12), p(4, "Números", 13))),
+    )
+
+    private fun traditionalBlock2(): List<ReadingPlanDay> = listOf(
+        d(41, "Día 41: Números 14-17", "Números 14-17", 4, 14, listOf(p(4, "Números", 14), p(4, "Números", 15), p(4, "Números", 16), p(4, "Números", 17))),
+        d(42, "Día 42: Números 18-20", "Números 18-20", 4, 18, listOf(p(4, "Números", 18), p(4, "Números", 19), p(4, "Números", 20))),
+        d(43, "Día 43: Números 21-23", "Números 21-23", 4, 21, listOf(p(4, "Números", 21), p(4, "Números", 22), p(4, "Números", 23))),
+        d(44, "Día 44: Números 24-26", "Números 24-26", 4, 24, listOf(p(4, "Números", 24), p(4, "Números", 25), p(4, "Números", 26))),
+        d(45, "Día 45: Números 27-30", "Números 27-30", 4, 27, listOf(p(4, "Números", 27), p(4, "Números", 28), p(4, "Números", 29), p(4, "Números", 30))),
+        d(46, "Día 46: Números 31-33", "Números 31-33", 4, 31, listOf(p(4, "Números", 31), p(4, "Números", 32), p(4, "Números", 33))),
+        d(47, "Día 47: Números 34-36", "Números 34-36", 4, 34, listOf(p(4, "Números", 34), p(4, "Números", 35), p(4, "Números", 36))),
+        d(48, "Día 48: Deuteronomio 1-3", "Deuteronomio 1-3", 5, 1, listOf(p(5, "Deuteronomio", 1), p(5, "Deuteronomio", 2), p(5, "Deuteronomio", 3))),
+        d(49, "Día 49: Deuteronomio 4-7", "Deuteronomio 4-7", 5, 4, listOf(p(5, "Deuteronomio", 4), p(5, "Deuteronomio", 5), p(5, "Deuteronomio", 6), p(5, "Deuteronomio", 7))),
+        d(50, "Día 50: Deuteronomio 8-10", "Deuteronomio 8-10", 5, 8, listOf(p(5, "Deuteronomio", 8), p(5, "Deuteronomio", 9), p(5, "Deuteronomio", 10))),
+        d(51, "Día 51: Deuteronomio 11-13", "Deuteronomio 11-13", 5, 11, listOf(p(5, "Deuteronomio", 11), p(5, "Deuteronomio", 12), p(5, "Deuteronomio", 13))),
+        d(52, "Día 52: Deuteronomio 14-16", "Deuteronomio 14-16", 5, 14, listOf(p(5, "Deuteronomio", 14), p(5, "Deuteronomio", 15), p(5, "Deuteronomio", 16))),
+        d(53, "Día 53: Deuteronomio 17-20", "Deuteronomio 17-20", 5, 17, listOf(p(5, "Deuteronomio", 17), p(5, "Deuteronomio", 18), p(5, "Deuteronomio", 19), p(5, "Deuteronomio", 20))),
+        d(54, "Día 54: Deuteronomio 21-23", "Deuteronomio 21-23", 5, 21, listOf(p(5, "Deuteronomio", 21), p(5, "Deuteronomio", 22), p(5, "Deuteronomio", 23))),
+        d(55, "Día 55: Deuteronomio 24-26", "Deuteronomio 24-26", 5, 24, listOf(p(5, "Deuteronomio", 24), p(5, "Deuteronomio", 25), p(5, "Deuteronomio", 26))),
+        d(56, "Día 56: Deuteronomio 27-29", "Deuteronomio 27-29", 5, 27, listOf(p(5, "Deuteronomio", 27), p(5, "Deuteronomio", 28), p(5, "Deuteronomio", 29))),
+        d(57, "Día 57: Deuteronomio 30-33", "Deuteronomio 30-33", 5, 30, listOf(p(5, "Deuteronomio", 30), p(5, "Deuteronomio", 31), p(5, "Deuteronomio", 32), p(5, "Deuteronomio", 33))),
+        d(58, "Día 58: Deuteronomio 34, Josué 1-2", "Deuteronomio 34, Josué 1-2", 5, 34, listOf(p(5, "Deuteronomio", 34), p(6, "Josué", 1), p(6, "Josué", 2))),
+        d(59, "Día 59: Josué 3-5", "Josué 3-5", 6, 3, listOf(p(6, "Josué", 3), p(6, "Josué", 4), p(6, "Josué", 5))),
+        d(60, "Día 60: Josué 6-8", "Josué 6-8", 6, 6, listOf(p(6, "Josué", 6), p(6, "Josué", 7), p(6, "Josué", 8))),
+        d(61, "Día 61: Josué 9-12", "Josué 9-12", 6, 9, listOf(p(6, "Josué", 9), p(6, "Josué", 10), p(6, "Josué", 11), p(6, "Josué", 12))),
+        d(62, "Día 62: Josué 13-15", "Josué 13-15", 6, 13, listOf(p(6, "Josué", 13), p(6, "Josué", 14), p(6, "Josué", 15))),
+        d(63, "Día 63: Josué 16-18", "Josué 16-18", 6, 16, listOf(p(6, "Josué", 16), p(6, "Josué", 17), p(6, "Josué", 18))),
+        d(64, "Día 64: Josué 19-21", "Josué 19-21", 6, 19, listOf(p(6, "Josué", 19), p(6, "Josué", 20), p(6, "Josué", 21))),
+        d(65, "Día 65: Josué 22-24, Jueces 1", "Josué 22-24, Jueces 1", 6, 22, listOf(p(6, "Josué", 22), p(6, "Josué", 23), p(6, "Josué", 24), p(7, "Jueces", 1))),
+        d(66, "Día 66: Jueces 2-4", "Jueces 2-4", 7, 2, listOf(p(7, "Jueces", 2), p(7, "Jueces", 3), p(7, "Jueces", 4))),
+        d(67, "Día 67: Jueces 5-7", "Jueces 5-7", 7, 5, listOf(p(7, "Jueces", 5), p(7, "Jueces", 6), p(7, "Jueces", 7))),
+        d(68, "Día 68: Jueces 8-11", "Jueces 8-11", 7, 8, listOf(p(7, "Jueces", 8), p(7, "Jueces", 9), p(7, "Jueces", 10), p(7, "Jueces", 11))),
+        d(69, "Día 69: Jueces 12-14", "Jueces 12-14", 7, 12, listOf(p(7, "Jueces", 12), p(7, "Jueces", 13), p(7, "Jueces", 14))),
+        d(70, "Día 70: Jueces 15-17", "Jueces 15-17", 7, 15, listOf(p(7, "Jueces", 15), p(7, "Jueces", 16), p(7, "Jueces", 17))),
+        d(71, "Día 71: Jueces 18-20", "Jueces 18-20", 7, 18, listOf(p(7, "Jueces", 18), p(7, "Jueces", 19), p(7, "Jueces", 20))),
+        d(72, "Día 72: Jueces 21, Rut 1-3", "Jueces 21, Rut 1-3", 7, 21, listOf(p(7, "Jueces", 21), p(8, "Rut", 1), p(8, "Rut", 2), p(8, "Rut", 3))),
+        d(73, "Día 73: Rut 4, 1 Samuel 1-2", "Rut 4, 1 Samuel 1-2", 8, 4, listOf(p(8, "Rut", 4), p(9, "1 Samuel", 1), p(9, "1 Samuel", 2))),
+        d(74, "Día 74: 1 Samuel 3-5", "1 Samuel 3-5", 9, 3, listOf(p(9, "1 Samuel", 3), p(9, "1 Samuel", 4), p(9, "1 Samuel", 5))),
+        d(75, "Día 75: 1 Samuel 6-8", "1 Samuel 6-8", 9, 6, listOf(p(9, "1 Samuel", 6), p(9, "1 Samuel", 7), p(9, "1 Samuel", 8))),
+        d(76, "Día 76: 1 Samuel 9-12", "1 Samuel 9-12", 9, 9, listOf(p(9, "1 Samuel", 9), p(9, "1 Samuel", 10), p(9, "1 Samuel", 11), p(9, "1 Samuel", 12))),
+        d(77, "Día 77: 1 Samuel 13-15", "1 Samuel 13-15", 9, 13, listOf(p(9, "1 Samuel", 13), p(9, "1 Samuel", 14), p(9, "1 Samuel", 15))),
+        d(78, "Día 78: 1 Samuel 16-18", "1 Samuel 16-18", 9, 16, listOf(p(9, "1 Samuel", 16), p(9, "1 Samuel", 17), p(9, "1 Samuel", 18))),
+        d(79, "Día 79: 1 Samuel 19-21", "1 Samuel 19-21", 9, 19, listOf(p(9, "1 Samuel", 19), p(9, "1 Samuel", 20), p(9, "1 Samuel", 21))),
+        d(80, "Día 80: 1 Samuel 22-25", "1 Samuel 22-25", 9, 22, listOf(p(9, "1 Samuel", 22), p(9, "1 Samuel", 23), p(9, "1 Samuel", 24), p(9, "1 Samuel", 25))),
+    )
+
+    private fun traditionalBlock3(): List<ReadingPlanDay> = listOf(
+        d(81, "Día 81: 1 Samuel 26-28", "1 Samuel 26-28", 9, 26, listOf(p(9, "1 Samuel", 26), p(9, "1 Samuel", 27), p(9, "1 Samuel", 28))),
+        d(82, "Día 82: 1 Samuel 29-31", "1 Samuel 29-31", 9, 29, listOf(p(9, "1 Samuel", 29), p(9, "1 Samuel", 30), p(9, "1 Samuel", 31))),
+        d(83, "Día 83: 2 Samuel 1-3", "2 Samuel 1-3", 10, 1, listOf(p(10, "2 Samuel", 1), p(10, "2 Samuel", 2), p(10, "2 Samuel", 3))),
+        d(84, "Día 84: 2 Samuel 4-7", "2 Samuel 4-7", 10, 4, listOf(p(10, "2 Samuel", 4), p(10, "2 Samuel", 5), p(10, "2 Samuel", 6), p(10, "2 Samuel", 7))),
+        d(85, "Día 85: 2 Samuel 8-10", "2 Samuel 8-10", 10, 8, listOf(p(10, "2 Samuel", 8), p(10, "2 Samuel", 9), p(10, "2 Samuel", 10))),
+        d(86, "Día 86: 2 Samuel 11-13", "2 Samuel 11-13", 10, 11, listOf(p(10, "2 Samuel", 11), p(10, "2 Samuel", 12), p(10, "2 Samuel", 13))),
+        d(87, "Día 87: 2 Samuel 14-16", "2 Samuel 14-16", 10, 14, listOf(p(10, "2 Samuel", 14), p(10, "2 Samuel", 15), p(10, "2 Samuel", 16))),
+        d(88, "Día 88: 2 Samuel 17-20", "2 Samuel 17-20", 10, 17, listOf(p(10, "2 Samuel", 17), p(10, "2 Samuel", 18), p(10, "2 Samuel", 19), p(10, "2 Samuel", 20))),
+        d(89, "Día 89: 2 Samuel 21-23", "2 Samuel 21-23", 10, 21, listOf(p(10, "2 Samuel", 21), p(10, "2 Samuel", 22), p(10, "2 Samuel", 23))),
+        d(90, "Día 90: 2 Samuel 24, 1 Reyes 1-2", "2 Samuel 24, 1 Reyes 1-2", 10, 24, listOf(p(10, "2 Samuel", 24), p(11, "1 Reyes", 1), p(11, "1 Reyes", 2))),
+        d(91, "Día 91: 1 Reyes 3-5", "1 Reyes 3-5", 11, 3, listOf(p(11, "1 Reyes", 3), p(11, "1 Reyes", 4), p(11, "1 Reyes", 5))),
+        d(92, "Día 92: 1 Reyes 6-9", "1 Reyes 6-9", 11, 6, listOf(p(11, "1 Reyes", 6), p(11, "1 Reyes", 7), p(11, "1 Reyes", 8), p(11, "1 Reyes", 9))),
+        d(93, "Día 93: 1 Reyes 10-12", "1 Reyes 10-12", 11, 10, listOf(p(11, "1 Reyes", 10), p(11, "1 Reyes", 11), p(11, "1 Reyes", 12))),
+        d(94, "Día 94: 1 Reyes 13-15", "1 Reyes 13-15", 11, 13, listOf(p(11, "1 Reyes", 13), p(11, "1 Reyes", 14), p(11, "1 Reyes", 15))),
+        d(95, "Día 95: 1 Reyes 16-18", "1 Reyes 16-18", 11, 16, listOf(p(11, "1 Reyes", 16), p(11, "1 Reyes", 17), p(11, "1 Reyes", 18))),
+        d(96, "Día 96: 1 Reyes 19-22", "1 Reyes 19-22", 11, 19, listOf(p(11, "1 Reyes", 19), p(11, "1 Reyes", 20), p(11, "1 Reyes", 21), p(11, "1 Reyes", 22))),
+        d(97, "Día 97: 2 Reyes 1-3", "2 Reyes 1-3", 12, 1, listOf(p(12, "2 Reyes", 1), p(12, "2 Reyes", 2), p(12, "2 Reyes", 3))),
+        d(98, "Día 98: 2 Reyes 4-6", "2 Reyes 4-6", 12, 4, listOf(p(12, "2 Reyes", 4), p(12, "2 Reyes", 5), p(12, "2 Reyes", 6))),
+        d(99, "Día 99: 2 Reyes 7-9", "2 Reyes 7-9", 12, 7, listOf(p(12, "2 Reyes", 7), p(12, "2 Reyes", 8), p(12, "2 Reyes", 9))),
+        d(100, "Día 100: 2 Reyes 10-13", "2 Reyes 10-13", 12, 10, listOf(p(12, "2 Reyes", 10), p(12, "2 Reyes", 11), p(12, "2 Reyes", 12), p(12, "2 Reyes", 13))),
+        d(101, "Día 101: 2 Reyes 14-16", "2 Reyes 14-16", 12, 14, listOf(p(12, "2 Reyes", 14), p(12, "2 Reyes", 15), p(12, "2 Reyes", 16))),
+        d(102, "Día 102: 2 Reyes 17-19", "2 Reyes 17-19", 12, 17, listOf(p(12, "2 Reyes", 17), p(12, "2 Reyes", 18), p(12, "2 Reyes", 19))),
+        d(103, "Día 103: 2 Reyes 20-23", "2 Reyes 20-23", 12, 20, listOf(p(12, "2 Reyes", 20), p(12, "2 Reyes", 21), p(12, "2 Reyes", 22), p(12, "2 Reyes", 23))),
+        d(104, "Día 104: 2 Reyes 24-25, 1 Crónicas 1", "2 Reyes 24-25, 1 Crónicas 1", 12, 24, listOf(p(12, "2 Reyes", 24), p(12, "2 Reyes", 25), p(13, "1 Crónicas", 1))),
+        d(105, "Día 105: 1 Crónicas 2-4", "1 Crónicas 2-4", 13, 2, listOf(p(13, "1 Crónicas", 2), p(13, "1 Crónicas", 3), p(13, "1 Crónicas", 4))),
+        d(106, "Día 106: 1 Crónicas 5-7", "1 Crónicas 5-7", 13, 5, listOf(p(13, "1 Crónicas", 5), p(13, "1 Crónicas", 6), p(13, "1 Crónicas", 7))),
+        d(107, "Día 107: 1 Crónicas 8-11", "1 Crónicas 8-11", 13, 8, listOf(p(13, "1 Crónicas", 8), p(13, "1 Crónicas", 9), p(13, "1 Crónicas", 10), p(13, "1 Crónicas", 11))),
+        d(108, "Día 108: 1 Crónicas 12-14", "1 Crónicas 12-14", 13, 12, listOf(p(13, "1 Crónicas", 12), p(13, "1 Crónicas", 13), p(13, "1 Crónicas", 14))),
+        d(109, "Día 109: 1 Crónicas 15-17", "1 Crónicas 15-17", 13, 15, listOf(p(13, "1 Crónicas", 15), p(13, "1 Crónicas", 16), p(13, "1 Crónicas", 17))),
+        d(110, "Día 110: 1 Crónicas 18-20", "1 Crónicas 18-20", 13, 18, listOf(p(13, "1 Crónicas", 18), p(13, "1 Crónicas", 19), p(13, "1 Crónicas", 20))),
+        d(111, "Día 111: 1 Crónicas 21-24", "1 Crónicas 21-24", 13, 21, listOf(p(13, "1 Crónicas", 21), p(13, "1 Crónicas", 22), p(13, "1 Crónicas", 23), p(13, "1 Crónicas", 24))),
+        d(112, "Día 112: 1 Crónicas 25-27", "1 Crónicas 25-27", 13, 25, listOf(p(13, "1 Crónicas", 25), p(13, "1 Crónicas", 26), p(13, "1 Crónicas", 27))),
+        d(113, "Día 113: 1 Crónicas 28-29, 2 Crónicas 1", "1 Crónicas 28-29, 2 Crónicas 1", 13, 28, listOf(p(13, "1 Crónicas", 28), p(13, "1 Crónicas", 29), p(14, "2 Crónicas", 1))),
+        d(114, "Día 114: 2 Crónicas 2-4", "2 Crónicas 2-4", 14, 2, listOf(p(14, "2 Crónicas", 2), p(14, "2 Crónicas", 3), p(14, "2 Crónicas", 4))),
+        d(115, "Día 115: 2 Crónicas 5-8", "2 Crónicas 5-8", 14, 5, listOf(p(14, "2 Crónicas", 5), p(14, "2 Crónicas", 6), p(14, "2 Crónicas", 7), p(14, "2 Crónicas", 8))),
+        d(116, "Día 116: 2 Crónicas 9-11", "2 Crónicas 9-11", 14, 9, listOf(p(14, "2 Crónicas", 9), p(14, "2 Crónicas", 10), p(14, "2 Crónicas", 11))),
+        d(117, "Día 117: 2 Crónicas 12-14", "2 Crónicas 12-14", 14, 12, listOf(p(14, "2 Crónicas", 12), p(14, "2 Crónicas", 13), p(14, "2 Crónicas", 14))),
+        d(118, "Día 118: 2 Crónicas 15-17", "2 Crónicas 15-17", 14, 15, listOf(p(14, "2 Crónicas", 15), p(14, "2 Crónicas", 16), p(14, "2 Crónicas", 17))),
+        d(119, "Día 119: 2 Crónicas 18-21", "2 Crónicas 18-21", 14, 18, listOf(p(14, "2 Crónicas", 18), p(14, "2 Crónicas", 19), p(14, "2 Crónicas", 20), p(14, "2 Crónicas", 21))),
+        d(120, "Día 120: 2 Crónicas 22-24", "2 Crónicas 22-24", 14, 22, listOf(p(14, "2 Crónicas", 22), p(14, "2 Crónicas", 23), p(14, "2 Crónicas", 24))),
+    )
+
+    private fun traditionalBlock4(): List<ReadingPlanDay> = listOf(
+        d(121, "Día 121: 2 Crónicas 25-27", "2 Crónicas 25-27", 14, 25, listOf(p(14, "2 Crónicas", 25), p(14, "2 Crónicas", 26), p(14, "2 Crónicas", 27))),
+        d(122, "Día 122: 2 Crónicas 28-30", "2 Crónicas 28-30", 14, 28, listOf(p(14, "2 Crónicas", 28), p(14, "2 Crónicas", 29), p(14, "2 Crónicas", 30))),
+        d(123, "Día 123: 2 Crónicas 31-34", "2 Crónicas 31-34", 14, 31, listOf(p(14, "2 Crónicas", 31), p(14, "2 Crónicas", 32), p(14, "2 Crónicas", 33), p(14, "2 Crónicas", 34))),
+        d(124, "Día 124: 2 Crónicas 35-36, Esdras 1", "2 Crónicas 35-36, Esdras 1", 14, 35, listOf(p(14, "2 Crónicas", 35), p(14, "2 Crónicas", 36), p(15, "Esdras", 1))),
+        d(125, "Día 125: Esdras 2-4", "Esdras 2-4", 15, 2, listOf(p(15, "Esdras", 2), p(15, "Esdras", 3), p(15, "Esdras", 4))),
+        d(126, "Día 126: Esdras 5-7", "Esdras 5-7", 15, 5, listOf(p(15, "Esdras", 5), p(15, "Esdras", 6), p(15, "Esdras", 7))),
+        d(127, "Día 127: Esdras 8-10, Nehemías 1", "Esdras 8-10, Nehemías 1", 15, 8, listOf(p(15, "Esdras", 8), p(15, "Esdras", 9), p(15, "Esdras", 10), p(16, "Nehemías", 1))),
+        d(128, "Día 128: Nehemías 2-4", "Nehemías 2-4", 16, 2, listOf(p(16, "Nehemías", 2), p(16, "Nehemías", 3), p(16, "Nehemías", 4))),
+        d(129, "Día 129: Nehemías 5-7", "Nehemías 5-7", 16, 5, listOf(p(16, "Nehemías", 5), p(16, "Nehemías", 6), p(16, "Nehemías", 7))),
+        d(130, "Día 130: Nehemías 8-10", "Nehemías 8-10", 16, 8, listOf(p(16, "Nehemías", 8), p(16, "Nehemías", 9), p(16, "Nehemías", 10))),
+        d(131, "Día 131: Nehemías 11-13, Ester 1", "Nehemías 11-13, Ester 1", 16, 11, listOf(p(16, "Nehemías", 11), p(16, "Nehemías", 12), p(16, "Nehemías", 13), p(17, "Ester", 1))),
+        d(132, "Día 132: Ester 2-4", "Ester 2-4", 17, 2, listOf(p(17, "Ester", 2), p(17, "Ester", 3), p(17, "Ester", 4))),
+        d(133, "Día 133: Ester 5-7", "Ester 5-7", 17, 5, listOf(p(17, "Ester", 5), p(17, "Ester", 6), p(17, "Ester", 7))),
+        d(134, "Día 134: Ester 8-10, Job 1", "Ester 8-10, Job 1", 17, 8, listOf(p(17, "Ester", 8), p(17, "Ester", 9), p(17, "Ester", 10), p(18, "Job", 1))),
+        d(135, "Día 135: Job 2-4", "Job 2-4", 18, 2, listOf(p(18, "Job", 2), p(18, "Job", 3), p(18, "Job", 4))),
+        d(136, "Día 136: Job 5-7", "Job 5-7", 18, 5, listOf(p(18, "Job", 5), p(18, "Job", 6), p(18, "Job", 7))),
+        d(137, "Día 137: Job 8-10", "Job 8-10", 18, 8, listOf(p(18, "Job", 8), p(18, "Job", 9), p(18, "Job", 10))),
+        d(138, "Día 138: Job 11-14", "Job 11-14", 18, 11, listOf(p(18, "Job", 11), p(18, "Job", 12), p(18, "Job", 13), p(18, "Job", 14))),
+        d(139, "Día 139: Job 15-17", "Job 15-17", 18, 15, listOf(p(18, "Job", 15), p(18, "Job", 16), p(18, "Job", 17))),
+        d(140, "Día 140: Job 18-20", "Job 18-20", 18, 18, listOf(p(18, "Job", 18), p(18, "Job", 19), p(18, "Job", 20))),
+        d(141, "Día 141: Job 21-23", "Job 21-23", 18, 21, listOf(p(18, "Job", 21), p(18, "Job", 22), p(18, "Job", 23))),
+        d(142, "Día 142: Job 24-27", "Job 24-27", 18, 24, listOf(p(18, "Job", 24), p(18, "Job", 25), p(18, "Job", 26), p(18, "Job", 27))),
+        d(143, "Día 143: Job 28-30", "Job 28-30", 18, 28, listOf(p(18, "Job", 28), p(18, "Job", 29), p(18, "Job", 30))),
+        d(144, "Día 144: Job 31-33", "Job 31-33", 18, 31, listOf(p(18, "Job", 31), p(18, "Job", 32), p(18, "Job", 33))),
+        d(145, "Día 145: Job 34-36", "Job 34-36", 18, 34, listOf(p(18, "Job", 34), p(18, "Job", 35), p(18, "Job", 36))),
+        d(146, "Día 146: Job 37-40", "Job 37-40", 18, 37, listOf(p(18, "Job", 37), p(18, "Job", 38), p(18, "Job", 39), p(18, "Job", 40))),
+        d(147, "Día 147: Job 41-42, Salmos 1", "Job 41-42, Salmos 1", 18, 41, listOf(p(18, "Job", 41), p(18, "Job", 42), p(19, "Salmos", 1))),
+        d(148, "Día 148: Salmos 2-4", "Salmos 2-4", 19, 2, listOf(p(19, "Salmos", 2), p(19, "Salmos", 3), p(19, "Salmos", 4))),
+        d(149, "Día 149: Salmos 5-7", "Salmos 5-7", 19, 5, listOf(p(19, "Salmos", 5), p(19, "Salmos", 6), p(19, "Salmos", 7))),
+        d(150, "Día 150: Salmos 8-11", "Salmos 8-11", 19, 8, listOf(p(19, "Salmos", 8), p(19, "Salmos", 9), p(19, "Salmos", 10), p(19, "Salmos", 11))),
+        d(151, "Día 151: Salmos 12-14", "Salmos 12-14", 19, 12, listOf(p(19, "Salmos", 12), p(19, "Salmos", 13), p(19, "Salmos", 14))),
+        d(152, "Día 152: Salmos 15-17", "Salmos 15-17", 19, 15, listOf(p(19, "Salmos", 15), p(19, "Salmos", 16), p(19, "Salmos", 17))),
+        d(153, "Día 153: Salmos 18-20", "Salmos 18-20", 19, 18, listOf(p(19, "Salmos", 18), p(19, "Salmos", 19), p(19, "Salmos", 20))),
+        d(154, "Día 154: Salmos 21-24", "Salmos 21-24", 19, 21, listOf(p(19, "Salmos", 21), p(19, "Salmos", 22), p(19, "Salmos", 23), p(19, "Salmos", 24))),
+        d(155, "Día 155: Salmos 25-27", "Salmos 25-27", 19, 25, listOf(p(19, "Salmos", 25), p(19, "Salmos", 26), p(19, "Salmos", 27))),
+        d(156, "Día 156: Salmos 28-30", "Salmos 28-30", 19, 28, listOf(p(19, "Salmos", 28), p(19, "Salmos", 29), p(19, "Salmos", 30))),
+        d(157, "Día 157: Salmos 31-33", "Salmos 31-33", 19, 31, listOf(p(19, "Salmos", 31), p(19, "Salmos", 32), p(19, "Salmos", 33))),
+        d(158, "Día 158: Salmos 34-37", "Salmos 34-37", 19, 34, listOf(p(19, "Salmos", 34), p(19, "Salmos", 35), p(19, "Salmos", 36), p(19, "Salmos", 37))),
+        d(159, "Día 159: Salmos 38-40", "Salmos 38-40", 19, 38, listOf(p(19, "Salmos", 38), p(19, "Salmos", 39), p(19, "Salmos", 40))),
+        d(160, "Día 160: Salmos 41-43", "Salmos 41-43", 19, 41, listOf(p(19, "Salmos", 41), p(19, "Salmos", 42), p(19, "Salmos", 43))),
+    )
+
+    private fun traditionalBlock5(): List<ReadingPlanDay> = listOf(
+        d(161, "Día 161: Salmos 44-46", "Salmos 44-46", 19, 44, listOf(p(19, "Salmos", 44), p(19, "Salmos", 45), p(19, "Salmos", 46))),
+        d(162, "Día 162: Salmos 47-50", "Salmos 47-50", 19, 47, listOf(p(19, "Salmos", 47), p(19, "Salmos", 48), p(19, "Salmos", 49), p(19, "Salmos", 50))),
+        d(163, "Día 163: Salmos 51-53", "Salmos 51-53", 19, 51, listOf(p(19, "Salmos", 51), p(19, "Salmos", 52), p(19, "Salmos", 53))),
+        d(164, "Día 164: Salmos 54-56", "Salmos 54-56", 19, 54, listOf(p(19, "Salmos", 54), p(19, "Salmos", 55), p(19, "Salmos", 56))),
+        d(165, "Día 165: Salmos 57-59", "Salmos 57-59", 19, 57, listOf(p(19, "Salmos", 57), p(19, "Salmos", 58), p(19, "Salmos", 59))),
+        d(166, "Día 166: Salmos 60-63", "Salmos 60-63", 19, 60, listOf(p(19, "Salmos", 60), p(19, "Salmos", 61), p(19, "Salmos", 62), p(19, "Salmos", 63))),
+        d(167, "Día 167: Salmos 64-66", "Salmos 64-66", 19, 64, listOf(p(19, "Salmos", 64), p(19, "Salmos", 65), p(19, "Salmos", 66))),
+        d(168, "Día 168: Salmos 67-69", "Salmos 67-69", 19, 67, listOf(p(19, "Salmos", 67), p(19, "Salmos", 68), p(19, "Salmos", 69))),
+        d(169, "Día 169: Salmos 70-73", "Salmos 70-73", 19, 70, listOf(p(19, "Salmos", 70), p(19, "Salmos", 71), p(19, "Salmos", 72), p(19, "Salmos", 73))),
+        d(170, "Día 170: Salmos 74-76", "Salmos 74-76", 19, 74, listOf(p(19, "Salmos", 74), p(19, "Salmos", 75), p(19, "Salmos", 76))),
+        d(171, "Día 171: Salmos 77-79", "Salmos 77-79", 19, 77, listOf(p(19, "Salmos", 77), p(19, "Salmos", 78), p(19, "Salmos", 79))),
+        d(172, "Día 172: Salmos 80-82", "Salmos 80-82", 19, 80, listOf(p(19, "Salmos", 80), p(19, "Salmos", 81), p(19, "Salmos", 82))),
+        d(173, "Día 173: Salmos 83-86", "Salmos 83-86", 19, 83, listOf(p(19, "Salmos", 83), p(19, "Salmos", 84), p(19, "Salmos", 85), p(19, "Salmos", 86))),
+        d(174, "Día 174: Salmos 87-89", "Salmos 87-89", 19, 87, listOf(p(19, "Salmos", 87), p(19, "Salmos", 88), p(19, "Salmos", 89))),
+        d(175, "Día 175: Salmos 90-92", "Salmos 90-92", 19, 90, listOf(p(19, "Salmos", 90), p(19, "Salmos", 91), p(19, "Salmos", 92))),
+        d(176, "Día 176: Salmos 93-95", "Salmos 93-95", 19, 93, listOf(p(19, "Salmos", 93), p(19, "Salmos", 94), p(19, "Salmos", 95))),
+        d(177, "Día 177: Salmos 96-99", "Salmos 96-99", 19, 96, listOf(p(19, "Salmos", 96), p(19, "Salmos", 97), p(19, "Salmos", 98), p(19, "Salmos", 99))),
+        d(178, "Día 178: Salmos 100-102", "Salmos 100-102", 19, 100, listOf(p(19, "Salmos", 100), p(19, "Salmos", 101), p(19, "Salmos", 102))),
+        d(179, "Día 179: Salmos 103-105", "Salmos 103-105", 19, 103, listOf(p(19, "Salmos", 103), p(19, "Salmos", 104), p(19, "Salmos", 105))),
+        d(180, "Día 180: Salmos 106-108", "Salmos 106-108", 19, 106, listOf(p(19, "Salmos", 106), p(19, "Salmos", 107), p(19, "Salmos", 108))),
+        d(181, "Día 181: Salmos 109-112", "Salmos 109-112", 19, 109, listOf(p(19, "Salmos", 109), p(19, "Salmos", 110), p(19, "Salmos", 111), p(19, "Salmos", 112))),
+        d(182, "Día 182: Salmos 113-115", "Salmos 113-115", 19, 113, listOf(p(19, "Salmos", 113), p(19, "Salmos", 114), p(19, "Salmos", 115))),
+        d(183, "Día 183: Salmos 116-118", "Salmos 116-118", 19, 116, listOf(p(19, "Salmos", 116), p(19, "Salmos", 117), p(19, "Salmos", 118))),
+        d(184, "Día 184: Salmos 119-121", "Salmos 119-121", 19, 119, listOf(p(19, "Salmos", 119), p(19, "Salmos", 120), p(19, "Salmos", 121))),
+        d(185, "Día 185: Salmos 122-125", "Salmos 122-125", 19, 122, listOf(p(19, "Salmos", 122), p(19, "Salmos", 123), p(19, "Salmos", 124), p(19, "Salmos", 125))),
+        d(186, "Día 186: Salmos 126-128", "Salmos 126-128", 19, 126, listOf(p(19, "Salmos", 126), p(19, "Salmos", 127), p(19, "Salmos", 128))),
+        d(187, "Día 187: Salmos 129-131", "Salmos 129-131", 19, 129, listOf(p(19, "Salmos", 129), p(19, "Salmos", 130), p(19, "Salmos", 131))),
+        d(188, "Día 188: Salmos 132-134", "Salmos 132-134", 19, 132, listOf(p(19, "Salmos", 132), p(19, "Salmos", 133), p(19, "Salmos", 134))),
+        d(189, "Día 189: Salmos 135-138", "Salmos 135-138", 19, 135, listOf(p(19, "Salmos", 135), p(19, "Salmos", 136), p(19, "Salmos", 137), p(19, "Salmos", 138))),
+        d(190, "Día 190: Salmos 139-141", "Salmos 139-141", 19, 139, listOf(p(19, "Salmos", 139), p(19, "Salmos", 140), p(19, "Salmos", 141))),
+        d(191, "Día 191: Salmos 142-144", "Salmos 142-144", 19, 142, listOf(p(19, "Salmos", 142), p(19, "Salmos", 143), p(19, "Salmos", 144))),
+        d(192, "Día 192: Salmos 145-147", "Salmos 145-147", 19, 145, listOf(p(19, "Salmos", 145), p(19, "Salmos", 146), p(19, "Salmos", 147))),
+        d(193, "Día 193: Salmos 148-150, Proverbios 1", "Salmos 148-150, Proverbios 1", 19, 148, listOf(p(19, "Salmos", 148), p(19, "Salmos", 149), p(19, "Salmos", 150), p(20, "Proverbios", 1))),
+        d(194, "Día 194: Proverbios 2-4", "Proverbios 2-4", 20, 2, listOf(p(20, "Proverbios", 2), p(20, "Proverbios", 3), p(20, "Proverbios", 4))),
+        d(195, "Día 195: Proverbios 5-7", "Proverbios 5-7", 20, 5, listOf(p(20, "Proverbios", 5), p(20, "Proverbios", 6), p(20, "Proverbios", 7))),
+        d(196, "Día 196: Proverbios 8-10", "Proverbios 8-10", 20, 8, listOf(p(20, "Proverbios", 8), p(20, "Proverbios", 9), p(20, "Proverbios", 10))),
+        d(197, "Día 197: Proverbios 11-14", "Proverbios 11-14", 20, 11, listOf(p(20, "Proverbios", 11), p(20, "Proverbios", 12), p(20, "Proverbios", 13), p(20, "Proverbios", 14))),
+        d(198, "Día 198: Proverbios 15-17", "Proverbios 15-17", 20, 15, listOf(p(20, "Proverbios", 15), p(20, "Proverbios", 16), p(20, "Proverbios", 17))),
+        d(199, "Día 199: Proverbios 18-20", "Proverbios 18-20", 20, 18, listOf(p(20, "Proverbios", 18), p(20, "Proverbios", 19), p(20, "Proverbios", 20))),
+        d(200, "Día 200: Proverbios 21-24", "Proverbios 21-24", 20, 21, listOf(p(20, "Proverbios", 21), p(20, "Proverbios", 22), p(20, "Proverbios", 23), p(20, "Proverbios", 24))),
+    )
+
+    private fun traditionalBlock6(): List<ReadingPlanDay> = listOf(
+        d(201, "Día 201: Proverbios 25-27", "Proverbios 25-27", 20, 25, listOf(p(20, "Proverbios", 25), p(20, "Proverbios", 26), p(20, "Proverbios", 27))),
+        d(202, "Día 202: Proverbios 28-30", "Proverbios 28-30", 20, 28, listOf(p(20, "Proverbios", 28), p(20, "Proverbios", 29), p(20, "Proverbios", 30))),
+        d(203, "Día 203: Proverbios 31, Eclesiastés 1-2", "Proverbios 31, Eclesiastés 1-2", 20, 31, listOf(p(20, "Proverbios", 31), p(21, "Eclesiastés", 1), p(21, "Eclesiastés", 2))),
+        d(204, "Día 204: Eclesiastés 3-6", "Eclesiastés 3-6", 21, 3, listOf(p(21, "Eclesiastés", 3), p(21, "Eclesiastés", 4), p(21, "Eclesiastés", 5), p(21, "Eclesiastés", 6))),
+        d(205, "Día 205: Eclesiastés 7-9", "Eclesiastés 7-9", 21, 7, listOf(p(21, "Eclesiastés", 7), p(21, "Eclesiastés", 8), p(21, "Eclesiastés", 9))),
+        d(206, "Día 206: Eclesiastés 10-12", "Eclesiastés 10-12", 21, 10, listOf(p(21, "Eclesiastés", 10), p(21, "Eclesiastés", 11), p(21, "Eclesiastés", 12))),
+        d(207, "Día 207: Cantares 1-3", "Cantares 1-3", 22, 1, listOf(p(22, "Cantares", 1), p(22, "Cantares", 2), p(22, "Cantares", 3))),
+        d(208, "Día 208: Cantares 4-7", "Cantares 4-7", 22, 4, listOf(p(22, "Cantares", 4), p(22, "Cantares", 5), p(22, "Cantares", 6), p(22, "Cantares", 7))),
+        d(209, "Día 209: Cantares 8, Isaías 1-2", "Cantares 8, Isaías 1-2", 22, 8, listOf(p(22, "Cantares", 8), p(23, "Isaías", 1), p(23, "Isaías", 2))),
+        d(210, "Día 210: Isaías 3-5", "Isaías 3-5", 23, 3, listOf(p(23, "Isaías", 3), p(23, "Isaías", 4), p(23, "Isaías", 5))),
+        d(211, "Día 211: Isaías 6-8", "Isaías 6-8", 23, 6, listOf(p(23, "Isaías", 6), p(23, "Isaías", 7), p(23, "Isaías", 8))),
+        d(212, "Día 212: Isaías 9-12", "Isaías 9-12", 23, 9, listOf(p(23, "Isaías", 9), p(23, "Isaías", 10), p(23, "Isaías", 11), p(23, "Isaías", 12))),
+        d(213, "Día 213: Isaías 13-15", "Isaías 13-15", 23, 13, listOf(p(23, "Isaías", 13), p(23, "Isaías", 14), p(23, "Isaías", 15))),
+        d(214, "Día 214: Isaías 16-18", "Isaías 16-18", 23, 16, listOf(p(23, "Isaías", 16), p(23, "Isaías", 17), p(23, "Isaías", 18))),
+        d(215, "Día 215: Isaías 19-21", "Isaías 19-21", 23, 19, listOf(p(23, "Isaías", 19), p(23, "Isaías", 20), p(23, "Isaías", 21))),
+        d(216, "Día 216: Isaías 22-25", "Isaías 22-25", 23, 22, listOf(p(23, "Isaías", 22), p(23, "Isaías", 23), p(23, "Isaías", 24), p(23, "Isaías", 25))),
+        d(217, "Día 217: Isaías 26-28", "Isaías 26-28", 23, 26, listOf(p(23, "Isaías", 26), p(23, "Isaías", 27), p(23, "Isaías", 28))),
+        d(218, "Día 218: Isaías 29-31", "Isaías 29-31", 23, 29, listOf(p(23, "Isaías", 29), p(23, "Isaías", 30), p(23, "Isaías", 31))),
+        d(219, "Día 219: Isaías 32-34", "Isaías 32-34", 23, 32, listOf(p(23, "Isaías", 32), p(23, "Isaías", 33), p(23, "Isaías", 34))),
+        d(220, "Día 220: Isaías 35-38", "Isaías 35-38", 23, 35, listOf(p(23, "Isaías", 35), p(23, "Isaías", 36), p(23, "Isaías", 37), p(23, "Isaías", 38))),
+        d(221, "Día 221: Isaías 39-41", "Isaías 39-41", 23, 39, listOf(p(23, "Isaías", 39), p(23, "Isaías", 40), p(23, "Isaías", 41))),
+        d(222, "Día 222: Isaías 42-44", "Isaías 42-44", 23, 42, listOf(p(23, "Isaías", 42), p(23, "Isaías", 43), p(23, "Isaías", 44))),
+        d(223, "Día 223: Isaías 45-47", "Isaías 45-47", 23, 45, listOf(p(23, "Isaías", 45), p(23, "Isaías", 46), p(23, "Isaías", 47))),
+        d(224, "Día 224: Isaías 48-51", "Isaías 48-51", 23, 48, listOf(p(23, "Isaías", 48), p(23, "Isaías", 49), p(23, "Isaías", 50), p(23, "Isaías", 51))),
+        d(225, "Día 225: Isaías 52-54", "Isaías 52-54", 23, 52, listOf(p(23, "Isaías", 52), p(23, "Isaías", 53), p(23, "Isaías", 54))),
+        d(226, "Día 226: Isaías 55-57", "Isaías 55-57", 23, 55, listOf(p(23, "Isaías", 55), p(23, "Isaías", 56), p(23, "Isaías", 57))),
+        d(227, "Día 227: Isaías 58-60", "Isaías 58-60", 23, 58, listOf(p(23, "Isaías", 58), p(23, "Isaías", 59), p(23, "Isaías", 60))),
+        d(228, "Día 228: Isaías 61-64", "Isaías 61-64", 23, 61, listOf(p(23, "Isaías", 61), p(23, "Isaías", 62), p(23, "Isaías", 63), p(23, "Isaías", 64))),
+        d(229, "Día 229: Isaías 65-66, Jeremías 1", "Isaías 65-66, Jeremías 1", 23, 65, listOf(p(23, "Isaías", 65), p(23, "Isaías", 66), p(24, "Jeremías", 1))),
+        d(230, "Día 230: Jeremías 2-4", "Jeremías 2-4", 24, 2, listOf(p(24, "Jeremías", 2), p(24, "Jeremías", 3), p(24, "Jeremías", 4))),
+        d(231, "Día 231: Jeremías 5-7", "Jeremías 5-7", 24, 5, listOf(p(24, "Jeremías", 5), p(24, "Jeremías", 6), p(24, "Jeremías", 7))),
+        d(232, "Día 232: Jeremías 8-11", "Jeremías 8-11", 24, 8, listOf(p(24, "Jeremías", 8), p(24, "Jeremías", 9), p(24, "Jeremías", 10), p(24, "Jeremías", 11))),
+        d(233, "Día 233: Jeremías 12-14", "Jeremías 12-14", 24, 12, listOf(p(24, "Jeremías", 12), p(24, "Jeremías", 13), p(24, "Jeremías", 14))),
+        d(234, "Día 234: Jeremías 15-17", "Jeremías 15-17", 24, 15, listOf(p(24, "Jeremías", 15), p(24, "Jeremías", 16), p(24, "Jeremías", 17))),
+        d(235, "Día 235: Jeremías 18-21", "Jeremías 18-21", 24, 18, listOf(p(24, "Jeremías", 18), p(24, "Jeremías", 19), p(24, "Jeremías", 20), p(24, "Jeremías", 21))),
+        d(236, "Día 236: Jeremías 22-24", "Jeremías 22-24", 24, 22, listOf(p(24, "Jeremías", 22), p(24, "Jeremías", 23), p(24, "Jeremías", 24))),
+        d(237, "Día 237: Jeremías 25-27", "Jeremías 25-27", 24, 25, listOf(p(24, "Jeremías", 25), p(24, "Jeremías", 26), p(24, "Jeremías", 27))),
+        d(238, "Día 238: Jeremías 28-30", "Jeremías 28-30", 24, 28, listOf(p(24, "Jeremías", 28), p(24, "Jeremías", 29), p(24, "Jeremías", 30))),
+        d(239, "Día 239: Jeremías 31-34", "Jeremías 31-34", 24, 31, listOf(p(24, "Jeremías", 31), p(24, "Jeremías", 32), p(24, "Jeremías", 33), p(24, "Jeremías", 34))),
+        d(240, "Día 240: Jeremías 35-37", "Jeremías 35-37", 24, 35, listOf(p(24, "Jeremías", 35), p(24, "Jeremías", 36), p(24, "Jeremías", 37))),
+    )
+
+    private fun traditionalBlock7(): List<ReadingPlanDay> = listOf(
+        d(241, "Día 241: Jeremías 38-40", "Jeremías 38-40", 24, 38, listOf(p(24, "Jeremías", 38), p(24, "Jeremías", 39), p(24, "Jeremías", 40))),
+        d(242, "Día 242: Jeremías 41-43", "Jeremías 41-43", 24, 41, listOf(p(24, "Jeremías", 41), p(24, "Jeremías", 42), p(24, "Jeremías", 43))),
+        d(243, "Día 243: Jeremías 44-47", "Jeremías 44-47", 24, 44, listOf(p(24, "Jeremías", 44), p(24, "Jeremías", 45), p(24, "Jeremías", 46), p(24, "Jeremías", 47))),
+        d(244, "Día 244: Jeremías 48-50", "Jeremías 48-50", 24, 48, listOf(p(24, "Jeremías", 48), p(24, "Jeremías", 49), p(24, "Jeremías", 50))),
+        d(245, "Día 245: Jeremías 51-52, Lamentaciones 1", "Jeremías 51-52, Lamentaciones 1", 24, 51, listOf(p(24, "Jeremías", 51), p(24, "Jeremías", 52), p(25, "Lamentaciones", 1))),
+        d(246, "Día 246: Lamentaciones 2-4", "Lamentaciones 2-4", 25, 2, listOf(p(25, "Lamentaciones", 2), p(25, "Lamentaciones", 3), p(25, "Lamentaciones", 4))),
+        d(247, "Día 247: Lamentaciones 5, Ezequiel 1-3", "Lamentaciones 5, Ezequiel 1-3", 25, 5, listOf(p(25, "Lamentaciones", 5), p(26, "Ezequiel", 1), p(26, "Ezequiel", 2), p(26, "Ezequiel", 3))),
+        d(248, "Día 248: Ezequiel 4-6", "Ezequiel 4-6", 26, 4, listOf(p(26, "Ezequiel", 4), p(26, "Ezequiel", 5), p(26, "Ezequiel", 6))),
+        d(249, "Día 249: Ezequiel 7-9", "Ezequiel 7-9", 26, 7, listOf(p(26, "Ezequiel", 7), p(26, "Ezequiel", 8), p(26, "Ezequiel", 9))),
+        d(250, "Día 250: Ezequiel 10-12", "Ezequiel 10-12", 26, 10, listOf(p(26, "Ezequiel", 10), p(26, "Ezequiel", 11), p(26, "Ezequiel", 12))),
+        d(251, "Día 251: Ezequiel 13-16", "Ezequiel 13-16", 26, 13, listOf(p(26, "Ezequiel", 13), p(26, "Ezequiel", 14), p(26, "Ezequiel", 15), p(26, "Ezequiel", 16))),
+        d(252, "Día 252: Ezequiel 17-19", "Ezequiel 17-19", 26, 17, listOf(p(26, "Ezequiel", 17), p(26, "Ezequiel", 18), p(26, "Ezequiel", 19))),
+        d(253, "Día 253: Ezequiel 20-22", "Ezequiel 20-22", 26, 20, listOf(p(26, "Ezequiel", 20), p(26, "Ezequiel", 21), p(26, "Ezequiel", 22))),
+        d(254, "Día 254: Ezequiel 23-25", "Ezequiel 23-25", 26, 23, listOf(p(26, "Ezequiel", 23), p(26, "Ezequiel", 24), p(26, "Ezequiel", 25))),
+        d(255, "Día 255: Ezequiel 26-29", "Ezequiel 26-29", 26, 26, listOf(p(26, "Ezequiel", 26), p(26, "Ezequiel", 27), p(26, "Ezequiel", 28), p(26, "Ezequiel", 29))),
+        d(256, "Día 256: Ezequiel 30-32", "Ezequiel 30-32", 26, 30, listOf(p(26, "Ezequiel", 30), p(26, "Ezequiel", 31), p(26, "Ezequiel", 32))),
+        d(257, "Día 257: Ezequiel 33-35", "Ezequiel 33-35", 26, 33, listOf(p(26, "Ezequiel", 33), p(26, "Ezequiel", 34), p(26, "Ezequiel", 35))),
+        d(258, "Día 258: Ezequiel 36-38", "Ezequiel 36-38", 26, 36, listOf(p(26, "Ezequiel", 36), p(26, "Ezequiel", 37), p(26, "Ezequiel", 38))),
+        d(259, "Día 259: Ezequiel 39-42", "Ezequiel 39-42", 26, 39, listOf(p(26, "Ezequiel", 39), p(26, "Ezequiel", 40), p(26, "Ezequiel", 41), p(26, "Ezequiel", 42))),
+        d(260, "Día 260: Ezequiel 43-45", "Ezequiel 43-45", 26, 43, listOf(p(26, "Ezequiel", 43), p(26, "Ezequiel", 44), p(26, "Ezequiel", 45))),
+        d(261, "Día 261: Ezequiel 46-48", "Ezequiel 46-48", 26, 46, listOf(p(26, "Ezequiel", 46), p(26, "Ezequiel", 47), p(26, "Ezequiel", 48))),
+        d(262, "Día 262: Daniel 1-3", "Daniel 1-3", 27, 1, listOf(p(27, "Daniel", 1), p(27, "Daniel", 2), p(27, "Daniel", 3))),
+        d(263, "Día 263: Daniel 4-7", "Daniel 4-7", 27, 4, listOf(p(27, "Daniel", 4), p(27, "Daniel", 5), p(27, "Daniel", 6), p(27, "Daniel", 7))),
+        d(264, "Día 264: Daniel 8-10", "Daniel 8-10", 27, 8, listOf(p(27, "Daniel", 8), p(27, "Daniel", 9), p(27, "Daniel", 10))),
+        d(265, "Día 265: Daniel 11-12, Oseas 1", "Daniel 11-12, Oseas 1", 27, 11, listOf(p(27, "Daniel", 11), p(27, "Daniel", 12), p(28, "Oseas", 1))),
+        d(266, "Día 266: Oseas 2-5", "Oseas 2-5", 28, 2, listOf(p(28, "Oseas", 2), p(28, "Oseas", 3), p(28, "Oseas", 4), p(28, "Oseas", 5))),
+        d(267, "Día 267: Oseas 6-8", "Oseas 6-8", 28, 6, listOf(p(28, "Oseas", 6), p(28, "Oseas", 7), p(28, "Oseas", 8))),
+        d(268, "Día 268: Oseas 9-11", "Oseas 9-11", 28, 9, listOf(p(28, "Oseas", 9), p(28, "Oseas", 10), p(28, "Oseas", 11))),
+        d(269, "Día 269: Oseas 12-14", "Oseas 12-14", 28, 12, listOf(p(28, "Oseas", 12), p(28, "Oseas", 13), p(28, "Oseas", 14))),
+        d(270, "Día 270: Joel 1-3, Amós 1", "Joel 1-3, Amós 1", 29, 1, listOf(p(29, "Joel", 1), p(29, "Joel", 2), p(29, "Joel", 3), p(30, "Amós", 1))),
+        d(271, "Día 271: Amós 2-4", "Amós 2-4", 30, 2, listOf(p(30, "Amós", 2), p(30, "Amós", 3), p(30, "Amós", 4))),
+        d(272, "Día 272: Amós 5-7", "Amós 5-7", 30, 5, listOf(p(30, "Amós", 5), p(30, "Amós", 6), p(30, "Amós", 7))),
+        d(273, "Día 273: Amós 8-9, Abdías 1", "Amós 8-9, Abdías 1", 30, 8, listOf(p(30, "Amós", 8), p(30, "Amós", 9), p(31, "Abdías", 1))),
+        d(274, "Día 274: Jonás 1-4", "Jonás 1-4", 32, 1, listOf(p(32, "Jonás", 1), p(32, "Jonás", 2), p(32, "Jonás", 3), p(32, "Jonás", 4))),
+        d(275, "Día 275: Miqueas 1-3", "Miqueas 1-3", 33, 1, listOf(p(33, "Miqueas", 1), p(33, "Miqueas", 2), p(33, "Miqueas", 3))),
+        d(276, "Día 276: Miqueas 4-6", "Miqueas 4-6", 33, 4, listOf(p(33, "Miqueas", 4), p(33, "Miqueas", 5), p(33, "Miqueas", 6))),
+        d(277, "Día 277: Miqueas 7, Nahúm 1-2", "Miqueas 7, Nahúm 1-2", 33, 7, listOf(p(33, "Miqueas", 7), p(34, "Nahúm", 1), p(34, "Nahúm", 2))),
+        d(278, "Día 278: Nahúm 3, Habacuc 1-3", "Nahúm 3, Habacuc 1-3", 34, 3, listOf(p(34, "Nahúm", 3), p(35, "Habacuc", 1), p(35, "Habacuc", 2), p(35, "Habacuc", 3))),
+        d(279, "Día 279: Sofonías 1-3", "Sofonías 1-3", 36, 1, listOf(p(36, "Sofonías", 1), p(36, "Sofonías", 2), p(36, "Sofonías", 3))),
+        d(280, "Día 280: Hageo 1-2, Zacarías 1", "Hageo 1-2, Zacarías 1", 37, 1, listOf(p(37, "Hageo", 1), p(37, "Hageo", 2), p(38, "Zacarías", 1))),
+    )
+
+    private fun traditionalBlock8(): List<ReadingPlanDay> = listOf(
+        d(281, "Día 281: Zacarías 2-4", "Zacarías 2-4", 38, 2, listOf(p(38, "Zacarías", 2), p(38, "Zacarías", 3), p(38, "Zacarías", 4))),
+        d(282, "Día 282: Zacarías 5-8", "Zacarías 5-8", 38, 5, listOf(p(38, "Zacarías", 5), p(38, "Zacarías", 6), p(38, "Zacarías", 7), p(38, "Zacarías", 8))),
+        d(283, "Día 283: Zacarías 9-11", "Zacarías 9-11", 38, 9, listOf(p(38, "Zacarías", 9), p(38, "Zacarías", 10), p(38, "Zacarías", 11))),
+        d(284, "Día 284: Zacarías 12-14", "Zacarías 12-14", 38, 12, listOf(p(38, "Zacarías", 12), p(38, "Zacarías", 13), p(38, "Zacarías", 14))),
+        d(285, "Día 285: Malaquías 1-3", "Malaquías 1-3", 39, 1, listOf(p(39, "Malaquías", 1), p(39, "Malaquías", 2), p(39, "Malaquías", 3))),
+        d(286, "Día 286: Malaquías 4, Mateo 1-3", "Malaquías 4, Mateo 1-3", 39, 4, listOf(p(39, "Malaquías", 4), p(40, "Mateo", 1), p(40, "Mateo", 2), p(40, "Mateo", 3))),
+        d(287, "Día 287: Mateo 4-6", "Mateo 4-6", 40, 4, listOf(p(40, "Mateo", 4), p(40, "Mateo", 5), p(40, "Mateo", 6))),
+        d(288, "Día 288: Mateo 7-9", "Mateo 7-9", 40, 7, listOf(p(40, "Mateo", 7), p(40, "Mateo", 8), p(40, "Mateo", 9))),
+        d(289, "Día 289: Mateo 10-12", "Mateo 10-12", 40, 10, listOf(p(40, "Mateo", 10), p(40, "Mateo", 11), p(40, "Mateo", 12))),
+        d(290, "Día 290: Mateo 13-16", "Mateo 13-16", 40, 13, listOf(p(40, "Mateo", 13), p(40, "Mateo", 14), p(40, "Mateo", 15), p(40, "Mateo", 16))),
+        d(291, "Día 291: Mateo 17-19", "Mateo 17-19", 40, 17, listOf(p(40, "Mateo", 17), p(40, "Mateo", 18), p(40, "Mateo", 19))),
+        d(292, "Día 292: Mateo 20-22", "Mateo 20-22", 40, 20, listOf(p(40, "Mateo", 20), p(40, "Mateo", 21), p(40, "Mateo", 22))),
+        d(293, "Día 293: Mateo 23-25", "Mateo 23-25", 40, 23, listOf(p(40, "Mateo", 23), p(40, "Mateo", 24), p(40, "Mateo", 25))),
+        d(294, "Día 294: Mateo 26-28, Marcos 1", "Mateo 26-28, Marcos 1", 40, 26, listOf(p(40, "Mateo", 26), p(40, "Mateo", 27), p(40, "Mateo", 28), p(41, "Marcos", 1))),
+        d(295, "Día 295: Marcos 2-4", "Marcos 2-4", 41, 2, listOf(p(41, "Marcos", 2), p(41, "Marcos", 3), p(41, "Marcos", 4))),
+        d(296, "Día 296: Marcos 5-7", "Marcos 5-7", 41, 5, listOf(p(41, "Marcos", 5), p(41, "Marcos", 6), p(41, "Marcos", 7))),
+        d(297, "Día 297: Marcos 8-10", "Marcos 8-10", 41, 8, listOf(p(41, "Marcos", 8), p(41, "Marcos", 9), p(41, "Marcos", 10))),
+        d(298, "Día 298: Marcos 11-14", "Marcos 11-14", 41, 11, listOf(p(41, "Marcos", 11), p(41, "Marcos", 12), p(41, "Marcos", 13), p(41, "Marcos", 14))),
+        d(299, "Día 299: Marcos 15-16, Lucas 1", "Marcos 15-16, Lucas 1", 41, 15, listOf(p(41, "Marcos", 15), p(41, "Marcos", 16), p(42, "Lucas", 1))),
+        d(300, "Día 300: Lucas 2-4", "Lucas 2-4", 42, 2, listOf(p(42, "Lucas", 2), p(42, "Lucas", 3), p(42, "Lucas", 4))),
+        d(301, "Día 301: Lucas 5-8", "Lucas 5-8", 42, 5, listOf(p(42, "Lucas", 5), p(42, "Lucas", 6), p(42, "Lucas", 7), p(42, "Lucas", 8))),
+        d(302, "Día 302: Lucas 9-11", "Lucas 9-11", 42, 9, listOf(p(42, "Lucas", 9), p(42, "Lucas", 10), p(42, "Lucas", 11))),
+        d(303, "Día 303: Lucas 12-14", "Lucas 12-14", 42, 12, listOf(p(42, "Lucas", 12), p(42, "Lucas", 13), p(42, "Lucas", 14))),
+        d(304, "Día 304: Lucas 15-17", "Lucas 15-17", 42, 15, listOf(p(42, "Lucas", 15), p(42, "Lucas", 16), p(42, "Lucas", 17))),
+        d(305, "Día 305: Lucas 18-21", "Lucas 18-21", 42, 18, listOf(p(42, "Lucas", 18), p(42, "Lucas", 19), p(42, "Lucas", 20), p(42, "Lucas", 21))),
+        d(306, "Día 306: Lucas 22-24", "Lucas 22-24", 42, 22, listOf(p(42, "Lucas", 22), p(42, "Lucas", 23), p(42, "Lucas", 24))),
+        d(307, "Día 307: Juan 1-3", "Juan 1-3", 43, 1, listOf(p(43, "Juan", 1), p(43, "Juan", 2), p(43, "Juan", 3))),
+        d(308, "Día 308: Juan 4-6", "Juan 4-6", 43, 4, listOf(p(43, "Juan", 4), p(43, "Juan", 5), p(43, "Juan", 6))),
+        d(309, "Día 309: Juan 7-10", "Juan 7-10", 43, 7, listOf(p(43, "Juan", 7), p(43, "Juan", 8), p(43, "Juan", 9), p(43, "Juan", 10))),
+        d(310, "Día 310: Juan 11-13", "Juan 11-13", 43, 11, listOf(p(43, "Juan", 11), p(43, "Juan", 12), p(43, "Juan", 13))),
+        d(311, "Día 311: Juan 14-16", "Juan 14-16", 43, 14, listOf(p(43, "Juan", 14), p(43, "Juan", 15), p(43, "Juan", 16))),
+        d(312, "Día 312: Juan 17-19", "Juan 17-19", 43, 17, listOf(p(43, "Juan", 17), p(43, "Juan", 18), p(43, "Juan", 19))),
+        d(313, "Día 313: Juan 20-21, Hechos 1-2", "Juan 20-21, Hechos 1-2", 43, 20, listOf(p(43, "Juan", 20), p(43, "Juan", 21), p(44, "Hechos", 1), p(44, "Hechos", 2))),
+        d(314, "Día 314: Hechos 3-5", "Hechos 3-5", 44, 3, listOf(p(44, "Hechos", 3), p(44, "Hechos", 4), p(44, "Hechos", 5))),
+        d(315, "Día 315: Hechos 6-8", "Hechos 6-8", 44, 6, listOf(p(44, "Hechos", 6), p(44, "Hechos", 7), p(44, "Hechos", 8))),
+        d(316, "Día 316: Hechos 9-11", "Hechos 9-11", 44, 9, listOf(p(44, "Hechos", 9), p(44, "Hechos", 10), p(44, "Hechos", 11))),
+        d(317, "Día 317: Hechos 12-15", "Hechos 12-15", 44, 12, listOf(p(44, "Hechos", 12), p(44, "Hechos", 13), p(44, "Hechos", 14), p(44, "Hechos", 15))),
+        d(318, "Día 318: Hechos 16-18", "Hechos 16-18", 44, 16, listOf(p(44, "Hechos", 16), p(44, "Hechos", 17), p(44, "Hechos", 18))),
+        d(319, "Día 319: Hechos 19-21", "Hechos 19-21", 44, 19, listOf(p(44, "Hechos", 19), p(44, "Hechos", 20), p(44, "Hechos", 21))),
+        d(320, "Día 320: Hechos 22-24", "Hechos 22-24", 44, 22, listOf(p(44, "Hechos", 22), p(44, "Hechos", 23), p(44, "Hechos", 24))),
+    )
+
+    private fun traditionalBlock9(): List<ReadingPlanDay> = listOf(
+        d(321, "Día 321: Hechos 25-28", "Hechos 25-28", 44, 25, listOf(p(44, "Hechos", 25), p(44, "Hechos", 26), p(44, "Hechos", 27), p(44, "Hechos", 28))),
+        d(322, "Día 322: Romanos 1-3", "Romanos 1-3", 45, 1, listOf(p(45, "Romanos", 1), p(45, "Romanos", 2), p(45, "Romanos", 3))),
+        d(323, "Día 323: Romanos 4-6", "Romanos 4-6", 45, 4, listOf(p(45, "Romanos", 4), p(45, "Romanos", 5), p(45, "Romanos", 6))),
+        d(324, "Día 324: Romanos 7-9", "Romanos 7-9", 45, 7, listOf(p(45, "Romanos", 7), p(45, "Romanos", 8), p(45, "Romanos", 9))),
+        d(325, "Día 325: Romanos 10-13", "Romanos 10-13", 45, 10, listOf(p(45, "Romanos", 10), p(45, "Romanos", 11), p(45, "Romanos", 12), p(45, "Romanos", 13))),
+        d(326, "Día 326: Romanos 14-16", "Romanos 14-16", 45, 14, listOf(p(45, "Romanos", 14), p(45, "Romanos", 15), p(45, "Romanos", 16))),
+        d(327, "Día 327: 1 Corintios 1-3", "1 Corintios 1-3", 46, 1, listOf(p(46, "1 Corintios", 1), p(46, "1 Corintios", 2), p(46, "1 Corintios", 3))),
+        d(328, "Día 328: 1 Corintios 4-6", "1 Corintios 4-6", 46, 4, listOf(p(46, "1 Corintios", 4), p(46, "1 Corintios", 5), p(46, "1 Corintios", 6))),
+        d(329, "Día 329: 1 Corintios 7-10", "1 Corintios 7-10", 46, 7, listOf(p(46, "1 Corintios", 7), p(46, "1 Corintios", 8), p(46, "1 Corintios", 9), p(46, "1 Corintios", 10))),
+        d(330, "Día 330: 1 Corintios 11-13", "1 Corintios 11-13", 46, 11, listOf(p(46, "1 Corintios", 11), p(46, "1 Corintios", 12), p(46, "1 Corintios", 13))),
+        d(331, "Día 331: 1 Corintios 14-16", "1 Corintios 14-16", 46, 14, listOf(p(46, "1 Corintios", 14), p(46, "1 Corintios", 15), p(46, "1 Corintios", 16))),
+        d(332, "Día 332: 2 Corintios 1-4", "2 Corintios 1-4", 47, 1, listOf(p(47, "2 Corintios", 1), p(47, "2 Corintios", 2), p(47, "2 Corintios", 3), p(47, "2 Corintios", 4))),
+        d(333, "Día 333: 2 Corintios 5-7", "2 Corintios 5-7", 47, 5, listOf(p(47, "2 Corintios", 5), p(47, "2 Corintios", 6), p(47, "2 Corintios", 7))),
+        d(334, "Día 334: 2 Corintios 8-10", "2 Corintios 8-10", 47, 8, listOf(p(47, "2 Corintios", 8), p(47, "2 Corintios", 9), p(47, "2 Corintios", 10))),
+        d(335, "Día 335: 2 Corintios 11-13", "2 Corintios 11-13", 47, 11, listOf(p(47, "2 Corintios", 11), p(47, "2 Corintios", 12), p(47, "2 Corintios", 13))),
+        d(336, "Día 336: Gálatas 1-4", "Gálatas 1-4", 48, 1, listOf(p(48, "Gálatas", 1), p(48, "Gálatas", 2), p(48, "Gálatas", 3), p(48, "Gálatas", 4))),
+        d(337, "Día 337: Gálatas 5-6, Efesios 1", "Gálatas 5-6, Efesios 1", 48, 5, listOf(p(48, "Gálatas", 5), p(48, "Gálatas", 6), p(49, "Efesios", 1))),
+        d(338, "Día 338: Efesios 2-4", "Efesios 2-4", 49, 2, listOf(p(49, "Efesios", 2), p(49, "Efesios", 3), p(49, "Efesios", 4))),
+        d(339, "Día 339: Efesios 5-6, Filipenses 1", "Efesios 5-6, Filipenses 1", 49, 5, listOf(p(49, "Efesios", 5), p(49, "Efesios", 6), p(50, "Filipenses", 1))),
+        d(340, "Día 340: Filipenses 2-4, Colosenses 1", "Filipenses 2-4, Colosenses 1", 50, 2, listOf(p(50, "Filipenses", 2), p(50, "Filipenses", 3), p(50, "Filipenses", 4), p(51, "Colosenses", 1))),
+        d(341, "Día 341: Colosenses 2-4", "Colosenses 2-4", 51, 2, listOf(p(51, "Colosenses", 2), p(51, "Colosenses", 3), p(51, "Colosenses", 4))),
+        d(342, "Día 342: 1 Tesalonicenses 1-3", "1 Tesalonicenses 1-3", 52, 1, listOf(p(52, "1 Tesalonicenses", 1), p(52, "1 Tesalonicenses", 2), p(52, "1 Tesalonicenses", 3))),
+        d(343, "Día 343: 1 Tesalonicenses 4-5, 2 Tesalonicenses 1", "1 Tesalonicenses 4-5, 2 Tesalonicenses 1", 52, 4, listOf(p(52, "1 Tesalonicenses", 4), p(52, "1 Tesalonicenses", 5), p(53, "2 Tesalonicenses", 1))),
+        d(344, "Día 344: 2 Tesalonicenses 2-3, 1 Timoteo 1-2", "2 Tesalonicenses 2-3, 1 Timoteo 1-2", 53, 2, listOf(p(53, "2 Tesalonicenses", 2), p(53, "2 Tesalonicenses", 3), p(54, "1 Timoteo", 1), p(54, "1 Timoteo", 2))),
+        d(345, "Día 345: 1 Timoteo 3-5", "1 Timoteo 3-5", 54, 3, listOf(p(54, "1 Timoteo", 3), p(54, "1 Timoteo", 4), p(54, "1 Timoteo", 5))),
+        d(346, "Día 346: 1 Timoteo 6, 2 Timoteo 1-2", "1 Timoteo 6, 2 Timoteo 1-2", 54, 6, listOf(p(54, "1 Timoteo", 6), p(55, "2 Timoteo", 1), p(55, "2 Timoteo", 2))),
+        d(347, "Día 347: 2 Timoteo 3-4, Tito 1", "2 Timoteo 3-4, Tito 1", 55, 3, listOf(p(55, "2 Timoteo", 3), p(55, "2 Timoteo", 4), p(56, "Tito", 1))),
+        d(348, "Día 348: Tito 2-3, Filemón 1, Hebreos 1", "Tito 2-3, Filemón 1, Hebreos 1", 56, 2, listOf(p(56, "Tito", 2), p(56, "Tito", 3), p(57, "Filemón", 1), p(58, "Hebreos", 1))),
+        d(349, "Día 349: Hebreos 2-4", "Hebreos 2-4", 58, 2, listOf(p(58, "Hebreos", 2), p(58, "Hebreos", 3), p(58, "Hebreos", 4))),
+        d(350, "Día 350: Hebreos 5-7", "Hebreos 5-7", 58, 5, listOf(p(58, "Hebreos", 5), p(58, "Hebreos", 6), p(58, "Hebreos", 7))),
+        d(351, "Día 351: Hebreos 8-10", "Hebreos 8-10", 58, 8, listOf(p(58, "Hebreos", 8), p(58, "Hebreos", 9), p(58, "Hebreos", 10))),
+        d(352, "Día 352: Hebreos 11-13, Santiago 1", "Hebreos 11-13, Santiago 1", 58, 11, listOf(p(58, "Hebreos", 11), p(58, "Hebreos", 12), p(58, "Hebreos", 13), p(59, "Santiago", 1))),
+        d(353, "Día 353: Santiago 2-4", "Santiago 2-4", 59, 2, listOf(p(59, "Santiago", 2), p(59, "Santiago", 3), p(59, "Santiago", 4))),
+        d(354, "Día 354: Santiago 5, 1 Pedro 1-2", "Santiago 5, 1 Pedro 1-2", 59, 5, listOf(p(59, "Santiago", 5), p(60, "1 Pedro", 1), p(60, "1 Pedro", 2))),
+        d(355, "Día 355: 1 Pedro 3-5", "1 Pedro 3-5", 60, 3, listOf(p(60, "1 Pedro", 3), p(60, "1 Pedro", 4), p(60, "1 Pedro", 5))),
+        d(356, "Día 356: 2 Pedro 1-3, 1 Juan 1", "2 Pedro 1-3, 1 Juan 1", 61, 1, listOf(p(61, "2 Pedro", 1), p(61, "2 Pedro", 2), p(61, "2 Pedro", 3), p(62, "1 Juan", 1))),
+        d(357, "Día 357: 1 Juan 2-4", "1 Juan 2-4", 62, 2, listOf(p(62, "1 Juan", 2), p(62, "1 Juan", 3), p(62, "1 Juan", 4))),
+        d(358, "Día 358: 1 Juan 5, 2 Juan 1, 3 Juan 1", "1 Juan 5, 2 Juan 1, 3 Juan 1", 62, 5, listOf(p(62, "1 Juan", 5), p(63, "2 Juan", 1), p(64, "3 Juan", 1))),
+        d(359, "Día 359: Judas 1, Apocalipsis 1-2", "Judas 1, Apocalipsis 1-2", 65, 1, listOf(p(65, "Judas", 1), p(66, "Apocalipsis", 1), p(66, "Apocalipsis", 2))),
+        d(360, "Día 360: Apocalipsis 3-6", "Apocalipsis 3-6", 66, 3, listOf(p(66, "Apocalipsis", 3), p(66, "Apocalipsis", 4), p(66, "Apocalipsis", 5), p(66, "Apocalipsis", 6))),
+    )
+
+    private fun traditionalBlock10(): List<ReadingPlanDay> = listOf(
+        d(361, "Día 361: Apocalipsis 7-9", "Apocalipsis 7-9", 66, 7, listOf(p(66, "Apocalipsis", 7), p(66, "Apocalipsis", 8), p(66, "Apocalipsis", 9))),
+        d(362, "Día 362: Apocalipsis 10-12", "Apocalipsis 10-12", 66, 10, listOf(p(66, "Apocalipsis", 10), p(66, "Apocalipsis", 11), p(66, "Apocalipsis", 12))),
+        d(363, "Día 363: Apocalipsis 13-15", "Apocalipsis 13-15", 66, 13, listOf(p(66, "Apocalipsis", 13), p(66, "Apocalipsis", 14), p(66, "Apocalipsis", 15))),
+        d(364, "Día 364: Apocalipsis 16-19", "Apocalipsis 16-19", 66, 16, listOf(p(66, "Apocalipsis", 16), p(66, "Apocalipsis", 17), p(66, "Apocalipsis", 18), p(66, "Apocalipsis", 19))),
+        d(365, "Día 365: Apocalipsis 20-22", "Apocalipsis 20-22", 66, 20, listOf(p(66, "Apocalipsis", 20), p(66, "Apocalipsis", 21), p(66, "Apocalipsis", 22))),
+    )
+
+    private fun buildChronologicalPlan(): List<ReadingPlanDay> = chronologicalBlock1() + chronologicalBlock2() + chronologicalBlock3() + chronologicalBlock4() + chronologicalBlock5() + chronologicalBlock6() + chronologicalBlock7() + chronologicalBlock8() + chronologicalBlock9() + chronologicalBlock10()
+
+    private fun chronologicalBlock1(): List<ReadingPlanDay> = listOf(
+        d(1, "Día 1: Génesis 1-3", "Génesis 1-3", 1, 1, listOf(p(1, "Génesis", 1), p(1, "Génesis", 2), p(1, "Génesis", 3))),
+        d(2, "Día 2: Génesis 4-7", "Génesis 4-7", 1, 4, listOf(p(1, "Génesis", 4), p(1, "Génesis", 5), p(1, "Génesis", 6), p(1, "Génesis", 7))),
+        d(3, "Día 3: Génesis 8-11", "Génesis 8-11", 1, 8, listOf(p(1, "Génesis", 8), p(1, "Génesis", 9), p(1, "Génesis", 10), p(1, "Génesis", 11))),
+        d(4, "Día 4: Job 1-5", "Job 1-5", 18, 1, listOf(p(18, "Job", 1), p(18, "Job", 2), p(18, "Job", 3), p(18, "Job", 4), p(18, "Job", 5))),
+        d(5, "Día 5: Job 6-9", "Job 6-9", 18, 6, listOf(p(18, "Job", 6), p(18, "Job", 7), p(18, "Job", 8), p(18, "Job", 9))),
+        d(6, "Día 6: Job 10-13", "Job 10-13", 18, 10, listOf(p(18, "Job", 10), p(18, "Job", 11), p(18, "Job", 12), p(18, "Job", 13))),
+        d(7, "Día 7: Job 14-16", "Job 14-16", 18, 14, listOf(p(18, "Job", 14), p(18, "Job", 15), p(18, "Job", 16))),
+        d(8, "Día 8: Job 17-20", "Job 17-20", 18, 17, listOf(p(18, "Job", 17), p(18, "Job", 18), p(18, "Job", 19), p(18, "Job", 20))),
+        d(9, "Día 9: Job 21-23", "Job 21-23", 18, 21, listOf(p(18, "Job", 21), p(18, "Job", 22), p(18, "Job", 23))),
+        d(10, "Día 10: Job 24-28", "Job 24-28", 18, 24, listOf(p(18, "Job", 24), p(18, "Job", 25), p(18, "Job", 26), p(18, "Job", 27), p(18, "Job", 28))),
+        d(11, "Día 11: Job 29-31", "Job 29-31", 18, 29, listOf(p(18, "Job", 29), p(18, "Job", 30), p(18, "Job", 31))),
+        d(12, "Día 12: Job 32-34", "Job 32-34", 18, 32, listOf(p(18, "Job", 32), p(18, "Job", 33), p(18, "Job", 34))),
+        d(13, "Día 13: Job 35-37", "Job 35-37", 18, 35, listOf(p(18, "Job", 35), p(18, "Job", 36), p(18, "Job", 37))),
+        d(14, "Día 14: Job 38-39", "Job 38-39", 18, 38, listOf(p(18, "Job", 38), p(18, "Job", 39))),
+        d(15, "Día 15: Job 40-42", "Job 40-42", 18, 40, listOf(p(18, "Job", 40), p(18, "Job", 41), p(18, "Job", 42))),
+        d(16, "Día 16: Génesis 12-15", "Génesis 12-15", 1, 12, listOf(p(1, "Génesis", 12), p(1, "Génesis", 13), p(1, "Génesis", 14), p(1, "Génesis", 15))),
+        d(17, "Día 17: Génesis 16-18", "Génesis 16-18", 1, 16, listOf(p(1, "Génesis", 16), p(1, "Génesis", 17), p(1, "Génesis", 18))),
+        d(18, "Día 18: Génesis 19-21", "Génesis 19-21", 1, 19, listOf(p(1, "Génesis", 19), p(1, "Génesis", 20), p(1, "Génesis", 21))),
+        d(19, "Día 19: Génesis 22-24", "Génesis 22-24", 1, 22, listOf(p(1, "Génesis", 22), p(1, "Génesis", 23), p(1, "Génesis", 24))),
+        d(20, "Día 20: Génesis 25-26", "Génesis 25-26", 1, 25, listOf(p(1, "Génesis", 25), p(1, "Génesis", 26))),
+        d(21, "Día 21: Génesis 27-29", "Génesis 27-29", 1, 27, listOf(p(1, "Génesis", 27), p(1, "Génesis", 28), p(1, "Génesis", 29))),
+        d(22, "Día 22: Génesis 30-31", "Génesis 30-31", 1, 30, listOf(p(1, "Génesis", 30), p(1, "Génesis", 31))),
+        d(23, "Día 23: Génesis 32-34", "Génesis 32-34", 1, 32, listOf(p(1, "Génesis", 32), p(1, "Génesis", 33), p(1, "Génesis", 34))),
+        d(24, "Día 24: Génesis 35-37", "Génesis 35-37", 1, 35, listOf(p(1, "Génesis", 35), p(1, "Génesis", 36), p(1, "Génesis", 37))),
+        d(25, "Día 25: Génesis 38-40", "Génesis 38-40", 1, 38, listOf(p(1, "Génesis", 38), p(1, "Génesis", 39), p(1, "Génesis", 40))),
+        d(26, "Día 26: Génesis 41-42", "Génesis 41-42", 1, 41, listOf(p(1, "Génesis", 41), p(1, "Génesis", 42))),
+        d(27, "Día 27: Génesis 43-45", "Génesis 43-45", 1, 43, listOf(p(1, "Génesis", 43), p(1, "Génesis", 44), p(1, "Génesis", 45))),
+        d(28, "Día 28: Génesis 46-47", "Génesis 46-47", 1, 46, listOf(p(1, "Génesis", 46), p(1, "Génesis", 47))),
+        d(29, "Día 29: Génesis 48-50", "Génesis 48-50", 1, 48, listOf(p(1, "Génesis", 48), p(1, "Génesis", 49), p(1, "Génesis", 50))),
+        d(30, "Día 30: Éxodo 1-3", "Éxodo 1-3", 2, 1, listOf(p(2, "Éxodo", 1), p(2, "Éxodo", 2), p(2, "Éxodo", 3))),
+        d(31, "Día 31: Éxodo 4-6", "Éxodo 4-6", 2, 4, listOf(p(2, "Éxodo", 4), p(2, "Éxodo", 5), p(2, "Éxodo", 6))),
+        d(32, "Día 32: Éxodo 7-9", "Éxodo 7-9", 2, 7, listOf(p(2, "Éxodo", 7), p(2, "Éxodo", 8), p(2, "Éxodo", 9))),
+        d(33, "Día 33: Éxodo 10-12", "Éxodo 10-12", 2, 10, listOf(p(2, "Éxodo", 10), p(2, "Éxodo", 11), p(2, "Éxodo", 12))),
+        d(34, "Día 34: Éxodo 13-15", "Éxodo 13-15", 2, 13, listOf(p(2, "Éxodo", 13), p(2, "Éxodo", 14), p(2, "Éxodo", 15))),
+        d(35, "Día 35: Éxodo 16-18", "Éxodo 16-18", 2, 16, listOf(p(2, "Éxodo", 16), p(2, "Éxodo", 17), p(2, "Éxodo", 18))),
+        d(36, "Día 36: Éxodo 19-21", "Éxodo 19-21", 2, 19, listOf(p(2, "Éxodo", 19), p(2, "Éxodo", 20), p(2, "Éxodo", 21))),
+        d(37, "Día 37: Éxodo 22-24", "Éxodo 22-24", 2, 22, listOf(p(2, "Éxodo", 22), p(2, "Éxodo", 23), p(2, "Éxodo", 24))),
+        d(38, "Día 38: Éxodo 25-27", "Éxodo 25-27", 2, 25, listOf(p(2, "Éxodo", 25), p(2, "Éxodo", 26), p(2, "Éxodo", 27))),
+        d(39, "Día 39: Éxodo 28-29", "Éxodo 28-29", 2, 28, listOf(p(2, "Éxodo", 28), p(2, "Éxodo", 29))),
+        d(40, "Día 40: Éxodo 30-32", "Éxodo 30-32", 2, 30, listOf(p(2, "Éxodo", 30), p(2, "Éxodo", 31), p(2, "Éxodo", 32))),
+    )
+
+    private fun chronologicalBlock2(): List<ReadingPlanDay> = listOf(
+        d(41, "Día 41: Éxodo 33-35", "Éxodo 33-35", 2, 33, listOf(p(2, "Éxodo", 33), p(2, "Éxodo", 34), p(2, "Éxodo", 35))),
+        d(42, "Día 42: Éxodo 36-38", "Éxodo 36-38", 2, 36, listOf(p(2, "Éxodo", 36), p(2, "Éxodo", 37), p(2, "Éxodo", 38))),
+        d(43, "Día 43: Éxodo 39-40", "Éxodo 39-40", 2, 39, listOf(p(2, "Éxodo", 39), p(2, "Éxodo", 40))),
+        d(44, "Día 44: Levítico 1-4", "Levítico 1-4", 3, 1, listOf(p(3, "Levítico", 1), p(3, "Levítico", 2), p(3, "Levítico", 3), p(3, "Levítico", 4))),
+        d(45, "Día 45: Levítico 5-7", "Levítico 5-7", 3, 5, listOf(p(3, "Levítico", 5), p(3, "Levítico", 6), p(3, "Levítico", 7))),
+        d(46, "Día 46: Levítico 8-10", "Levítico 8-10", 3, 8, listOf(p(3, "Levítico", 8), p(3, "Levítico", 9), p(3, "Levítico", 10))),
+        d(47, "Día 47: Levítico 11-13", "Levítico 11-13", 3, 11, listOf(p(3, "Levítico", 11), p(3, "Levítico", 12), p(3, "Levítico", 13))),
+        d(48, "Día 48: Levítico 14-15", "Levítico 14-15", 3, 14, listOf(p(3, "Levítico", 14), p(3, "Levítico", 15))),
+        d(49, "Día 49: Levítico 16-18", "Levítico 16-18", 3, 16, listOf(p(3, "Levítico", 16), p(3, "Levítico", 17), p(3, "Levítico", 18))),
+        d(50, "Día 50: Levítico 19-21", "Levítico 19-21", 3, 19, listOf(p(3, "Levítico", 19), p(3, "Levítico", 20), p(3, "Levítico", 21))),
+        d(51, "Día 51: Levítico 22-23", "Levítico 22-23", 3, 22, listOf(p(3, "Levítico", 22), p(3, "Levítico", 23))),
+        d(52, "Día 52: Levítico 24-25", "Levítico 24-25", 3, 24, listOf(p(3, "Levítico", 24), p(3, "Levítico", 25))),
+        d(53, "Día 53: Levítico 26-27", "Levítico 26-27", 3, 26, listOf(p(3, "Levítico", 26), p(3, "Levítico", 27))),
+        d(54, "Día 54: Números 1-2", "Números 1-2", 4, 1, listOf(p(4, "Números", 1), p(4, "Números", 2))),
+        d(55, "Día 55: Números 3-4", "Números 3-4", 4, 3, listOf(p(4, "Números", 3), p(4, "Números", 4))),
+        d(56, "Día 56: Números 5-6", "Números 5-6", 4, 5, listOf(p(4, "Números", 5), p(4, "Números", 6))),
+        d(57, "Día 57: Números 7", "Números 7", 4, 7, listOf(p(4, "Números", 7))),
+        d(58, "Día 58: Números 8-10", "Números 8-10", 4, 8, listOf(p(4, "Números", 8), p(4, "Números", 9), p(4, "Números", 10))),
+        d(59, "Día 59: Números 11-13", "Números 11-13", 4, 11, listOf(p(4, "Números", 11), p(4, "Números", 12), p(4, "Números", 13))),
+        d(60, "Día 60: Números 14-15; Salmos 90", "Números 14-15; Salmos 90", 4, 14, listOf(p(4, "Números", 14), p(4, "Números", 15), p(19, "Salmos", 90))),
+        d(61, "Día 61: Números 16-17", "Números 16-17", 4, 16, listOf(p(4, "Números", 16), p(4, "Números", 17))),
+        d(62, "Día 62: Números 18-20", "Números 18-20", 4, 18, listOf(p(4, "Números", 18), p(4, "Números", 19), p(4, "Números", 20))),
+        d(63, "Día 63: Números 21-22", "Números 21-22", 4, 21, listOf(p(4, "Números", 21), p(4, "Números", 22))),
+        d(64, "Día 64: Números 23-25", "Números 23-25", 4, 23, listOf(p(4, "Números", 23), p(4, "Números", 24), p(4, "Números", 25))),
+        d(65, "Día 65: Números 26-27", "Números 26-27", 4, 26, listOf(p(4, "Números", 26), p(4, "Números", 27))),
+        d(66, "Día 66: Números 28-30", "Números 28-30", 4, 28, listOf(p(4, "Números", 28), p(4, "Números", 29), p(4, "Números", 30))),
+        d(67, "Día 67: Números 31-32", "Números 31-32", 4, 31, listOf(p(4, "Números", 31), p(4, "Números", 32))),
+        d(68, "Día 68: Números 33-34", "Números 33-34", 4, 33, listOf(p(4, "Números", 33), p(4, "Números", 34))),
+        d(69, "Día 69: Números 35-36", "Números 35-36", 4, 35, listOf(p(4, "Números", 35), p(4, "Números", 36))),
+        d(70, "Día 70: Deuteronomio 1-2", "Deuteronomio 1-2", 5, 1, listOf(p(5, "Deuteronomio", 1), p(5, "Deuteronomio", 2))),
+        d(71, "Día 71: Deuteronomio 3-4", "Deuteronomio 3-4", 5, 3, listOf(p(5, "Deuteronomio", 3), p(5, "Deuteronomio", 4))),
+        d(72, "Día 72: Deuteronomio 5-7", "Deuteronomio 5-7", 5, 5, listOf(p(5, "Deuteronomio", 5), p(5, "Deuteronomio", 6), p(5, "Deuteronomio", 7))),
+        d(73, "Día 73: Deuteronomio 8-10", "Deuteronomio 8-10", 5, 8, listOf(p(5, "Deuteronomio", 8), p(5, "Deuteronomio", 9), p(5, "Deuteronomio", 10))),
+        d(74, "Día 74: Deuteronomio 11-13", "Deuteronomio 11-13", 5, 11, listOf(p(5, "Deuteronomio", 11), p(5, "Deuteronomio", 12), p(5, "Deuteronomio", 13))),
+        d(75, "Día 75: Deuteronomio 14-16", "Deuteronomio 14-16", 5, 14, listOf(p(5, "Deuteronomio", 14), p(5, "Deuteronomio", 15), p(5, "Deuteronomio", 16))),
+        d(76, "Día 76: Deuteronomio 17-20", "Deuteronomio 17-20", 5, 17, listOf(p(5, "Deuteronomio", 17), p(5, "Deuteronomio", 18), p(5, "Deuteronomio", 19), p(5, "Deuteronomio", 20))),
+        d(77, "Día 77: Deuteronomio 21-23", "Deuteronomio 21-23", 5, 21, listOf(p(5, "Deuteronomio", 21), p(5, "Deuteronomio", 22), p(5, "Deuteronomio", 23))),
+        d(78, "Día 78: Deuteronomio 24-27", "Deuteronomio 24-27", 5, 24, listOf(p(5, "Deuteronomio", 24), p(5, "Deuteronomio", 25), p(5, "Deuteronomio", 26), p(5, "Deuteronomio", 27))),
+        d(79, "Día 79: Deuteronomio 28-29", "Deuteronomio 28-29", 5, 28, listOf(p(5, "Deuteronomio", 28), p(5, "Deuteronomio", 29))),
+        d(80, "Día 80: Deuteronomio 30-31", "Deuteronomio 30-31", 5, 30, listOf(p(5, "Deuteronomio", 30), p(5, "Deuteronomio", 31))),
+    )
+
+    private fun chronologicalBlock3(): List<ReadingPlanDay> = listOf(
+        d(81, "Día 81: Deuteronomio 32-34; Salmos 91", "Deuteronomio 32-34; Salmos 91", 5, 32, listOf(p(5, "Deuteronomio", 32), p(5, "Deuteronomio", 33), p(5, "Deuteronomio", 34), p(19, "Salmos", 91))),
+        d(82, "Día 82: Josué 1-4", "Josué 1-4", 6, 1, listOf(p(6, "Josué", 1), p(6, "Josué", 2), p(6, "Josué", 3), p(6, "Josué", 4))),
+        d(83, "Día 83: Josué 5-8", "Josué 5-8", 6, 5, listOf(p(6, "Josué", 5), p(6, "Josué", 6), p(6, "Josué", 7), p(6, "Josué", 8))),
+        d(84, "Día 84: Josué 9-11", "Josué 9-11", 6, 9, listOf(p(6, "Josué", 9), p(6, "Josué", 10), p(6, "Josué", 11))),
+        d(85, "Día 85: Josué 12-15", "Josué 12-15", 6, 12, listOf(p(6, "Josué", 12), p(6, "Josué", 13), p(6, "Josué", 14), p(6, "Josué", 15))),
+        d(86, "Día 86: Josué 16-18", "Josué 16-18", 6, 16, listOf(p(6, "Josué", 16), p(6, "Josué", 17), p(6, "Josué", 18))),
+        d(87, "Día 87: Josué 19-21", "Josué 19-21", 6, 19, listOf(p(6, "Josué", 19), p(6, "Josué", 20), p(6, "Josué", 21))),
+        d(88, "Día 88: Josué 22-24", "Josué 22-24", 6, 22, listOf(p(6, "Josué", 22), p(6, "Josué", 23), p(6, "Josué", 24))),
+        d(89, "Día 89: Jueces 1-2", "Jueces 1-2", 7, 1, listOf(p(7, "Jueces", 1), p(7, "Jueces", 2))),
+        d(90, "Día 90: Jueces 3-5", "Jueces 3-5", 7, 3, listOf(p(7, "Jueces", 3), p(7, "Jueces", 4), p(7, "Jueces", 5))),
+        d(91, "Día 91: Jueces 6-7", "Jueces 6-7", 7, 6, listOf(p(7, "Jueces", 6), p(7, "Jueces", 7))),
+        d(92, "Día 92: Jueces 8-9", "Jueces 8-9", 7, 8, listOf(p(7, "Jueces", 8), p(7, "Jueces", 9))),
+        d(93, "Día 93: Jueces 10-12", "Jueces 10-12", 7, 10, listOf(p(7, "Jueces", 10), p(7, "Jueces", 11), p(7, "Jueces", 12))),
+        d(94, "Día 94: Jueces 13-15", "Jueces 13-15", 7, 13, listOf(p(7, "Jueces", 13), p(7, "Jueces", 14), p(7, "Jueces", 15))),
+        d(95, "Día 95: Jueces 16-18", "Jueces 16-18", 7, 16, listOf(p(7, "Jueces", 16), p(7, "Jueces", 17), p(7, "Jueces", 18))),
+        d(96, "Día 96: Jueces 19-21", "Jueces 19-21", 7, 19, listOf(p(7, "Jueces", 19), p(7, "Jueces", 20), p(7, "Jueces", 21))),
+        d(97, "Día 97: Rut 1-4", "Rut 1-4", 8, 1, listOf(p(8, "Rut", 1), p(8, "Rut", 2), p(8, "Rut", 3), p(8, "Rut", 4))),
+        d(98, "Día 98: 1 Samuel 1-3", "1 Samuel 1-3", 9, 1, listOf(p(9, "1 Samuel", 1), p(9, "1 Samuel", 2), p(9, "1 Samuel", 3))),
+        d(99, "Día 99: 1 Samuel 4-8", "1 Samuel 4-8", 9, 4, listOf(p(9, "1 Samuel", 4), p(9, "1 Samuel", 5), p(9, "1 Samuel", 6), p(9, "1 Samuel", 7), p(9, "1 Samuel", 8))),
+        d(100, "Día 100: 1 Samuel 9-12", "1 Samuel 9-12", 9, 9, listOf(p(9, "1 Samuel", 9), p(9, "1 Samuel", 10), p(9, "1 Samuel", 11), p(9, "1 Samuel", 12))),
+        d(101, "Día 101: 1 Samuel 13-14", "1 Samuel 13-14", 9, 13, listOf(p(9, "1 Samuel", 13), p(9, "1 Samuel", 14))),
+        d(102, "Día 102: 1 Samuel 15-17", "1 Samuel 15-17", 9, 15, listOf(p(9, "1 Samuel", 15), p(9, "1 Samuel", 16), p(9, "1 Samuel", 17))),
+        d(103, "Día 103: 1 Samuel 18-20; Salmos 11-59", "1 Samuel 18-20; Salmos 11-59", 9, 18, listOf(p(9, "1 Samuel", 18), p(9, "1 Samuel", 19), p(9, "1 Samuel", 20), p(19, "Salmos", 11), p(19, "Salmos", 59))),
+        d(104, "Día 104: 1 Samuel 21-24", "1 Samuel 21-24", 9, 21, listOf(p(9, "1 Samuel", 21), p(9, "1 Samuel", 22), p(9, "1 Samuel", 23), p(9, "1 Samuel", 24))),
+        d(105, "Día 105: Salmos 7-52", "Salmos 7-52", 19, 7, listOf(p(19, "Salmos", 7), p(19, "Salmos", 27), p(19, "Salmos", 31), p(19, "Salmos", 34), p(19, "Salmos", 52))),
+        d(106, "Día 106: Salmos 56-142", "Salmos 56-142", 19, 56, listOf(p(19, "Salmos", 56), p(19, "Salmos", 120), p(19, "Salmos", 140), p(19, "Salmos", 141), p(19, "Salmos", 142))),
+        d(107, "Día 107: 1 Samuel 25-27", "1 Samuel 25-27", 9, 25, listOf(p(9, "1 Samuel", 25), p(9, "1 Samuel", 26), p(9, "1 Samuel", 27))),
+        d(108, "Día 108: Salmos 17-63", "Salmos 17-63", 19, 17, listOf(p(19, "Salmos", 17), p(19, "Salmos", 35), p(19, "Salmos", 54), p(19, "Salmos", 63))),
+        d(109, "Día 109: 1 Samuel 28-31; Salmos 18", "1 Samuel 28-31; Salmos 18", 9, 28, listOf(p(9, "1 Samuel", 28), p(9, "1 Samuel", 29), p(9, "1 Samuel", 30), p(9, "1 Samuel", 31), p(19, "Salmos", 18))),
+        d(110, "Día 110: Salmos 121-130", "Salmos 121-130", 19, 121, listOf(p(19, "Salmos", 121), p(19, "Salmos", 123), p(19, "Salmos", 124), p(19, "Salmos", 125), p(19, "Salmos", 128), p(19, "Salmos", 129), p(19, "Salmos", 130))),
+        d(111, "Día 111: 2 Samuel 1-4", "2 Samuel 1-4", 10, 1, listOf(p(10, "2 Samuel", 1), p(10, "2 Samuel", 2), p(10, "2 Samuel", 3), p(10, "2 Samuel", 4))),
+        d(112, "Día 112: Salmos 6-21", "Salmos 6-21", 19, 6, listOf(p(19, "Salmos", 6), p(19, "Salmos", 8), p(19, "Salmos", 9), p(19, "Salmos", 10), p(19, "Salmos", 14), p(19, "Salmos", 16), p(19, "Salmos", 19), p(19, "Salmos", 21))),
+        d(113, "Día 113: 1 Crónicas 1-2", "1 Crónicas 1-2", 13, 1, listOf(p(13, "1 Crónicas", 1), p(13, "1 Crónicas", 2))),
+        d(114, "Día 114: Salmos 43-87", "Salmos 43-87", 19, 43, listOf(p(19, "Salmos", 43), p(19, "Salmos", 44), p(19, "Salmos", 45), p(19, "Salmos", 49), p(19, "Salmos", 84), p(19, "Salmos", 85), p(19, "Salmos", 87))),
+        d(115, "Día 115: 1 Crónicas 3-5", "1 Crónicas 3-5", 13, 3, listOf(p(13, "1 Crónicas", 3), p(13, "1 Crónicas", 4), p(13, "1 Crónicas", 5))),
+        d(116, "Día 116: Salmos 73-78", "Salmos 73-78", 19, 73, listOf(p(19, "Salmos", 73), p(19, "Salmos", 77), p(19, "Salmos", 78))),
+        d(117, "Día 117: 1 Crónicas 6", "1 Crónicas 6", 13, 6, listOf(p(13, "1 Crónicas", 6))),
+        d(118, "Día 118: Salmos 81-93", "Salmos 81-93", 19, 81, listOf(p(19, "Salmos", 81), p(19, "Salmos", 88), p(19, "Salmos", 92), p(19, "Salmos", 93))),
+        d(119, "Día 119: 1 Crónicas 7-10", "1 Crónicas 7-10", 13, 7, listOf(p(13, "1 Crónicas", 7), p(13, "1 Crónicas", 8), p(13, "1 Crónicas", 9), p(13, "1 Crónicas", 10))),
+        d(120, "Día 120: Salmos 102-104", "Salmos 102-104", 19, 102, listOf(p(19, "Salmos", 102), p(19, "Salmos", 103), p(19, "Salmos", 104))),
+    )
+
+    private fun chronologicalBlock4(): List<ReadingPlanDay> = listOf(
+        d(121, "Día 121: 2 Samuel 5; 1 Crónicas 11-12", "2 Samuel 5; 1 Crónicas 11-12", 10, 5, listOf(p(10, "2 Samuel", 5), p(13, "1 Crónicas", 11), p(13, "1 Crónicas", 12))),
+        d(122, "Día 122: Salmos 133", "Salmos 133", 19, 133, listOf(p(19, "Salmos", 133))),
+        d(123, "Día 123: Salmos 106-107", "Salmos 106-107", 19, 106, listOf(p(19, "Salmos", 106), p(19, "Salmos", 107))),
+        d(124, "Día 124: 2 Samuel 5-6; 1 Crónicas 13-16", "2 Samuel 5-6; 1 Crónicas 13-16", 10, 5, listOf(p(10, "2 Samuel", 5), p(10, "2 Samuel", 6), p(13, "1 Crónicas", 13), p(13, "1 Crónicas", 14), p(13, "1 Crónicas", 15), p(13, "1 Crónicas", 16))),
+        d(125, "Día 125: Salmos 1-68", "Salmos 1-68", 19, 1, listOf(p(19, "Salmos", 1), p(19, "Salmos", 2), p(19, "Salmos", 15), p(19, "Salmos", 22), p(19, "Salmos", 23), p(19, "Salmos", 24), p(19, "Salmos", 47), p(19, "Salmos", 68))),
+        d(126, "Día 126: Salmos 89-132", "Salmos 89-132", 19, 89, listOf(p(19, "Salmos", 89), p(19, "Salmos", 96), p(19, "Salmos", 100), p(19, "Salmos", 101), p(19, "Salmos", 105), p(19, "Salmos", 132))),
+        d(127, "Día 127: 2 Samuel 7; 1 Crónicas 17", "2 Samuel 7; 1 Crónicas 17", 10, 7, listOf(p(10, "2 Samuel", 7), p(13, "1 Crónicas", 17))),
+        d(128, "Día 128: Salmos 25-39", "Salmos 25-39", 19, 25, listOf(p(19, "Salmos", 25), p(19, "Salmos", 29), p(19, "Salmos", 33), p(19, "Salmos", 36), p(19, "Salmos", 39))),
+        d(129, "Día 129: 2 Samuel 8-9; 1 Crónicas 18", "2 Samuel 8-9; 1 Crónicas 18", 10, 8, listOf(p(10, "2 Samuel", 8), p(10, "2 Samuel", 9), p(13, "1 Crónicas", 18))),
+        d(130, "Día 130: Salmos 50-75", "Salmos 50-75", 19, 50, listOf(p(19, "Salmos", 50), p(19, "Salmos", 53), p(19, "Salmos", 60), p(19, "Salmos", 75))),
+        d(131, "Día 131: 2 Samuel 10; 1 Crónicas 19; Salmos 20", "2 Samuel 10; 1 Crónicas 19; Salmos 20", 10, 10, listOf(p(10, "2 Samuel", 10), p(13, "1 Crónicas", 19), p(19, "Salmos", 20))),
+        d(132, "Día 132: Salmos 65-70", "Salmos 65-70", 19, 65, listOf(p(19, "Salmos", 65), p(19, "Salmos", 66), p(19, "Salmos", 67), p(19, "Salmos", 69), p(19, "Salmos", 70))),
+        d(133, "Día 133: 2 Samuel 11-12; 1 Crónicas 20", "2 Samuel 11-12; 1 Crónicas 20", 10, 11, listOf(p(10, "2 Samuel", 11), p(10, "2 Samuel", 12), p(13, "1 Crónicas", 20))),
+        d(134, "Día 134: Salmos 32-122", "Salmos 32-122", 19, 32, listOf(p(19, "Salmos", 32), p(19, "Salmos", 51), p(19, "Salmos", 86), p(19, "Salmos", 122))),
+        d(135, "Día 135: 2 Samuel 13-15", "2 Samuel 13-15", 10, 13, listOf(p(10, "2 Samuel", 13), p(10, "2 Samuel", 14), p(10, "2 Samuel", 15))),
+        d(136, "Día 136: Salmos 3-55", "Salmos 3-55", 19, 3, listOf(p(19, "Salmos", 3), p(19, "Salmos", 4), p(19, "Salmos", 12), p(19, "Salmos", 13), p(19, "Salmos", 28), p(19, "Salmos", 55))),
+        d(137, "Día 137: 2 Samuel 16-18", "2 Samuel 16-18", 10, 16, listOf(p(10, "2 Samuel", 16), p(10, "2 Samuel", 17), p(10, "2 Samuel", 18))),
+        d(138, "Día 138: Salmos 26-64", "Salmos 26-64", 19, 26, listOf(p(19, "Salmos", 26), p(19, "Salmos", 40), p(19, "Salmos", 58), p(19, "Salmos", 61), p(19, "Salmos", 62), p(19, "Salmos", 64))),
+        d(139, "Día 139: 2 Samuel 19-21", "2 Samuel 19-21", 10, 19, listOf(p(10, "2 Samuel", 19), p(10, "2 Samuel", 20), p(10, "2 Samuel", 21))),
+        d(140, "Día 140: Salmos 5-42", "Salmos 5-42", 19, 5, listOf(p(19, "Salmos", 5), p(19, "Salmos", 38), p(19, "Salmos", 41), p(19, "Salmos", 42))),
+        d(141, "Día 141: 2 Samuel 22-23; Salmos 57", "2 Samuel 22-23; Salmos 57", 10, 22, listOf(p(10, "2 Samuel", 22), p(10, "2 Samuel", 23), p(19, "Salmos", 57))),
+        d(142, "Día 142: Salmos 95-99", "Salmos 95-99", 19, 95, listOf(p(19, "Salmos", 95), p(19, "Salmos", 97), p(19, "Salmos", 98), p(19, "Salmos", 99))),
+        d(143, "Día 143: 2 Samuel 24; 1 Crónicas 21-22; Salmos 30", "2 Samuel 24; 1 Crónicas 21-22; Salmos 30", 10, 24, listOf(p(10, "2 Samuel", 24), p(13, "1 Crónicas", 21), p(13, "1 Crónicas", 22), p(19, "Salmos", 30))),
+        d(144, "Día 144: Salmos 108-110", "Salmos 108-110", 19, 108, listOf(p(19, "Salmos", 108), p(19, "Salmos", 109), p(19, "Salmos", 110))),
+        d(145, "Día 145: 1 Crónicas 23-25", "1 Crónicas 23-25", 13, 23, listOf(p(13, "1 Crónicas", 23), p(13, "1 Crónicas", 24), p(13, "1 Crónicas", 25))),
+        d(146, "Día 146: Salmos 131-145", "Salmos 131-145", 19, 131, listOf(p(19, "Salmos", 131), p(19, "Salmos", 138), p(19, "Salmos", 139), p(19, "Salmos", 143), p(19, "Salmos", 144), p(19, "Salmos", 145))),
+        d(147, "Día 147: 1 Crónicas 26-29; Salmos 127", "1 Crónicas 26-29; Salmos 127", 13, 26, listOf(p(13, "1 Crónicas", 26), p(13, "1 Crónicas", 27), p(13, "1 Crónicas", 28), p(13, "1 Crónicas", 29), p(19, "Salmos", 127))),
+        d(148, "Día 148: Salmos 111-118", "Salmos 111-118", 19, 111, listOf(p(19, "Salmos", 111), p(19, "Salmos", 112), p(19, "Salmos", 113), p(19, "Salmos", 114), p(19, "Salmos", 115), p(19, "Salmos", 116), p(19, "Salmos", 117), p(19, "Salmos", 118))),
+        d(149, "Día 149: 1 Reyes 1-2; Salmos 37-94", "1 Reyes 1-2; Salmos 37-94", 11, 1, listOf(p(11, "1 Reyes", 1), p(11, "1 Reyes", 2), p(19, "Salmos", 37), p(19, "Salmos", 71), p(19, "Salmos", 94))),
+        d(150, "Día 150: Salmos 119", "Salmos 119", 19, 119, listOf(p(19, "Salmos", 119))),
+        d(151, "Día 151: 1 Reyes 3-4; 2 Crónicas 1; Salmos 72", "1 Reyes 3-4; 2 Crónicas 1; Salmos 72", 11, 3, listOf(p(11, "1 Reyes", 3), p(11, "1 Reyes", 4), p(14, "2 Crónicas", 1), p(19, "Salmos", 72))),
+        d(152, "Día 152: Salmos 119", "Salmos 119", 19, 119, listOf(p(19, "Salmos", 119))),
+        d(153, "Día 153: Cantares 1-8", "Cantares 1-8", 22, 1, listOf(p(22, "Cantares", 1), p(22, "Cantares", 2), p(22, "Cantares", 3), p(22, "Cantares", 4), p(22, "Cantares", 5), p(22, "Cantares", 6), p(22, "Cantares", 7), p(22, "Cantares", 8))),
+        d(154, "Día 154: Proverbios 1-3", "Proverbios 1-3", 20, 1, listOf(p(20, "Proverbios", 1), p(20, "Proverbios", 2), p(20, "Proverbios", 3))),
+        d(155, "Día 155: Proverbios 4-6", "Proverbios 4-6", 20, 4, listOf(p(20, "Proverbios", 4), p(20, "Proverbios", 5), p(20, "Proverbios", 6))),
+        d(156, "Día 156: Proverbios 7-9", "Proverbios 7-9", 20, 7, listOf(p(20, "Proverbios", 7), p(20, "Proverbios", 8), p(20, "Proverbios", 9))),
+        d(157, "Día 157: Proverbios 10-12", "Proverbios 10-12", 20, 10, listOf(p(20, "Proverbios", 10), p(20, "Proverbios", 11), p(20, "Proverbios", 12))),
+        d(158, "Día 158: Proverbios 13-15", "Proverbios 13-15", 20, 13, listOf(p(20, "Proverbios", 13), p(20, "Proverbios", 14), p(20, "Proverbios", 15))),
+        d(159, "Día 159: Proverbios 16-18", "Proverbios 16-18", 20, 16, listOf(p(20, "Proverbios", 16), p(20, "Proverbios", 17), p(20, "Proverbios", 18))),
+        d(160, "Día 160: Proverbios 19-21", "Proverbios 19-21", 20, 19, listOf(p(20, "Proverbios", 19), p(20, "Proverbios", 20), p(20, "Proverbios", 21))),
+    )
+
+    private fun chronologicalBlock5(): List<ReadingPlanDay> = listOf(
+        d(161, "Día 161: Proverbios 22-24", "Proverbios 22-24", 20, 22, listOf(p(20, "Proverbios", 22), p(20, "Proverbios", 23), p(20, "Proverbios", 24))),
+        d(162, "Día 162: 1 Reyes 5-6; 2 Crónicas 2-3", "1 Reyes 5-6; 2 Crónicas 2-3", 11, 5, listOf(p(11, "1 Reyes", 5), p(11, "1 Reyes", 6), p(14, "2 Crónicas", 2), p(14, "2 Crónicas", 3))),
+        d(163, "Día 163: 1 Reyes 7; 2 Crónicas 4", "1 Reyes 7; 2 Crónicas 4", 11, 7, listOf(p(11, "1 Reyes", 7), p(14, "2 Crónicas", 4))),
+        d(164, "Día 164: 1 Reyes 8; 2 Crónicas 5", "1 Reyes 8; 2 Crónicas 5", 11, 8, listOf(p(11, "1 Reyes", 8), p(14, "2 Crónicas", 5))),
+        d(165, "Día 165: 2 Crónicas 6-7; Salmos 136", "2 Crónicas 6-7; Salmos 136", 14, 6, listOf(p(14, "2 Crónicas", 6), p(14, "2 Crónicas", 7), p(19, "Salmos", 136))),
+        d(166, "Día 166: Salmos 134-150", "Salmos 134-150", 19, 134, listOf(p(19, "Salmos", 134), p(19, "Salmos", 146), p(19, "Salmos", 147), p(19, "Salmos", 148), p(19, "Salmos", 149), p(19, "Salmos", 150))),
+        d(167, "Día 167: 1 Reyes 9; 2 Crónicas 8", "1 Reyes 9; 2 Crónicas 8", 11, 9, listOf(p(11, "1 Reyes", 9), p(14, "2 Crónicas", 8))),
+        d(168, "Día 168: Proverbios 25-26", "Proverbios 25-26", 20, 25, listOf(p(20, "Proverbios", 25), p(20, "Proverbios", 26))),
+        d(169, "Día 169: Proverbios 27-29", "Proverbios 27-29", 20, 27, listOf(p(20, "Proverbios", 27), p(20, "Proverbios", 28), p(20, "Proverbios", 29))),
+        d(170, "Día 170: Eclesiastés 1-6", "Eclesiastés 1-6", 21, 1, listOf(p(21, "Eclesiastés", 1), p(21, "Eclesiastés", 2), p(21, "Eclesiastés", 3), p(21, "Eclesiastés", 4), p(21, "Eclesiastés", 5), p(21, "Eclesiastés", 6))),
+        d(171, "Día 171: Eclesiastés 7-12", "Eclesiastés 7-12", 21, 7, listOf(p(21, "Eclesiastés", 7), p(21, "Eclesiastés", 8), p(21, "Eclesiastés", 9), p(21, "Eclesiastés", 10), p(21, "Eclesiastés", 11), p(21, "Eclesiastés", 12))),
+        d(172, "Día 172: 1 Reyes 10-11; 2 Crónicas 9", "1 Reyes 10-11; 2 Crónicas 9", 11, 10, listOf(p(11, "1 Reyes", 10), p(11, "1 Reyes", 11), p(14, "2 Crónicas", 9))),
+        d(173, "Día 173: Proverbios 30-31", "Proverbios 30-31", 20, 30, listOf(p(20, "Proverbios", 30), p(20, "Proverbios", 31))),
+        d(174, "Día 174: 1 Reyes 12-14", "1 Reyes 12-14", 11, 12, listOf(p(11, "1 Reyes", 12), p(11, "1 Reyes", 13), p(11, "1 Reyes", 14))),
+        d(175, "Día 175: 2 Crónicas 10-12", "2 Crónicas 10-12", 14, 10, listOf(p(14, "2 Crónicas", 10), p(14, "2 Crónicas", 11), p(14, "2 Crónicas", 12))),
+        d(176, "Día 176: 1 Reyes 15; 2 Crónicas 13-16", "1 Reyes 15; 2 Crónicas 13-16", 11, 15, listOf(p(11, "1 Reyes", 15), p(14, "2 Crónicas", 13), p(14, "2 Crónicas", 14), p(14, "2 Crónicas", 15), p(14, "2 Crónicas", 16))),
+        d(177, "Día 177: 1 Reyes 15-16; 2 Crónicas 17", "1 Reyes 15-16; 2 Crónicas 17", 11, 15, listOf(p(11, "1 Reyes", 15), p(11, "1 Reyes", 16), p(14, "2 Crónicas", 17))),
+        d(178, "Día 178: 1 Reyes 17-19", "1 Reyes 17-19", 11, 17, listOf(p(11, "1 Reyes", 17), p(11, "1 Reyes", 18), p(11, "1 Reyes", 19))),
+        d(179, "Día 179: 1 Reyes 20-21", "1 Reyes 20-21", 11, 20, listOf(p(11, "1 Reyes", 20), p(11, "1 Reyes", 21))),
+        d(180, "Día 180: 1 Reyes 22; 2 Crónicas 18", "1 Reyes 22; 2 Crónicas 18", 11, 22, listOf(p(11, "1 Reyes", 22), p(14, "2 Crónicas", 18))),
+        d(181, "Día 181: 2 Crónicas 19-23", "2 Crónicas 19-23", 14, 19, listOf(p(14, "2 Crónicas", 19), p(14, "2 Crónicas", 20), p(14, "2 Crónicas", 21), p(14, "2 Crónicas", 22), p(14, "2 Crónicas", 23))),
+        d(182, "Día 182: Abdías 1; Salmos 82-83", "Abdías 1; Salmos 82-83", 31, 1, listOf(p(31, "Abdías", 1), p(19, "Salmos", 82), p(19, "Salmos", 83))),
+        d(183, "Día 183: 2 Reyes 1-4", "2 Reyes 1-4", 12, 1, listOf(p(12, "2 Reyes", 1), p(12, "2 Reyes", 2), p(12, "2 Reyes", 3), p(12, "2 Reyes", 4))),
+        d(184, "Día 184: 2 Reyes 5-8", "2 Reyes 5-8", 12, 5, listOf(p(12, "2 Reyes", 5), p(12, "2 Reyes", 6), p(12, "2 Reyes", 7), p(12, "2 Reyes", 8))),
+        d(185, "Día 185: 2 Reyes 9-11", "2 Reyes 9-11", 12, 9, listOf(p(12, "2 Reyes", 9), p(12, "2 Reyes", 10), p(12, "2 Reyes", 11))),
+        d(186, "Día 186: 2 Reyes 12-13; 2 Crónicas 24", "2 Reyes 12-13; 2 Crónicas 24", 12, 12, listOf(p(12, "2 Reyes", 12), p(12, "2 Reyes", 13), p(14, "2 Crónicas", 24))),
+        d(187, "Día 187: 2 Reyes 14; 2 Crónicas 25", "2 Reyes 14; 2 Crónicas 25", 12, 14, listOf(p(12, "2 Reyes", 14), p(14, "2 Crónicas", 25))),
+        d(188, "Día 188: Jonás 1-4", "Jonás 1-4", 32, 1, listOf(p(32, "Jonás", 1), p(32, "Jonás", 2), p(32, "Jonás", 3), p(32, "Jonás", 4))),
+        d(189, "Día 189: 2 Reyes 15; 2 Crónicas 26", "2 Reyes 15; 2 Crónicas 26", 12, 15, listOf(p(12, "2 Reyes", 15), p(14, "2 Crónicas", 26))),
+        d(190, "Día 190: Isaías 1-4", "Isaías 1-4", 23, 1, listOf(p(23, "Isaías", 1), p(23, "Isaías", 2), p(23, "Isaías", 3), p(23, "Isaías", 4))),
+        d(191, "Día 191: Isaías 5-8", "Isaías 5-8", 23, 5, listOf(p(23, "Isaías", 5), p(23, "Isaías", 6), p(23, "Isaías", 7), p(23, "Isaías", 8))),
+        d(192, "Día 192: Amós 1-5", "Amós 1-5", 30, 1, listOf(p(30, "Amós", 1), p(30, "Amós", 2), p(30, "Amós", 3), p(30, "Amós", 4), p(30, "Amós", 5))),
+        d(193, "Día 193: Amós 6-9", "Amós 6-9", 30, 6, listOf(p(30, "Amós", 6), p(30, "Amós", 7), p(30, "Amós", 8), p(30, "Amós", 9))),
+        d(194, "Día 194: 2 Crónicas 27; Isaías 9-12", "2 Crónicas 27; Isaías 9-12", 14, 27, listOf(p(14, "2 Crónicas", 27), p(23, "Isaías", 9), p(23, "Isaías", 10), p(23, "Isaías", 11), p(23, "Isaías", 12))),
+        d(195, "Día 195: Miqueas 1-7", "Miqueas 1-7", 33, 1, listOf(p(33, "Miqueas", 1), p(33, "Miqueas", 2), p(33, "Miqueas", 3), p(33, "Miqueas", 4), p(33, "Miqueas", 5), p(33, "Miqueas", 6), p(33, "Miqueas", 7))),
+        d(196, "Día 196: 2 Crónicas 28; 2 Reyes 16-17", "2 Crónicas 28; 2 Reyes 16-17", 14, 28, listOf(p(14, "2 Crónicas", 28), p(12, "2 Reyes", 16), p(12, "2 Reyes", 17))),
+        d(197, "Día 197: Isaías 13-17", "Isaías 13-17", 23, 13, listOf(p(23, "Isaías", 13), p(23, "Isaías", 14), p(23, "Isaías", 15), p(23, "Isaías", 16), p(23, "Isaías", 17))),
+        d(198, "Día 198: Isaías 18-22", "Isaías 18-22", 23, 18, listOf(p(23, "Isaías", 18), p(23, "Isaías", 19), p(23, "Isaías", 20), p(23, "Isaías", 21), p(23, "Isaías", 22))),
+        d(199, "Día 199: Isaías 23-27", "Isaías 23-27", 23, 23, listOf(p(23, "Isaías", 23), p(23, "Isaías", 24), p(23, "Isaías", 25), p(23, "Isaías", 26), p(23, "Isaías", 27))),
+        d(200, "Día 200: 2 Reyes 18; 2 Crónicas 29-31; Salmos 48", "2 Reyes 18; 2 Crónicas 29-31; Salmos 48", 12, 18, listOf(p(12, "2 Reyes", 18), p(14, "2 Crónicas", 29), p(14, "2 Crónicas", 30), p(14, "2 Crónicas", 31), p(19, "Salmos", 48))),
+    )
+
+    private fun chronologicalBlock6(): List<ReadingPlanDay> = listOf(
+        d(201, "Día 201: Oseas 1-7", "Oseas 1-7", 28, 1, listOf(p(28, "Oseas", 1), p(28, "Oseas", 2), p(28, "Oseas", 3), p(28, "Oseas", 4), p(28, "Oseas", 5), p(28, "Oseas", 6), p(28, "Oseas", 7))),
+        d(202, "Día 202: Oseas 8-14", "Oseas 8-14", 28, 8, listOf(p(28, "Oseas", 8), p(28, "Oseas", 9), p(28, "Oseas", 10), p(28, "Oseas", 11), p(28, "Oseas", 12), p(28, "Oseas", 13), p(28, "Oseas", 14))),
+        d(203, "Día 203: Isaías 28-30", "Isaías 28-30", 23, 28, listOf(p(23, "Isaías", 28), p(23, "Isaías", 29), p(23, "Isaías", 30))),
+        d(204, "Día 204: Isaías 31-34", "Isaías 31-34", 23, 31, listOf(p(23, "Isaías", 31), p(23, "Isaías", 32), p(23, "Isaías", 33), p(23, "Isaías", 34))),
+        d(205, "Día 205: Isaías 35-36", "Isaías 35-36", 23, 35, listOf(p(23, "Isaías", 35), p(23, "Isaías", 36))),
+        d(206, "Día 206: Isaías 37-39; Salmos 76", "Isaías 37-39; Salmos 76", 23, 37, listOf(p(23, "Isaías", 37), p(23, "Isaías", 38), p(23, "Isaías", 39), p(19, "Salmos", 76))),
+        d(207, "Día 207: Isaías 40-43", "Isaías 40-43", 23, 40, listOf(p(23, "Isaías", 40), p(23, "Isaías", 41), p(23, "Isaías", 42), p(23, "Isaías", 43))),
+        d(208, "Día 208: Isaías 44-48", "Isaías 44-48", 23, 44, listOf(p(23, "Isaías", 44), p(23, "Isaías", 45), p(23, "Isaías", 46), p(23, "Isaías", 47), p(23, "Isaías", 48))),
+        d(209, "Día 209: 2 Reyes 18-19; Salmos 46-135", "2 Reyes 18-19; Salmos 46-135", 12, 18, listOf(p(12, "2 Reyes", 18), p(12, "2 Reyes", 19), p(19, "Salmos", 46), p(19, "Salmos", 80), p(19, "Salmos", 135))),
+        d(210, "Día 210: Isaías 49-53", "Isaías 49-53", 23, 49, listOf(p(23, "Isaías", 49), p(23, "Isaías", 50), p(23, "Isaías", 51), p(23, "Isaías", 52), p(23, "Isaías", 53))),
+        d(211, "Día 211: Isaías 54-58", "Isaías 54-58", 23, 54, listOf(p(23, "Isaías", 54), p(23, "Isaías", 55), p(23, "Isaías", 56), p(23, "Isaías", 57), p(23, "Isaías", 58))),
+        d(212, "Día 212: Isaías 59-63", "Isaías 59-63", 23, 59, listOf(p(23, "Isaías", 59), p(23, "Isaías", 60), p(23, "Isaías", 61), p(23, "Isaías", 62), p(23, "Isaías", 63))),
+        d(213, "Día 213: Isaías 64-66", "Isaías 64-66", 23, 64, listOf(p(23, "Isaías", 64), p(23, "Isaías", 65), p(23, "Isaías", 66))),
+        d(214, "Día 214: 2 Reyes 20-21", "2 Reyes 20-21", 12, 20, listOf(p(12, "2 Reyes", 20), p(12, "2 Reyes", 21))),
+        d(215, "Día 215: 2 Crónicas 32-33", "2 Crónicas 32-33", 14, 32, listOf(p(14, "2 Crónicas", 32), p(14, "2 Crónicas", 33))),
+        d(216, "Día 216: Nahúm 1-3", "Nahúm 1-3", 34, 1, listOf(p(34, "Nahúm", 1), p(34, "Nahúm", 2), p(34, "Nahúm", 3))),
+        d(217, "Día 217: 2 Reyes 22-23; 2 Crónicas 34-35", "2 Reyes 22-23; 2 Crónicas 34-35", 12, 22, listOf(p(12, "2 Reyes", 22), p(12, "2 Reyes", 23), p(14, "2 Crónicas", 34), p(14, "2 Crónicas", 35))),
+        d(218, "Día 218: Sofonías 1-3", "Sofonías 1-3", 36, 1, listOf(p(36, "Sofonías", 1), p(36, "Sofonías", 2), p(36, "Sofonías", 3))),
+        d(219, "Día 219: Jeremías 1-3", "Jeremías 1-3", 24, 1, listOf(p(24, "Jeremías", 1), p(24, "Jeremías", 2), p(24, "Jeremías", 3))),
+        d(220, "Día 220: Jeremías 4-6", "Jeremías 4-6", 24, 4, listOf(p(24, "Jeremías", 4), p(24, "Jeremías", 5), p(24, "Jeremías", 6))),
+        d(221, "Día 221: Jeremías 7-9", "Jeremías 7-9", 24, 7, listOf(p(24, "Jeremías", 7), p(24, "Jeremías", 8), p(24, "Jeremías", 9))),
+        d(222, "Día 222: Jeremías 10-13", "Jeremías 10-13", 24, 10, listOf(p(24, "Jeremías", 10), p(24, "Jeremías", 11), p(24, "Jeremías", 12), p(24, "Jeremías", 13))),
+        d(223, "Día 223: Jeremías 14-17", "Jeremías 14-17", 24, 14, listOf(p(24, "Jeremías", 14), p(24, "Jeremías", 15), p(24, "Jeremías", 16), p(24, "Jeremías", 17))),
+        d(224, "Día 224: Jeremías 18-22", "Jeremías 18-22", 24, 18, listOf(p(24, "Jeremías", 18), p(24, "Jeremías", 19), p(24, "Jeremías", 20), p(24, "Jeremías", 21), p(24, "Jeremías", 22))),
+        d(225, "Día 225: Jeremías 23-25", "Jeremías 23-25", 24, 23, listOf(p(24, "Jeremías", 23), p(24, "Jeremías", 24), p(24, "Jeremías", 25))),
+        d(226, "Día 226: Jeremías 26-29", "Jeremías 26-29", 24, 26, listOf(p(24, "Jeremías", 26), p(24, "Jeremías", 27), p(24, "Jeremías", 28), p(24, "Jeremías", 29))),
+        d(227, "Día 227: Jeremías 30-31", "Jeremías 30-31", 24, 30, listOf(p(24, "Jeremías", 30), p(24, "Jeremías", 31))),
+        d(228, "Día 228: Jeremías 32-34", "Jeremías 32-34", 24, 32, listOf(p(24, "Jeremías", 32), p(24, "Jeremías", 33), p(24, "Jeremías", 34))),
+        d(229, "Día 229: Jeremías 35-37", "Jeremías 35-37", 24, 35, listOf(p(24, "Jeremías", 35), p(24, "Jeremías", 36), p(24, "Jeremías", 37))),
+        d(230, "Día 230: Jeremías 38-40; Salmos 74-79", "Jeremías 38-40; Salmos 74-79", 24, 38, listOf(p(24, "Jeremías", 38), p(24, "Jeremías", 39), p(24, "Jeremías", 40), p(19, "Salmos", 74), p(19, "Salmos", 79))),
+        d(231, "Día 231: 2 Reyes 24-25; 2 Crónicas 36", "2 Reyes 24-25; 2 Crónicas 36", 12, 24, listOf(p(12, "2 Reyes", 24), p(12, "2 Reyes", 25), p(14, "2 Crónicas", 36))),
+        d(232, "Día 232: Habacuc 1-3", "Habacuc 1-3", 35, 1, listOf(p(35, "Habacuc", 1), p(35, "Habacuc", 2), p(35, "Habacuc", 3))),
+        d(233, "Día 233: Jeremías 41-45", "Jeremías 41-45", 24, 41, listOf(p(24, "Jeremías", 41), p(24, "Jeremías", 42), p(24, "Jeremías", 43), p(24, "Jeremías", 44), p(24, "Jeremías", 45))),
+        d(234, "Día 234: Jeremías 46-48", "Jeremías 46-48", 24, 46, listOf(p(24, "Jeremías", 46), p(24, "Jeremías", 47), p(24, "Jeremías", 48))),
+        d(235, "Día 235: Jeremías 49-50", "Jeremías 49-50", 24, 49, listOf(p(24, "Jeremías", 49), p(24, "Jeremías", 50))),
+        d(236, "Día 236: Jeremías 51-52", "Jeremías 51-52", 24, 51, listOf(p(24, "Jeremías", 51), p(24, "Jeremías", 52))),
+        d(237, "Día 237: Lamentaciones 1-3", "Lamentaciones 1-3", 25, 1, listOf(p(25, "Lamentaciones", 1), p(25, "Lamentaciones", 2), p(25, "Lamentaciones", 3))),
+        d(238, "Día 238: Lamentaciones 3-5", "Lamentaciones 3-5", 25, 3, listOf(p(25, "Lamentaciones", 3), p(25, "Lamentaciones", 4), p(25, "Lamentaciones", 5))),
+        d(239, "Día 239: Ezequiel 1-4", "Ezequiel 1-4", 26, 1, listOf(p(26, "Ezequiel", 1), p(26, "Ezequiel", 2), p(26, "Ezequiel", 3), p(26, "Ezequiel", 4))),
+        d(240, "Día 240: Ezequiel 5-8", "Ezequiel 5-8", 26, 5, listOf(p(26, "Ezequiel", 5), p(26, "Ezequiel", 6), p(26, "Ezequiel", 7), p(26, "Ezequiel", 8))),
+    )
+
+    private fun chronologicalBlock7(): List<ReadingPlanDay> = listOf(
+        d(241, "Día 241: Ezequiel 9-12", "Ezequiel 9-12", 26, 9, listOf(p(26, "Ezequiel", 9), p(26, "Ezequiel", 10), p(26, "Ezequiel", 11), p(26, "Ezequiel", 12))),
+        d(242, "Día 242: Ezequiel 13-15", "Ezequiel 13-15", 26, 13, listOf(p(26, "Ezequiel", 13), p(26, "Ezequiel", 14), p(26, "Ezequiel", 15))),
+        d(243, "Día 243: Ezequiel 16-17", "Ezequiel 16-17", 26, 16, listOf(p(26, "Ezequiel", 16), p(26, "Ezequiel", 17))),
+        d(244, "Día 244: Ezequiel 18-19", "Ezequiel 18-19", 26, 18, listOf(p(26, "Ezequiel", 18), p(26, "Ezequiel", 19))),
+        d(245, "Día 245: Ezequiel 20-21", "Ezequiel 20-21", 26, 20, listOf(p(26, "Ezequiel", 20), p(26, "Ezequiel", 21))),
+        d(246, "Día 246: Ezequiel 22-23", "Ezequiel 22-23", 26, 22, listOf(p(26, "Ezequiel", 22), p(26, "Ezequiel", 23))),
+        d(247, "Día 247: Ezequiel 24-27", "Ezequiel 24-27", 26, 24, listOf(p(26, "Ezequiel", 24), p(26, "Ezequiel", 25), p(26, "Ezequiel", 26), p(26, "Ezequiel", 27))),
+        d(248, "Día 248: Ezequiel 28-31", "Ezequiel 28-31", 26, 28, listOf(p(26, "Ezequiel", 28), p(26, "Ezequiel", 29), p(26, "Ezequiel", 30), p(26, "Ezequiel", 31))),
+        d(249, "Día 249: Ezequiel 32-34", "Ezequiel 32-34", 26, 32, listOf(p(26, "Ezequiel", 32), p(26, "Ezequiel", 33), p(26, "Ezequiel", 34))),
+        d(250, "Día 250: Ezequiel 35-37", "Ezequiel 35-37", 26, 35, listOf(p(26, "Ezequiel", 35), p(26, "Ezequiel", 36), p(26, "Ezequiel", 37))),
+        d(251, "Día 251: Ezequiel 38-39", "Ezequiel 38-39", 26, 38, listOf(p(26, "Ezequiel", 38), p(26, "Ezequiel", 39))),
+        d(252, "Día 252: Ezequiel 40-41", "Ezequiel 40-41", 26, 40, listOf(p(26, "Ezequiel", 40), p(26, "Ezequiel", 41))),
+        d(253, "Día 253: Ezequiel 42-43", "Ezequiel 42-43", 26, 42, listOf(p(26, "Ezequiel", 42), p(26, "Ezequiel", 43))),
+        d(254, "Día 254: Ezequiel 44-45", "Ezequiel 44-45", 26, 44, listOf(p(26, "Ezequiel", 44), p(26, "Ezequiel", 45))),
+        d(255, "Día 255: Ezequiel 46-48", "Ezequiel 46-48", 26, 46, listOf(p(26, "Ezequiel", 46), p(26, "Ezequiel", 47), p(26, "Ezequiel", 48))),
+        d(256, "Día 256: Joel 1-3", "Joel 1-3", 29, 1, listOf(p(29, "Joel", 1), p(29, "Joel", 2), p(29, "Joel", 3))),
+        d(257, "Día 257: Daniel 1-3", "Daniel 1-3", 27, 1, listOf(p(27, "Daniel", 1), p(27, "Daniel", 2), p(27, "Daniel", 3))),
+        d(258, "Día 258: Daniel 4-6", "Daniel 4-6", 27, 4, listOf(p(27, "Daniel", 4), p(27, "Daniel", 5), p(27, "Daniel", 6))),
+        d(259, "Día 259: Daniel 7-9", "Daniel 7-9", 27, 7, listOf(p(27, "Daniel", 7), p(27, "Daniel", 8), p(27, "Daniel", 9))),
+        d(260, "Día 260: Daniel 10-12", "Daniel 10-12", 27, 10, listOf(p(27, "Daniel", 10), p(27, "Daniel", 11), p(27, "Daniel", 12))),
+        d(261, "Día 261: Esdras 1-3", "Esdras 1-3", 15, 1, listOf(p(15, "Esdras", 1), p(15, "Esdras", 2), p(15, "Esdras", 3))),
+        d(262, "Día 262: Esdras 4-6; Salmos 137", "Esdras 4-6; Salmos 137", 15, 4, listOf(p(15, "Esdras", 4), p(15, "Esdras", 5), p(15, "Esdras", 6), p(19, "Salmos", 137))),
+        d(263, "Día 263: Hageo 1-2", "Hageo 1-2", 37, 1, listOf(p(37, "Hageo", 1), p(37, "Hageo", 2))),
+        d(264, "Día 264: Zacarías 1-7", "Zacarías 1-7", 38, 1, listOf(p(38, "Zacarías", 1), p(38, "Zacarías", 2), p(38, "Zacarías", 3), p(38, "Zacarías", 4), p(38, "Zacarías", 5), p(38, "Zacarías", 6), p(38, "Zacarías", 7))),
+        d(265, "Día 265: Zacarías 8-14", "Zacarías 8-14", 38, 8, listOf(p(38, "Zacarías", 8), p(38, "Zacarías", 9), p(38, "Zacarías", 10), p(38, "Zacarías", 11), p(38, "Zacarías", 12), p(38, "Zacarías", 13), p(38, "Zacarías", 14))),
+        d(266, "Día 266: Ester 1-5", "Ester 1-5", 17, 1, listOf(p(17, "Ester", 1), p(17, "Ester", 2), p(17, "Ester", 3), p(17, "Ester", 4), p(17, "Ester", 5))),
+        d(267, "Día 267: Ester 6-10", "Ester 6-10", 17, 6, listOf(p(17, "Ester", 6), p(17, "Ester", 7), p(17, "Ester", 8), p(17, "Ester", 9), p(17, "Ester", 10))),
+        d(268, "Día 268: Esdras 7-10", "Esdras 7-10", 15, 7, listOf(p(15, "Esdras", 7), p(15, "Esdras", 8), p(15, "Esdras", 9), p(15, "Esdras", 10))),
+        d(269, "Día 269: Nehemías 1-5", "Nehemías 1-5", 16, 1, listOf(p(16, "Nehemías", 1), p(16, "Nehemías", 2), p(16, "Nehemías", 3), p(16, "Nehemías", 4), p(16, "Nehemías", 5))),
+        d(270, "Día 270: Nehemías 6-7", "Nehemías 6-7", 16, 6, listOf(p(16, "Nehemías", 6), p(16, "Nehemías", 7))),
+        d(271, "Día 271: Nehemías 8-10", "Nehemías 8-10", 16, 8, listOf(p(16, "Nehemías", 8), p(16, "Nehemías", 9), p(16, "Nehemías", 10))),
+        d(272, "Día 272: Nehemías 11-13; Salmos 126", "Nehemías 11-13; Salmos 126", 16, 11, listOf(p(16, "Nehemías", 11), p(16, "Nehemías", 12), p(16, "Nehemías", 13), p(19, "Salmos", 126))),
+        d(273, "Día 273: Malaquías 1-4", "Malaquías 1-4", 39, 1, listOf(p(39, "Malaquías", 1), p(39, "Malaquías", 2), p(39, "Malaquías", 3), p(39, "Malaquías", 4))),
+        d(274, "Día 274: Lucas 1; Juan 1", "Lucas 1; Juan 1", 42, 1, listOf(p(42, "Lucas", 1), p(43, "Juan", 1))),
+        d(275, "Día 275: Mateo 1; Lucas 2", "Mateo 1; Lucas 2", 40, 1, listOf(p(40, "Mateo", 1), p(42, "Lucas", 2))),
+        d(276, "Día 276: Mateo 2; Lucas 2", "Mateo 2; Lucas 2", 40, 2, listOf(p(40, "Mateo", 2), p(42, "Lucas", 2))),
+        d(277, "Día 277: Mateo 3; Marcos 1; Lucas 3", "Mateo 3; Marcos 1; Lucas 3", 40, 3, listOf(p(40, "Mateo", 3), p(41, "Marcos", 1), p(42, "Lucas", 3))),
+        d(278, "Día 278: Mateo 4; Lucas 4-5; Juan 1", "Mateo 4; Lucas 4-5; Juan 1", 40, 4, listOf(p(40, "Mateo", 4), p(42, "Lucas", 4), p(42, "Lucas", 5), p(43, "Juan", 1))),
+        d(279, "Día 279: Juan 2-4", "Juan 2-4", 43, 2, listOf(p(43, "Juan", 2), p(43, "Juan", 3), p(43, "Juan", 4))),
+        d(280, "Día 280: Marcos 2", "Marcos 2", 41, 2, listOf(p(41, "Marcos", 2))),
+    )
+
+    private fun chronologicalBlock8(): List<ReadingPlanDay> = listOf(
+        d(281, "Día 281: Juan 5", "Juan 5", 43, 5, listOf(p(43, "Juan", 5))),
+        d(282, "Día 282: Mateo 12; Marcos 3; Lucas 6", "Mateo 12; Marcos 3; Lucas 6", 40, 12, listOf(p(40, "Mateo", 12), p(41, "Marcos", 3), p(42, "Lucas", 6))),
+        d(283, "Día 283: Mateo 5-7", "Mateo 5-7", 40, 5, listOf(p(40, "Mateo", 5), p(40, "Mateo", 6), p(40, "Mateo", 7))),
+        d(284, "Día 284: Mateo 8; Lucas 7", "Mateo 8; Lucas 7", 40, 8, listOf(p(40, "Mateo", 8), p(42, "Lucas", 7))),
+        d(285, "Día 285: Mateo 11", "Mateo 11", 40, 11, listOf(p(40, "Mateo", 11))),
+        d(286, "Día 286: Mateo 12; Lucas 11", "Mateo 12; Lucas 11", 40, 12, listOf(p(40, "Mateo", 12), p(42, "Lucas", 11))),
+        d(287, "Día 287: Mateo 13; Lucas 8", "Mateo 13; Lucas 8", 40, 13, listOf(p(40, "Mateo", 13), p(42, "Lucas", 8))),
+        d(288, "Día 288: Mateo 8; Marcos 4-5", "Mateo 8; Marcos 4-5", 40, 8, listOf(p(40, "Mateo", 8), p(41, "Marcos", 4), p(41, "Marcos", 5))),
+        d(289, "Día 289: Mateo 9-10", "Mateo 9-10", 40, 9, listOf(p(40, "Mateo", 9), p(40, "Mateo", 10))),
+        d(290, "Día 290: Mateo 14; Marcos 6; Lucas 9", "Mateo 14; Marcos 6; Lucas 9", 40, 14, listOf(p(40, "Mateo", 14), p(41, "Marcos", 6), p(42, "Lucas", 9))),
+        d(291, "Día 291: Juan 6", "Juan 6", 43, 6, listOf(p(43, "Juan", 6))),
+        d(292, "Día 292: Mateo 15; Marcos 7", "Mateo 15; Marcos 7", 40, 15, listOf(p(40, "Mateo", 15), p(41, "Marcos", 7))),
+        d(293, "Día 293: Mateo 16; Marcos 8; Lucas 9", "Mateo 16; Marcos 8; Lucas 9", 40, 16, listOf(p(40, "Mateo", 16), p(41, "Marcos", 8), p(42, "Lucas", 9))),
+        d(294, "Día 294: Mateo 17; Marcos 9; Lucas 9", "Mateo 17; Marcos 9; Lucas 9", 40, 17, listOf(p(40, "Mateo", 17), p(41, "Marcos", 9), p(42, "Lucas", 9))),
+        d(295, "Día 295: Mateo 18", "Mateo 18", 40, 18, listOf(p(40, "Mateo", 18))),
+        d(296, "Día 296: Juan 7-8", "Juan 7-8", 43, 7, listOf(p(43, "Juan", 7), p(43, "Juan", 8))),
+        d(297, "Día 297: Juan 9-10", "Juan 9-10", 43, 9, listOf(p(43, "Juan", 9), p(43, "Juan", 10))),
+        d(298, "Día 298: Lucas 10-11; Juan 10", "Lucas 10-11; Juan 10", 42, 10, listOf(p(42, "Lucas", 10), p(42, "Lucas", 11), p(43, "Juan", 10))),
+        d(299, "Día 299: Lucas 12-13", "Lucas 12-13", 42, 12, listOf(p(42, "Lucas", 12), p(42, "Lucas", 13))),
+        d(300, "Día 300: Lucas 14-15", "Lucas 14-15", 42, 14, listOf(p(42, "Lucas", 14), p(42, "Lucas", 15))),
+        d(301, "Día 301: Lucas 16-17", "Lucas 16-17", 42, 16, listOf(p(42, "Lucas", 16), p(42, "Lucas", 17))),
+        d(302, "Día 302: Juan 11", "Juan 11", 43, 11, listOf(p(43, "Juan", 11))),
+        d(303, "Día 303: Lucas 17-18", "Lucas 17-18", 42, 17, listOf(p(42, "Lucas", 17), p(42, "Lucas", 18))),
+        d(304, "Día 304: Mateo 19; Marcos 10", "Mateo 19; Marcos 10", 40, 19, listOf(p(40, "Mateo", 19), p(41, "Marcos", 10))),
+        d(305, "Día 305: Mateo 20-21", "Mateo 20-21", 40, 20, listOf(p(40, "Mateo", 20), p(40, "Mateo", 21))),
+        d(306, "Día 306: Lucas 18-19", "Lucas 18-19", 42, 18, listOf(p(42, "Lucas", 18), p(42, "Lucas", 19))),
+        d(307, "Día 307: Marcos 11; Juan 12", "Marcos 11; Juan 12", 41, 11, listOf(p(41, "Marcos", 11), p(43, "Juan", 12))),
+        d(308, "Día 308: Mateo 22; Marcos 12", "Mateo 22; Marcos 12", 40, 22, listOf(p(40, "Mateo", 22), p(41, "Marcos", 12))),
+        d(309, "Día 309: Mateo 23; Lucas 20-21", "Mateo 23; Lucas 20-21", 40, 23, listOf(p(40, "Mateo", 23), p(42, "Lucas", 20), p(42, "Lucas", 21))),
+        d(310, "Día 310: Marcos 13", "Marcos 13", 41, 13, listOf(p(41, "Marcos", 13))),
+        d(311, "Día 311: Mateo 24", "Mateo 24", 40, 24, listOf(p(40, "Mateo", 24))),
+        d(312, "Día 312: Mateo 25", "Mateo 25", 40, 25, listOf(p(40, "Mateo", 25))),
+        d(313, "Día 313: Mateo 26; Marcos 14", "Mateo 26; Marcos 14", 40, 26, listOf(p(40, "Mateo", 26), p(41, "Marcos", 14))),
+        d(314, "Día 314: Lucas 22; Juan 13", "Lucas 22; Juan 13", 42, 22, listOf(p(42, "Lucas", 22), p(43, "Juan", 13))),
+        d(315, "Día 315: Juan 14-17", "Juan 14-17", 43, 14, listOf(p(43, "Juan", 14), p(43, "Juan", 15), p(43, "Juan", 16), p(43, "Juan", 17))),
+        d(316, "Día 316: Mateo 27; Marcos 15", "Mateo 27; Marcos 15", 40, 27, listOf(p(40, "Mateo", 27), p(41, "Marcos", 15))),
+        d(317, "Día 317: Lucas 23; Juan 18-19", "Lucas 23; Juan 18-19", 42, 23, listOf(p(42, "Lucas", 23), p(43, "Juan", 18), p(43, "Juan", 19))),
+        d(318, "Día 318: Mateo 28; Marcos 16", "Mateo 28; Marcos 16", 40, 28, listOf(p(40, "Mateo", 28), p(41, "Marcos", 16))),
+        d(319, "Día 319: Lucas 24; Juan 20-21", "Lucas 24; Juan 20-21", 42, 24, listOf(p(42, "Lucas", 24), p(43, "Juan", 20), p(43, "Juan", 21))),
+        d(320, "Día 320: Hechos 1-3", "Hechos 1-3", 44, 1, listOf(p(44, "Hechos", 1), p(44, "Hechos", 2), p(44, "Hechos", 3))),
+    )
+
+    private fun chronologicalBlock9(): List<ReadingPlanDay> = listOf(
+        d(321, "Día 321: Hechos 4-6", "Hechos 4-6", 44, 4, listOf(p(44, "Hechos", 4), p(44, "Hechos", 5), p(44, "Hechos", 6))),
+        d(322, "Día 322: Hechos 7-8", "Hechos 7-8", 44, 7, listOf(p(44, "Hechos", 7), p(44, "Hechos", 8))),
+        d(323, "Día 323: Hechos 9-10", "Hechos 9-10", 44, 9, listOf(p(44, "Hechos", 9), p(44, "Hechos", 10))),
+        d(324, "Día 324: Hechos 11-12", "Hechos 11-12", 44, 11, listOf(p(44, "Hechos", 11), p(44, "Hechos", 12))),
+        d(325, "Día 325: Hechos 13-14", "Hechos 13-14", 44, 13, listOf(p(44, "Hechos", 13), p(44, "Hechos", 14))),
+        d(326, "Día 326: Santiago 1-5", "Santiago 1-5", 59, 1, listOf(p(59, "Santiago", 1), p(59, "Santiago", 2), p(59, "Santiago", 3), p(59, "Santiago", 4), p(59, "Santiago", 5))),
+        d(327, "Día 327: Hechos 15-16", "Hechos 15-16", 44, 15, listOf(p(44, "Hechos", 15), p(44, "Hechos", 16))),
+        d(328, "Día 328: Gálatas 1-3", "Gálatas 1-3", 48, 1, listOf(p(48, "Gálatas", 1), p(48, "Gálatas", 2), p(48, "Gálatas", 3))),
+        d(329, "Día 329: Gálatas 4-6", "Gálatas 4-6", 48, 4, listOf(p(48, "Gálatas", 4), p(48, "Gálatas", 5), p(48, "Gálatas", 6))),
+        d(330, "Día 330: Hechos 17-18", "Hechos 17-18", 44, 17, listOf(p(44, "Hechos", 17), p(44, "Hechos", 18))),
+        d(331, "Día 331: 1 Tesalonicenses 1-5; 2 Tesalonicenses 1-3", "1 Tesalonicenses 1-5; 2 Tesalonicenses 1-3", 52, 1, listOf(p(52, "1 Tesalonicenses", 1), p(52, "1 Tesalonicenses", 2), p(52, "1 Tesalonicenses", 3), p(52, "1 Tesalonicenses", 4), p(52, "1 Tesalonicenses", 5), p(53, "2 Tesalonicenses", 1), p(53, "2 Tesalonicenses", 2), p(53, "2 Tesalonicenses", 3))),
+        d(332, "Día 332: Hechos 18-19", "Hechos 18-19", 44, 18, listOf(p(44, "Hechos", 18), p(44, "Hechos", 19))),
+        d(333, "Día 333: 1 Corintios 1-4", "1 Corintios 1-4", 46, 1, listOf(p(46, "1 Corintios", 1), p(46, "1 Corintios", 2), p(46, "1 Corintios", 3), p(46, "1 Corintios", 4))),
+        d(334, "Día 334: 1 Corintios 5-8", "1 Corintios 5-8", 46, 5, listOf(p(46, "1 Corintios", 5), p(46, "1 Corintios", 6), p(46, "1 Corintios", 7), p(46, "1 Corintios", 8))),
+        d(335, "Día 335: 1 Corintios 9-11", "1 Corintios 9-11", 46, 9, listOf(p(46, "1 Corintios", 9), p(46, "1 Corintios", 10), p(46, "1 Corintios", 11))),
+        d(336, "Día 336: 1 Corintios 12-14", "1 Corintios 12-14", 46, 12, listOf(p(46, "1 Corintios", 12), p(46, "1 Corintios", 13), p(46, "1 Corintios", 14))),
+        d(337, "Día 337: 1 Corintios 15-16", "1 Corintios 15-16", 46, 15, listOf(p(46, "1 Corintios", 15), p(46, "1 Corintios", 16))),
+        d(338, "Día 338: 2 Corintios 1-4", "2 Corintios 1-4", 47, 1, listOf(p(47, "2 Corintios", 1), p(47, "2 Corintios", 2), p(47, "2 Corintios", 3), p(47, "2 Corintios", 4))),
+        d(339, "Día 339: 2 Corintios 5-9", "2 Corintios 5-9", 47, 5, listOf(p(47, "2 Corintios", 5), p(47, "2 Corintios", 6), p(47, "2 Corintios", 7), p(47, "2 Corintios", 8), p(47, "2 Corintios", 9))),
+        d(340, "Día 340: 2 Corintios 10-13", "2 Corintios 10-13", 47, 10, listOf(p(47, "2 Corintios", 10), p(47, "2 Corintios", 11), p(47, "2 Corintios", 12), p(47, "2 Corintios", 13))),
+        d(341, "Día 341: Hechos 20; Romanos 1-3", "Hechos 20; Romanos 1-3", 44, 20, listOf(p(44, "Hechos", 20), p(45, "Romanos", 1), p(45, "Romanos", 2), p(45, "Romanos", 3))),
+        d(342, "Día 342: Romanos 4-7", "Romanos 4-7", 45, 4, listOf(p(45, "Romanos", 4), p(45, "Romanos", 5), p(45, "Romanos", 6), p(45, "Romanos", 7))),
+        d(343, "Día 343: Romanos 8-10", "Romanos 8-10", 45, 8, listOf(p(45, "Romanos", 8), p(45, "Romanos", 9), p(45, "Romanos", 10))),
+        d(344, "Día 344: Romanos 11-13", "Romanos 11-13", 45, 11, listOf(p(45, "Romanos", 11), p(45, "Romanos", 12), p(45, "Romanos", 13))),
+        d(345, "Día 345: Romanos 14-16", "Romanos 14-16", 45, 14, listOf(p(45, "Romanos", 14), p(45, "Romanos", 15), p(45, "Romanos", 16))),
+        d(346, "Día 346: Hechos 20-23", "Hechos 20-23", 44, 20, listOf(p(44, "Hechos", 20), p(44, "Hechos", 21), p(44, "Hechos", 22), p(44, "Hechos", 23))),
+        d(347, "Día 347: Hechos 24-26", "Hechos 24-26", 44, 24, listOf(p(44, "Hechos", 24), p(44, "Hechos", 25), p(44, "Hechos", 26))),
+        d(348, "Día 348: Hechos 27-28", "Hechos 27-28", 44, 27, listOf(p(44, "Hechos", 27), p(44, "Hechos", 28))),
+        d(349, "Día 349: Colosenses 1-4; Filemón 1", "Colosenses 1-4; Filemón 1", 51, 1, listOf(p(51, "Colosenses", 1), p(51, "Colosenses", 2), p(51, "Colosenses", 3), p(51, "Colosenses", 4), p(57, "Filemón", 1))),
+        d(350, "Día 350: Efesios 1-6", "Efesios 1-6", 49, 1, listOf(p(49, "Efesios", 1), p(49, "Efesios", 2), p(49, "Efesios", 3), p(49, "Efesios", 4), p(49, "Efesios", 5), p(49, "Efesios", 6))),
+        d(351, "Día 351: Filipenses 1-4", "Filipenses 1-4", 50, 1, listOf(p(50, "Filipenses", 1), p(50, "Filipenses", 2), p(50, "Filipenses", 3), p(50, "Filipenses", 4))),
+        d(352, "Día 352: 1 Timoteo 1-6", "1 Timoteo 1-6", 54, 1, listOf(p(54, "1 Timoteo", 1), p(54, "1 Timoteo", 2), p(54, "1 Timoteo", 3), p(54, "1 Timoteo", 4), p(54, "1 Timoteo", 5), p(54, "1 Timoteo", 6))),
+        d(353, "Día 353: Tito 1-3", "Tito 1-3", 56, 1, listOf(p(56, "Tito", 1), p(56, "Tito", 2), p(56, "Tito", 3))),
+        d(354, "Día 354: 1 Pedro 1-5", "1 Pedro 1-5", 60, 1, listOf(p(60, "1 Pedro", 1), p(60, "1 Pedro", 2), p(60, "1 Pedro", 3), p(60, "1 Pedro", 4), p(60, "1 Pedro", 5))),
+        d(355, "Día 355: Hebreos 1-6", "Hebreos 1-6", 58, 1, listOf(p(58, "Hebreos", 1), p(58, "Hebreos", 2), p(58, "Hebreos", 3), p(58, "Hebreos", 4), p(58, "Hebreos", 5), p(58, "Hebreos", 6))),
+        d(356, "Día 356: Hebreos 7-10", "Hebreos 7-10", 58, 7, listOf(p(58, "Hebreos", 7), p(58, "Hebreos", 8), p(58, "Hebreos", 9), p(58, "Hebreos", 10))),
+        d(357, "Día 357: Hebreos 11-13", "Hebreos 11-13", 58, 11, listOf(p(58, "Hebreos", 11), p(58, "Hebreos", 12), p(58, "Hebreos", 13))),
+        d(358, "Día 358: 2 Timoteo 1-4", "2 Timoteo 1-4", 55, 1, listOf(p(55, "2 Timoteo", 1), p(55, "2 Timoteo", 2), p(55, "2 Timoteo", 3), p(55, "2 Timoteo", 4))),
+        d(359, "Día 359: 2 Pedro 1-3; Judas 1", "2 Pedro 1-3; Judas 1", 61, 1, listOf(p(61, "2 Pedro", 1), p(61, "2 Pedro", 2), p(61, "2 Pedro", 3), p(65, "Judas", 1))),
+        d(360, "Día 360: 1 Juan 1-5", "1 Juan 1-5", 62, 1, listOf(p(62, "1 Juan", 1), p(62, "1 Juan", 2), p(62, "1 Juan", 3), p(62, "1 Juan", 4), p(62, "1 Juan", 5))),
+    )
+
+    private fun chronologicalBlock10(): List<ReadingPlanDay> = listOf(
+        d(361, "Día 361: 2 Juan 1; 3 Juan 1", "2 Juan 1; 3 Juan 1", 63, 1, listOf(p(63, "2 Juan", 1), p(64, "3 Juan", 1))),
+        d(362, "Día 362: Apocalipsis 1-5", "Apocalipsis 1-5", 66, 1, listOf(p(66, "Apocalipsis", 1), p(66, "Apocalipsis", 2), p(66, "Apocalipsis", 3), p(66, "Apocalipsis", 4), p(66, "Apocalipsis", 5))),
+        d(363, "Día 363: Apocalipsis 6-11", "Apocalipsis 6-11", 66, 6, listOf(p(66, "Apocalipsis", 6), p(66, "Apocalipsis", 7), p(66, "Apocalipsis", 8), p(66, "Apocalipsis", 9), p(66, "Apocalipsis", 10), p(66, "Apocalipsis", 11))),
+        d(364, "Día 364: Apocalipsis 12-18", "Apocalipsis 12-18", 66, 12, listOf(p(66, "Apocalipsis", 12), p(66, "Apocalipsis", 13), p(66, "Apocalipsis", 14), p(66, "Apocalipsis", 15), p(66, "Apocalipsis", 16), p(66, "Apocalipsis", 17), p(66, "Apocalipsis", 18))),
+        d(365, "Día 365: Apocalipsis 19-22", "Apocalipsis 19-22", 66, 19, listOf(p(66, "Apocalipsis", 19), p(66, "Apocalipsis", 20), p(66, "Apocalipsis", 21), p(66, "Apocalipsis", 22))),
+    )
+
 }

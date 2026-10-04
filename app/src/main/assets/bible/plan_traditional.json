@@ -1,0 +1,9232 @@
+[
+  {
+    "dayNumber": 1,
+    "title": "Día 1: Génesis 1-3",
+    "passagesSummary": "Génesis 1-3",
+    "primaryBookId": 1,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 1
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 2
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 2,
+    "title": "Día 2: Génesis 4-7",
+    "passagesSummary": "Génesis 4-7",
+    "primaryBookId": 1,
+    "primaryChapter": 4,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 4
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 5
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 6
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 3,
+    "title": "Día 3: Génesis 8-10",
+    "passagesSummary": "Génesis 8-10",
+    "primaryBookId": 1,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 8
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 9
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 10
+      }
+    ]
+  },
+  {
+    "dayNumber": 4,
+    "title": "Día 4: Génesis 11-13",
+    "passagesSummary": "Génesis 11-13",
+    "primaryBookId": 1,
+    "primaryChapter": 11,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 11
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 12
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 13
+      }
+    ]
+  },
+  {
+    "dayNumber": 5,
+    "title": "Día 5: Génesis 14-16",
+    "passagesSummary": "Génesis 14-16",
+    "primaryBookId": 1,
+    "primaryChapter": 14,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 14
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 15
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 16
+      }
+    ]
+  },
+  {
+    "dayNumber": 6,
+    "title": "Día 6: Génesis 17-20",
+    "passagesSummary": "Génesis 17-20",
+    "primaryBookId": 1,
+    "primaryChapter": 17,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 17
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 18
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 19
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 20
+      }
+    ]
+  },
+  {
+    "dayNumber": 7,
+    "title": "Día 7: Génesis 21-23",
+    "passagesSummary": "Génesis 21-23",
+    "primaryBookId": 1,
+    "primaryChapter": 21,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 21
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 22
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 23
+      }
+    ]
+  },
+  {
+    "dayNumber": 8,
+    "title": "Día 8: Génesis 24-26",
+    "passagesSummary": "Génesis 24-26",
+    "primaryBookId": 1,
+    "primaryChapter": 24,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 24
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 25
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 26
+      }
+    ]
+  },
+  {
+    "dayNumber": 9,
+    "title": "Día 9: Génesis 27-29",
+    "passagesSummary": "Génesis 27-29",
+    "primaryBookId": 1,
+    "primaryChapter": 27,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 27
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 28
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 29
+      }
+    ]
+  },
+  {
+    "dayNumber": 10,
+    "title": "Día 10: Génesis 30-33",
+    "passagesSummary": "Génesis 30-33",
+    "primaryBookId": 1,
+    "primaryChapter": 30,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 30
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 31
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 32
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 33
+      }
+    ]
+  },
+  {
+    "dayNumber": 11,
+    "title": "Día 11: Génesis 34-36",
+    "passagesSummary": "Génesis 34-36",
+    "primaryBookId": 1,
+    "primaryChapter": 34,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 34
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 35
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 36
+      }
+    ]
+  },
+  {
+    "dayNumber": 12,
+    "title": "Día 12: Génesis 37-39",
+    "passagesSummary": "Génesis 37-39",
+    "primaryBookId": 1,
+    "primaryChapter": 37,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 37
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 38
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 39
+      }
+    ]
+  },
+  {
+    "dayNumber": 13,
+    "title": "Día 13: Génesis 40-42",
+    "passagesSummary": "Génesis 40-42",
+    "primaryBookId": 1,
+    "primaryChapter": 40,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 40
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 41
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 42
+      }
+    ]
+  },
+  {
+    "dayNumber": 14,
+    "title": "Día 14: Génesis 43-46",
+    "passagesSummary": "Génesis 43-46",
+    "primaryBookId": 1,
+    "primaryChapter": 43,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 43
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 44
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 45
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 46
+      }
+    ]
+  },
+  {
+    "dayNumber": 15,
+    "title": "Día 15: Génesis 47-49",
+    "passagesSummary": "Génesis 47-49",
+    "primaryBookId": 1,
+    "primaryChapter": 47,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 47
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 48
+      },
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 49
+      }
+    ]
+  },
+  {
+    "dayNumber": 16,
+    "title": "Día 16: Génesis 50, Éxodo 1-2",
+    "passagesSummary": "Génesis 50, Éxodo 1-2",
+    "primaryBookId": 1,
+    "primaryChapter": 50,
+    "segments": [
+      {
+        "bookId": 1,
+        "bookName": "Génesis",
+        "chapter": 50
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 1
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 2
+      }
+    ]
+  },
+  {
+    "dayNumber": 17,
+    "title": "Día 17: Éxodo 3-5",
+    "passagesSummary": "Éxodo 3-5",
+    "primaryBookId": 2,
+    "primaryChapter": 3,
+    "segments": [
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 3
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 4
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 5
+      }
+    ]
+  },
+  {
+    "dayNumber": 18,
+    "title": "Día 18: Éxodo 6-9",
+    "passagesSummary": "Éxodo 6-9",
+    "primaryBookId": 2,
+    "primaryChapter": 6,
+    "segments": [
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 6
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 7
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 8
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 9
+      }
+    ]
+  },
+  {
+    "dayNumber": 19,
+    "title": "Día 19: Éxodo 10-12",
+    "passagesSummary": "Éxodo 10-12",
+    "primaryBookId": 2,
+    "primaryChapter": 10,
+    "segments": [
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 10
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 11
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 12
+      }
+    ]
+  },
+  {
+    "dayNumber": 20,
+    "title": "Día 20: Éxodo 13-15",
+    "passagesSummary": "Éxodo 13-15",
+    "primaryBookId": 2,
+    "primaryChapter": 13,
+    "segments": [
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 13
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 14
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 15
+      }
+    ]
+  },
+  {
+    "dayNumber": 21,
+    "title": "Día 21: Éxodo 16-18",
+    "passagesSummary": "Éxodo 16-18",
+    "primaryBookId": 2,
+    "primaryChapter": 16,
+    "segments": [
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 16
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 17
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 18
+      }
+    ]
+  },
+  {
+    "dayNumber": 22,
+    "title": "Día 22: Éxodo 19-22",
+    "passagesSummary": "Éxodo 19-22",
+    "primaryBookId": 2,
+    "primaryChapter": 19,
+    "segments": [
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 19
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 20
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 21
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 22
+      }
+    ]
+  },
+  {
+    "dayNumber": 23,
+    "title": "Día 23: Éxodo 23-25",
+    "passagesSummary": "Éxodo 23-25",
+    "primaryBookId": 2,
+    "primaryChapter": 23,
+    "segments": [
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 23
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 24
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 25
+      }
+    ]
+  },
+  {
+    "dayNumber": 24,
+    "title": "Día 24: Éxodo 26-28",
+    "passagesSummary": "Éxodo 26-28",
+    "primaryBookId": 2,
+    "primaryChapter": 26,
+    "segments": [
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 26
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 27
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 28
+      }
+    ]
+  },
+  {
+    "dayNumber": 25,
+    "title": "Día 25: Éxodo 29-31",
+    "passagesSummary": "Éxodo 29-31",
+    "primaryBookId": 2,
+    "primaryChapter": 29,
+    "segments": [
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 29
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 30
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 31
+      }
+    ]
+  },
+  {
+    "dayNumber": 26,
+    "title": "Día 26: Éxodo 32-35",
+    "passagesSummary": "Éxodo 32-35",
+    "primaryBookId": 2,
+    "primaryChapter": 32,
+    "segments": [
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 32
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 33
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 34
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 35
+      }
+    ]
+  },
+  {
+    "dayNumber": 27,
+    "title": "Día 27: Éxodo 36-38",
+    "passagesSummary": "Éxodo 36-38",
+    "primaryBookId": 2,
+    "primaryChapter": 36,
+    "segments": [
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 36
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 37
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 38
+      }
+    ]
+  },
+  {
+    "dayNumber": 28,
+    "title": "Día 28: Éxodo 39-40, Levítico 1",
+    "passagesSummary": "Éxodo 39-40, Levítico 1",
+    "primaryBookId": 2,
+    "primaryChapter": 39,
+    "segments": [
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 39
+      },
+      {
+        "bookId": 2,
+        "bookName": "Éxodo",
+        "chapter": 40
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 29,
+    "title": "Día 29: Levítico 2-4",
+    "passagesSummary": "Levítico 2-4",
+    "primaryBookId": 3,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 2
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 3
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 30,
+    "title": "Día 30: Levítico 5-8",
+    "passagesSummary": "Levítico 5-8",
+    "primaryBookId": 3,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 5
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 6
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 7
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 8
+      }
+    ]
+  },
+  {
+    "dayNumber": 31,
+    "title": "Día 31: Levítico 9-11",
+    "passagesSummary": "Levítico 9-11",
+    "primaryBookId": 3,
+    "primaryChapter": 9,
+    "segments": [
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 9
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 10
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 11
+      }
+    ]
+  },
+  {
+    "dayNumber": 32,
+    "title": "Día 32: Levítico 12-14",
+    "passagesSummary": "Levítico 12-14",
+    "primaryBookId": 3,
+    "primaryChapter": 12,
+    "segments": [
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 12
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 13
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 14
+      }
+    ]
+  },
+  {
+    "dayNumber": 33,
+    "title": "Día 33: Levítico 15-17",
+    "passagesSummary": "Levítico 15-17",
+    "primaryBookId": 3,
+    "primaryChapter": 15,
+    "segments": [
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 15
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 16
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 17
+      }
+    ]
+  },
+  {
+    "dayNumber": 34,
+    "title": "Día 34: Levítico 18-21",
+    "passagesSummary": "Levítico 18-21",
+    "primaryBookId": 3,
+    "primaryChapter": 18,
+    "segments": [
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 18
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 19
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 20
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 21
+      }
+    ]
+  },
+  {
+    "dayNumber": 35,
+    "title": "Día 35: Levítico 22-24",
+    "passagesSummary": "Levítico 22-24",
+    "primaryBookId": 3,
+    "primaryChapter": 22,
+    "segments": [
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 22
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 23
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 24
+      }
+    ]
+  },
+  {
+    "dayNumber": 36,
+    "title": "Día 36: Levítico 25-27",
+    "passagesSummary": "Levítico 25-27",
+    "primaryBookId": 3,
+    "primaryChapter": 25,
+    "segments": [
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 25
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 26
+      },
+      {
+        "bookId": 3,
+        "bookName": "Levítico",
+        "chapter": 27
+      }
+    ]
+  },
+  {
+    "dayNumber": 37,
+    "title": "Día 37: Números 1-4",
+    "passagesSummary": "Números 1-4",
+    "primaryBookId": 4,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 1
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 2
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 3
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 38,
+    "title": "Día 38: Números 5-7",
+    "passagesSummary": "Números 5-7",
+    "primaryBookId": 4,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 5
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 6
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 39,
+    "title": "Día 39: Números 8-10",
+    "passagesSummary": "Números 8-10",
+    "primaryBookId": 4,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 8
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 9
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 10
+      }
+    ]
+  },
+  {
+    "dayNumber": 40,
+    "title": "Día 40: Números 11-13",
+    "passagesSummary": "Números 11-13",
+    "primaryBookId": 4,
+    "primaryChapter": 11,
+    "segments": [
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 11
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 12
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 13
+      }
+    ]
+  },
+  {
+    "dayNumber": 41,
+    "title": "Día 41: Números 14-17",
+    "passagesSummary": "Números 14-17",
+    "primaryBookId": 4,
+    "primaryChapter": 14,
+    "segments": [
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 14
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 15
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 16
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 17
+      }
+    ]
+  },
+  {
+    "dayNumber": 42,
+    "title": "Día 42: Números 18-20",
+    "passagesSummary": "Números 18-20",
+    "primaryBookId": 4,
+    "primaryChapter": 18,
+    "segments": [
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 18
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 19
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 20
+      }
+    ]
+  },
+  {
+    "dayNumber": 43,
+    "title": "Día 43: Números 21-23",
+    "passagesSummary": "Números 21-23",
+    "primaryBookId": 4,
+    "primaryChapter": 21,
+    "segments": [
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 21
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 22
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 23
+      }
+    ]
+  },
+  {
+    "dayNumber": 44,
+    "title": "Día 44: Números 24-26",
+    "passagesSummary": "Números 24-26",
+    "primaryBookId": 4,
+    "primaryChapter": 24,
+    "segments": [
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 24
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 25
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 26
+      }
+    ]
+  },
+  {
+    "dayNumber": 45,
+    "title": "Día 45: Números 27-30",
+    "passagesSummary": "Números 27-30",
+    "primaryBookId": 4,
+    "primaryChapter": 27,
+    "segments": [
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 27
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 28
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 29
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 30
+      }
+    ]
+  },
+  {
+    "dayNumber": 46,
+    "title": "Día 46: Números 31-33",
+    "passagesSummary": "Números 31-33",
+    "primaryBookId": 4,
+    "primaryChapter": 31,
+    "segments": [
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 31
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 32
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 33
+      }
+    ]
+  },
+  {
+    "dayNumber": 47,
+    "title": "Día 47: Números 34-36",
+    "passagesSummary": "Números 34-36",
+    "primaryBookId": 4,
+    "primaryChapter": 34,
+    "segments": [
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 34
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 35
+      },
+      {
+        "bookId": 4,
+        "bookName": "Números",
+        "chapter": 36
+      }
+    ]
+  },
+  {
+    "dayNumber": 48,
+    "title": "Día 48: Deuteronomio 1-3",
+    "passagesSummary": "Deuteronomio 1-3",
+    "primaryBookId": 5,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 1
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 2
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 49,
+    "title": "Día 49: Deuteronomio 4-7",
+    "passagesSummary": "Deuteronomio 4-7",
+    "primaryBookId": 5,
+    "primaryChapter": 4,
+    "segments": [
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 4
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 5
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 6
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 50,
+    "title": "Día 50: Deuteronomio 8-10",
+    "passagesSummary": "Deuteronomio 8-10",
+    "primaryBookId": 5,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 8
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 9
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 10
+      }
+    ]
+  },
+  {
+    "dayNumber": 51,
+    "title": "Día 51: Deuteronomio 11-13",
+    "passagesSummary": "Deuteronomio 11-13",
+    "primaryBookId": 5,
+    "primaryChapter": 11,
+    "segments": [
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 11
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 12
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 13
+      }
+    ]
+  },
+  {
+    "dayNumber": 52,
+    "title": "Día 52: Deuteronomio 14-16",
+    "passagesSummary": "Deuteronomio 14-16",
+    "primaryBookId": 5,
+    "primaryChapter": 14,
+    "segments": [
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 14
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 15
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 16
+      }
+    ]
+  },
+  {
+    "dayNumber": 53,
+    "title": "Día 53: Deuteronomio 17-20",
+    "passagesSummary": "Deuteronomio 17-20",
+    "primaryBookId": 5,
+    "primaryChapter": 17,
+    "segments": [
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 17
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 18
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 19
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 20
+      }
+    ]
+  },
+  {
+    "dayNumber": 54,
+    "title": "Día 54: Deuteronomio 21-23",
+    "passagesSummary": "Deuteronomio 21-23",
+    "primaryBookId": 5,
+    "primaryChapter": 21,
+    "segments": [
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 21
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 22
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 23
+      }
+    ]
+  },
+  {
+    "dayNumber": 55,
+    "title": "Día 55: Deuteronomio 24-26",
+    "passagesSummary": "Deuteronomio 24-26",
+    "primaryBookId": 5,
+    "primaryChapter": 24,
+    "segments": [
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 24
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 25
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 26
+      }
+    ]
+  },
+  {
+    "dayNumber": 56,
+    "title": "Día 56: Deuteronomio 27-29",
+    "passagesSummary": "Deuteronomio 27-29",
+    "primaryBookId": 5,
+    "primaryChapter": 27,
+    "segments": [
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 27
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 28
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 29
+      }
+    ]
+  },
+  {
+    "dayNumber": 57,
+    "title": "Día 57: Deuteronomio 30-33",
+    "passagesSummary": "Deuteronomio 30-33",
+    "primaryBookId": 5,
+    "primaryChapter": 30,
+    "segments": [
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 30
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 31
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 32
+      },
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 33
+      }
+    ]
+  },
+  {
+    "dayNumber": 58,
+    "title": "Día 58: Deuteronomio 34, Josué 1-2",
+    "passagesSummary": "Deuteronomio 34, Josué 1-2",
+    "primaryBookId": 5,
+    "primaryChapter": 34,
+    "segments": [
+      {
+        "bookId": 5,
+        "bookName": "Deuteronomio",
+        "chapter": 34
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 1
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 2
+      }
+    ]
+  },
+  {
+    "dayNumber": 59,
+    "title": "Día 59: Josué 3-5",
+    "passagesSummary": "Josué 3-5",
+    "primaryBookId": 6,
+    "primaryChapter": 3,
+    "segments": [
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 3
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 4
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 5
+      }
+    ]
+  },
+  {
+    "dayNumber": 60,
+    "title": "Día 60: Josué 6-8",
+    "passagesSummary": "Josué 6-8",
+    "primaryBookId": 6,
+    "primaryChapter": 6,
+    "segments": [
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 6
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 7
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 8
+      }
+    ]
+  },
+  {
+    "dayNumber": 61,
+    "title": "Día 61: Josué 9-12",
+    "passagesSummary": "Josué 9-12",
+    "primaryBookId": 6,
+    "primaryChapter": 9,
+    "segments": [
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 9
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 10
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 11
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 12
+      }
+    ]
+  },
+  {
+    "dayNumber": 62,
+    "title": "Día 62: Josué 13-15",
+    "passagesSummary": "Josué 13-15",
+    "primaryBookId": 6,
+    "primaryChapter": 13,
+    "segments": [
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 13
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 14
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 15
+      }
+    ]
+  },
+  {
+    "dayNumber": 63,
+    "title": "Día 63: Josué 16-18",
+    "passagesSummary": "Josué 16-18",
+    "primaryBookId": 6,
+    "primaryChapter": 16,
+    "segments": [
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 16
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 17
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 18
+      }
+    ]
+  },
+  {
+    "dayNumber": 64,
+    "title": "Día 64: Josué 19-21",
+    "passagesSummary": "Josué 19-21",
+    "primaryBookId": 6,
+    "primaryChapter": 19,
+    "segments": [
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 19
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 20
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 21
+      }
+    ]
+  },
+  {
+    "dayNumber": 65,
+    "title": "Día 65: Josué 22-24, Jueces 1",
+    "passagesSummary": "Josué 22-24, Jueces 1",
+    "primaryBookId": 6,
+    "primaryChapter": 22,
+    "segments": [
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 22
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 23
+      },
+      {
+        "bookId": 6,
+        "bookName": "Josué",
+        "chapter": 24
+      },
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 66,
+    "title": "Día 66: Jueces 2-4",
+    "passagesSummary": "Jueces 2-4",
+    "primaryBookId": 7,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 2
+      },
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 3
+      },
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 67,
+    "title": "Día 67: Jueces 5-7",
+    "passagesSummary": "Jueces 5-7",
+    "primaryBookId": 7,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 5
+      },
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 6
+      },
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 68,
+    "title": "Día 68: Jueces 8-11",
+    "passagesSummary": "Jueces 8-11",
+    "primaryBookId": 7,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 8
+      },
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 9
+      },
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 10
+      },
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 11
+      }
+    ]
+  },
+  {
+    "dayNumber": 69,
+    "title": "Día 69: Jueces 12-14",
+    "passagesSummary": "Jueces 12-14",
+    "primaryBookId": 7,
+    "primaryChapter": 12,
+    "segments": [
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 12
+      },
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 13
+      },
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 14
+      }
+    ]
+  },
+  {
+    "dayNumber": 70,
+    "title": "Día 70: Jueces 15-17",
+    "passagesSummary": "Jueces 15-17",
+    "primaryBookId": 7,
+    "primaryChapter": 15,
+    "segments": [
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 15
+      },
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 16
+      },
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 17
+      }
+    ]
+  },
+  {
+    "dayNumber": 71,
+    "title": "Día 71: Jueces 18-20",
+    "passagesSummary": "Jueces 18-20",
+    "primaryBookId": 7,
+    "primaryChapter": 18,
+    "segments": [
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 18
+      },
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 19
+      },
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 20
+      }
+    ]
+  },
+  {
+    "dayNumber": 72,
+    "title": "Día 72: Jueces 21, Rut 1-3",
+    "passagesSummary": "Jueces 21, Rut 1-3",
+    "primaryBookId": 7,
+    "primaryChapter": 21,
+    "segments": [
+      {
+        "bookId": 7,
+        "bookName": "Jueces",
+        "chapter": 21
+      },
+      {
+        "bookId": 8,
+        "bookName": "Rut",
+        "chapter": 1
+      },
+      {
+        "bookId": 8,
+        "bookName": "Rut",
+        "chapter": 2
+      },
+      {
+        "bookId": 8,
+        "bookName": "Rut",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 73,
+    "title": "Día 73: Rut 4, 1 Samuel 1-2",
+    "passagesSummary": "Rut 4, 1 Samuel 1-2",
+    "primaryBookId": 8,
+    "primaryChapter": 4,
+    "segments": [
+      {
+        "bookId": 8,
+        "bookName": "Rut",
+        "chapter": 4
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 1
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 2
+      }
+    ]
+  },
+  {
+    "dayNumber": 74,
+    "title": "Día 74: 1 Samuel 3-5",
+    "passagesSummary": "1 Samuel 3-5",
+    "primaryBookId": 9,
+    "primaryChapter": 3,
+    "segments": [
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 3
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 4
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 5
+      }
+    ]
+  },
+  {
+    "dayNumber": 75,
+    "title": "Día 75: 1 Samuel 6-8",
+    "passagesSummary": "1 Samuel 6-8",
+    "primaryBookId": 9,
+    "primaryChapter": 6,
+    "segments": [
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 6
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 7
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 8
+      }
+    ]
+  },
+  {
+    "dayNumber": 76,
+    "title": "Día 76: 1 Samuel 9-12",
+    "passagesSummary": "1 Samuel 9-12",
+    "primaryBookId": 9,
+    "primaryChapter": 9,
+    "segments": [
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 9
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 10
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 11
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 12
+      }
+    ]
+  },
+  {
+    "dayNumber": 77,
+    "title": "Día 77: 1 Samuel 13-15",
+    "passagesSummary": "1 Samuel 13-15",
+    "primaryBookId": 9,
+    "primaryChapter": 13,
+    "segments": [
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 13
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 14
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 15
+      }
+    ]
+  },
+  {
+    "dayNumber": 78,
+    "title": "Día 78: 1 Samuel 16-18",
+    "passagesSummary": "1 Samuel 16-18",
+    "primaryBookId": 9,
+    "primaryChapter": 16,
+    "segments": [
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 16
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 17
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 18
+      }
+    ]
+  },
+  {
+    "dayNumber": 79,
+    "title": "Día 79: 1 Samuel 19-21",
+    "passagesSummary": "1 Samuel 19-21",
+    "primaryBookId": 9,
+    "primaryChapter": 19,
+    "segments": [
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 19
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 20
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 21
+      }
+    ]
+  },
+  {
+    "dayNumber": 80,
+    "title": "Día 80: 1 Samuel 22-25",
+    "passagesSummary": "1 Samuel 22-25",
+    "primaryBookId": 9,
+    "primaryChapter": 22,
+    "segments": [
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 22
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 23
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 24
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 25
+      }
+    ]
+  },
+  {
+    "dayNumber": 81,
+    "title": "Día 81: 1 Samuel 26-28",
+    "passagesSummary": "1 Samuel 26-28",
+    "primaryBookId": 9,
+    "primaryChapter": 26,
+    "segments": [
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 26
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 27
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 28
+      }
+    ]
+  },
+  {
+    "dayNumber": 82,
+    "title": "Día 82: 1 Samuel 29-31",
+    "passagesSummary": "1 Samuel 29-31",
+    "primaryBookId": 9,
+    "primaryChapter": 29,
+    "segments": [
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 29
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 30
+      },
+      {
+        "bookId": 9,
+        "bookName": "1 Samuel",
+        "chapter": 31
+      }
+    ]
+  },
+  {
+    "dayNumber": 83,
+    "title": "Día 83: 2 Samuel 1-3",
+    "passagesSummary": "2 Samuel 1-3",
+    "primaryBookId": 10,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 1
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 2
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 84,
+    "title": "Día 84: 2 Samuel 4-7",
+    "passagesSummary": "2 Samuel 4-7",
+    "primaryBookId": 10,
+    "primaryChapter": 4,
+    "segments": [
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 4
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 5
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 6
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 85,
+    "title": "Día 85: 2 Samuel 8-10",
+    "passagesSummary": "2 Samuel 8-10",
+    "primaryBookId": 10,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 8
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 9
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 10
+      }
+    ]
+  },
+  {
+    "dayNumber": 86,
+    "title": "Día 86: 2 Samuel 11-13",
+    "passagesSummary": "2 Samuel 11-13",
+    "primaryBookId": 10,
+    "primaryChapter": 11,
+    "segments": [
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 11
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 12
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 13
+      }
+    ]
+  },
+  {
+    "dayNumber": 87,
+    "title": "Día 87: 2 Samuel 14-16",
+    "passagesSummary": "2 Samuel 14-16",
+    "primaryBookId": 10,
+    "primaryChapter": 14,
+    "segments": [
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 14
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 15
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 16
+      }
+    ]
+  },
+  {
+    "dayNumber": 88,
+    "title": "Día 88: 2 Samuel 17-20",
+    "passagesSummary": "2 Samuel 17-20",
+    "primaryBookId": 10,
+    "primaryChapter": 17,
+    "segments": [
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 17
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 18
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 19
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 20
+      }
+    ]
+  },
+  {
+    "dayNumber": 89,
+    "title": "Día 89: 2 Samuel 21-23",
+    "passagesSummary": "2 Samuel 21-23",
+    "primaryBookId": 10,
+    "primaryChapter": 21,
+    "segments": [
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 21
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 22
+      },
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 23
+      }
+    ]
+  },
+  {
+    "dayNumber": 90,
+    "title": "Día 90: 2 Samuel 24, 1 Reyes 1-2",
+    "passagesSummary": "2 Samuel 24, 1 Reyes 1-2",
+    "primaryBookId": 10,
+    "primaryChapter": 24,
+    "segments": [
+      {
+        "bookId": 10,
+        "bookName": "2 Samuel",
+        "chapter": 24
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 1
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 2
+      }
+    ]
+  },
+  {
+    "dayNumber": 91,
+    "title": "Día 91: 1 Reyes 3-5",
+    "passagesSummary": "1 Reyes 3-5",
+    "primaryBookId": 11,
+    "primaryChapter": 3,
+    "segments": [
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 3
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 4
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 5
+      }
+    ]
+  },
+  {
+    "dayNumber": 92,
+    "title": "Día 92: 1 Reyes 6-9",
+    "passagesSummary": "1 Reyes 6-9",
+    "primaryBookId": 11,
+    "primaryChapter": 6,
+    "segments": [
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 6
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 7
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 8
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 9
+      }
+    ]
+  },
+  {
+    "dayNumber": 93,
+    "title": "Día 93: 1 Reyes 10-12",
+    "passagesSummary": "1 Reyes 10-12",
+    "primaryBookId": 11,
+    "primaryChapter": 10,
+    "segments": [
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 10
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 11
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 12
+      }
+    ]
+  },
+  {
+    "dayNumber": 94,
+    "title": "Día 94: 1 Reyes 13-15",
+    "passagesSummary": "1 Reyes 13-15",
+    "primaryBookId": 11,
+    "primaryChapter": 13,
+    "segments": [
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 13
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 14
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 15
+      }
+    ]
+  },
+  {
+    "dayNumber": 95,
+    "title": "Día 95: 1 Reyes 16-18",
+    "passagesSummary": "1 Reyes 16-18",
+    "primaryBookId": 11,
+    "primaryChapter": 16,
+    "segments": [
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 16
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 17
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 18
+      }
+    ]
+  },
+  {
+    "dayNumber": 96,
+    "title": "Día 96: 1 Reyes 19-22",
+    "passagesSummary": "1 Reyes 19-22",
+    "primaryBookId": 11,
+    "primaryChapter": 19,
+    "segments": [
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 19
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 20
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 21
+      },
+      {
+        "bookId": 11,
+        "bookName": "1 Reyes",
+        "chapter": 22
+      }
+    ]
+  },
+  {
+    "dayNumber": 97,
+    "title": "Día 97: 2 Reyes 1-3",
+    "passagesSummary": "2 Reyes 1-3",
+    "primaryBookId": 12,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 1
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 2
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 98,
+    "title": "Día 98: 2 Reyes 4-6",
+    "passagesSummary": "2 Reyes 4-6",
+    "primaryBookId": 12,
+    "primaryChapter": 4,
+    "segments": [
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 4
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 5
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 6
+      }
+    ]
+  },
+  {
+    "dayNumber": 99,
+    "title": "Día 99: 2 Reyes 7-9",
+    "passagesSummary": "2 Reyes 7-9",
+    "primaryBookId": 12,
+    "primaryChapter": 7,
+    "segments": [
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 7
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 8
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 9
+      }
+    ]
+  },
+  {
+    "dayNumber": 100,
+    "title": "Día 100: 2 Reyes 10-13",
+    "passagesSummary": "2 Reyes 10-13",
+    "primaryBookId": 12,
+    "primaryChapter": 10,
+    "segments": [
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 10
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 11
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 12
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 13
+      }
+    ]
+  },
+  {
+    "dayNumber": 101,
+    "title": "Día 101: 2 Reyes 14-16",
+    "passagesSummary": "2 Reyes 14-16",
+    "primaryBookId": 12,
+    "primaryChapter": 14,
+    "segments": [
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 14
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 15
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 16
+      }
+    ]
+  },
+  {
+    "dayNumber": 102,
+    "title": "Día 102: 2 Reyes 17-19",
+    "passagesSummary": "2 Reyes 17-19",
+    "primaryBookId": 12,
+    "primaryChapter": 17,
+    "segments": [
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 17
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 18
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 19
+      }
+    ]
+  },
+  {
+    "dayNumber": 103,
+    "title": "Día 103: 2 Reyes 20-23",
+    "passagesSummary": "2 Reyes 20-23",
+    "primaryBookId": 12,
+    "primaryChapter": 20,
+    "segments": [
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 20
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 21
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 22
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 23
+      }
+    ]
+  },
+  {
+    "dayNumber": 104,
+    "title": "Día 104: 2 Reyes 24-25, 1 Crónicas 1",
+    "passagesSummary": "2 Reyes 24-25, 1 Crónicas 1",
+    "primaryBookId": 12,
+    "primaryChapter": 24,
+    "segments": [
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 24
+      },
+      {
+        "bookId": 12,
+        "bookName": "2 Reyes",
+        "chapter": 25
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 105,
+    "title": "Día 105: 1 Crónicas 2-4",
+    "passagesSummary": "1 Crónicas 2-4",
+    "primaryBookId": 13,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 2
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 3
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 106,
+    "title": "Día 106: 1 Crónicas 5-7",
+    "passagesSummary": "1 Crónicas 5-7",
+    "primaryBookId": 13,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 5
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 6
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 107,
+    "title": "Día 107: 1 Crónicas 8-11",
+    "passagesSummary": "1 Crónicas 8-11",
+    "primaryBookId": 13,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 8
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 9
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 10
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 11
+      }
+    ]
+  },
+  {
+    "dayNumber": 108,
+    "title": "Día 108: 1 Crónicas 12-14",
+    "passagesSummary": "1 Crónicas 12-14",
+    "primaryBookId": 13,
+    "primaryChapter": 12,
+    "segments": [
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 12
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 13
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 14
+      }
+    ]
+  },
+  {
+    "dayNumber": 109,
+    "title": "Día 109: 1 Crónicas 15-17",
+    "passagesSummary": "1 Crónicas 15-17",
+    "primaryBookId": 13,
+    "primaryChapter": 15,
+    "segments": [
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 15
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 16
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 17
+      }
+    ]
+  },
+  {
+    "dayNumber": 110,
+    "title": "Día 110: 1 Crónicas 18-20",
+    "passagesSummary": "1 Crónicas 18-20",
+    "primaryBookId": 13,
+    "primaryChapter": 18,
+    "segments": [
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 18
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 19
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 20
+      }
+    ]
+  },
+  {
+    "dayNumber": 111,
+    "title": "Día 111: 1 Crónicas 21-24",
+    "passagesSummary": "1 Crónicas 21-24",
+    "primaryBookId": 13,
+    "primaryChapter": 21,
+    "segments": [
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 21
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 22
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 23
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 24
+      }
+    ]
+  },
+  {
+    "dayNumber": 112,
+    "title": "Día 112: 1 Crónicas 25-27",
+    "passagesSummary": "1 Crónicas 25-27",
+    "primaryBookId": 13,
+    "primaryChapter": 25,
+    "segments": [
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 25
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 26
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 27
+      }
+    ]
+  },
+  {
+    "dayNumber": 113,
+    "title": "Día 113: 1 Crónicas 28-29, 2 Crónicas 1",
+    "passagesSummary": "1 Crónicas 28-29, 2 Crónicas 1",
+    "primaryBookId": 13,
+    "primaryChapter": 28,
+    "segments": [
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 28
+      },
+      {
+        "bookId": 13,
+        "bookName": "1 Crónicas",
+        "chapter": 29
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 114,
+    "title": "Día 114: 2 Crónicas 2-4",
+    "passagesSummary": "2 Crónicas 2-4",
+    "primaryBookId": 14,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 2
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 3
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 115,
+    "title": "Día 115: 2 Crónicas 5-8",
+    "passagesSummary": "2 Crónicas 5-8",
+    "primaryBookId": 14,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 5
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 6
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 7
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 8
+      }
+    ]
+  },
+  {
+    "dayNumber": 116,
+    "title": "Día 116: 2 Crónicas 9-11",
+    "passagesSummary": "2 Crónicas 9-11",
+    "primaryBookId": 14,
+    "primaryChapter": 9,
+    "segments": [
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 9
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 10
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 11
+      }
+    ]
+  },
+  {
+    "dayNumber": 117,
+    "title": "Día 117: 2 Crónicas 12-14",
+    "passagesSummary": "2 Crónicas 12-14",
+    "primaryBookId": 14,
+    "primaryChapter": 12,
+    "segments": [
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 12
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 13
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 14
+      }
+    ]
+  },
+  {
+    "dayNumber": 118,
+    "title": "Día 118: 2 Crónicas 15-17",
+    "passagesSummary": "2 Crónicas 15-17",
+    "primaryBookId": 14,
+    "primaryChapter": 15,
+    "segments": [
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 15
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 16
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 17
+      }
+    ]
+  },
+  {
+    "dayNumber": 119,
+    "title": "Día 119: 2 Crónicas 18-21",
+    "passagesSummary": "2 Crónicas 18-21",
+    "primaryBookId": 14,
+    "primaryChapter": 18,
+    "segments": [
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 18
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 19
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 20
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 21
+      }
+    ]
+  },
+  {
+    "dayNumber": 120,
+    "title": "Día 120: 2 Crónicas 22-24",
+    "passagesSummary": "2 Crónicas 22-24",
+    "primaryBookId": 14,
+    "primaryChapter": 22,
+    "segments": [
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 22
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 23
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 24
+      }
+    ]
+  },
+  {
+    "dayNumber": 121,
+    "title": "Día 121: 2 Crónicas 25-27",
+    "passagesSummary": "2 Crónicas 25-27",
+    "primaryBookId": 14,
+    "primaryChapter": 25,
+    "segments": [
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 25
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 26
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 27
+      }
+    ]
+  },
+  {
+    "dayNumber": 122,
+    "title": "Día 122: 2 Crónicas 28-30",
+    "passagesSummary": "2 Crónicas 28-30",
+    "primaryBookId": 14,
+    "primaryChapter": 28,
+    "segments": [
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 28
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 29
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 30
+      }
+    ]
+  },
+  {
+    "dayNumber": 123,
+    "title": "Día 123: 2 Crónicas 31-34",
+    "passagesSummary": "2 Crónicas 31-34",
+    "primaryBookId": 14,
+    "primaryChapter": 31,
+    "segments": [
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 31
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 32
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 33
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 34
+      }
+    ]
+  },
+  {
+    "dayNumber": 124,
+    "title": "Día 124: 2 Crónicas 35-36, Esdras 1",
+    "passagesSummary": "2 Crónicas 35-36, Esdras 1",
+    "primaryBookId": 14,
+    "primaryChapter": 35,
+    "segments": [
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 35
+      },
+      {
+        "bookId": 14,
+        "bookName": "2 Crónicas",
+        "chapter": 36
+      },
+      {
+        "bookId": 15,
+        "bookName": "Esdras",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 125,
+    "title": "Día 125: Esdras 2-4",
+    "passagesSummary": "Esdras 2-4",
+    "primaryBookId": 15,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 15,
+        "bookName": "Esdras",
+        "chapter": 2
+      },
+      {
+        "bookId": 15,
+        "bookName": "Esdras",
+        "chapter": 3
+      },
+      {
+        "bookId": 15,
+        "bookName": "Esdras",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 126,
+    "title": "Día 126: Esdras 5-7",
+    "passagesSummary": "Esdras 5-7",
+    "primaryBookId": 15,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 15,
+        "bookName": "Esdras",
+        "chapter": 5
+      },
+      {
+        "bookId": 15,
+        "bookName": "Esdras",
+        "chapter": 6
+      },
+      {
+        "bookId": 15,
+        "bookName": "Esdras",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 127,
+    "title": "Día 127: Esdras 8-10, Nehemías 1",
+    "passagesSummary": "Esdras 8-10, Nehemías 1",
+    "primaryBookId": 15,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 15,
+        "bookName": "Esdras",
+        "chapter": 8
+      },
+      {
+        "bookId": 15,
+        "bookName": "Esdras",
+        "chapter": 9
+      },
+      {
+        "bookId": 15,
+        "bookName": "Esdras",
+        "chapter": 10
+      },
+      {
+        "bookId": 16,
+        "bookName": "Nehemías",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 128,
+    "title": "Día 128: Nehemías 2-4",
+    "passagesSummary": "Nehemías 2-4",
+    "primaryBookId": 16,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 16,
+        "bookName": "Nehemías",
+        "chapter": 2
+      },
+      {
+        "bookId": 16,
+        "bookName": "Nehemías",
+        "chapter": 3
+      },
+      {
+        "bookId": 16,
+        "bookName": "Nehemías",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 129,
+    "title": "Día 129: Nehemías 5-7",
+    "passagesSummary": "Nehemías 5-7",
+    "primaryBookId": 16,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 16,
+        "bookName": "Nehemías",
+        "chapter": 5
+      },
+      {
+        "bookId": 16,
+        "bookName": "Nehemías",
+        "chapter": 6
+      },
+      {
+        "bookId": 16,
+        "bookName": "Nehemías",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 130,
+    "title": "Día 130: Nehemías 8-10",
+    "passagesSummary": "Nehemías 8-10",
+    "primaryBookId": 16,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 16,
+        "bookName": "Nehemías",
+        "chapter": 8
+      },
+      {
+        "bookId": 16,
+        "bookName": "Nehemías",
+        "chapter": 9
+      },
+      {
+        "bookId": 16,
+        "bookName": "Nehemías",
+        "chapter": 10
+      }
+    ]
+  },
+  {
+    "dayNumber": 131,
+    "title": "Día 131: Nehemías 11-13, Ester 1",
+    "passagesSummary": "Nehemías 11-13, Ester 1",
+    "primaryBookId": 16,
+    "primaryChapter": 11,
+    "segments": [
+      {
+        "bookId": 16,
+        "bookName": "Nehemías",
+        "chapter": 11
+      },
+      {
+        "bookId": 16,
+        "bookName": "Nehemías",
+        "chapter": 12
+      },
+      {
+        "bookId": 16,
+        "bookName": "Nehemías",
+        "chapter": 13
+      },
+      {
+        "bookId": 17,
+        "bookName": "Ester",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 132,
+    "title": "Día 132: Ester 2-4",
+    "passagesSummary": "Ester 2-4",
+    "primaryBookId": 17,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 17,
+        "bookName": "Ester",
+        "chapter": 2
+      },
+      {
+        "bookId": 17,
+        "bookName": "Ester",
+        "chapter": 3
+      },
+      {
+        "bookId": 17,
+        "bookName": "Ester",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 133,
+    "title": "Día 133: Ester 5-7",
+    "passagesSummary": "Ester 5-7",
+    "primaryBookId": 17,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 17,
+        "bookName": "Ester",
+        "chapter": 5
+      },
+      {
+        "bookId": 17,
+        "bookName": "Ester",
+        "chapter": 6
+      },
+      {
+        "bookId": 17,
+        "bookName": "Ester",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 134,
+    "title": "Día 134: Ester 8-10, Job 1",
+    "passagesSummary": "Ester 8-10, Job 1",
+    "primaryBookId": 17,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 17,
+        "bookName": "Ester",
+        "chapter": 8
+      },
+      {
+        "bookId": 17,
+        "bookName": "Ester",
+        "chapter": 9
+      },
+      {
+        "bookId": 17,
+        "bookName": "Ester",
+        "chapter": 10
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 135,
+    "title": "Día 135: Job 2-4",
+    "passagesSummary": "Job 2-4",
+    "primaryBookId": 18,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 2
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 3
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 136,
+    "title": "Día 136: Job 5-7",
+    "passagesSummary": "Job 5-7",
+    "primaryBookId": 18,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 5
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 6
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 137,
+    "title": "Día 137: Job 8-10",
+    "passagesSummary": "Job 8-10",
+    "primaryBookId": 18,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 8
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 9
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 10
+      }
+    ]
+  },
+  {
+    "dayNumber": 138,
+    "title": "Día 138: Job 11-14",
+    "passagesSummary": "Job 11-14",
+    "primaryBookId": 18,
+    "primaryChapter": 11,
+    "segments": [
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 11
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 12
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 13
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 14
+      }
+    ]
+  },
+  {
+    "dayNumber": 139,
+    "title": "Día 139: Job 15-17",
+    "passagesSummary": "Job 15-17",
+    "primaryBookId": 18,
+    "primaryChapter": 15,
+    "segments": [
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 15
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 16
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 17
+      }
+    ]
+  },
+  {
+    "dayNumber": 140,
+    "title": "Día 140: Job 18-20",
+    "passagesSummary": "Job 18-20",
+    "primaryBookId": 18,
+    "primaryChapter": 18,
+    "segments": [
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 18
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 19
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 20
+      }
+    ]
+  },
+  {
+    "dayNumber": 141,
+    "title": "Día 141: Job 21-23",
+    "passagesSummary": "Job 21-23",
+    "primaryBookId": 18,
+    "primaryChapter": 21,
+    "segments": [
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 21
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 22
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 23
+      }
+    ]
+  },
+  {
+    "dayNumber": 142,
+    "title": "Día 142: Job 24-27",
+    "passagesSummary": "Job 24-27",
+    "primaryBookId": 18,
+    "primaryChapter": 24,
+    "segments": [
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 24
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 25
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 26
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 27
+      }
+    ]
+  },
+  {
+    "dayNumber": 143,
+    "title": "Día 143: Job 28-30",
+    "passagesSummary": "Job 28-30",
+    "primaryBookId": 18,
+    "primaryChapter": 28,
+    "segments": [
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 28
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 29
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 30
+      }
+    ]
+  },
+  {
+    "dayNumber": 144,
+    "title": "Día 144: Job 31-33",
+    "passagesSummary": "Job 31-33",
+    "primaryBookId": 18,
+    "primaryChapter": 31,
+    "segments": [
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 31
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 32
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 33
+      }
+    ]
+  },
+  {
+    "dayNumber": 145,
+    "title": "Día 145: Job 34-36",
+    "passagesSummary": "Job 34-36",
+    "primaryBookId": 18,
+    "primaryChapter": 34,
+    "segments": [
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 34
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 35
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 36
+      }
+    ]
+  },
+  {
+    "dayNumber": 146,
+    "title": "Día 146: Job 37-40",
+    "passagesSummary": "Job 37-40",
+    "primaryBookId": 18,
+    "primaryChapter": 37,
+    "segments": [
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 37
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 38
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 39
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 40
+      }
+    ]
+  },
+  {
+    "dayNumber": 147,
+    "title": "Día 147: Job 41-42, Salmos 1",
+    "passagesSummary": "Job 41-42, Salmos 1",
+    "primaryBookId": 18,
+    "primaryChapter": 41,
+    "segments": [
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 41
+      },
+      {
+        "bookId": 18,
+        "bookName": "Job",
+        "chapter": 42
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 148,
+    "title": "Día 148: Salmos 2-4",
+    "passagesSummary": "Salmos 2-4",
+    "primaryBookId": 19,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 2
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 3
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 149,
+    "title": "Día 149: Salmos 5-7",
+    "passagesSummary": "Salmos 5-7",
+    "primaryBookId": 19,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 5
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 6
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 150,
+    "title": "Día 150: Salmos 8-11",
+    "passagesSummary": "Salmos 8-11",
+    "primaryBookId": 19,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 8
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 9
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 10
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 11
+      }
+    ]
+  },
+  {
+    "dayNumber": 151,
+    "title": "Día 151: Salmos 12-14",
+    "passagesSummary": "Salmos 12-14",
+    "primaryBookId": 19,
+    "primaryChapter": 12,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 12
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 13
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 14
+      }
+    ]
+  },
+  {
+    "dayNumber": 152,
+    "title": "Día 152: Salmos 15-17",
+    "passagesSummary": "Salmos 15-17",
+    "primaryBookId": 19,
+    "primaryChapter": 15,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 15
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 16
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 17
+      }
+    ]
+  },
+  {
+    "dayNumber": 153,
+    "title": "Día 153: Salmos 18-20",
+    "passagesSummary": "Salmos 18-20",
+    "primaryBookId": 19,
+    "primaryChapter": 18,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 18
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 19
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 20
+      }
+    ]
+  },
+  {
+    "dayNumber": 154,
+    "title": "Día 154: Salmos 21-24",
+    "passagesSummary": "Salmos 21-24",
+    "primaryBookId": 19,
+    "primaryChapter": 21,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 21
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 22
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 23
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 24
+      }
+    ]
+  },
+  {
+    "dayNumber": 155,
+    "title": "Día 155: Salmos 25-27",
+    "passagesSummary": "Salmos 25-27",
+    "primaryBookId": 19,
+    "primaryChapter": 25,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 25
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 26
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 27
+      }
+    ]
+  },
+  {
+    "dayNumber": 156,
+    "title": "Día 156: Salmos 28-30",
+    "passagesSummary": "Salmos 28-30",
+    "primaryBookId": 19,
+    "primaryChapter": 28,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 28
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 29
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 30
+      }
+    ]
+  },
+  {
+    "dayNumber": 157,
+    "title": "Día 157: Salmos 31-33",
+    "passagesSummary": "Salmos 31-33",
+    "primaryBookId": 19,
+    "primaryChapter": 31,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 31
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 32
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 33
+      }
+    ]
+  },
+  {
+    "dayNumber": 158,
+    "title": "Día 158: Salmos 34-37",
+    "passagesSummary": "Salmos 34-37",
+    "primaryBookId": 19,
+    "primaryChapter": 34,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 34
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 35
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 36
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 37
+      }
+    ]
+  },
+  {
+    "dayNumber": 159,
+    "title": "Día 159: Salmos 38-40",
+    "passagesSummary": "Salmos 38-40",
+    "primaryBookId": 19,
+    "primaryChapter": 38,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 38
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 39
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 40
+      }
+    ]
+  },
+  {
+    "dayNumber": 160,
+    "title": "Día 160: Salmos 41-43",
+    "passagesSummary": "Salmos 41-43",
+    "primaryBookId": 19,
+    "primaryChapter": 41,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 41
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 42
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 43
+      }
+    ]
+  },
+  {
+    "dayNumber": 161,
+    "title": "Día 161: Salmos 44-46",
+    "passagesSummary": "Salmos 44-46",
+    "primaryBookId": 19,
+    "primaryChapter": 44,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 44
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 45
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 46
+      }
+    ]
+  },
+  {
+    "dayNumber": 162,
+    "title": "Día 162: Salmos 47-50",
+    "passagesSummary": "Salmos 47-50",
+    "primaryBookId": 19,
+    "primaryChapter": 47,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 47
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 48
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 49
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 50
+      }
+    ]
+  },
+  {
+    "dayNumber": 163,
+    "title": "Día 163: Salmos 51-53",
+    "passagesSummary": "Salmos 51-53",
+    "primaryBookId": 19,
+    "primaryChapter": 51,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 51
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 52
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 53
+      }
+    ]
+  },
+  {
+    "dayNumber": 164,
+    "title": "Día 164: Salmos 54-56",
+    "passagesSummary": "Salmos 54-56",
+    "primaryBookId": 19,
+    "primaryChapter": 54,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 54
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 55
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 56
+      }
+    ]
+  },
+  {
+    "dayNumber": 165,
+    "title": "Día 165: Salmos 57-59",
+    "passagesSummary": "Salmos 57-59",
+    "primaryBookId": 19,
+    "primaryChapter": 57,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 57
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 58
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 59
+      }
+    ]
+  },
+  {
+    "dayNumber": 166,
+    "title": "Día 166: Salmos 60-63",
+    "passagesSummary": "Salmos 60-63",
+    "primaryBookId": 19,
+    "primaryChapter": 60,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 60
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 61
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 62
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 63
+      }
+    ]
+  },
+  {
+    "dayNumber": 167,
+    "title": "Día 167: Salmos 64-66",
+    "passagesSummary": "Salmos 64-66",
+    "primaryBookId": 19,
+    "primaryChapter": 64,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 64
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 65
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 66
+      }
+    ]
+  },
+  {
+    "dayNumber": 168,
+    "title": "Día 168: Salmos 67-69",
+    "passagesSummary": "Salmos 67-69",
+    "primaryBookId": 19,
+    "primaryChapter": 67,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 67
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 68
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 69
+      }
+    ]
+  },
+  {
+    "dayNumber": 169,
+    "title": "Día 169: Salmos 70-73",
+    "passagesSummary": "Salmos 70-73",
+    "primaryBookId": 19,
+    "primaryChapter": 70,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 70
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 71
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 72
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 73
+      }
+    ]
+  },
+  {
+    "dayNumber": 170,
+    "title": "Día 170: Salmos 74-76",
+    "passagesSummary": "Salmos 74-76",
+    "primaryBookId": 19,
+    "primaryChapter": 74,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 74
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 75
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 76
+      }
+    ]
+  },
+  {
+    "dayNumber": 171,
+    "title": "Día 171: Salmos 77-79",
+    "passagesSummary": "Salmos 77-79",
+    "primaryBookId": 19,
+    "primaryChapter": 77,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 77
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 78
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 79
+      }
+    ]
+  },
+  {
+    "dayNumber": 172,
+    "title": "Día 172: Salmos 80-82",
+    "passagesSummary": "Salmos 80-82",
+    "primaryBookId": 19,
+    "primaryChapter": 80,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 80
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 81
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 82
+      }
+    ]
+  },
+  {
+    "dayNumber": 173,
+    "title": "Día 173: Salmos 83-86",
+    "passagesSummary": "Salmos 83-86",
+    "primaryBookId": 19,
+    "primaryChapter": 83,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 83
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 84
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 85
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 86
+      }
+    ]
+  },
+  {
+    "dayNumber": 174,
+    "title": "Día 174: Salmos 87-89",
+    "passagesSummary": "Salmos 87-89",
+    "primaryBookId": 19,
+    "primaryChapter": 87,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 87
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 88
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 89
+      }
+    ]
+  },
+  {
+    "dayNumber": 175,
+    "title": "Día 175: Salmos 90-92",
+    "passagesSummary": "Salmos 90-92",
+    "primaryBookId": 19,
+    "primaryChapter": 90,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 90
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 91
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 92
+      }
+    ]
+  },
+  {
+    "dayNumber": 176,
+    "title": "Día 176: Salmos 93-95",
+    "passagesSummary": "Salmos 93-95",
+    "primaryBookId": 19,
+    "primaryChapter": 93,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 93
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 94
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 95
+      }
+    ]
+  },
+  {
+    "dayNumber": 177,
+    "title": "Día 177: Salmos 96-99",
+    "passagesSummary": "Salmos 96-99",
+    "primaryBookId": 19,
+    "primaryChapter": 96,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 96
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 97
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 98
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 99
+      }
+    ]
+  },
+  {
+    "dayNumber": 178,
+    "title": "Día 178: Salmos 100-102",
+    "passagesSummary": "Salmos 100-102",
+    "primaryBookId": 19,
+    "primaryChapter": 100,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 100
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 101
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 102
+      }
+    ]
+  },
+  {
+    "dayNumber": 179,
+    "title": "Día 179: Salmos 103-105",
+    "passagesSummary": "Salmos 103-105",
+    "primaryBookId": 19,
+    "primaryChapter": 103,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 103
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 104
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 105
+      }
+    ]
+  },
+  {
+    "dayNumber": 180,
+    "title": "Día 180: Salmos 106-108",
+    "passagesSummary": "Salmos 106-108",
+    "primaryBookId": 19,
+    "primaryChapter": 106,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 106
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 107
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 108
+      }
+    ]
+  },
+  {
+    "dayNumber": 181,
+    "title": "Día 181: Salmos 109-112",
+    "passagesSummary": "Salmos 109-112",
+    "primaryBookId": 19,
+    "primaryChapter": 109,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 109
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 110
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 111
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 112
+      }
+    ]
+  },
+  {
+    "dayNumber": 182,
+    "title": "Día 182: Salmos 113-115",
+    "passagesSummary": "Salmos 113-115",
+    "primaryBookId": 19,
+    "primaryChapter": 113,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 113
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 114
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 115
+      }
+    ]
+  },
+  {
+    "dayNumber": 183,
+    "title": "Día 183: Salmos 116-118",
+    "passagesSummary": "Salmos 116-118",
+    "primaryBookId": 19,
+    "primaryChapter": 116,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 116
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 117
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 118
+      }
+    ]
+  },
+  {
+    "dayNumber": 184,
+    "title": "Día 184: Salmos 119-121",
+    "passagesSummary": "Salmos 119-121",
+    "primaryBookId": 19,
+    "primaryChapter": 119,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 119
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 120
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 121
+      }
+    ]
+  },
+  {
+    "dayNumber": 185,
+    "title": "Día 185: Salmos 122-125",
+    "passagesSummary": "Salmos 122-125",
+    "primaryBookId": 19,
+    "primaryChapter": 122,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 122
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 123
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 124
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 125
+      }
+    ]
+  },
+  {
+    "dayNumber": 186,
+    "title": "Día 186: Salmos 126-128",
+    "passagesSummary": "Salmos 126-128",
+    "primaryBookId": 19,
+    "primaryChapter": 126,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 126
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 127
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 128
+      }
+    ]
+  },
+  {
+    "dayNumber": 187,
+    "title": "Día 187: Salmos 129-131",
+    "passagesSummary": "Salmos 129-131",
+    "primaryBookId": 19,
+    "primaryChapter": 129,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 129
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 130
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 131
+      }
+    ]
+  },
+  {
+    "dayNumber": 188,
+    "title": "Día 188: Salmos 132-134",
+    "passagesSummary": "Salmos 132-134",
+    "primaryBookId": 19,
+    "primaryChapter": 132,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 132
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 133
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 134
+      }
+    ]
+  },
+  {
+    "dayNumber": 189,
+    "title": "Día 189: Salmos 135-138",
+    "passagesSummary": "Salmos 135-138",
+    "primaryBookId": 19,
+    "primaryChapter": 135,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 135
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 136
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 137
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 138
+      }
+    ]
+  },
+  {
+    "dayNumber": 190,
+    "title": "Día 190: Salmos 139-141",
+    "passagesSummary": "Salmos 139-141",
+    "primaryBookId": 19,
+    "primaryChapter": 139,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 139
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 140
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 141
+      }
+    ]
+  },
+  {
+    "dayNumber": 191,
+    "title": "Día 191: Salmos 142-144",
+    "passagesSummary": "Salmos 142-144",
+    "primaryBookId": 19,
+    "primaryChapter": 142,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 142
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 143
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 144
+      }
+    ]
+  },
+  {
+    "dayNumber": 192,
+    "title": "Día 192: Salmos 145-147",
+    "passagesSummary": "Salmos 145-147",
+    "primaryBookId": 19,
+    "primaryChapter": 145,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 145
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 146
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 147
+      }
+    ]
+  },
+  {
+    "dayNumber": 193,
+    "title": "Día 193: Salmos 148-150, Proverbios 1",
+    "passagesSummary": "Salmos 148-150, Proverbios 1",
+    "primaryBookId": 19,
+    "primaryChapter": 148,
+    "segments": [
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 148
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 149
+      },
+      {
+        "bookId": 19,
+        "bookName": "Salmos",
+        "chapter": 150
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 194,
+    "title": "Día 194: Proverbios 2-4",
+    "passagesSummary": "Proverbios 2-4",
+    "primaryBookId": 20,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 2
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 3
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 195,
+    "title": "Día 195: Proverbios 5-7",
+    "passagesSummary": "Proverbios 5-7",
+    "primaryBookId": 20,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 5
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 6
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 196,
+    "title": "Día 196: Proverbios 8-10",
+    "passagesSummary": "Proverbios 8-10",
+    "primaryBookId": 20,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 8
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 9
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 10
+      }
+    ]
+  },
+  {
+    "dayNumber": 197,
+    "title": "Día 197: Proverbios 11-14",
+    "passagesSummary": "Proverbios 11-14",
+    "primaryBookId": 20,
+    "primaryChapter": 11,
+    "segments": [
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 11
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 12
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 13
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 14
+      }
+    ]
+  },
+  {
+    "dayNumber": 198,
+    "title": "Día 198: Proverbios 15-17",
+    "passagesSummary": "Proverbios 15-17",
+    "primaryBookId": 20,
+    "primaryChapter": 15,
+    "segments": [
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 15
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 16
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 17
+      }
+    ]
+  },
+  {
+    "dayNumber": 199,
+    "title": "Día 199: Proverbios 18-20",
+    "passagesSummary": "Proverbios 18-20",
+    "primaryBookId": 20,
+    "primaryChapter": 18,
+    "segments": [
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 18
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 19
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 20
+      }
+    ]
+  },
+  {
+    "dayNumber": 200,
+    "title": "Día 200: Proverbios 21-24",
+    "passagesSummary": "Proverbios 21-24",
+    "primaryBookId": 20,
+    "primaryChapter": 21,
+    "segments": [
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 21
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 22
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 23
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 24
+      }
+    ]
+  },
+  {
+    "dayNumber": 201,
+    "title": "Día 201: Proverbios 25-27",
+    "passagesSummary": "Proverbios 25-27",
+    "primaryBookId": 20,
+    "primaryChapter": 25,
+    "segments": [
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 25
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 26
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 27
+      }
+    ]
+  },
+  {
+    "dayNumber": 202,
+    "title": "Día 202: Proverbios 28-30",
+    "passagesSummary": "Proverbios 28-30",
+    "primaryBookId": 20,
+    "primaryChapter": 28,
+    "segments": [
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 28
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 29
+      },
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 30
+      }
+    ]
+  },
+  {
+    "dayNumber": 203,
+    "title": "Día 203: Proverbios 31, Eclesiastés 1-2",
+    "passagesSummary": "Proverbios 31, Eclesiastés 1-2",
+    "primaryBookId": 20,
+    "primaryChapter": 31,
+    "segments": [
+      {
+        "bookId": 20,
+        "bookName": "Proverbios",
+        "chapter": 31
+      },
+      {
+        "bookId": 21,
+        "bookName": "Eclesiastés",
+        "chapter": 1
+      },
+      {
+        "bookId": 21,
+        "bookName": "Eclesiastés",
+        "chapter": 2
+      }
+    ]
+  },
+  {
+    "dayNumber": 204,
+    "title": "Día 204: Eclesiastés 3-6",
+    "passagesSummary": "Eclesiastés 3-6",
+    "primaryBookId": 21,
+    "primaryChapter": 3,
+    "segments": [
+      {
+        "bookId": 21,
+        "bookName": "Eclesiastés",
+        "chapter": 3
+      },
+      {
+        "bookId": 21,
+        "bookName": "Eclesiastés",
+        "chapter": 4
+      },
+      {
+        "bookId": 21,
+        "bookName": "Eclesiastés",
+        "chapter": 5
+      },
+      {
+        "bookId": 21,
+        "bookName": "Eclesiastés",
+        "chapter": 6
+      }
+    ]
+  },
+  {
+    "dayNumber": 205,
+    "title": "Día 205: Eclesiastés 7-9",
+    "passagesSummary": "Eclesiastés 7-9",
+    "primaryBookId": 21,
+    "primaryChapter": 7,
+    "segments": [
+      {
+        "bookId": 21,
+        "bookName": "Eclesiastés",
+        "chapter": 7
+      },
+      {
+        "bookId": 21,
+        "bookName": "Eclesiastés",
+        "chapter": 8
+      },
+      {
+        "bookId": 21,
+        "bookName": "Eclesiastés",
+        "chapter": 9
+      }
+    ]
+  },
+  {
+    "dayNumber": 206,
+    "title": "Día 206: Eclesiastés 10-12",
+    "passagesSummary": "Eclesiastés 10-12",
+    "primaryBookId": 21,
+    "primaryChapter": 10,
+    "segments": [
+      {
+        "bookId": 21,
+        "bookName": "Eclesiastés",
+        "chapter": 10
+      },
+      {
+        "bookId": 21,
+        "bookName": "Eclesiastés",
+        "chapter": 11
+      },
+      {
+        "bookId": 21,
+        "bookName": "Eclesiastés",
+        "chapter": 12
+      }
+    ]
+  },
+  {
+    "dayNumber": 207,
+    "title": "Día 207: Cantares 1-3",
+    "passagesSummary": "Cantares 1-3",
+    "primaryBookId": 22,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 22,
+        "bookName": "Cantares",
+        "chapter": 1
+      },
+      {
+        "bookId": 22,
+        "bookName": "Cantares",
+        "chapter": 2
+      },
+      {
+        "bookId": 22,
+        "bookName": "Cantares",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 208,
+    "title": "Día 208: Cantares 4-7",
+    "passagesSummary": "Cantares 4-7",
+    "primaryBookId": 22,
+    "primaryChapter": 4,
+    "segments": [
+      {
+        "bookId": 22,
+        "bookName": "Cantares",
+        "chapter": 4
+      },
+      {
+        "bookId": 22,
+        "bookName": "Cantares",
+        "chapter": 5
+      },
+      {
+        "bookId": 22,
+        "bookName": "Cantares",
+        "chapter": 6
+      },
+      {
+        "bookId": 22,
+        "bookName": "Cantares",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 209,
+    "title": "Día 209: Cantares 8, Isaías 1-2",
+    "passagesSummary": "Cantares 8, Isaías 1-2",
+    "primaryBookId": 22,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 22,
+        "bookName": "Cantares",
+        "chapter": 8
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 1
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 2
+      }
+    ]
+  },
+  {
+    "dayNumber": 210,
+    "title": "Día 210: Isaías 3-5",
+    "passagesSummary": "Isaías 3-5",
+    "primaryBookId": 23,
+    "primaryChapter": 3,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 3
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 4
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 5
+      }
+    ]
+  },
+  {
+    "dayNumber": 211,
+    "title": "Día 211: Isaías 6-8",
+    "passagesSummary": "Isaías 6-8",
+    "primaryBookId": 23,
+    "primaryChapter": 6,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 6
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 7
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 8
+      }
+    ]
+  },
+  {
+    "dayNumber": 212,
+    "title": "Día 212: Isaías 9-12",
+    "passagesSummary": "Isaías 9-12",
+    "primaryBookId": 23,
+    "primaryChapter": 9,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 9
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 10
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 11
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 12
+      }
+    ]
+  },
+  {
+    "dayNumber": 213,
+    "title": "Día 213: Isaías 13-15",
+    "passagesSummary": "Isaías 13-15",
+    "primaryBookId": 23,
+    "primaryChapter": 13,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 13
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 14
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 15
+      }
+    ]
+  },
+  {
+    "dayNumber": 214,
+    "title": "Día 214: Isaías 16-18",
+    "passagesSummary": "Isaías 16-18",
+    "primaryBookId": 23,
+    "primaryChapter": 16,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 16
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 17
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 18
+      }
+    ]
+  },
+  {
+    "dayNumber": 215,
+    "title": "Día 215: Isaías 19-21",
+    "passagesSummary": "Isaías 19-21",
+    "primaryBookId": 23,
+    "primaryChapter": 19,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 19
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 20
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 21
+      }
+    ]
+  },
+  {
+    "dayNumber": 216,
+    "title": "Día 216: Isaías 22-25",
+    "passagesSummary": "Isaías 22-25",
+    "primaryBookId": 23,
+    "primaryChapter": 22,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 22
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 23
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 24
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 25
+      }
+    ]
+  },
+  {
+    "dayNumber": 217,
+    "title": "Día 217: Isaías 26-28",
+    "passagesSummary": "Isaías 26-28",
+    "primaryBookId": 23,
+    "primaryChapter": 26,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 26
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 27
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 28
+      }
+    ]
+  },
+  {
+    "dayNumber": 218,
+    "title": "Día 218: Isaías 29-31",
+    "passagesSummary": "Isaías 29-31",
+    "primaryBookId": 23,
+    "primaryChapter": 29,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 29
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 30
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 31
+      }
+    ]
+  },
+  {
+    "dayNumber": 219,
+    "title": "Día 219: Isaías 32-34",
+    "passagesSummary": "Isaías 32-34",
+    "primaryBookId": 23,
+    "primaryChapter": 32,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 32
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 33
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 34
+      }
+    ]
+  },
+  {
+    "dayNumber": 220,
+    "title": "Día 220: Isaías 35-38",
+    "passagesSummary": "Isaías 35-38",
+    "primaryBookId": 23,
+    "primaryChapter": 35,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 35
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 36
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 37
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 38
+      }
+    ]
+  },
+  {
+    "dayNumber": 221,
+    "title": "Día 221: Isaías 39-41",
+    "passagesSummary": "Isaías 39-41",
+    "primaryBookId": 23,
+    "primaryChapter": 39,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 39
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 40
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 41
+      }
+    ]
+  },
+  {
+    "dayNumber": 222,
+    "title": "Día 222: Isaías 42-44",
+    "passagesSummary": "Isaías 42-44",
+    "primaryBookId": 23,
+    "primaryChapter": 42,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 42
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 43
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 44
+      }
+    ]
+  },
+  {
+    "dayNumber": 223,
+    "title": "Día 223: Isaías 45-47",
+    "passagesSummary": "Isaías 45-47",
+    "primaryBookId": 23,
+    "primaryChapter": 45,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 45
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 46
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 47
+      }
+    ]
+  },
+  {
+    "dayNumber": 224,
+    "title": "Día 224: Isaías 48-51",
+    "passagesSummary": "Isaías 48-51",
+    "primaryBookId": 23,
+    "primaryChapter": 48,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 48
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 49
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 50
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 51
+      }
+    ]
+  },
+  {
+    "dayNumber": 225,
+    "title": "Día 225: Isaías 52-54",
+    "passagesSummary": "Isaías 52-54",
+    "primaryBookId": 23,
+    "primaryChapter": 52,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 52
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 53
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 54
+      }
+    ]
+  },
+  {
+    "dayNumber": 226,
+    "title": "Día 226: Isaías 55-57",
+    "passagesSummary": "Isaías 55-57",
+    "primaryBookId": 23,
+    "primaryChapter": 55,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 55
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 56
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 57
+      }
+    ]
+  },
+  {
+    "dayNumber": 227,
+    "title": "Día 227: Isaías 58-60",
+    "passagesSummary": "Isaías 58-60",
+    "primaryBookId": 23,
+    "primaryChapter": 58,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 58
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 59
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 60
+      }
+    ]
+  },
+  {
+    "dayNumber": 228,
+    "title": "Día 228: Isaías 61-64",
+    "passagesSummary": "Isaías 61-64",
+    "primaryBookId": 23,
+    "primaryChapter": 61,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 61
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 62
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 63
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 64
+      }
+    ]
+  },
+  {
+    "dayNumber": 229,
+    "title": "Día 229: Isaías 65-66, Jeremías 1",
+    "passagesSummary": "Isaías 65-66, Jeremías 1",
+    "primaryBookId": 23,
+    "primaryChapter": 65,
+    "segments": [
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 65
+      },
+      {
+        "bookId": 23,
+        "bookName": "Isaías",
+        "chapter": 66
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 230,
+    "title": "Día 230: Jeremías 2-4",
+    "passagesSummary": "Jeremías 2-4",
+    "primaryBookId": 24,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 2
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 3
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 231,
+    "title": "Día 231: Jeremías 5-7",
+    "passagesSummary": "Jeremías 5-7",
+    "primaryBookId": 24,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 5
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 6
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 232,
+    "title": "Día 232: Jeremías 8-11",
+    "passagesSummary": "Jeremías 8-11",
+    "primaryBookId": 24,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 8
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 9
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 10
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 11
+      }
+    ]
+  },
+  {
+    "dayNumber": 233,
+    "title": "Día 233: Jeremías 12-14",
+    "passagesSummary": "Jeremías 12-14",
+    "primaryBookId": 24,
+    "primaryChapter": 12,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 12
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 13
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 14
+      }
+    ]
+  },
+  {
+    "dayNumber": 234,
+    "title": "Día 234: Jeremías 15-17",
+    "passagesSummary": "Jeremías 15-17",
+    "primaryBookId": 24,
+    "primaryChapter": 15,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 15
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 16
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 17
+      }
+    ]
+  },
+  {
+    "dayNumber": 235,
+    "title": "Día 235: Jeremías 18-21",
+    "passagesSummary": "Jeremías 18-21",
+    "primaryBookId": 24,
+    "primaryChapter": 18,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 18
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 19
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 20
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 21
+      }
+    ]
+  },
+  {
+    "dayNumber": 236,
+    "title": "Día 236: Jeremías 22-24",
+    "passagesSummary": "Jeremías 22-24",
+    "primaryBookId": 24,
+    "primaryChapter": 22,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 22
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 23
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 24
+      }
+    ]
+  },
+  {
+    "dayNumber": 237,
+    "title": "Día 237: Jeremías 25-27",
+    "passagesSummary": "Jeremías 25-27",
+    "primaryBookId": 24,
+    "primaryChapter": 25,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 25
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 26
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 27
+      }
+    ]
+  },
+  {
+    "dayNumber": 238,
+    "title": "Día 238: Jeremías 28-30",
+    "passagesSummary": "Jeremías 28-30",
+    "primaryBookId": 24,
+    "primaryChapter": 28,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 28
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 29
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 30
+      }
+    ]
+  },
+  {
+    "dayNumber": 239,
+    "title": "Día 239: Jeremías 31-34",
+    "passagesSummary": "Jeremías 31-34",
+    "primaryBookId": 24,
+    "primaryChapter": 31,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 31
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 32
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 33
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 34
+      }
+    ]
+  },
+  {
+    "dayNumber": 240,
+    "title": "Día 240: Jeremías 35-37",
+    "passagesSummary": "Jeremías 35-37",
+    "primaryBookId": 24,
+    "primaryChapter": 35,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 35
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 36
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 37
+      }
+    ]
+  },
+  {
+    "dayNumber": 241,
+    "title": "Día 241: Jeremías 38-40",
+    "passagesSummary": "Jeremías 38-40",
+    "primaryBookId": 24,
+    "primaryChapter": 38,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 38
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 39
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 40
+      }
+    ]
+  },
+  {
+    "dayNumber": 242,
+    "title": "Día 242: Jeremías 41-43",
+    "passagesSummary": "Jeremías 41-43",
+    "primaryBookId": 24,
+    "primaryChapter": 41,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 41
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 42
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 43
+      }
+    ]
+  },
+  {
+    "dayNumber": 243,
+    "title": "Día 243: Jeremías 44-47",
+    "passagesSummary": "Jeremías 44-47",
+    "primaryBookId": 24,
+    "primaryChapter": 44,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 44
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 45
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 46
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 47
+      }
+    ]
+  },
+  {
+    "dayNumber": 244,
+    "title": "Día 244: Jeremías 48-50",
+    "passagesSummary": "Jeremías 48-50",
+    "primaryBookId": 24,
+    "primaryChapter": 48,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 48
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 49
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 50
+      }
+    ]
+  },
+  {
+    "dayNumber": 245,
+    "title": "Día 245: Jeremías 51-52, Lamentaciones 1",
+    "passagesSummary": "Jeremías 51-52, Lamentaciones 1",
+    "primaryBookId": 24,
+    "primaryChapter": 51,
+    "segments": [
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 51
+      },
+      {
+        "bookId": 24,
+        "bookName": "Jeremías",
+        "chapter": 52
+      },
+      {
+        "bookId": 25,
+        "bookName": "Lamentaciones",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 246,
+    "title": "Día 246: Lamentaciones 2-4",
+    "passagesSummary": "Lamentaciones 2-4",
+    "primaryBookId": 25,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 25,
+        "bookName": "Lamentaciones",
+        "chapter": 2
+      },
+      {
+        "bookId": 25,
+        "bookName": "Lamentaciones",
+        "chapter": 3
+      },
+      {
+        "bookId": 25,
+        "bookName": "Lamentaciones",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 247,
+    "title": "Día 247: Lamentaciones 5, Ezequiel 1-3",
+    "passagesSummary": "Lamentaciones 5, Ezequiel 1-3",
+    "primaryBookId": 25,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 25,
+        "bookName": "Lamentaciones",
+        "chapter": 5
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 1
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 2
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 248,
+    "title": "Día 248: Ezequiel 4-6",
+    "passagesSummary": "Ezequiel 4-6",
+    "primaryBookId": 26,
+    "primaryChapter": 4,
+    "segments": [
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 4
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 5
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 6
+      }
+    ]
+  },
+  {
+    "dayNumber": 249,
+    "title": "Día 249: Ezequiel 7-9",
+    "passagesSummary": "Ezequiel 7-9",
+    "primaryBookId": 26,
+    "primaryChapter": 7,
+    "segments": [
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 7
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 8
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 9
+      }
+    ]
+  },
+  {
+    "dayNumber": 250,
+    "title": "Día 250: Ezequiel 10-12",
+    "passagesSummary": "Ezequiel 10-12",
+    "primaryBookId": 26,
+    "primaryChapter": 10,
+    "segments": [
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 10
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 11
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 12
+      }
+    ]
+  },
+  {
+    "dayNumber": 251,
+    "title": "Día 251: Ezequiel 13-16",
+    "passagesSummary": "Ezequiel 13-16",
+    "primaryBookId": 26,
+    "primaryChapter": 13,
+    "segments": [
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 13
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 14
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 15
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 16
+      }
+    ]
+  },
+  {
+    "dayNumber": 252,
+    "title": "Día 252: Ezequiel 17-19",
+    "passagesSummary": "Ezequiel 17-19",
+    "primaryBookId": 26,
+    "primaryChapter": 17,
+    "segments": [
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 17
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 18
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 19
+      }
+    ]
+  },
+  {
+    "dayNumber": 253,
+    "title": "Día 253: Ezequiel 20-22",
+    "passagesSummary": "Ezequiel 20-22",
+    "primaryBookId": 26,
+    "primaryChapter": 20,
+    "segments": [
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 20
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 21
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 22
+      }
+    ]
+  },
+  {
+    "dayNumber": 254,
+    "title": "Día 254: Ezequiel 23-25",
+    "passagesSummary": "Ezequiel 23-25",
+    "primaryBookId": 26,
+    "primaryChapter": 23,
+    "segments": [
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 23
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 24
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 25
+      }
+    ]
+  },
+  {
+    "dayNumber": 255,
+    "title": "Día 255: Ezequiel 26-29",
+    "passagesSummary": "Ezequiel 26-29",
+    "primaryBookId": 26,
+    "primaryChapter": 26,
+    "segments": [
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 26
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 27
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 28
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 29
+      }
+    ]
+  },
+  {
+    "dayNumber": 256,
+    "title": "Día 256: Ezequiel 30-32",
+    "passagesSummary": "Ezequiel 30-32",
+    "primaryBookId": 26,
+    "primaryChapter": 30,
+    "segments": [
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 30
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 31
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 32
+      }
+    ]
+  },
+  {
+    "dayNumber": 257,
+    "title": "Día 257: Ezequiel 33-35",
+    "passagesSummary": "Ezequiel 33-35",
+    "primaryBookId": 26,
+    "primaryChapter": 33,
+    "segments": [
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 33
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 34
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 35
+      }
+    ]
+  },
+  {
+    "dayNumber": 258,
+    "title": "Día 258: Ezequiel 36-38",
+    "passagesSummary": "Ezequiel 36-38",
+    "primaryBookId": 26,
+    "primaryChapter": 36,
+    "segments": [
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 36
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 37
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 38
+      }
+    ]
+  },
+  {
+    "dayNumber": 259,
+    "title": "Día 259: Ezequiel 39-42",
+    "passagesSummary": "Ezequiel 39-42",
+    "primaryBookId": 26,
+    "primaryChapter": 39,
+    "segments": [
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 39
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 40
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 41
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 42
+      }
+    ]
+  },
+  {
+    "dayNumber": 260,
+    "title": "Día 260: Ezequiel 43-45",
+    "passagesSummary": "Ezequiel 43-45",
+    "primaryBookId": 26,
+    "primaryChapter": 43,
+    "segments": [
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 43
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 44
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 45
+      }
+    ]
+  },
+  {
+    "dayNumber": 261,
+    "title": "Día 261: Ezequiel 46-48",
+    "passagesSummary": "Ezequiel 46-48",
+    "primaryBookId": 26,
+    "primaryChapter": 46,
+    "segments": [
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 46
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 47
+      },
+      {
+        "bookId": 26,
+        "bookName": "Ezequiel",
+        "chapter": 48
+      }
+    ]
+  },
+  {
+    "dayNumber": 262,
+    "title": "Día 262: Daniel 1-3",
+    "passagesSummary": "Daniel 1-3",
+    "primaryBookId": 27,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 27,
+        "bookName": "Daniel",
+        "chapter": 1
+      },
+      {
+        "bookId": 27,
+        "bookName": "Daniel",
+        "chapter": 2
+      },
+      {
+        "bookId": 27,
+        "bookName": "Daniel",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 263,
+    "title": "Día 263: Daniel 4-7",
+    "passagesSummary": "Daniel 4-7",
+    "primaryBookId": 27,
+    "primaryChapter": 4,
+    "segments": [
+      {
+        "bookId": 27,
+        "bookName": "Daniel",
+        "chapter": 4
+      },
+      {
+        "bookId": 27,
+        "bookName": "Daniel",
+        "chapter": 5
+      },
+      {
+        "bookId": 27,
+        "bookName": "Daniel",
+        "chapter": 6
+      },
+      {
+        "bookId": 27,
+        "bookName": "Daniel",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 264,
+    "title": "Día 264: Daniel 8-10",
+    "passagesSummary": "Daniel 8-10",
+    "primaryBookId": 27,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 27,
+        "bookName": "Daniel",
+        "chapter": 8
+      },
+      {
+        "bookId": 27,
+        "bookName": "Daniel",
+        "chapter": 9
+      },
+      {
+        "bookId": 27,
+        "bookName": "Daniel",
+        "chapter": 10
+      }
+    ]
+  },
+  {
+    "dayNumber": 265,
+    "title": "Día 265: Daniel 11-12, Oseas 1",
+    "passagesSummary": "Daniel 11-12, Oseas 1",
+    "primaryBookId": 27,
+    "primaryChapter": 11,
+    "segments": [
+      {
+        "bookId": 27,
+        "bookName": "Daniel",
+        "chapter": 11
+      },
+      {
+        "bookId": 27,
+        "bookName": "Daniel",
+        "chapter": 12
+      },
+      {
+        "bookId": 28,
+        "bookName": "Oseas",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 266,
+    "title": "Día 266: Oseas 2-5",
+    "passagesSummary": "Oseas 2-5",
+    "primaryBookId": 28,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 28,
+        "bookName": "Oseas",
+        "chapter": 2
+      },
+      {
+        "bookId": 28,
+        "bookName": "Oseas",
+        "chapter": 3
+      },
+      {
+        "bookId": 28,
+        "bookName": "Oseas",
+        "chapter": 4
+      },
+      {
+        "bookId": 28,
+        "bookName": "Oseas",
+        "chapter": 5
+      }
+    ]
+  },
+  {
+    "dayNumber": 267,
+    "title": "Día 267: Oseas 6-8",
+    "passagesSummary": "Oseas 6-8",
+    "primaryBookId": 28,
+    "primaryChapter": 6,
+    "segments": [
+      {
+        "bookId": 28,
+        "bookName": "Oseas",
+        "chapter": 6
+      },
+      {
+        "bookId": 28,
+        "bookName": "Oseas",
+        "chapter": 7
+      },
+      {
+        "bookId": 28,
+        "bookName": "Oseas",
+        "chapter": 8
+      }
+    ]
+  },
+  {
+    "dayNumber": 268,
+    "title": "Día 268: Oseas 9-11",
+    "passagesSummary": "Oseas 9-11",
+    "primaryBookId": 28,
+    "primaryChapter": 9,
+    "segments": [
+      {
+        "bookId": 28,
+        "bookName": "Oseas",
+        "chapter": 9
+      },
+      {
+        "bookId": 28,
+        "bookName": "Oseas",
+        "chapter": 10
+      },
+      {
+        "bookId": 28,
+        "bookName": "Oseas",
+        "chapter": 11
+      }
+    ]
+  },
+  {
+    "dayNumber": 269,
+    "title": "Día 269: Oseas 12-14",
+    "passagesSummary": "Oseas 12-14",
+    "primaryBookId": 28,
+    "primaryChapter": 12,
+    "segments": [
+      {
+        "bookId": 28,
+        "bookName": "Oseas",
+        "chapter": 12
+      },
+      {
+        "bookId": 28,
+        "bookName": "Oseas",
+        "chapter": 13
+      },
+      {
+        "bookId": 28,
+        "bookName": "Oseas",
+        "chapter": 14
+      }
+    ]
+  },
+  {
+    "dayNumber": 270,
+    "title": "Día 270: Joel 1-3, Amós 1",
+    "passagesSummary": "Joel 1-3, Amós 1",
+    "primaryBookId": 29,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 29,
+        "bookName": "Joel",
+        "chapter": 1
+      },
+      {
+        "bookId": 29,
+        "bookName": "Joel",
+        "chapter": 2
+      },
+      {
+        "bookId": 29,
+        "bookName": "Joel",
+        "chapter": 3
+      },
+      {
+        "bookId": 30,
+        "bookName": "Amós",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 271,
+    "title": "Día 271: Amós 2-4",
+    "passagesSummary": "Amós 2-4",
+    "primaryBookId": 30,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 30,
+        "bookName": "Amós",
+        "chapter": 2
+      },
+      {
+        "bookId": 30,
+        "bookName": "Amós",
+        "chapter": 3
+      },
+      {
+        "bookId": 30,
+        "bookName": "Amós",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 272,
+    "title": "Día 272: Amós 5-7",
+    "passagesSummary": "Amós 5-7",
+    "primaryBookId": 30,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 30,
+        "bookName": "Amós",
+        "chapter": 5
+      },
+      {
+        "bookId": 30,
+        "bookName": "Amós",
+        "chapter": 6
+      },
+      {
+        "bookId": 30,
+        "bookName": "Amós",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 273,
+    "title": "Día 273: Amós 8-9, Abdías 1",
+    "passagesSummary": "Amós 8-9, Abdías 1",
+    "primaryBookId": 30,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 30,
+        "bookName": "Amós",
+        "chapter": 8
+      },
+      {
+        "bookId": 30,
+        "bookName": "Amós",
+        "chapter": 9
+      },
+      {
+        "bookId": 31,
+        "bookName": "Abdías",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 274,
+    "title": "Día 274: Jonás 1-4",
+    "passagesSummary": "Jonás 1-4",
+    "primaryBookId": 32,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 32,
+        "bookName": "Jonás",
+        "chapter": 1
+      },
+      {
+        "bookId": 32,
+        "bookName": "Jonás",
+        "chapter": 2
+      },
+      {
+        "bookId": 32,
+        "bookName": "Jonás",
+        "chapter": 3
+      },
+      {
+        "bookId": 32,
+        "bookName": "Jonás",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 275,
+    "title": "Día 275: Miqueas 1-3",
+    "passagesSummary": "Miqueas 1-3",
+    "primaryBookId": 33,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 33,
+        "bookName": "Miqueas",
+        "chapter": 1
+      },
+      {
+        "bookId": 33,
+        "bookName": "Miqueas",
+        "chapter": 2
+      },
+      {
+        "bookId": 33,
+        "bookName": "Miqueas",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 276,
+    "title": "Día 276: Miqueas 4-6",
+    "passagesSummary": "Miqueas 4-6",
+    "primaryBookId": 33,
+    "primaryChapter": 4,
+    "segments": [
+      {
+        "bookId": 33,
+        "bookName": "Miqueas",
+        "chapter": 4
+      },
+      {
+        "bookId": 33,
+        "bookName": "Miqueas",
+        "chapter": 5
+      },
+      {
+        "bookId": 33,
+        "bookName": "Miqueas",
+        "chapter": 6
+      }
+    ]
+  },
+  {
+    "dayNumber": 277,
+    "title": "Día 277: Miqueas 7, Nahúm 1-2",
+    "passagesSummary": "Miqueas 7, Nahúm 1-2",
+    "primaryBookId": 33,
+    "primaryChapter": 7,
+    "segments": [
+      {
+        "bookId": 33,
+        "bookName": "Miqueas",
+        "chapter": 7
+      },
+      {
+        "bookId": 34,
+        "bookName": "Nahúm",
+        "chapter": 1
+      },
+      {
+        "bookId": 34,
+        "bookName": "Nahúm",
+        "chapter": 2
+      }
+    ]
+  },
+  {
+    "dayNumber": 278,
+    "title": "Día 278: Nahúm 3, Habacuc 1-3",
+    "passagesSummary": "Nahúm 3, Habacuc 1-3",
+    "primaryBookId": 34,
+    "primaryChapter": 3,
+    "segments": [
+      {
+        "bookId": 34,
+        "bookName": "Nahúm",
+        "chapter": 3
+      },
+      {
+        "bookId": 35,
+        "bookName": "Habacuc",
+        "chapter": 1
+      },
+      {
+        "bookId": 35,
+        "bookName": "Habacuc",
+        "chapter": 2
+      },
+      {
+        "bookId": 35,
+        "bookName": "Habacuc",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 279,
+    "title": "Día 279: Sofonías 1-3",
+    "passagesSummary": "Sofonías 1-3",
+    "primaryBookId": 36,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 36,
+        "bookName": "Sofonías",
+        "chapter": 1
+      },
+      {
+        "bookId": 36,
+        "bookName": "Sofonías",
+        "chapter": 2
+      },
+      {
+        "bookId": 36,
+        "bookName": "Sofonías",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 280,
+    "title": "Día 280: Hageo 1-2, Zacarías 1",
+    "passagesSummary": "Hageo 1-2, Zacarías 1",
+    "primaryBookId": 37,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 37,
+        "bookName": "Hageo",
+        "chapter": 1
+      },
+      {
+        "bookId": 37,
+        "bookName": "Hageo",
+        "chapter": 2
+      },
+      {
+        "bookId": 38,
+        "bookName": "Zacarías",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 281,
+    "title": "Día 281: Zacarías 2-4",
+    "passagesSummary": "Zacarías 2-4",
+    "primaryBookId": 38,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 38,
+        "bookName": "Zacarías",
+        "chapter": 2
+      },
+      {
+        "bookId": 38,
+        "bookName": "Zacarías",
+        "chapter": 3
+      },
+      {
+        "bookId": 38,
+        "bookName": "Zacarías",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 282,
+    "title": "Día 282: Zacarías 5-8",
+    "passagesSummary": "Zacarías 5-8",
+    "primaryBookId": 38,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 38,
+        "bookName": "Zacarías",
+        "chapter": 5
+      },
+      {
+        "bookId": 38,
+        "bookName": "Zacarías",
+        "chapter": 6
+      },
+      {
+        "bookId": 38,
+        "bookName": "Zacarías",
+        "chapter": 7
+      },
+      {
+        "bookId": 38,
+        "bookName": "Zacarías",
+        "chapter": 8
+      }
+    ]
+  },
+  {
+    "dayNumber": 283,
+    "title": "Día 283: Zacarías 9-11",
+    "passagesSummary": "Zacarías 9-11",
+    "primaryBookId": 38,
+    "primaryChapter": 9,
+    "segments": [
+      {
+        "bookId": 38,
+        "bookName": "Zacarías",
+        "chapter": 9
+      },
+      {
+        "bookId": 38,
+        "bookName": "Zacarías",
+        "chapter": 10
+      },
+      {
+        "bookId": 38,
+        "bookName": "Zacarías",
+        "chapter": 11
+      }
+    ]
+  },
+  {
+    "dayNumber": 284,
+    "title": "Día 284: Zacarías 12-14",
+    "passagesSummary": "Zacarías 12-14",
+    "primaryBookId": 38,
+    "primaryChapter": 12,
+    "segments": [
+      {
+        "bookId": 38,
+        "bookName": "Zacarías",
+        "chapter": 12
+      },
+      {
+        "bookId": 38,
+        "bookName": "Zacarías",
+        "chapter": 13
+      },
+      {
+        "bookId": 38,
+        "bookName": "Zacarías",
+        "chapter": 14
+      }
+    ]
+  },
+  {
+    "dayNumber": 285,
+    "title": "Día 285: Malaquías 1-3",
+    "passagesSummary": "Malaquías 1-3",
+    "primaryBookId": 39,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 39,
+        "bookName": "Malaquías",
+        "chapter": 1
+      },
+      {
+        "bookId": 39,
+        "bookName": "Malaquías",
+        "chapter": 2
+      },
+      {
+        "bookId": 39,
+        "bookName": "Malaquías",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 286,
+    "title": "Día 286: Malaquías 4, Mateo 1-3",
+    "passagesSummary": "Malaquías 4, Mateo 1-3",
+    "primaryBookId": 39,
+    "primaryChapter": 4,
+    "segments": [
+      {
+        "bookId": 39,
+        "bookName": "Malaquías",
+        "chapter": 4
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 1
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 2
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 287,
+    "title": "Día 287: Mateo 4-6",
+    "passagesSummary": "Mateo 4-6",
+    "primaryBookId": 40,
+    "primaryChapter": 4,
+    "segments": [
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 4
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 5
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 6
+      }
+    ]
+  },
+  {
+    "dayNumber": 288,
+    "title": "Día 288: Mateo 7-9",
+    "passagesSummary": "Mateo 7-9",
+    "primaryBookId": 40,
+    "primaryChapter": 7,
+    "segments": [
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 7
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 8
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 9
+      }
+    ]
+  },
+  {
+    "dayNumber": 289,
+    "title": "Día 289: Mateo 10-12",
+    "passagesSummary": "Mateo 10-12",
+    "primaryBookId": 40,
+    "primaryChapter": 10,
+    "segments": [
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 10
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 11
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 12
+      }
+    ]
+  },
+  {
+    "dayNumber": 290,
+    "title": "Día 290: Mateo 13-16",
+    "passagesSummary": "Mateo 13-16",
+    "primaryBookId": 40,
+    "primaryChapter": 13,
+    "segments": [
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 13
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 14
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 15
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 16
+      }
+    ]
+  },
+  {
+    "dayNumber": 291,
+    "title": "Día 291: Mateo 17-19",
+    "passagesSummary": "Mateo 17-19",
+    "primaryBookId": 40,
+    "primaryChapter": 17,
+    "segments": [
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 17
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 18
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 19
+      }
+    ]
+  },
+  {
+    "dayNumber": 292,
+    "title": "Día 292: Mateo 20-22",
+    "passagesSummary": "Mateo 20-22",
+    "primaryBookId": 40,
+    "primaryChapter": 20,
+    "segments": [
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 20
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 21
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 22
+      }
+    ]
+  },
+  {
+    "dayNumber": 293,
+    "title": "Día 293: Mateo 23-25",
+    "passagesSummary": "Mateo 23-25",
+    "primaryBookId": 40,
+    "primaryChapter": 23,
+    "segments": [
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 23
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 24
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 25
+      }
+    ]
+  },
+  {
+    "dayNumber": 294,
+    "title": "Día 294: Mateo 26-28, Marcos 1",
+    "passagesSummary": "Mateo 26-28, Marcos 1",
+    "primaryBookId": 40,
+    "primaryChapter": 26,
+    "segments": [
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 26
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 27
+      },
+      {
+        "bookId": 40,
+        "bookName": "Mateo",
+        "chapter": 28
+      },
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 295,
+    "title": "Día 295: Marcos 2-4",
+    "passagesSummary": "Marcos 2-4",
+    "primaryBookId": 41,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 2
+      },
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 3
+      },
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 296,
+    "title": "Día 296: Marcos 5-7",
+    "passagesSummary": "Marcos 5-7",
+    "primaryBookId": 41,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 5
+      },
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 6
+      },
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 297,
+    "title": "Día 297: Marcos 8-10",
+    "passagesSummary": "Marcos 8-10",
+    "primaryBookId": 41,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 8
+      },
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 9
+      },
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 10
+      }
+    ]
+  },
+  {
+    "dayNumber": 298,
+    "title": "Día 298: Marcos 11-14",
+    "passagesSummary": "Marcos 11-14",
+    "primaryBookId": 41,
+    "primaryChapter": 11,
+    "segments": [
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 11
+      },
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 12
+      },
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 13
+      },
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 14
+      }
+    ]
+  },
+  {
+    "dayNumber": 299,
+    "title": "Día 299: Marcos 15-16, Lucas 1",
+    "passagesSummary": "Marcos 15-16, Lucas 1",
+    "primaryBookId": 41,
+    "primaryChapter": 15,
+    "segments": [
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 15
+      },
+      {
+        "bookId": 41,
+        "bookName": "Marcos",
+        "chapter": 16
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 300,
+    "title": "Día 300: Lucas 2-4",
+    "passagesSummary": "Lucas 2-4",
+    "primaryBookId": 42,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 2
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 3
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 301,
+    "title": "Día 301: Lucas 5-8",
+    "passagesSummary": "Lucas 5-8",
+    "primaryBookId": 42,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 5
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 6
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 7
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 8
+      }
+    ]
+  },
+  {
+    "dayNumber": 302,
+    "title": "Día 302: Lucas 9-11",
+    "passagesSummary": "Lucas 9-11",
+    "primaryBookId": 42,
+    "primaryChapter": 9,
+    "segments": [
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 9
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 10
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 11
+      }
+    ]
+  },
+  {
+    "dayNumber": 303,
+    "title": "Día 303: Lucas 12-14",
+    "passagesSummary": "Lucas 12-14",
+    "primaryBookId": 42,
+    "primaryChapter": 12,
+    "segments": [
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 12
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 13
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 14
+      }
+    ]
+  },
+  {
+    "dayNumber": 304,
+    "title": "Día 304: Lucas 15-17",
+    "passagesSummary": "Lucas 15-17",
+    "primaryBookId": 42,
+    "primaryChapter": 15,
+    "segments": [
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 15
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 16
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 17
+      }
+    ]
+  },
+  {
+    "dayNumber": 305,
+    "title": "Día 305: Lucas 18-21",
+    "passagesSummary": "Lucas 18-21",
+    "primaryBookId": 42,
+    "primaryChapter": 18,
+    "segments": [
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 18
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 19
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 20
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 21
+      }
+    ]
+  },
+  {
+    "dayNumber": 306,
+    "title": "Día 306: Lucas 22-24",
+    "passagesSummary": "Lucas 22-24",
+    "primaryBookId": 42,
+    "primaryChapter": 22,
+    "segments": [
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 22
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 23
+      },
+      {
+        "bookId": 42,
+        "bookName": "Lucas",
+        "chapter": 24
+      }
+    ]
+  },
+  {
+    "dayNumber": 307,
+    "title": "Día 307: Juan 1-3",
+    "passagesSummary": "Juan 1-3",
+    "primaryBookId": 43,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 1
+      },
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 2
+      },
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 308,
+    "title": "Día 308: Juan 4-6",
+    "passagesSummary": "Juan 4-6",
+    "primaryBookId": 43,
+    "primaryChapter": 4,
+    "segments": [
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 4
+      },
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 5
+      },
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 6
+      }
+    ]
+  },
+  {
+    "dayNumber": 309,
+    "title": "Día 309: Juan 7-10",
+    "passagesSummary": "Juan 7-10",
+    "primaryBookId": 43,
+    "primaryChapter": 7,
+    "segments": [
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 7
+      },
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 8
+      },
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 9
+      },
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 10
+      }
+    ]
+  },
+  {
+    "dayNumber": 310,
+    "title": "Día 310: Juan 11-13",
+    "passagesSummary": "Juan 11-13",
+    "primaryBookId": 43,
+    "primaryChapter": 11,
+    "segments": [
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 11
+      },
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 12
+      },
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 13
+      }
+    ]
+  },
+  {
+    "dayNumber": 311,
+    "title": "Día 311: Juan 14-16",
+    "passagesSummary": "Juan 14-16",
+    "primaryBookId": 43,
+    "primaryChapter": 14,
+    "segments": [
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 14
+      },
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 15
+      },
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 16
+      }
+    ]
+  },
+  {
+    "dayNumber": 312,
+    "title": "Día 312: Juan 17-19",
+    "passagesSummary": "Juan 17-19",
+    "primaryBookId": 43,
+    "primaryChapter": 17,
+    "segments": [
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 17
+      },
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 18
+      },
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 19
+      }
+    ]
+  },
+  {
+    "dayNumber": 313,
+    "title": "Día 313: Juan 20-21, Hechos 1-2",
+    "passagesSummary": "Juan 20-21, Hechos 1-2",
+    "primaryBookId": 43,
+    "primaryChapter": 20,
+    "segments": [
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 20
+      },
+      {
+        "bookId": 43,
+        "bookName": "Juan",
+        "chapter": 21
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 1
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 2
+      }
+    ]
+  },
+  {
+    "dayNumber": 314,
+    "title": "Día 314: Hechos 3-5",
+    "passagesSummary": "Hechos 3-5",
+    "primaryBookId": 44,
+    "primaryChapter": 3,
+    "segments": [
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 3
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 4
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 5
+      }
+    ]
+  },
+  {
+    "dayNumber": 315,
+    "title": "Día 315: Hechos 6-8",
+    "passagesSummary": "Hechos 6-8",
+    "primaryBookId": 44,
+    "primaryChapter": 6,
+    "segments": [
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 6
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 7
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 8
+      }
+    ]
+  },
+  {
+    "dayNumber": 316,
+    "title": "Día 316: Hechos 9-11",
+    "passagesSummary": "Hechos 9-11",
+    "primaryBookId": 44,
+    "primaryChapter": 9,
+    "segments": [
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 9
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 10
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 11
+      }
+    ]
+  },
+  {
+    "dayNumber": 317,
+    "title": "Día 317: Hechos 12-15",
+    "passagesSummary": "Hechos 12-15",
+    "primaryBookId": 44,
+    "primaryChapter": 12,
+    "segments": [
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 12
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 13
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 14
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 15
+      }
+    ]
+  },
+  {
+    "dayNumber": 318,
+    "title": "Día 318: Hechos 16-18",
+    "passagesSummary": "Hechos 16-18",
+    "primaryBookId": 44,
+    "primaryChapter": 16,
+    "segments": [
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 16
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 17
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 18
+      }
+    ]
+  },
+  {
+    "dayNumber": 319,
+    "title": "Día 319: Hechos 19-21",
+    "passagesSummary": "Hechos 19-21",
+    "primaryBookId": 44,
+    "primaryChapter": 19,
+    "segments": [
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 19
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 20
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 21
+      }
+    ]
+  },
+  {
+    "dayNumber": 320,
+    "title": "Día 320: Hechos 22-24",
+    "passagesSummary": "Hechos 22-24",
+    "primaryBookId": 44,
+    "primaryChapter": 22,
+    "segments": [
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 22
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 23
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 24
+      }
+    ]
+  },
+  {
+    "dayNumber": 321,
+    "title": "Día 321: Hechos 25-28",
+    "passagesSummary": "Hechos 25-28",
+    "primaryBookId": 44,
+    "primaryChapter": 25,
+    "segments": [
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 25
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 26
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 27
+      },
+      {
+        "bookId": 44,
+        "bookName": "Hechos",
+        "chapter": 28
+      }
+    ]
+  },
+  {
+    "dayNumber": 322,
+    "title": "Día 322: Romanos 1-3",
+    "passagesSummary": "Romanos 1-3",
+    "primaryBookId": 45,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 1
+      },
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 2
+      },
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 323,
+    "title": "Día 323: Romanos 4-6",
+    "passagesSummary": "Romanos 4-6",
+    "primaryBookId": 45,
+    "primaryChapter": 4,
+    "segments": [
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 4
+      },
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 5
+      },
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 6
+      }
+    ]
+  },
+  {
+    "dayNumber": 324,
+    "title": "Día 324: Romanos 7-9",
+    "passagesSummary": "Romanos 7-9",
+    "primaryBookId": 45,
+    "primaryChapter": 7,
+    "segments": [
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 7
+      },
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 8
+      },
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 9
+      }
+    ]
+  },
+  {
+    "dayNumber": 325,
+    "title": "Día 325: Romanos 10-13",
+    "passagesSummary": "Romanos 10-13",
+    "primaryBookId": 45,
+    "primaryChapter": 10,
+    "segments": [
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 10
+      },
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 11
+      },
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 12
+      },
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 13
+      }
+    ]
+  },
+  {
+    "dayNumber": 326,
+    "title": "Día 326: Romanos 14-16",
+    "passagesSummary": "Romanos 14-16",
+    "primaryBookId": 45,
+    "primaryChapter": 14,
+    "segments": [
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 14
+      },
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 15
+      },
+      {
+        "bookId": 45,
+        "bookName": "Romanos",
+        "chapter": 16
+      }
+    ]
+  },
+  {
+    "dayNumber": 327,
+    "title": "Día 327: 1 Corintios 1-3",
+    "passagesSummary": "1 Corintios 1-3",
+    "primaryBookId": 46,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 1
+      },
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 2
+      },
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 328,
+    "title": "Día 328: 1 Corintios 4-6",
+    "passagesSummary": "1 Corintios 4-6",
+    "primaryBookId": 46,
+    "primaryChapter": 4,
+    "segments": [
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 4
+      },
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 5
+      },
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 6
+      }
+    ]
+  },
+  {
+    "dayNumber": 329,
+    "title": "Día 329: 1 Corintios 7-10",
+    "passagesSummary": "1 Corintios 7-10",
+    "primaryBookId": 46,
+    "primaryChapter": 7,
+    "segments": [
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 7
+      },
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 8
+      },
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 9
+      },
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 10
+      }
+    ]
+  },
+  {
+    "dayNumber": 330,
+    "title": "Día 330: 1 Corintios 11-13",
+    "passagesSummary": "1 Corintios 11-13",
+    "primaryBookId": 46,
+    "primaryChapter": 11,
+    "segments": [
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 11
+      },
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 12
+      },
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 13
+      }
+    ]
+  },
+  {
+    "dayNumber": 331,
+    "title": "Día 331: 1 Corintios 14-16",
+    "passagesSummary": "1 Corintios 14-16",
+    "primaryBookId": 46,
+    "primaryChapter": 14,
+    "segments": [
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 14
+      },
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 15
+      },
+      {
+        "bookId": 46,
+        "bookName": "1 Corintios",
+        "chapter": 16
+      }
+    ]
+  },
+  {
+    "dayNumber": 332,
+    "title": "Día 332: 2 Corintios 1-4",
+    "passagesSummary": "2 Corintios 1-4",
+    "primaryBookId": 47,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 47,
+        "bookName": "2 Corintios",
+        "chapter": 1
+      },
+      {
+        "bookId": 47,
+        "bookName": "2 Corintios",
+        "chapter": 2
+      },
+      {
+        "bookId": 47,
+        "bookName": "2 Corintios",
+        "chapter": 3
+      },
+      {
+        "bookId": 47,
+        "bookName": "2 Corintios",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 333,
+    "title": "Día 333: 2 Corintios 5-7",
+    "passagesSummary": "2 Corintios 5-7",
+    "primaryBookId": 47,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 47,
+        "bookName": "2 Corintios",
+        "chapter": 5
+      },
+      {
+        "bookId": 47,
+        "bookName": "2 Corintios",
+        "chapter": 6
+      },
+      {
+        "bookId": 47,
+        "bookName": "2 Corintios",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 334,
+    "title": "Día 334: 2 Corintios 8-10",
+    "passagesSummary": "2 Corintios 8-10",
+    "primaryBookId": 47,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 47,
+        "bookName": "2 Corintios",
+        "chapter": 8
+      },
+      {
+        "bookId": 47,
+        "bookName": "2 Corintios",
+        "chapter": 9
+      },
+      {
+        "bookId": 47,
+        "bookName": "2 Corintios",
+        "chapter": 10
+      }
+    ]
+  },
+  {
+    "dayNumber": 335,
+    "title": "Día 335: 2 Corintios 11-13",
+    "passagesSummary": "2 Corintios 11-13",
+    "primaryBookId": 47,
+    "primaryChapter": 11,
+    "segments": [
+      {
+        "bookId": 47,
+        "bookName": "2 Corintios",
+        "chapter": 11
+      },
+      {
+        "bookId": 47,
+        "bookName": "2 Corintios",
+        "chapter": 12
+      },
+      {
+        "bookId": 47,
+        "bookName": "2 Corintios",
+        "chapter": 13
+      }
+    ]
+  },
+  {
+    "dayNumber": 336,
+    "title": "Día 336: Gálatas 1-4",
+    "passagesSummary": "Gálatas 1-4",
+    "primaryBookId": 48,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 48,
+        "bookName": "Gálatas",
+        "chapter": 1
+      },
+      {
+        "bookId": 48,
+        "bookName": "Gálatas",
+        "chapter": 2
+      },
+      {
+        "bookId": 48,
+        "bookName": "Gálatas",
+        "chapter": 3
+      },
+      {
+        "bookId": 48,
+        "bookName": "Gálatas",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 337,
+    "title": "Día 337: Gálatas 5-6, Efesios 1",
+    "passagesSummary": "Gálatas 5-6, Efesios 1",
+    "primaryBookId": 48,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 48,
+        "bookName": "Gálatas",
+        "chapter": 5
+      },
+      {
+        "bookId": 48,
+        "bookName": "Gálatas",
+        "chapter": 6
+      },
+      {
+        "bookId": 49,
+        "bookName": "Efesios",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 338,
+    "title": "Día 338: Efesios 2-4",
+    "passagesSummary": "Efesios 2-4",
+    "primaryBookId": 49,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 49,
+        "bookName": "Efesios",
+        "chapter": 2
+      },
+      {
+        "bookId": 49,
+        "bookName": "Efesios",
+        "chapter": 3
+      },
+      {
+        "bookId": 49,
+        "bookName": "Efesios",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 339,
+    "title": "Día 339: Efesios 5-6, Filipenses 1",
+    "passagesSummary": "Efesios 5-6, Filipenses 1",
+    "primaryBookId": 49,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 49,
+        "bookName": "Efesios",
+        "chapter": 5
+      },
+      {
+        "bookId": 49,
+        "bookName": "Efesios",
+        "chapter": 6
+      },
+      {
+        "bookId": 50,
+        "bookName": "Filipenses",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 340,
+    "title": "Día 340: Filipenses 2-4, Colosenses 1",
+    "passagesSummary": "Filipenses 2-4, Colosenses 1",
+    "primaryBookId": 50,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 50,
+        "bookName": "Filipenses",
+        "chapter": 2
+      },
+      {
+        "bookId": 50,
+        "bookName": "Filipenses",
+        "chapter": 3
+      },
+      {
+        "bookId": 50,
+        "bookName": "Filipenses",
+        "chapter": 4
+      },
+      {
+        "bookId": 51,
+        "bookName": "Colosenses",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 341,
+    "title": "Día 341: Colosenses 2-4",
+    "passagesSummary": "Colosenses 2-4",
+    "primaryBookId": 51,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 51,
+        "bookName": "Colosenses",
+        "chapter": 2
+      },
+      {
+        "bookId": 51,
+        "bookName": "Colosenses",
+        "chapter": 3
+      },
+      {
+        "bookId": 51,
+        "bookName": "Colosenses",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 342,
+    "title": "Día 342: 1 Tesalonicenses 1-3",
+    "passagesSummary": "1 Tesalonicenses 1-3",
+    "primaryBookId": 52,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 52,
+        "bookName": "1 Tesalonicenses",
+        "chapter": 1
+      },
+      {
+        "bookId": 52,
+        "bookName": "1 Tesalonicenses",
+        "chapter": 2
+      },
+      {
+        "bookId": 52,
+        "bookName": "1 Tesalonicenses",
+        "chapter": 3
+      }
+    ]
+  },
+  {
+    "dayNumber": 343,
+    "title": "Día 343: 1 Tesalonicenses 4-5, 2 Tesalonicenses 1",
+    "passagesSummary": "1 Tesalonicenses 4-5, 2 Tesalonicenses 1",
+    "primaryBookId": 52,
+    "primaryChapter": 4,
+    "segments": [
+      {
+        "bookId": 52,
+        "bookName": "1 Tesalonicenses",
+        "chapter": 4
+      },
+      {
+        "bookId": 52,
+        "bookName": "1 Tesalonicenses",
+        "chapter": 5
+      },
+      {
+        "bookId": 53,
+        "bookName": "2 Tesalonicenses",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 344,
+    "title": "Día 344: 2 Tesalonicenses 2-3, 1 Timoteo 1-2",
+    "passagesSummary": "2 Tesalonicenses 2-3, 1 Timoteo 1-2",
+    "primaryBookId": 53,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 53,
+        "bookName": "2 Tesalonicenses",
+        "chapter": 2
+      },
+      {
+        "bookId": 53,
+        "bookName": "2 Tesalonicenses",
+        "chapter": 3
+      },
+      {
+        "bookId": 54,
+        "bookName": "1 Timoteo",
+        "chapter": 1
+      },
+      {
+        "bookId": 54,
+        "bookName": "1 Timoteo",
+        "chapter": 2
+      }
+    ]
+  },
+  {
+    "dayNumber": 345,
+    "title": "Día 345: 1 Timoteo 3-5",
+    "passagesSummary": "1 Timoteo 3-5",
+    "primaryBookId": 54,
+    "primaryChapter": 3,
+    "segments": [
+      {
+        "bookId": 54,
+        "bookName": "1 Timoteo",
+        "chapter": 3
+      },
+      {
+        "bookId": 54,
+        "bookName": "1 Timoteo",
+        "chapter": 4
+      },
+      {
+        "bookId": 54,
+        "bookName": "1 Timoteo",
+        "chapter": 5
+      }
+    ]
+  },
+  {
+    "dayNumber": 346,
+    "title": "Día 346: 1 Timoteo 6, 2 Timoteo 1-2",
+    "passagesSummary": "1 Timoteo 6, 2 Timoteo 1-2",
+    "primaryBookId": 54,
+    "primaryChapter": 6,
+    "segments": [
+      {
+        "bookId": 54,
+        "bookName": "1 Timoteo",
+        "chapter": 6
+      },
+      {
+        "bookId": 55,
+        "bookName": "2 Timoteo",
+        "chapter": 1
+      },
+      {
+        "bookId": 55,
+        "bookName": "2 Timoteo",
+        "chapter": 2
+      }
+    ]
+  },
+  {
+    "dayNumber": 347,
+    "title": "Día 347: 2 Timoteo 3-4, Tito 1",
+    "passagesSummary": "2 Timoteo 3-4, Tito 1",
+    "primaryBookId": 55,
+    "primaryChapter": 3,
+    "segments": [
+      {
+        "bookId": 55,
+        "bookName": "2 Timoteo",
+        "chapter": 3
+      },
+      {
+        "bookId": 55,
+        "bookName": "2 Timoteo",
+        "chapter": 4
+      },
+      {
+        "bookId": 56,
+        "bookName": "Tito",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 348,
+    "title": "Día 348: Tito 2-3, Filemón 1, Hebreos 1",
+    "passagesSummary": "Tito 2-3, Filemón 1, Hebreos 1",
+    "primaryBookId": 56,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 56,
+        "bookName": "Tito",
+        "chapter": 2
+      },
+      {
+        "bookId": 56,
+        "bookName": "Tito",
+        "chapter": 3
+      },
+      {
+        "bookId": 57,
+        "bookName": "Filemón",
+        "chapter": 1
+      },
+      {
+        "bookId": 58,
+        "bookName": "Hebreos",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 349,
+    "title": "Día 349: Hebreos 2-4",
+    "passagesSummary": "Hebreos 2-4",
+    "primaryBookId": 58,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 58,
+        "bookName": "Hebreos",
+        "chapter": 2
+      },
+      {
+        "bookId": 58,
+        "bookName": "Hebreos",
+        "chapter": 3
+      },
+      {
+        "bookId": 58,
+        "bookName": "Hebreos",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 350,
+    "title": "Día 350: Hebreos 5-7",
+    "passagesSummary": "Hebreos 5-7",
+    "primaryBookId": 58,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 58,
+        "bookName": "Hebreos",
+        "chapter": 5
+      },
+      {
+        "bookId": 58,
+        "bookName": "Hebreos",
+        "chapter": 6
+      },
+      {
+        "bookId": 58,
+        "bookName": "Hebreos",
+        "chapter": 7
+      }
+    ]
+  },
+  {
+    "dayNumber": 351,
+    "title": "Día 351: Hebreos 8-10",
+    "passagesSummary": "Hebreos 8-10",
+    "primaryBookId": 58,
+    "primaryChapter": 8,
+    "segments": [
+      {
+        "bookId": 58,
+        "bookName": "Hebreos",
+        "chapter": 8
+      },
+      {
+        "bookId": 58,
+        "bookName": "Hebreos",
+        "chapter": 9
+      },
+      {
+        "bookId": 58,
+        "bookName": "Hebreos",
+        "chapter": 10
+      }
+    ]
+  },
+  {
+    "dayNumber": 352,
+    "title": "Día 352: Hebreos 11-13, Santiago 1",
+    "passagesSummary": "Hebreos 11-13, Santiago 1",
+    "primaryBookId": 58,
+    "primaryChapter": 11,
+    "segments": [
+      {
+        "bookId": 58,
+        "bookName": "Hebreos",
+        "chapter": 11
+      },
+      {
+        "bookId": 58,
+        "bookName": "Hebreos",
+        "chapter": 12
+      },
+      {
+        "bookId": 58,
+        "bookName": "Hebreos",
+        "chapter": 13
+      },
+      {
+        "bookId": 59,
+        "bookName": "Santiago",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 353,
+    "title": "Día 353: Santiago 2-4",
+    "passagesSummary": "Santiago 2-4",
+    "primaryBookId": 59,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 59,
+        "bookName": "Santiago",
+        "chapter": 2
+      },
+      {
+        "bookId": 59,
+        "bookName": "Santiago",
+        "chapter": 3
+      },
+      {
+        "bookId": 59,
+        "bookName": "Santiago",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 354,
+    "title": "Día 354: Santiago 5, 1 Pedro 1-2",
+    "passagesSummary": "Santiago 5, 1 Pedro 1-2",
+    "primaryBookId": 59,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 59,
+        "bookName": "Santiago",
+        "chapter": 5
+      },
+      {
+        "bookId": 60,
+        "bookName": "1 Pedro",
+        "chapter": 1
+      },
+      {
+        "bookId": 60,
+        "bookName": "1 Pedro",
+        "chapter": 2
+      }
+    ]
+  },
+  {
+    "dayNumber": 355,
+    "title": "Día 355: 1 Pedro 3-5",
+    "passagesSummary": "1 Pedro 3-5",
+    "primaryBookId": 60,
+    "primaryChapter": 3,
+    "segments": [
+      {
+        "bookId": 60,
+        "bookName": "1 Pedro",
+        "chapter": 3
+      },
+      {
+        "bookId": 60,
+        "bookName": "1 Pedro",
+        "chapter": 4
+      },
+      {
+        "bookId": 60,
+        "bookName": "1 Pedro",
+        "chapter": 5
+      }
+    ]
+  },
+  {
+    "dayNumber": 356,
+    "title": "Día 356: 2 Pedro 1-3, 1 Juan 1",
+    "passagesSummary": "2 Pedro 1-3, 1 Juan 1",
+    "primaryBookId": 61,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 61,
+        "bookName": "2 Pedro",
+        "chapter": 1
+      },
+      {
+        "bookId": 61,
+        "bookName": "2 Pedro",
+        "chapter": 2
+      },
+      {
+        "bookId": 61,
+        "bookName": "2 Pedro",
+        "chapter": 3
+      },
+      {
+        "bookId": 62,
+        "bookName": "1 Juan",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 357,
+    "title": "Día 357: 1 Juan 2-4",
+    "passagesSummary": "1 Juan 2-4",
+    "primaryBookId": 62,
+    "primaryChapter": 2,
+    "segments": [
+      {
+        "bookId": 62,
+        "bookName": "1 Juan",
+        "chapter": 2
+      },
+      {
+        "bookId": 62,
+        "bookName": "1 Juan",
+        "chapter": 3
+      },
+      {
+        "bookId": 62,
+        "bookName": "1 Juan",
+        "chapter": 4
+      }
+    ]
+  },
+  {
+    "dayNumber": 358,
+    "title": "Día 358: 1 Juan 5, 2 Juan 1, 3 Juan 1",
+    "passagesSummary": "1 Juan 5, 2 Juan 1, 3 Juan 1",
+    "primaryBookId": 62,
+    "primaryChapter": 5,
+    "segments": [
+      {
+        "bookId": 62,
+        "bookName": "1 Juan",
+        "chapter": 5
+      },
+      {
+        "bookId": 63,
+        "bookName": "2 Juan",
+        "chapter": 1
+      },
+      {
+        "bookId": 64,
+        "bookName": "3 Juan",
+        "chapter": 1
+      }
+    ]
+  },
+  {
+    "dayNumber": 359,
+    "title": "Día 359: Judas 1, Apocalipsis 1-2",
+    "passagesSummary": "Judas 1, Apocalipsis 1-2",
+    "primaryBookId": 65,
+    "primaryChapter": 1,
+    "segments": [
+      {
+        "bookId": 65,
+        "bookName": "Judas",
+        "chapter": 1
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 1
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 2
+      }
+    ]
+  },
+  {
+    "dayNumber": 360,
+    "title": "Día 360: Apocalipsis 3-6",
+    "passagesSummary": "Apocalipsis 3-6",
+    "primaryBookId": 66,
+    "primaryChapter": 3,
+    "segments": [
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 3
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 4
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 5
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 6
+      }
+    ]
+  },
+  {
+    "dayNumber": 361,
+    "title": "Día 361: Apocalipsis 7-9",
+    "passagesSummary": "Apocalipsis 7-9",
+    "primaryBookId": 66,
+    "primaryChapter": 7,
+    "segments": [
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 7
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 8
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 9
+      }
+    ]
+  },
+  {
+    "dayNumber": 362,
+    "title": "Día 362: Apocalipsis 10-12",
+    "passagesSummary": "Apocalipsis 10-12",
+    "primaryBookId": 66,
+    "primaryChapter": 10,
+    "segments": [
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 10
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 11
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 12
+      }
+    ]
+  },
+  {
+    "dayNumber": 363,
+    "title": "Día 363: Apocalipsis 13-15",
+    "passagesSummary": "Apocalipsis 13-15",
+    "primaryBookId": 66,
+    "primaryChapter": 13,
+    "segments": [
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 13
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 14
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 15
+      }
+    ]
+  },
+  {
+    "dayNumber": 364,
+    "title": "Día 364: Apocalipsis 16-19",
+    "passagesSummary": "Apocalipsis 16-19",
+    "primaryBookId": 66,
+    "primaryChapter": 16,
+    "segments": [
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 16
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 17
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 18
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 19
+      }
+    ]
+  },
+  {
+    "dayNumber": 365,
+    "title": "Día 365: Apocalipsis 20-22",
+    "passagesSummary": "Apocalipsis 20-22",
+    "primaryBookId": 66,
+    "primaryChapter": 20,
+    "segments": [
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 20
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 21
+      },
+      {
+        "bookId": 66,
+        "bookName": "Apocalipsis",
+        "chapter": 22
+      }
+    ]
+  }
+]
