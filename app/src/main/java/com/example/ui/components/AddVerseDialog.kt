@@ -1234,6 +1234,7 @@ fun BibleReferenceWindowPicker(
                         LazyColumn(
                             state = listState,
                             modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = 36.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             itemsIndexed(filteredBooks, key = { _, it -> it.order }) { index, book ->
@@ -1335,7 +1336,7 @@ fun BibleReferenceWindowPicker(
                             modifier = Modifier.fillMaxSize(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(vertical = 8.dp)
+                            contentPadding = PaddingValues(top = 8.dp, bottom = 36.dp)
                         ) {
                             items((1..pickedBook.chaptersCount).toList()) { ch ->
                                 val isSelected = ch == pickedChapter
@@ -1375,7 +1376,7 @@ fun BibleReferenceWindowPicker(
                             modifier = Modifier.fillMaxSize(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(vertical = 8.dp)
+                            contentPadding = PaddingValues(top = 8.dp, bottom = 36.dp)
                         ) {
                             items((1..maxVerses).toList()) { v ->
                                 val isSelected = v == initialVerse

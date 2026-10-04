@@ -135,7 +135,10 @@ fun BookChapterSelectorSheet(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                        .navigationBarsPadding()
+                        .imePadding()
+                        .padding(horizontal = 20.dp)
+                        .padding(top = 8.dp, bottom = 12.dp)
                 ) {
 
             AnimatedContent(
@@ -204,6 +207,7 @@ fun BookChapterSelectorSheet(
                             LazyColumn(
                                 state = bookListState,
                                 modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(bottom = 36.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 itemsIndexed(filteredBooks, key = { _, book -> book.id }) { index, book ->
@@ -321,6 +325,7 @@ fun BookChapterSelectorSheet(
                                 columns = GridCells.Adaptive(minSize = 56.dp),
                                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                                 verticalArrangement = Arrangement.spacedBy(10.dp),
+                                contentPadding = PaddingValues(bottom = 36.dp),
                                 modifier = Modifier.fillMaxSize()
                             ) {
                                 items((1..book.chaptersCount).toList()) { ch ->
@@ -377,6 +382,7 @@ fun BookChapterSelectorSheet(
                                 columns = GridCells.Adaptive(minSize = 52.dp),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(bottom = 36.dp),
                                 modifier = Modifier.fillMaxSize()
                             ) {
                                 items((1..verseCount).toList()) { vNum ->
