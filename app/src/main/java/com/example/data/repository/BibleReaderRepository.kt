@@ -55,21 +55,23 @@ class BibleReaderRepository(
             }
         } catch (_: Exception) {}
 
-        // One-time purge v2: TLA/DHH/NBLA were previously served from other translations (PDT/LBLA) or from
-        // an RVR1960 fallback and cached in Room. They are now bundled, so drop the stale cache.
+        // One-time purge v4: Purge cached Room verses for all bundled versions so they are re-populated
+        // with the authentic, verified offline databases without stale or corrupted entries.
         try {
             val prefs = context.getSharedPreferences("bible_cache_maintenance", Context.MODE_PRIVATE)
-            if (!prefs.getBoolean("purge_bundled_versions_v2", false)) {
+            if (!prefs.getBoolean("purge_bundled_versions_v4", false)) {
                 for (code in OfflineBibleManager.bundledCodes()) {
-                    if (!code.equals("RVR1960", ignoreCase = true)) dao.deleteVersesForVersion(code)
+                    dao.deleteVersesForVersion(code)
                 }
-                prefs.edit().putBoolean("purge_bundled_versions_v2", true).apply()
+                prefs.edit().putBoolean("purge_bundled_versions_v4", true).apply()
             }
         } catch (_: Exception) {}
 
-        // Pre-warm the offline RVR1960 database in background to avoid any delay
+        // Pre-warm all offline bundled databases in background to avoid any delay when switching versions
         try {
-            OfflineBibleManager.ensureDatabase(context)
+            for (code in OfflineBibleManager.bundledCodes()) {
+                OfflineBibleManager.ensureDatabase(context, code)
+            }
         } catch (_: Exception) {}
     }
 
@@ -98,9 +100,15 @@ class BibleReaderRepository(
         val normVersion = normalizeVersion(version)
         val isOfflineOnly = OfflineBibleManager.isBundled(normVersion)
 
-        // 1. For fully bundled versions (RVR1960, TLA, DHH), ALWAYS use the complete pre-packaged offline SQLite.
+        // 1. For fully bundled versions (RVR1960, TLA, DHH, NBLA), ALWAYS use the complete pre-packaged offline SQLite.
         if (isOfflineOnly) {
-            val offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter, normVersion)
+            var offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter, normVersion)
+            if (offlineVerses.isEmpty()) {
+                // Ensure extraction is complete and retry
+                OfflineBibleManager.ensureReady(context, normVersion)
+                offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter, normVersion)
+            }
+
             if (offlineVerses.isNotEmpty()) {
                 val existing = dao.getVersesSync(bookId, chapter, normVersion)
                 val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
@@ -130,6 +138,9 @@ class BibleReaderRepository(
                     }
                     dao.insertVerses(entities)
                 }
+                return@withContext
+            } else {
+                android.util.Log.e("BibleReaderRepo", "ERROR: Bundled version $normVersion returned 0 verses for $bookId:$chapter")
                 return@withContext
             }
         }
