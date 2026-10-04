@@ -1,5 +1,8 @@
 package com.example.data.bible
 
+import android.content.Context
+import android.database.sqlite.SQLiteDatabase
+import android.util.Log
 import com.example.data.local.BibleReaderDao
 import com.example.data.model.BibleReaderVerseEntity
 import kotlinx.coroutines.Dispatchers
@@ -11,7 +14,12 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 import java.util.concurrent.TimeUnit
+import java.util.zip.GZIPInputStream
 
 sealed interface VersionDownloadState {
     object Idle : VersionDownloadState
@@ -82,20 +90,20 @@ object OfflineBibleDownloadManager {
             it + (codeUpper to VersionDownloadState.Downloading(10, "Preparando texto offline..."))
         }
 
-        val tempFile = java.io.File(context.cacheDir, "import_${codeUpper.lowercase()}.db")
+        val tempFile = File(context.cacheDir, "import_${codeUpper.lowercase()}.db")
         if (tempFile.exists()) tempFile.delete()
 
         try {
             context.assets.open(assetPath).use { rawIn ->
-                val bis = java.io.BufferedInputStream(rawIn)
+                val bis = BufferedInputStream(rawIn)
                 bis.mark(4)
                 val b1 = bis.read()
                 val b2 = bis.read()
                 bis.reset()
                 val isGzip = (b1 == 0x1f && b2 == 0x8b)
-                val inputStream: java.io.InputStream = if (isGzip) java.util.zip.GZIPInputStream(bis) else bis
+                val inputStream: InputStream = if (isGzip) GZIPInputStream(bis) else bis
 
-                java.io.FileOutputStream(tempFile).use { fileOut ->
+                FileOutputStream(tempFile).use { fileOut ->
                     val buffer = ByteArray(64 * 1024)
                     var bytesRead: Int
                     while (inputStream.read(buffer).also { bytesRead = it } != -1) {
@@ -109,10 +117,10 @@ object OfflineBibleDownloadManager {
                 it + (codeUpper to VersionDownloadState.Downloading(40, "Guardando versículos auténticos..."))
             }
 
-            val db = android.database.sqlite.SQLiteDatabase.openDatabase(
+            val db = SQLiteDatabase.openDatabase(
                 tempFile.absolutePath,
                 null,
-                android.database.sqlite.SQLiteDatabase.OPEN_READWRITE or android.database.sqlite.SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.NO_LOCALIZED_COLLATORS
             )
 
             dao.deleteVersesForVersion(codeUpper)

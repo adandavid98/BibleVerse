@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 
 import android.content.Context
 import com.example.data.bible.BiblePericopesCatalog
+import com.example.data.bible.OfflineBibleDownloadManager
 import com.example.data.bible.OfflineBibleManager
 
 class BibleReaderRepository(
