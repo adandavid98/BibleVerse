@@ -1,7 +1,6 @@
 package com.example.data.bible
 
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import com.example.data.local.BibleReaderDao
 import com.example.data.model.BibleReaderVerseEntity
@@ -14,12 +13,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
-import java.io.BufferedInputStream
-import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
 import java.util.concurrent.TimeUnit
-import java.util.zip.GZIPInputStream
 
 sealed interface VersionDownloadState {
     object Idle : VersionDownloadState
@@ -36,31 +30,39 @@ object OfflineBibleDownloadManager {
         .build()
 
     private val _downloadStates = MutableStateFlow<Map<String, VersionDownloadState>>(
-        mapOf("RVR1960" to VersionDownloadState.Downloaded)
+        mapOf(
+            "RVR1960" to VersionDownloadState.Downloaded,
+            "NBLA" to VersionDownloadState.Downloaded,
+            "TLA" to VersionDownloadState.Downloaded,
+            "DHH" to VersionDownloadState.Downloaded,
+            "DHH94PC" to VersionDownloadState.Downloaded
+        )
     )
     val downloadStates: StateFlow<Map<String, VersionDownloadState>> = _downloadStates.asStateFlow()
 
     suspend fun isVersionOfflineReady(dao: BibleReaderDao, versionCode: String): Boolean = withContext(Dispatchers.IO) {
-        if (versionCode.equals("RVR1960", ignoreCase = true) || versionCode.equals("RV1960", ignoreCase = true)) {
+        val norm = OfflineBibleManager.normalizeVersion(versionCode)
+        if (OfflineBibleManager.isAssetVersion(norm)) {
             return@withContext true
         }
-        val count = dao.getVerseCountForVersion(versionCode)
+        val count = dao.getVerseCountForVersion(norm)
         count > 5000
     }
 
     suspend fun refreshStatuses(dao: BibleReaderDao) = withContext(Dispatchers.IO) {
         val updated = mutableMapOf<String, VersionDownloadState>()
-        updated["RVR1960"] = VersionDownloadState.Downloaded
 
         for (version in BibleCatalog.versions) {
-            val code = version.code
-            if (code.equals("RVR1960", ignoreCase = true)) continue
-
-            val count = dao.getVerseCountForVersion(code)
-            if (count > 5000) {
-                updated[code] = VersionDownloadState.Downloaded
-            } else if (_downloadStates.value[code] !is VersionDownloadState.Downloading) {
-                updated[code] = VersionDownloadState.Idle
+            val code = OfflineBibleManager.normalizeVersion(version.code)
+            if (OfflineBibleManager.isAssetVersion(code)) {
+                updated[version.code] = VersionDownloadState.Downloaded
+            } else {
+                val count = dao.getVerseCountForVersion(code)
+                if (count > 5000) {
+                    updated[version.code] = VersionDownloadState.Downloaded
+                } else if (_downloadStates.value[version.code] !is VersionDownloadState.Downloading) {
+                    updated[version.code] = VersionDownloadState.Idle
+                }
             }
         }
         _downloadStates.update { current ->
@@ -68,143 +70,17 @@ object OfflineBibleDownloadManager {
         }
     }
 
-    private val assetVersionMap = mapOf(
-        "TLA" to "bible/bible_tla.db.gz",
-        "DHH" to "bible/bible_dhh94pc.db.gz",
-        "DHH94PC" to "bible/bible_dhh94pc.db.gz",
-        "NBLA" to "bible/bible_nbla.db.gz"
-    )
-
     fun isAssetVersion(versionCode: String): Boolean =
-        assetVersionMap.containsKey(versionCode.uppercase().trim())
-
-    suspend fun importAssetVersion(
-        context: Context,
-        dao: BibleReaderDao,
-        versionCode: String
-    ): Boolean = withContext(Dispatchers.IO) {
-        val codeUpper = versionCode.uppercase().trim()
-        val assetPath = assetVersionMap[codeUpper] ?: return@withContext false
-
-        _downloadStates.update {
-            it + (codeUpper to VersionDownloadState.Downloading(10, "Preparando texto offline..."))
-        }
-
-        val tempFile = File(context.cacheDir, "import_${codeUpper.lowercase()}.db")
-        if (tempFile.exists()) tempFile.delete()
-
-        try {
-            context.assets.open(assetPath).use { rawIn ->
-                val bis = BufferedInputStream(rawIn)
-                bis.mark(4)
-                val b1 = bis.read()
-                val b2 = bis.read()
-                bis.reset()
-                val isGzip = (b1 == 0x1f && b2 == 0x8b)
-                val inputStream: InputStream = if (isGzip) GZIPInputStream(bis) else bis
-
-                FileOutputStream(tempFile).use { fileOut ->
-                    val buffer = ByteArray(64 * 1024)
-                    var bytesRead: Int
-                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                        fileOut.write(buffer, 0, bytesRead)
-                    }
-                    fileOut.flush()
-                }
-            }
-
-            _downloadStates.update {
-                it + (codeUpper to VersionDownloadState.Downloading(40, "Guardando versículos auténticos..."))
-            }
-
-            val db = SQLiteDatabase.openDatabase(
-                tempFile.absolutePath,
-                null,
-                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.NO_LOCALIZED_COLLATORS
-            )
-
-            dao.deleteVersesForVersion(codeUpper)
-
-            val batchSize = 1000
-            val batch = mutableListOf<BibleReaderVerseEntity>()
-
-            val cursor = db.rawQuery(
-                "SELECT book, chapter, verse, text FROM bible_verses ORDER BY book ASC, chapter ASC, verse ASC",
-                null
-            )
-            cursor.use { c ->
-                val colBook = c.getColumnIndexOrThrow("book")
-                val colChap = c.getColumnIndexOrThrow("chapter")
-                val colVerse = c.getColumnIndexOrThrow("verse")
-                val colText = c.getColumnIndexOrThrow("text")
-
-                while (c.moveToNext()) {
-                    val bookId = c.getInt(colBook)
-                    val chapter = c.getInt(colChap)
-                    val verseNum = c.getInt(colVerse)
-                    val rawText = c.getString(colText)
-
-                    val cleanText = BollsBibleApiService.sanitizeVerseText(rawText)
-                    val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, verseNum)
-                    val heading = BiblePericopesCatalog.getHeading(
-                        bookId = bookId,
-                        chapter = chapter,
-                        verse = verseNum,
-                        version = codeUpper
-                    )
-
-                    batch.add(
-                        BibleReaderVerseEntity(
-                            bookId = bookId,
-                            chapter = chapter,
-                            verseNumber = verseNum,
-                            text = cleanText,
-                            bibleVersion = codeUpper,
-                            sectionHeading = heading,
-                            isRedLetter = isJesus
-                        )
-                    )
-
-                    if (batch.size >= batchSize) {
-                        dao.insertVerses(batch)
-                        batch.clear()
-                    }
-                }
-            }
-
-            if (batch.isNotEmpty()) {
-                dao.insertVerses(batch)
-                batch.clear()
-            }
-
-            try { db.close() } catch (_: Exception) {}
-            if (tempFile.exists()) tempFile.delete()
-
-            _downloadStates.update {
-                it + (codeUpper to VersionDownloadState.Downloaded)
-            }
-            true
-        } catch (e: Exception) {
-            android.util.Log.e("OfflineDownloadMgr", "Error importing $codeUpper: ${e.message}", e)
-            if (tempFile.exists()) tempFile.delete()
-            _downloadStates.update {
-                it + (codeUpper to VersionDownloadState.Error("Error al importar: ${e.message}"))
-            }
-            false
-        }
-    }
+        OfflineBibleManager.isAssetVersion(versionCode)
 
     suspend fun downloadVersion(dao: BibleReaderDao, versionCode: String) = withContext(Dispatchers.IO) {
-        val codeUpper = versionCode.uppercase().trim()
-        if (codeUpper == "RVR1960" || codeUpper == "RV1960") {
-            _downloadStates.update { it + (codeUpper to VersionDownloadState.Downloaded) }
-            return@withContext
-        }
+        val codeUpper = OfflineBibleManager.normalizeVersion(versionCode)
 
-        // If this version is bundled in APK assets (TLA, DHH, NBLA), import it directly to Room!
-        if (assetVersionMap.containsKey(codeUpper)) {
+        // If this version is bundled in APK assets (RVR1960, TLA, DHH, NBLA), it's immediately ready!
+        if (OfflineBibleManager.isAssetVersion(codeUpper)) {
             val appCtx = com.example.BibleApplication.instance
-            importAssetVersion(appCtx, dao, codeUpper)
+            OfflineBibleManager.ensureReady(appCtx, codeUpper)
+            _downloadStates.update { it + (versionCode to VersionDownloadState.Downloaded) }
             return@withContext
         }
 
@@ -260,7 +136,7 @@ object OfflineBibleDownloadManager {
                 val verseNum = obj.optInt("verse", 1)
                 val rawText = obj.optString("text", "")
 
-                val cleanText = BollsBibleApiService.sanitizeVerseText(rawText)
+                val cleanText = BibleTextSanitizer.sanitize(rawText)
                 val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, verseNum)
                 val heading = BiblePericopesCatalog.getHeading(
                     bookId = bookId,
@@ -296,9 +172,9 @@ object OfflineBibleDownloadManager {
                 it + (codeUpper to VersionDownloadState.Downloaded)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("OfflineDownloadMgr", "Error descargando versión $codeUpper: ${e.message}", e)
             _downloadStates.update {
-                it + (codeUpper to VersionDownloadState.Error("Fallo: " + (e.localizedMessage ?: "Error de red")))
+                it + (codeUpper to VersionDownloadState.Error("Error: ${e.message}"))
             }
         }
     }

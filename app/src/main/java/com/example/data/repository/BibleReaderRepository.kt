@@ -46,27 +46,23 @@ class BibleReaderRepository(
         // populated with genuine authentic text from their respective asset packages.
         try {
             val prefs = context.getSharedPreferences("bible_cache_maintenance", Context.MODE_PRIVATE)
-            if (!prefs.getBoolean("clean_asset_versions_v1", false)) {
+            if (!prefs.getBoolean("clean_asset_versions_v4", false)) {
                 dao.deleteVersesForVersion("TLA")
                 dao.deleteVersesForVersion("DHH")
                 dao.deleteVersesForVersion("DHH94PC")
                 dao.deleteVersesForVersion("NBLA")
-                prefs.edit().putBoolean("clean_asset_versions_v1", true).apply()
+                prefs.edit().putBoolean("clean_asset_versions_v4", true).apply()
             }
         } catch (_: Exception) {}
 
-        // Pre-warm the offline RVR1960 database in background to avoid any delay
+        // Pre-warm the offline databases in background
         try {
-            OfflineBibleManager.ensureDatabase(context)
+            OfflineBibleManager.ensureAllAssetDatabases(context)
         } catch (_: Exception) {}
     }
 
     private fun normalizeVersion(version: String): String {
-        val upper = version.uppercase().trim()
-        return when (upper) {
-            "RV1960", "REINA-VALERA 1960" -> "RVR1960"
-            else -> upper
-        }
+        return OfflineBibleManager.normalizeVersion(version)
     }
 
     fun getAllBooks(): Flow<List<BibleBookEntity>> {
@@ -84,27 +80,27 @@ class BibleReaderRepository(
 
     suspend fun ensureChapterVerses(bookId: Int, chapter: Int, version: String = "RVR1960") = withContext(Dispatchers.IO) {
         val normVersion = normalizeVersion(version)
-        val isRvr1960 = normVersion == "RVR1960"
+        val isAsset = OfflineBibleManager.isAssetVersion(normVersion)
 
-        // 1. For RVR1960 (primary translation), ALWAYS use the complete pre-packaged offline SQLite (31,102 verses).
-        //    OfflineBibleManager guarantees all 31,102 verses are available offline, self-healing from asset if necessary.
-        if (isRvr1960) {
-            val offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter)
+        // 1. For pre-packaged offline asset versions (RVR1960, NBLA, TLA, DHH, DHH94PC):
+        //    ALWAYS read directly from their respective genuine offline SQLite file.
+        //    Instant sub-millisecond, 100% offline, zero network required!
+        if (isAsset) {
+            val offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter, normVersion)
             if (offlineVerses.isNotEmpty()) {
                 val existing = dao.getVersesSync(bookId, chapter, normVersion)
                 val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
-                val hasHeadingsInCatalog = BiblePericopesCatalog.hasHeadingsForChapter(bookId, chapter)
+                val hasHeadingsInCatalog = BiblePericopesCatalog.hasHeadingsForChapter(bookId, chapter, normVersion)
                 val needsHeadingRefresh = hasHeadingsInCatalog && existing.isNotEmpty() && existing.any { v ->
                     val expected = BiblePericopesCatalog.getHeading(context, bookId, chapter, v.verseNumber, normVersion)
                     v.sectionHeading != expected
                 }
                 val hasHtmlTags = existing.any { it.text.contains("<br", ignoreCase = true) || it.text.contains("<") }
 
-                // If not cached in Room yet, or incomplete, or contains synthetic placeholder, or headings need update, or has HTML tags, reload completely
                 if (existing.size != offlineVerses.size || hasSynthetic || needsHeadingRefresh || hasHtmlTags) {
                     dao.deleteVersesForChapter(bookId, chapter, normVersion)
                     val entities = offlineVerses.map { dto ->
-                        val cleanText = OfflineBibleManager.cleanVerseText(dto.text)
+                        val cleanText = BibleTextSanitizer.sanitize(dto.text)
                         val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber)
                             || isWordsOfJesus(bookId, chapter, dto.verseNumber, cleanText)
                         val heading = BiblePericopesCatalog.getHeading(context, bookId, chapter, dto.verseNumber, normVersion)
@@ -124,14 +120,14 @@ class BibleReaderRepository(
             }
         }
 
-        // 2. Check if we already have verses in Room for this chapter and version
+        // 2. Check if we already have valid verses in Room for this chapter and version (for downloaded versions)
         val existing = dao.getVersesSync(bookId, chapter, normVersion)
         if (existing.isNotEmpty()) {
             val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
             if (hasSynthetic) {
                 dao.deleteVersesForChapter(bookId, chapter, normVersion)
             } else {
-                val hasHeadingsInCatalog = BiblePericopesCatalog.hasHeadingsForChapter(bookId, chapter)
+                val hasHeadingsInCatalog = BiblePericopesCatalog.hasHeadingsForChapter(bookId, chapter, normVersion)
                 val needsHeadingRefresh = hasHeadingsInCatalog && existing.any { v ->
                     val expected = BiblePericopesCatalog.getHeading(context, bookId, chapter, v.verseNumber, normVersion)
                     v.sectionHeading != expected
@@ -140,43 +136,31 @@ class BibleReaderRepository(
 
                 if (needsHeadingRefresh || hasRawTags) {
                     val updated = existing.map { v ->
-                        val cleanText = if (v.text.contains("<")) BollsBibleApiService.sanitizeVerseText(v.text) else v.text
+                        val cleanText = BibleTextSanitizer.sanitize(v.text)
                         val expectedHeading = BiblePericopesCatalog.getHeading(context, bookId, chapter, v.verseNumber, normVersion)
                         v.copy(
                             text = cleanText,
-                            sectionHeading = expectedHeading ?: v.sectionHeading
+                            sectionHeading = expectedHeading
                         )
                     }
                     dao.insertVerses(updated)
                 }
-                // Valid verses already cached in Room (offline or previously fetched). Serve immediately!
                 return@withContext
             }
         }
 
-        // 3. For bundled asset versions (TLA, DHH, NBLA): import from APK assets into Room
-        if (OfflineBibleDownloadManager.isAssetVersion(normVersion)) {
-            val imported = OfflineBibleDownloadManager.importAssetVersion(context, dao, normVersion)
-            if (imported) {
-                val fresh = dao.getVersesSync(bookId, chapter, normVersion)
-                if (fresh.isNotEmpty()) return@withContext
-            }
+        // 3. For online-only versions: check if the version was fully downloaded in Room
+        val cachedCount = dao.getVerseCountForVersion(normVersion)
+        if (cachedCount > 5000) {
+            val fresh = dao.getVersesSync(bookId, chapter, normVersion)
+            if (fresh.isNotEmpty()) return@withContext
         }
 
-        // 4. For online versions: check if the version was fully downloaded in Room
-        if (!isRvr1960) {
-            val cachedCount = dao.getVerseCountForVersion(normVersion)
-            if (cachedCount > 5000) {
-                val fresh = dao.getVersesSync(bookId, chapter, normVersion)
-                if (fresh.isNotEmpty()) return@withContext
-            }
-        }
-
-        // 5. Attempt to fetch chapter via Bolls API
+        // 4. Attempt to fetch chapter via Bolls API
         val networkVerses = BollsBibleApiService.fetchChapter(normVersion, bookId, chapter)
         if (!networkVerses.isNullOrEmpty()) {
             val entities = networkVerses.map { dto ->
-                val cleanText = BollsBibleApiService.sanitizeVerseText(dto.text)
+                val cleanText = BibleTextSanitizer.sanitize(dto.text)
                 val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber)
                     || isWordsOfJesus(bookId, chapter, dto.verseNumber, cleanText)
                 val heading = BiblePericopesCatalog.getHeading(context, bookId, chapter, dto.verseNumber, normVersion)
@@ -194,26 +178,28 @@ class BibleReaderRepository(
             return@withContext
         }
 
-        // 6. Emergency offline fallback: Network is unavailable and chapter has not been downloaded.
-        //    Fall back to pre-packaged RVR1960 Scripture so reader is never empty.
-        val fallbackOffline = OfflineBibleManager.getVerses(context, bookId, chapter)
-        if (fallbackOffline.isNotEmpty()) {
-            val entities = fallbackOffline.map { dto ->
-                val cleanText = OfflineBibleManager.cleanVerseText(dto.text)
-                val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber)
-                    || isWordsOfJesus(bookId, chapter, dto.verseNumber, cleanText)
-                val heading = BiblePericopesCatalog.getHeading(context, bookId, chapter, dto.verseNumber, normVersion)
-                BibleReaderVerseEntity(
-                    bookId = bookId,
-                    chapter = chapter,
-                    verseNumber = dto.verseNumber,
-                    text = cleanText,
-                    bibleVersion = normVersion,
-                    sectionHeading = heading,
-                    isRedLetter = isJesus
-                )
+        // 5. Emergency offline fallback:
+        //    ONLY if RVR1960 itself failed, never corrupt another version with RVR1960 text!
+        if (normVersion == "RVR1960") {
+            val fallbackOffline = OfflineBibleManager.getVerses(context, bookId, chapter, "RVR1960")
+            if (fallbackOffline.isNotEmpty()) {
+                val entities = fallbackOffline.map { dto ->
+                    val cleanText = BibleTextSanitizer.sanitize(dto.text)
+                    val isJesus = WordsOfJesusCatalog.isWordsOfJesus(bookId, chapter, dto.verseNumber)
+                        || isWordsOfJesus(bookId, chapter, dto.verseNumber, cleanText)
+                    val heading = BiblePericopesCatalog.getHeading(context, bookId, chapter, dto.verseNumber, "RVR1960")
+                    BibleReaderVerseEntity(
+                        bookId = bookId,
+                        chapter = chapter,
+                        verseNumber = dto.verseNumber,
+                        text = cleanText,
+                        bibleVersion = "RVR1960",
+                        sectionHeading = heading,
+                        isRedLetter = isJesus
+                    )
+                }
+                dao.insertVerses(entities)
             }
-            dao.insertVerses(entities)
         }
     }
 

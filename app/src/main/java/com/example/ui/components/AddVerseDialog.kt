@@ -1390,10 +1390,10 @@ private suspend fun resolveVerseText(
         else -> versionCode.uppercase().trim()
     }
 
-    // 1. Try OfflineBibleManager for RVR1960 (local SQLite database - instant sub-millisecond)
-    if (normVersion == "RVR1960") {
+    // 1. Try OfflineBibleManager for asset versions (RVR1960, NBLA, TLA, DHH, DHH94PC)
+    if (OfflineBibleManager.isAssetVersion(normVersion)) {
         try {
-            val offlineVerses = OfflineBibleManager.getVerses(context, bookOrder, chapter)
+            val offlineVerses = OfflineBibleManager.getVerses(context, bookOrder, chapter, normVersion)
             val match = offlineVerses.firstOrNull { it.verseNumber == verse }
             if (match != null && match.text.isNotBlank()) {
                 return@withContext match.text.trim()
@@ -1412,14 +1412,16 @@ private suspend fun resolveVerseText(
         }
     } catch (_: Exception) {}
 
-    // 3. Fallback to OfflineBibleManager regardless of version
-    try {
-        val fallbackOffline = OfflineBibleManager.getVerses(context, bookOrder, chapter)
-        val fallbackMatch = fallbackOffline.firstOrNull { it.verseNumber == verse }
-        if (fallbackMatch != null && fallbackMatch.text.isNotBlank()) {
-            return@withContext fallbackMatch.text.trim()
-        }
-    } catch (_: Exception) {}
+    // 3. Fallback to OfflineBibleManager ONLY if RVR1960 was requested
+    if (normVersion == "RVR1960") {
+        try {
+            val fallbackOffline = OfflineBibleManager.getVerses(context, bookOrder, chapter, "RVR1960")
+            val fallbackMatch = fallbackOffline.firstOrNull { it.verseNumber == verse }
+            if (fallbackMatch != null && fallbackMatch.text.isNotBlank()) {
+                return@withContext fallbackMatch.text.trim()
+            }
+        } catch (_: Exception) {}
+    }
 
     // 4. InitialVersesData fallback if available
     val refQuery = "$bookName $chapter:$verse".trim()

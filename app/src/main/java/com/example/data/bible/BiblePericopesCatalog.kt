@@ -36,6 +36,16 @@ object BiblePericopesCatalog {
         }
     }
 
+    private val DEDICATED_VERSIONS = setOf("TLA", "DHH", "DHH94PC", "NBLA", "LBLA", "NTV", "NVI")
+
+    fun isDedicatedVersion(version: String): Boolean {
+        val norm = when (version.uppercase().trim()) {
+            "RV1960", "REINA-VALERA 1960" -> "RVR1960"
+            else -> version.uppercase().trim()
+        }
+        return DEDICATED_VERSIONS.contains(norm)
+    }
+
     fun hasHeadingsForChapter(bookId: Int, chapter: Int): Boolean {
         return chaptersWithHeadings.contains("${bookId}_${chapter}")
     }
@@ -45,8 +55,11 @@ object BiblePericopesCatalog {
             "RV1960", "REINA-VALERA 1960" -> "RVR1960"
             else -> version.uppercase().trim()
         }
-        return chaptersWithHeadings.contains("${bookId}_${chapter}@$norm") ||
-               chaptersWithHeadings.contains("${bookId}_${chapter}")
+        return if (DEDICATED_VERSIONS.contains(norm)) {
+            chaptersWithHeadings.contains("${bookId}_${chapter}@$norm")
+        } else {
+            chaptersWithHeadings.contains("${bookId}_${chapter}")
+        }
     }
 
     fun getHeading(
@@ -65,16 +78,21 @@ object BiblePericopesCatalog {
             else -> version.uppercase().trim()
         }
 
-        // 1. Translation-specific override (e.g. 40_8_5@NTV)
+        // 1. Translation-specific dedicated heading (e.g. 40_8_5@NTV)
         if (normVersion.isNotEmpty() && normVersion != "RVR1960") {
             val versionKey = "${bookId}_${chapter}_${verse}@$normVersion"
             val versionTitle = headings[versionKey]
             if (!versionTitle.isNullOrBlank()) {
                 return versionTitle
             }
+            // If this translation has its own dedicated pericope editorial committee,
+            // DO NOT inject RVR1960 headings onto verses where this version has none!
+            if (DEDICATED_VERSIONS.contains(normVersion)) {
+                return null
+            }
         }
 
-        // 2. Canonical Spanish heading (RVR1960 and universal fallback)
+        // 2. Canonical Spanish heading (RVR1960 and generic versions without dedicated catalog)
         val canonicalKey = "${bookId}_${chapter}_${verse}"
         return headings[canonicalKey]
     }

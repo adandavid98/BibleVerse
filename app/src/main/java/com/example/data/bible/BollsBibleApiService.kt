@@ -71,23 +71,7 @@ object BollsBibleApiService {
      * would glue the title to the verse text, so the whole title block is removed first.
      */
     fun sanitizeVerseText(text: String): String {
-        var t = text
-            .replace(titleBlockRegex, "")
-            .replace(Regex("(?i)<br\\s*/?>"), " ")
-            .replace(Regex("<[^>]*>"), "")
-            .replace("&nbsp;", " ")
-            .replace("&quot;", "\"")
-            .replace("&amp;", "&")
-            .replace("&lt;", "<")
-            .replace("&gt;", ">")
-            .replace("&#39;", "'")
-            .replace(Regex("\\s+"), " ")
-            .trim()
-        // Some sources wrap verses in stray single quotes: '...'
-        if (t.length >= 2 && t.startsWith("'") && t.endsWith("'")) {
-            t = t.substring(1, t.length - 1).trim()
-        }
-        return t
+        return BibleTextSanitizer.sanitize(text)
     }
 
     fun mapVersionToSlug(version: String): String {

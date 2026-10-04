@@ -432,9 +432,9 @@ private suspend fun loadVerseTextForVersion(
         else -> version.uppercase().trim()
     }
 
-    // 1. If RVR1960, use local offline SQLite directly
-    if (normVersion == "RVR1960") {
-        val offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter)
+    // 1. If asset version (RVR1960, NBLA, TLA, DHH, DHH94PC), use local offline SQLite directly
+    if (OfflineBibleManager.isAssetVersion(normVersion)) {
+        val offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter, normVersion)
         if (offlineVerses.isNotEmpty()) {
             val matching = offlineVerses.filter { it.verseNumber in verseNumbers }
             if (matching.isNotEmpty()) {
@@ -472,15 +472,6 @@ private suspend fun loadVerseTextForVersion(
         }
     }
 
-    // Fallback: RVR1960 offline text
-    val fallback = OfflineBibleManager.getVerses(context, bookId, chapter)
-        .filter { it.verseNumber in verseNumbers }
-    return if (fallback.isNotEmpty()) {
-        fallback.joinToString(" ") { v ->
-            val clean = OfflineBibleManager.cleanVerseText(v.text)
-            if (verseNumbers.size > 1) "${v.verseNumber} $clean" else clean
-        }
-    } else {
-        "Versículo no disponible en esta versión."
-    }
+    // Do NOT return RVR1960 text under another version
+    return "Versículo no disponible en esta versión."
 }
