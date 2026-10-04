@@ -47,12 +47,12 @@ class BibleReaderRepository(
         // populated with genuine authentic text from their respective asset packages.
         try {
             val prefs = context.getSharedPreferences("bible_cache_maintenance", Context.MODE_PRIVATE)
-            if (!prefs.getBoolean("clean_asset_versions_v7", false)) {
+            if (!prefs.getBoolean("clean_asset_versions_v8", false)) {
                 dao.deleteVersesForVersion("TLA")
                 dao.deleteVersesForVersion("DHH")
                 dao.deleteVersesForVersion("DHH94PC")
                 dao.deleteVersesForVersion("NBLA")
-                prefs.edit().putBoolean("clean_asset_versions_v7", true).apply()
+                prefs.edit().putBoolean("clean_asset_versions_v8", true).apply()
             }
         } catch (_: Exception) {}
 
@@ -87,11 +87,7 @@ class BibleReaderRepository(
         //    ALWAYS read directly from their respective genuine offline SQLite file.
         //    Instant sub-millisecond, 100% offline, zero network required!
         if (isAsset) {
-            var offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter, normVersion)
-            if (offlineVerses.isEmpty()) {
-                OfflineBibleManager.ensureReady(context, normVersion)
-                offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter, normVersion)
-            }
+            val offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter, normVersion)
             if (offlineVerses.isNotEmpty()) {
                 val existing = dao.getVersesSync(bookId, chapter, normVersion)
                 val firstTextDiffers = existing.isNotEmpty() &&
