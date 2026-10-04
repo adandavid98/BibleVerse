@@ -28,12 +28,12 @@ object OfflineBibleDownloadManager {
         .build()
 
     private val _downloadStates = MutableStateFlow<Map<String, VersionDownloadState>>(
-        mapOf("RVR1960" to VersionDownloadState.Downloaded)
+        OfflineBibleManager.bundledCodes().associateWith { VersionDownloadState.Downloaded }
     )
     val downloadStates: StateFlow<Map<String, VersionDownloadState>> = _downloadStates.asStateFlow()
 
     suspend fun isVersionOfflineReady(dao: BibleReaderDao, versionCode: String): Boolean = withContext(Dispatchers.IO) {
-        if (versionCode.equals("RVR1960", ignoreCase = true) || versionCode.equals("RV1960", ignoreCase = true)) {
+        if (versionCode.equals("RV1960", ignoreCase = true) || OfflineBibleManager.isBundled(versionCode)) {
             return@withContext true
         }
         val count = dao.getVerseCountForVersion(versionCode)
@@ -42,11 +42,11 @@ object OfflineBibleDownloadManager {
 
     suspend fun refreshStatuses(dao: BibleReaderDao) = withContext(Dispatchers.IO) {
         val updated = mutableMapOf<String, VersionDownloadState>()
-        updated["RVR1960"] = VersionDownloadState.Downloaded
+        for (code in OfflineBibleManager.bundledCodes()) updated[code] = VersionDownloadState.Downloaded
 
         for (version in BibleCatalog.versions) {
             val code = version.code
-            if (code.equals("RVR1960", ignoreCase = true)) continue
+            if (OfflineBibleManager.isBundled(code)) continue
 
             val count = dao.getVerseCountForVersion(code)
             if (count > 5000) {
@@ -62,7 +62,7 @@ object OfflineBibleDownloadManager {
 
     suspend fun downloadVersion(dao: BibleReaderDao, versionCode: String) = withContext(Dispatchers.IO) {
         val codeUpper = versionCode.uppercase().trim()
-        if (codeUpper == "RVR1960" || codeUpper == "RV1960") {
+        if (codeUpper == "RV1960" || OfflineBibleManager.isBundled(codeUpper)) {
             _downloadStates.update { it + (codeUpper to VersionDownloadState.Downloaded) }
             return@withContext
         }

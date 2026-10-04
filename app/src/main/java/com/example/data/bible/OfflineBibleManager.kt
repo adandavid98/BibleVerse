@@ -21,7 +21,10 @@ object OfflineBibleManager {
     private const val TAG = "OfflineBibleManager"
     private const val ASSET_NAME = "bible/bible_rvr1960.db.gz"
     private const val DB_FILE_NAME = "bible_rvr1960.db"
-    private const val TOTAL_CANONICAL_VERSES = 31100
+    // Minimum verse rows a bundled database must have to be considered complete. Translations such as
+    // TLA/DHH merge verse ranges, so their row count is lower than the 31,102 canonical verses.
+    private val minVerses = mapOf("RVR1960" to 31100, "TLA" to 26000, "DHH" to 30000, "NBLA" to 31000)
+    private fun minFor(code: String) = minVerses[code.uppercase()] ?: 31000
     private const val MIN_VALID_SIZE_BYTES = 1_000_000L
 
     // In-memory caches for open databases
@@ -31,8 +34,12 @@ object OfflineBibleManager {
     private val offlineAssets = mapOf(
         "RVR1960" to "bible/bible_rvr1960.db.gz",
         "TLA" to "bible/bible_tla.db.gz",
-        "DHH" to "bible/bible_dhh94pc.db.gz"
+        "DHH" to "bible/bible_dhh94pc.db.gz",
+        "NBLA" to "bible/bible_nbla.db.gz"
     )
+
+    fun isBundled(code: String): Boolean = offlineAssets.containsKey(code.uppercase().trim())
+    fun bundledCodes(): Set<String> = offlineAssets.keys
 
     suspend fun ensureDatabase(context: Context, versionCode: String = "RVR1960"): Boolean = ensureReady(context, versionCode)
 
@@ -51,7 +58,7 @@ object OfflineBibleManager {
             val dbFileName = "bible_${code.lowercase()}.db"
             val dbFile = File(context.filesDir, dbFileName)
 
-            if (dbFile.exists() && (!isValidDatabaseFile(dbFile))) {
+            if (dbFile.exists() && (!isValidDatabaseFile(dbFile, code))) {
                 closeCurrentDatabase(code)
                 dbFile.delete()
             }
@@ -103,13 +110,13 @@ object OfflineBibleManager {
             val count = cursor.use { c ->
                 if (c.moveToFirst()) c.getInt(0) else 0
             }
-            count >= TOTAL_CANONICAL_VERSES
+            count >= minFor(versionCode)
         } catch (e: Exception) {
             false
         }
     }
 
-    private fun isValidDatabaseFile(file: File): Boolean {
+    private fun isValidDatabaseFile(file: File, versionCode: String): Boolean {
         if (!file.exists() || file.length() < MIN_VALID_SIZE_BYTES) return false
         var testDb: SQLiteDatabase? = null
         return try {
@@ -122,7 +129,7 @@ object OfflineBibleManager {
             val count = cursor.use { c ->
                 if (c.moveToFirst()) c.getInt(0) else 0
             }
-            count >= TOTAL_CANONICAL_VERSES
+            count >= minFor(versionCode)
         } catch (e: Exception) {
             false
         } finally {
@@ -157,7 +164,7 @@ object OfflineBibleManager {
                 }
             }
 
-                if (isValidDatabaseFile(tempFile)) {
+                if (isValidDatabaseFile(tempFile, versionCode)) {
                     if (targetFile.exists()) targetFile.delete()
                     val renamed = tempFile.renameTo(targetFile)
                     if (!renamed) {

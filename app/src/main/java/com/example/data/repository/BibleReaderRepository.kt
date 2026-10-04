@@ -55,6 +55,18 @@ class BibleReaderRepository(
             }
         } catch (_: Exception) {}
 
+        // One-time purge v2: TLA/DHH/NBLA were previously served from other translations (PDT/LBLA) or from
+        // an RVR1960 fallback and cached in Room. They are now bundled, so drop the stale cache.
+        try {
+            val prefs = context.getSharedPreferences("bible_cache_maintenance", Context.MODE_PRIVATE)
+            if (!prefs.getBoolean("purge_bundled_versions_v2", false)) {
+                for (code in OfflineBibleManager.bundledCodes()) {
+                    if (!code.equals("RVR1960", ignoreCase = true)) dao.deleteVersesForVersion(code)
+                }
+                prefs.edit().putBoolean("purge_bundled_versions_v2", true).apply()
+            }
+        } catch (_: Exception) {}
+
         // Pre-warm the offline RVR1960 database in background to avoid any delay
         try {
             OfflineBibleManager.ensureDatabase(context)
@@ -84,7 +96,7 @@ class BibleReaderRepository(
 
     suspend fun ensureChapterVerses(bookId: Int, chapter: Int, version: String = "RVR1960") = withContext(Dispatchers.IO) {
         val normVersion = normalizeVersion(version)
-        val isOfflineOnly = normVersion in listOf("RVR1960", "TLA", "DHH")
+        val isOfflineOnly = OfflineBibleManager.isBundled(normVersion)
 
         // 1. For fully bundled versions (RVR1960, TLA, DHH), ALWAYS use the complete pre-packaged offline SQLite.
         if (isOfflineOnly) {
@@ -159,6 +171,10 @@ class BibleReaderRepository(
                 if (fresh.isNotEmpty() && !fresh.any { it.text.contains("<") }) return@withContext
             }
         }
+
+        // Bundled versions are served exclusively from their own database. Never fetch another
+        // translation from the network nor cache RVR1960 text under their code.
+        if (isOfflineOnly) return@withContext
 
         // 4. For other versions not yet downloaded: attempt to fetch chapter via Bolls API
         val networkVerses = BollsBibleApiService.fetchChapter(normVersion, bookId, chapter)
