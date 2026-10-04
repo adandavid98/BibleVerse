@@ -20,11 +20,11 @@ android {
 
     val appVersionName = project.findProperty("versionName") as String?
         ?: System.getenv("APP_VERSION_NAME")
-        ?: "1.9.33"
+        ?: "1.9.34"
 
     val appVersionCode = (project.findProperty("versionCode") as String?)?.toIntOrNull()
         ?: System.getenv("APP_VERSION_CODE")?.toIntOrNull()
-        ?: 73
+        ?: 74
 
     versionCode = appVersionCode
     versionName = appVersionName
@@ -78,6 +78,9 @@ android {
   dependenciesInfo {
     includeInApk = false
     includeInBundle = true
+  }
+  androidResources {
+    noCompress.addAll(listOf("gz", "bin", "db"))
   }
 }
 

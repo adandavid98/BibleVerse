@@ -29,11 +29,11 @@ object OfflineBibleManager {
     )
 
     private val ASSET_VERSIONS = mapOf(
-        "RVR1960" to VersionAssetConfig("bible/bible_rvr1960.db.gz", "bible_rvr1960.db", 30000),
-        "NBLA" to VersionAssetConfig("bible/bible_nbla.db.gz", "bible_nbla.db", 30000),
-        "TLA" to VersionAssetConfig("bible/bible_tla.db.gz", "bible_tla.db", 25000),
-        "DHH" to VersionAssetConfig("bible/bible_dhh94pc.db.gz", "bible_dhh94pc.db", 30000),
-        "DHH94PC" to VersionAssetConfig("bible/bible_dhh94pc.db.gz", "bible_dhh94pc.db", 30000)
+        "RVR1960" to VersionAssetConfig("bible/bible_rvr1960.db.gz", "bible_rvr1960.db", 20000),
+        "NBLA" to VersionAssetConfig("bible/bible_nbla.db.gz", "bible_nbla.db", 20000),
+        "TLA" to VersionAssetConfig("bible/bible_tla.db.gz", "bible_tla.db", 20000),
+        "DHH" to VersionAssetConfig("bible/bible_dhh94pc.db.gz", "bible_dhh94pc.db", 20000),
+        "DHH94PC" to VersionAssetConfig("bible/bible_dhh94pc.db.gz", "bible_dhh94pc.db", 20000)
     )
 
     private val databases = ConcurrentHashMap<String, SQLiteDatabase>()
@@ -54,6 +54,20 @@ object OfflineBibleManager {
 
     private fun getLockFor(version: String): Any {
         return locks.computeIfAbsent(version) { Any() }
+    }
+
+    private fun getDbFile(context: Context, fileName: String): File {
+        val standardDb = context.getDatabasePath(fileName)
+        val filesDb = File(context.filesDir, fileName)
+        if (filesDb.exists() && filesDb.length() > 1_000_000L) {
+            return filesDb
+        }
+        if (standardDb.exists() && standardDb.length() > 1_000_000L) {
+            return standardDb
+        }
+        val parent = standardDb.parentFile ?: context.filesDir
+        if (!parent.exists()) parent.mkdirs()
+        return standardDb
     }
 
     suspend fun ensureDatabase(context: Context): Boolean = ensureReady(context, "RVR1960")
@@ -87,7 +101,7 @@ object OfflineBibleManager {
                 return@synchronized true
             }
 
-            val dbFile = File(context.filesDir, config.dbFileName)
+            val dbFile = getDbFile(context, config.dbFileName)
 
             // 1. If existing file is corrupted or incomplete, remove it
             if (dbFile.exists() && (!isValidDatabaseFile(dbFile, config.minVerses))) {
@@ -105,13 +119,13 @@ object OfflineBibleManager {
                 }
             }
 
-            // 3. Open database with read-only flags for maximum stability and speed
+            // 3. Open database with read-write flags to avoid readonly locking issues
             try {
                 closeDatabase(normVersion)
                 val db = SQLiteDatabase.openDatabase(
                     dbFile.absolutePath,
                     null,
-                    SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                    SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.NO_LOCALIZED_COLLATORS
                 )
                 if (isDatabaseHealthy(db, config.minVerses)) {
                     databases[normVersion] = db
@@ -127,7 +141,7 @@ object OfflineBibleManager {
                         val reDb = SQLiteDatabase.openDatabase(
                             dbFile.absolutePath,
                             null,
-                            SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.NO_LOCALIZED_COLLATORS
                         )
                         databases[normVersion] = reDb
                         return@synchronized isDatabaseHealthy(reDb, config.minVerses)
@@ -158,13 +172,13 @@ object OfflineBibleManager {
     }
 
     private fun isValidDatabaseFile(file: File, minVerses: Int): Boolean {
-        if (!file.exists() || file.length() < 1_500_000L) return false
+        if (!file.exists() || file.length() < 1_000_000L) return false
         var testDb: SQLiteDatabase? = null
         return try {
             testDb = SQLiteDatabase.openDatabase(
                 file.absolutePath,
                 null,
-                SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.NO_LOCALIZED_COLLATORS
             )
             val cursor = testDb.rawQuery("SELECT COUNT(*) FROM bible_verses", null)
             val count = cursor.use { c ->
@@ -172,7 +186,7 @@ object OfflineBibleManager {
             }
             count >= minVerses
         } catch (e: Exception) {
-            Log.w(TAG, "Verificación isValidDatabaseFile falló para ${file.name}", e)
+            Log.w(TAG, "Verificación isValidDatabaseFile falló para ${file.name}: ${e.message}")
             false
         } finally {
             try { testDb?.close() } catch (_: Exception) {}
@@ -186,18 +200,14 @@ object OfflineBibleManager {
         minVerses: Int
     ): Boolean {
         val parent = targetFile.parentFile ?: context.filesDir
+        if (!parent.exists()) parent.mkdirs()
         val tempFile = File(parent, "${targetFile.name}.tmp")
         if (tempFile.exists()) tempFile.delete()
 
         try {
             context.assets.open(assetPath).use { rawIn ->
-                val bis = BufferedInputStream(rawIn)
-                bis.mark(4)
-                val b1 = bis.read()
-                val b2 = bis.read()
-                bis.reset()
-
-                val isGzip = (b1 == 0x1f && b2 == 0x8b)
+                val bis = BufferedInputStream(rawIn, 64 * 1024)
+                val isGzip = assetPath.endsWith(".gz", ignoreCase = true)
                 val inputStream = if (isGzip) GZIPInputStream(bis) else bis
 
                 FileOutputStream(tempFile).use { fileOut ->
@@ -224,7 +234,7 @@ object OfflineBibleManager {
                 if (tempFile.exists()) tempFile.delete()
             }
         } catch (e: Exception) {
-            Log.w(TAG, "No se pudo extraer $assetPath: ${e.message}")
+            Log.e(TAG, "Error extrayendo $assetPath a ${targetFile.name}", e)
             if (tempFile.exists()) tempFile.delete()
         }
         return false

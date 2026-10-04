@@ -47,12 +47,12 @@ class BibleReaderRepository(
         // populated with genuine authentic text from their respective asset packages.
         try {
             val prefs = context.getSharedPreferences("bible_cache_maintenance", Context.MODE_PRIVATE)
-            if (!prefs.getBoolean("clean_asset_versions_v6", false)) {
+            if (!prefs.getBoolean("clean_asset_versions_v7", false)) {
                 dao.deleteVersesForVersion("TLA")
                 dao.deleteVersesForVersion("DHH")
                 dao.deleteVersesForVersion("DHH94PC")
                 dao.deleteVersesForVersion("NBLA")
-                prefs.edit().putBoolean("clean_asset_versions_v6", true).apply()
+                prefs.edit().putBoolean("clean_asset_versions_v7", true).apply()
             }
         } catch (_: Exception) {}
 
