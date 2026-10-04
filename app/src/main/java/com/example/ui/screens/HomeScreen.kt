@@ -1726,7 +1726,7 @@ fun SettingsTab(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "v${BuildConfig.VERSION_NAME} (Compilación ${BuildConfig.VERSION_CODE})",
+                            text = "v${BuildConfig.VERSION_NAME.removePrefix("v").removePrefix("V")}",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
