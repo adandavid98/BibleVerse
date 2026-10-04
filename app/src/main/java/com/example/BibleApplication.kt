@@ -6,8 +6,15 @@ import com.example.sync.FirebaseSyncManager
 import com.google.firebase.FirebaseApp
 
 class BibleApplication : Application() {
+
+    companion object {
+        lateinit var instance: BibleApplication
+            private set
+    }
+
     override fun onCreate() {
         super.onCreate()
+        instance = this
         try {
             if (FirebaseApp.getApps(this).isEmpty()) {
                 val app = FirebaseApp.initializeApp(this)
