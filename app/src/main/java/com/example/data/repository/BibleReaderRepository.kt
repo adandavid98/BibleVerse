@@ -47,12 +47,12 @@ class BibleReaderRepository(
         // populated with genuine authentic text from their respective asset packages.
         try {
             val prefs = context.getSharedPreferences("bible_cache_maintenance", Context.MODE_PRIVATE)
-            if (!prefs.getBoolean("clean_asset_versions_v4", false)) {
+            if (!prefs.getBoolean("clean_asset_versions_v6", false)) {
                 dao.deleteVersesForVersion("TLA")
                 dao.deleteVersesForVersion("DHH")
                 dao.deleteVersesForVersion("DHH94PC")
                 dao.deleteVersesForVersion("NBLA")
-                prefs.edit().putBoolean("clean_asset_versions_v4", true).apply()
+                prefs.edit().putBoolean("clean_asset_versions_v6", true).apply()
             }
         } catch (_: Exception) {}
 
@@ -87,9 +87,16 @@ class BibleReaderRepository(
         //    ALWAYS read directly from their respective genuine offline SQLite file.
         //    Instant sub-millisecond, 100% offline, zero network required!
         if (isAsset) {
-            val offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter, normVersion)
+            var offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter, normVersion)
+            if (offlineVerses.isEmpty()) {
+                OfflineBibleManager.ensureReady(context, normVersion)
+                offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter, normVersion)
+            }
             if (offlineVerses.isNotEmpty()) {
                 val existing = dao.getVersesSync(bookId, chapter, normVersion)
+                val firstTextDiffers = existing.isNotEmpty() &&
+                    BibleTextSanitizer.sanitize(existing.first().text) != BibleTextSanitizer.sanitize(offlineVerses.first().text)
+                val sizeDiffers = existing.size != offlineVerses.size
                 val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
                 val hasHeadingsInCatalog = BiblePericopesCatalog.hasHeadingsForChapter(bookId, chapter, normVersion)
                 val needsHeadingRefresh = hasHeadingsInCatalog && existing.isNotEmpty() && existing.any { v ->
@@ -98,7 +105,7 @@ class BibleReaderRepository(
                 }
                 val hasHtmlTags = existing.any { it.text.contains("<br", ignoreCase = true) || it.text.contains("<") }
 
-                if (existing.size != offlineVerses.size || hasSynthetic || needsHeadingRefresh || hasHtmlTags) {
+                if (existing.isEmpty() || sizeDiffers || firstTextDiffers || hasSynthetic || needsHeadingRefresh || hasHtmlTags) {
                     dao.deleteVersesForChapter(bookId, chapter, normVersion)
                     val entities = offlineVerses.map { dto ->
                         val cleanText = BibleTextSanitizer.sanitize(dto.text)
@@ -119,6 +126,8 @@ class BibleReaderRepository(
                 }
                 return@withContext
             }
+            // Never fall through to network or RVR fallback for asset translations!
+            return@withContext
         }
 
         // 2. Check if we already have valid verses in Room for this chapter and version (for downloaded versions)

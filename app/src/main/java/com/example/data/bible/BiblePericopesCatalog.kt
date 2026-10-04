@@ -39,10 +39,7 @@ object BiblePericopesCatalog {
     private val DEDICATED_VERSIONS = setOf("TLA", "DHH", "DHH94PC", "NBLA", "LBLA", "NTV", "NVI")
 
     fun isDedicatedVersion(version: String): Boolean {
-        val norm = when (version.uppercase().trim()) {
-            "RV1960", "REINA-VALERA 1960" -> "RVR1960"
-            else -> version.uppercase().trim()
-        }
+        val norm = OfflineBibleManager.normalizeVersion(version)
         return DEDICATED_VERSIONS.contains(norm)
     }
 
@@ -51,10 +48,7 @@ object BiblePericopesCatalog {
     }
 
     fun hasHeadingsForChapter(bookId: Int, chapter: Int, version: String): Boolean {
-        val norm = when (version.uppercase().trim()) {
-            "RV1960", "REINA-VALERA 1960" -> "RVR1960"
-            else -> version.uppercase().trim()
-        }
+        val norm = OfflineBibleManager.normalizeVersion(version)
         return if (DEDICATED_VERSIONS.contains(norm)) {
             chaptersWithHeadings.contains("${bookId}_${chapter}@$norm")
         } else {
@@ -73,10 +67,7 @@ object BiblePericopesCatalog {
             ensureInitialized(context)
         }
 
-        val normVersion = when (version.uppercase().trim()) {
-            "RV1960", "REINA-VALERA 1960" -> "RVR1960"
-            else -> version.uppercase().trim()
-        }
+        val normVersion = OfflineBibleManager.normalizeVersion(version)
 
         // 1. Translation-specific dedicated heading (e.g. 40_8_5@NTV)
         if (normVersion.isNotEmpty() && normVersion != "RVR1960") {

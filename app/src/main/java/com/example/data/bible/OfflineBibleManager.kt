@@ -42,6 +42,7 @@ object OfflineBibleManager {
     fun normalizeVersion(version: String): String {
         return when (val upper = version.uppercase().trim()) {
             "RV1960", "REINA-VALERA 1960" -> "RVR1960"
+            "DHH94PC" -> "DHH"
             else -> upper
         }
     }
@@ -104,13 +105,13 @@ object OfflineBibleManager {
                 }
             }
 
-            // 3. Open database with read-write flags to avoid readonly locking issues
+            // 3. Open database with read-only flags for maximum stability and speed
             try {
                 closeDatabase(normVersion)
                 val db = SQLiteDatabase.openDatabase(
                     dbFile.absolutePath,
                     null,
-                    SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                    SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
                 )
                 if (isDatabaseHealthy(db, config.minVerses)) {
                     databases[normVersion] = db
@@ -126,7 +127,7 @@ object OfflineBibleManager {
                         val reDb = SQLiteDatabase.openDatabase(
                             dbFile.absolutePath,
                             null,
-                            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                            SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
                         )
                         databases[normVersion] = reDb
                         return@synchronized isDatabaseHealthy(reDb, config.minVerses)
@@ -163,7 +164,7 @@ object OfflineBibleManager {
             testDb = SQLiteDatabase.openDatabase(
                 file.absolutePath,
                 null,
-                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
             )
             val cursor = testDb.rawQuery("SELECT COUNT(*) FROM bible_verses", null)
             val count = cursor.use { c ->

@@ -22,6 +22,7 @@ object BollsBibleApiService {
 
     suspend fun fetchChapter(version: String, bookId: Int, chapter: Int): List<BollsVerseDto>? = withContext(Dispatchers.IO) {
         val slug = mapVersionToSlug(version)
+        if (slug.isBlank()) return@withContext null
         val url = "https://bolls.life/get-chapter/$slug/$bookId/$chapter/"
 
         try {
@@ -84,7 +85,7 @@ object BollsBibleApiService {
             "PDT", "PALABRA DE DIOS PARA TODOS" -> "PDT"
             "BTX3", "BIBLIA TEXTUAL" -> "BTX3"
             "RV2004" -> "RV2004"
-            else -> "RV1960"
+            else -> ""
         }
     }
 }
