@@ -79,6 +79,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.border
@@ -1235,7 +1236,40 @@ fun BibleReferenceWindowPicker(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(filteredBooks, key = { it.order }) { book ->
+                            itemsIndexed(filteredBooks, key = { _, it -> it.order }) { index, book ->
+                                val isFirstNt = index > 0 && filteredBooks[index - 1].order <= 39 && book.order > 39
+                                if (isFirstNt) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 10.dp, bottom = 6.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Divider(
+                                            modifier = Modifier.weight(1f),
+                                            thickness = 1.dp,
+                                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
+                                        )
+                                        Surface(
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = MaterialTheme.colorScheme.primaryContainer,
+                                            modifier = Modifier.padding(horizontal = 10.dp)
+                                        ) {
+                                            Text(
+                                                text = "Nuevo Testamento",
+                                                style = MaterialTheme.typography.labelMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+                                            )
+                                        }
+                                        Divider(
+                                            modifier = Modifier.weight(1f),
+                                            thickness = 1.dp,
+                                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
+                                        )
+                                    }
+                                }
                                 val isSelected = book.name == pickedBook.name
                                 Surface(
                                     modifier = Modifier

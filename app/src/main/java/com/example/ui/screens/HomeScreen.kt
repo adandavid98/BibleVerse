@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.rememberScrollState
@@ -1057,7 +1058,34 @@ fun SearchTab(
                             }
                             Divider()
                         }
-                        items(filteredBooks) { book ->
+                        itemsIndexed(filteredBooks) { index, book ->
+                            val isFirstNt = index > 0 && filteredBooks[index - 1].order <= 39 && book.order > 39
+                            if (isFirstNt) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Divider(
+                                        modifier = Modifier.weight(1f),
+                                        thickness = 1.dp,
+                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
+                                    )
+                                    Text(
+                                        text = "Nuevo Testamento",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(horizontal = 8.dp)
+                                    )
+                                    Divider(
+                                        modifier = Modifier.weight(1f),
+                                        thickness = 1.dp,
+                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
+                                    )
+                                }
+                            }
                             Surface(
                                 modifier = Modifier
                                     .fillMaxWidth()
