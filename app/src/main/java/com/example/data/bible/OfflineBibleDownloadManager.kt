@@ -1,4 +1,4 @@
-package com.example.data.bible
+﻿package com.example.data.bible
 
 import com.example.data.local.BibleReaderDao
 import com.example.data.model.BibleReaderVerseEntity
@@ -28,12 +28,12 @@ object OfflineBibleDownloadManager {
         .build()
 
     private val _downloadStates = MutableStateFlow<Map<String, VersionDownloadState>>(
-        OfflineBibleManager.bundledCodes().associateWith { VersionDownloadState.Downloaded }
+        mapOf("RVR1960" to VersionDownloadState.Downloaded)
     )
     val downloadStates: StateFlow<Map<String, VersionDownloadState>> = _downloadStates.asStateFlow()
 
     suspend fun isVersionOfflineReady(dao: BibleReaderDao, versionCode: String): Boolean = withContext(Dispatchers.IO) {
-        if (versionCode.equals("RV1960", ignoreCase = true) || OfflineBibleManager.isBundled(versionCode)) {
+        if (versionCode.equals("RVR1960", ignoreCase = true) || versionCode.equals("RV1960", ignoreCase = true)) {
             return@withContext true
         }
         val count = dao.getVerseCountForVersion(versionCode)
@@ -42,11 +42,11 @@ object OfflineBibleDownloadManager {
 
     suspend fun refreshStatuses(dao: BibleReaderDao) = withContext(Dispatchers.IO) {
         val updated = mutableMapOf<String, VersionDownloadState>()
-        for (code in OfflineBibleManager.bundledCodes()) updated[code] = VersionDownloadState.Downloaded
+        updated["RVR1960"] = VersionDownloadState.Downloaded
 
         for (version in BibleCatalog.versions) {
             val code = version.code
-            if (OfflineBibleManager.isBundled(code)) continue
+            if (code.equals("RVR1960", ignoreCase = true)) continue
 
             val count = dao.getVerseCountForVersion(code)
             if (count > 5000) {
@@ -62,7 +62,7 @@ object OfflineBibleDownloadManager {
 
     suspend fun downloadVersion(dao: BibleReaderDao, versionCode: String) = withContext(Dispatchers.IO) {
         val codeUpper = versionCode.uppercase().trim()
-        if (codeUpper == "RV1960" || OfflineBibleManager.isBundled(codeUpper)) {
+        if (codeUpper == "RVR1960" || codeUpper == "RV1960") {
             _downloadStates.update { it + (codeUpper to VersionDownloadState.Downloaded) }
             return@withContext
         }
@@ -92,19 +92,19 @@ object OfflineBibleDownloadManager {
                 it + (codeUpper to VersionDownloadState.Downloading(25, "Descargando texto completo..."))
             }
 
-            val bodyString = response.body?.string() ?: throw IllegalStateException("Respuesta vacía del servidor")
+            val bodyString = response.body?.string() ?: throw IllegalStateException("Respuesta vac├¡a del servidor")
             val jsonArray = JSONArray(bodyString)
             val totalItems = jsonArray.length()
 
             if (totalItems == 0) {
                 _downloadStates.update {
-                    it + (codeUpper to VersionDownloadState.Error("No se encontraron versículos"))
+                    it + (codeUpper to VersionDownloadState.Error("No se encontraron vers├¡culos"))
                 }
                 return@withContext
             }
 
             _downloadStates.update {
-                it + (codeUpper to VersionDownloadState.Downloading(45, "Indexando " + totalItems + " versículos..."))
+                it + (codeUpper to VersionDownloadState.Downloading(45, "Indexando " + totalItems + " vers├¡culos..."))
             }
 
             dao.deleteVersesForVersion(codeUpper)
@@ -146,7 +146,7 @@ object OfflineBibleDownloadManager {
 
                     val pct = 50 + ((i.toFloat() / totalItems.toFloat()) * 48).toInt()
                     _downloadStates.update {
-                        it + (codeUpper to VersionDownloadState.Downloading(pct, "Guardando versículos (" + pct + "%)..."))
+                        it + (codeUpper to VersionDownloadState.Downloading(pct, "Guardando vers├¡culos (" + pct + "%)..."))
                     }
                 }
             }
@@ -162,5 +162,15 @@ object OfflineBibleDownloadManager {
         }
     }
 
-    private fun sanitizeVerseText(text: String): String = BollsBibleApiService.sanitizeVerseText(text)
+    private fun sanitizeVerseText(text: String): String {
+        return text
+            .replace(Regex("<[^>]*>"), "")
+            .replace("&nbsp;", " ")
+            .replace("&quot;", "\"")
+            .replace("&amp;", "&")
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&#39;", "'")
+            .trim()
+    }
 }

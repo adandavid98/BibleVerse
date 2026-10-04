@@ -7,8 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.io.InputStream
-import java.util.concurrent.ConcurrentHashMap
 import java.util.zip.GZIPInputStream
 
 data class OfflineVerseDto(
@@ -21,272 +19,201 @@ data class OfflineVerseDto(
 object OfflineBibleManager {
 
     private const val TAG = "OfflineBibleManager"
-    private const val ASSET_VERSION_STAMP = "v_clean_2026_10_03_v4"
+    private const val ASSET_NAME = "bible/bible_rvr1960.db.gz"
+    private const val DB_FILE_NAME = "bible_rvr1960.db"
+    private const val TOTAL_CANONICAL_VERSES = 31102
+    private const val MIN_VALID_SIZE_BYTES = 4_000_000L
 
-    // Minimum verse rows required for each bundled version to be considered complete
-    private val minVerses = mapOf(
-        "RVR1960" to 31100,
-        "TLA" to 25000,
-        "DHH" to 29000,
-        "DHH94PC" to 29000,
-        "NBLA" to 30000
-    )
-    private fun minFor(code: String) = minVerses[code.uppercase().trim()] ?: 25000
-    private const val MIN_VALID_SIZE_BYTES = 500_000L
+    @Volatile
+    private var database: SQLiteDatabase? = null
 
-    // In-memory caches for open databases (thread-safe)
-    private val databases = ConcurrentHashMap<String, SQLiteDatabase>()
+    suspend fun ensureDatabase(context: Context): Boolean = ensureReady(context)
 
-    // Mappings for known offline assets
-    private val offlineAssets = mapOf(
-        "RVR1960" to "bible/bible_rvr1960.db.gz",
-        "TLA" to "bible/bible_tla.db.gz",
-        "DHH" to "bible/bible_dhh94pc.db.gz",
-        "DHH94PC" to "bible/bible_dhh94pc.db.gz",
-        "NBLA" to "bible/bible_nbla.db.gz"
-    )
+    /**
+     * Ensures the local SQLite database is extracted, verified for full canonical integrity
+     * (31,102 verses) and ready for immediate sub-millisecond offline reading.
+     */
+    suspend fun ensureReady(context: Context): Boolean = withContext(Dispatchers.IO) {
+        if (isDatabaseHealthy()) return@withContext true
 
-    fun isBundled(code: String): Boolean = offlineAssets.containsKey(code.uppercase().trim())
-    fun bundledCodes(): Set<String> = setOf("RVR1960", "TLA", "DHH", "NBLA")
+        synchronized(this) {
+            if (isDatabaseHealthy()) return@synchronized true
 
-    suspend fun ensureDatabase(context: Context, versionCode: String = "RVR1960"): Boolean =
-        ensureReady(context, versionCode)
+            val dbFile = File(context.filesDir, DB_FILE_NAME)
 
-    suspend fun ensureReady(context: Context, versionCode: String = "RVR1960"): Boolean = withContext(Dispatchers.IO) {
-        val code = versionCode.uppercase().trim()
-        if (!offlineAssets.containsKey(code)) {
-            Log.w(TAG, "[$code] No asset registered for version")
-            return@withContext false
-        }
-
-        if (isDatabaseHealthy(code)) return@withContext true
-
-        synchronized(this@OfflineBibleManager) {
-            if (isDatabaseHealthy(code)) return@synchronized true
-
-            val prefs = context.getSharedPreferences("offline_bible_manager_prefs", Context.MODE_PRIVATE)
-            val versionKey = "extracted_asset_version_${code.lowercase()}"
-            val currentStamp = prefs.getString(versionKey, null)
-
-            val dbFileName = "bible_${code.lowercase()}.db"
-            val dbFile = File(context.filesDir, dbFileName)
-
-            // If the database version stamp changed or the file is missing/invalid, force re-extraction from assets
-            val needsExtraction = !dbFile.exists() ||
-                    currentStamp != ASSET_VERSION_STAMP ||
-                    !isValidDatabaseFile(dbFile, code)
-
-            if (needsExtraction) {
-                Log.i(TAG, "[$code] Re-extracting database: fileExists=${dbFile.exists()}, stamp=$currentStamp, expected=$ASSET_VERSION_STAMP")
-                closeCurrentDatabase(code)
+            // 1. If existing file exists but is unhealthy or truncated, remove it
+            if (dbFile.exists() && (!isValidDatabaseFile(dbFile))) {
+                Log.w(TAG, "Existing database file is corrupted or incomplete (${dbFile.length()} bytes). Removing.")
+                closeCurrentDatabase()
                 try { SQLiteDatabase.deleteDatabase(dbFile) } catch (_: Exception) { dbFile.delete() }
-
-                val extracted = extractFromAssetsAtomically(context, dbFile, code)
-                if (!extracted) {
-                    Log.e(TAG, "[$code] Extraction failed from assets")
-                    return@synchronized false
-                }
-                prefs.edit().putString(versionKey, ASSET_VERSION_STAMP).apply()
             }
 
+            // 2. Extract freshly from assets if needed
+            if (!dbFile.exists()) {
+                val extracted = extractFromAssetsAtomically(context, dbFile)
+                if (!extracted) {
+                    Log.e(TAG, "Failed to extract offline database from assets.")
+                    return@synchronized false
+                }
+            }
+
+            // 3. Open database with read-write flags to avoid readonly locking issues
             try {
-                closeCurrentDatabase(code)
-                val db = SQLiteDatabase.openDatabase(
+                closeCurrentDatabase()
+                database = SQLiteDatabase.openDatabase(
                     dbFile.absolutePath,
                     null,
-                    SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                    SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.NO_LOCALIZED_COLLATORS
                 )
-                databases[code] = db
-
-                val healthy = isDatabaseHealthy(code)
-                if (healthy) {
-                    Log.i(TAG, "[$code] Database opened successfully and verified healthy")
+                if (isDatabaseHealthy()) {
+                    Log.d(TAG, "Offline SQLite Bible successfully opened and verified.")
                     return@synchronized true
                 } else {
-                    Log.e(TAG, "[$code] Database unhealthy after opening. Forcing clean re-extraction...")
-                    closeCurrentDatabase(code)
+                    Log.e(TAG, "Database opened but failed health check. Re-extracting.")
+                    closeCurrentDatabase()
                     try { SQLiteDatabase.deleteDatabase(dbFile) } catch (_: Exception) { dbFile.delete() }
-                    val reExtracted = extractFromAssetsAtomically(context, dbFile, code)
+                    val reExtracted = extractFromAssetsAtomically(context, dbFile)
                     if (reExtracted) {
-                        val newDb = SQLiteDatabase.openDatabase(
+                        database = SQLiteDatabase.openDatabase(
                             dbFile.absolutePath,
                             null,
-                            SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.NO_LOCALIZED_COLLATORS
                         )
-                        databases[code] = newDb
-                        prefs.edit().putString(versionKey, ASSET_VERSION_STAMP).apply()
                     }
-                    return@synchronized isDatabaseHealthy(code)
+                    return@synchronized isDatabaseHealthy()
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "[$code] Exception opening database: ${e.message}. Forcing re-extraction.", e)
-                closeCurrentDatabase(code)
+                Log.e(TAG, "Exception opening offline database", e)
+                closeCurrentDatabase()
                 try { SQLiteDatabase.deleteDatabase(dbFile) } catch (_: Exception) { dbFile.delete() }
-                val reExtracted = extractFromAssetsAtomically(context, dbFile, code)
-                if (reExtracted) {
-                    try {
-                        val newDb = SQLiteDatabase.openDatabase(
-                            dbFile.absolutePath,
-                            null,
-                            SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
-                        )
-                        databases[code] = newDb
-                        prefs.edit().putString(versionKey, ASSET_VERSION_STAMP).apply()
-                    } catch (e2: Exception) {
-                        Log.e(TAG, "[$code] Fatal: Exception after re-extraction: ${e2.message}", e2)
-                        return@synchronized false
-                    }
-                }
-                return@synchronized isDatabaseHealthy(code)
+                return@synchronized false
             }
         }
     }
 
-    private fun isDatabaseHealthy(versionCode: String): Boolean {
-        val code = versionCode.uppercase().trim()
-        val db = databases[code] ?: return false
+    private fun isDatabaseHealthy(): Boolean {
+        val db = database ?: return false
         if (!db.isOpen) return false
         return try {
             val cursor = db.rawQuery("SELECT COUNT(*) FROM bible_verses", null)
             val count = cursor.use { c ->
                 if (c.moveToFirst()) c.getInt(0) else 0
             }
-            val min = minFor(code)
-            val ok = count >= min
-            if (!ok) {
-                Log.w(TAG, "[$code] Health check failed: rows=$count < min=$min")
-            }
-            ok
+            count >= TOTAL_CANONICAL_VERSES
         } catch (e: Exception) {
-            Log.e(TAG, "[$code] Error checking health: ${e.message}", e)
+            Log.w(TAG, "Health check failed on open database", e)
             false
         }
     }
 
-    private fun isValidDatabaseFile(file: File, versionCode: String): Boolean {
+    private fun isValidDatabaseFile(file: File): Boolean {
         if (!file.exists() || file.length() < MIN_VALID_SIZE_BYTES) return false
         var testDb: SQLiteDatabase? = null
         return try {
             testDb = SQLiteDatabase.openDatabase(
                 file.absolutePath,
                 null,
-                SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.NO_LOCALIZED_COLLATORS
             )
             val cursor = testDb.rawQuery("SELECT COUNT(*) FROM bible_verses", null)
             val count = cursor.use { c ->
                 if (c.moveToFirst()) c.getInt(0) else 0
             }
-            count >= minFor(versionCode)
+            count >= TOTAL_CANONICAL_VERSES
         } catch (e: Exception) {
+            Log.w(TAG, "isValidDatabaseFile check failed for ${file.name}", e)
             false
         } finally {
             try { testDb?.close() } catch (_: Exception) {}
         }
     }
 
-    private fun extractFromAssetsAtomically(context: Context, targetFile: File, versionCode: String): Boolean {
-        val code = versionCode.uppercase().trim()
-        val assetPath = offlineAssets[code] ?: run {
-            Log.e(TAG, "[$code] No assetPath found")
-            return false
-        }
-
+    private fun extractFromAssetsAtomically(context: Context, targetFile: File): Boolean {
         val tempFile = File(targetFile.parentFile, "${targetFile.name}.tmp")
         if (tempFile.exists()) tempFile.delete()
 
-        try {
-            Log.i(TAG, "[$code] Opening asset: $assetPath")
-            context.assets.open(assetPath).use { rawIn ->
-                val bis = java.io.BufferedInputStream(rawIn)
-                bis.mark(4)
-                val b1 = bis.read()
-                val b2 = bis.read()
-                bis.reset()
+        val candidates = listOf("bible/bible_rvr1960.db", "bible/bible_rvr1960.db.gz")
+        for (assetPath in candidates) {
+            try {
+                context.assets.open(assetPath).use { rawIn ->
+                    val bis = java.io.BufferedInputStream(rawIn)
+                    bis.mark(4)
+                    val b1 = bis.read()
+                    val b2 = bis.read()
+                    bis.reset()
 
-                val isGzip = (b1 == 0x1f && b2 == 0x8b)
-                val inputStream: InputStream = if (isGzip) GZIPInputStream(bis) else bis
+                    val isGzip = (b1 == 0x1f && b2 == 0x8b)
+                    val inputStream = if (isGzip) GZIPInputStream(bis) else bis
 
-                FileOutputStream(tempFile).use { fileOut ->
-                    val buffer = ByteArray(64 * 1024)
-                    var bytesRead: Int
-                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                        fileOut.write(buffer, 0, bytesRead)
+                    FileOutputStream(tempFile).use { fileOut ->
+                        val buffer = ByteArray(64 * 1024)
+                        var bytesRead: Int
+                        while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                            fileOut.write(buffer, 0, bytesRead)
+                        }
+                        fileOut.flush()
                     }
-                    fileOut.flush()
                 }
-            }
 
-            Log.i(TAG, "[$code] Temp file extracted, size=${tempFile.length()} bytes")
-            if (tempFile.length() < MIN_VALID_SIZE_BYTES) {
-                Log.e(TAG, "[$code] Extracted temp file too small: ${tempFile.length()}")
-                tempFile.delete()
-                return false
-            }
-
-            // Quick validation check before replacing target
-            if (isValidDatabaseFile(tempFile, code)) {
-                try { SQLiteDatabase.deleteDatabase(targetFile) } catch (_: Exception) { targetFile.delete() }
-                val renamed = tempFile.renameTo(targetFile)
-                if (!renamed) {
-                    tempFile.copyTo(targetFile, overwrite = true)
-                    tempFile.delete()
+                if (isValidDatabaseFile(tempFile)) {
+                    try { SQLiteDatabase.deleteDatabase(targetFile) } catch (_: Exception) { targetFile.delete() }
+                    val renamed = tempFile.renameTo(targetFile)
+                    if (!renamed) {
+                        tempFile.copyTo(targetFile, overwrite = true)
+                        tempFile.delete()
+                    }
+                    Log.d(TAG, "Base de datos RVR1960 extraída exitosamente desde $assetPath")
+                    return true
+                } else {
+                    Log.e(TAG, "Extracted temp file from $assetPath failed integrity check (${tempFile.length()} bytes)")
+                    if (tempFile.exists()) tempFile.delete()
                 }
-                Log.i(TAG, "[$code] Database atomically deployed to ${targetFile.absolutePath}")
-                return true
-            } else {
-                Log.e(TAG, "[$code] Extracted temp file failed validity test")
-                tempFile.delete()
-                return false
+            } catch (e: Exception) {
+                Log.w(TAG, "No se pudo extraer desde $assetPath: ${e.message}")
+                if (tempFile.exists()) tempFile.delete()
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "[$code] Error during extraction: ${e.message}", e)
-            if (tempFile.exists()) tempFile.delete()
-            return false
         }
+        return false
     }
 
-    private fun closeCurrentDatabase(versionCode: String) {
-        val code = versionCode.uppercase().trim()
+    private fun closeCurrentDatabase() {
         try {
-            databases[code]?.close()
+            database?.close()
         } catch (_: Exception) {}
-        databases.remove(code)
+        database = null
     }
 
-    suspend fun getVerses(context: Context, bookId: Int, chapter: Int, versionCode: String = "RVR1960"): List<OfflineVerseDto> = withContext(Dispatchers.IO) {
-        val code = versionCode.uppercase().trim()
-        val isReady = ensureReady(context, code)
-        if (!isReady) {
-            Log.e(TAG, "[$code] getVerses: ensureReady returned false for $code ($bookId:$chapter)")
-            return@withContext emptyList()
-        }
+    /**
+     * Reads all verses for a given book and chapter offline directly from SQLite in ~1ms.
+     * Includes self-healing: if an unexpected corruption happens, it auto-repairs and retries.
+     */
+    suspend fun getVerses(context: Context, bookId: Int, chapter: Int): List<OfflineVerseDto> = withContext(Dispatchers.IO) {
+        val isReady = ensureReady(context)
+        if (!isReady) return@withContext emptyList()
 
-        val results = readVersesQuery(bookId, chapter, code)
+        val results = readVersesQuery(bookId, chapter)
         if (results.isNotEmpty()) {
             return@withContext results
         }
 
-        Log.w(TAG, "[$code] Query returned 0 verses for $bookId:$chapter. Checking health...")
-        if (!isDatabaseHealthy(code)) {
+        // Check if database health is degraded before deleting
+        if (!isDatabaseHealthy()) {
+            Log.w(TAG, "Database health degraded for book $bookId, chapter $chapter. Re-extracting.")
             synchronized(this@OfflineBibleManager) {
-                val dbFile = File(context.filesDir, "bible_${code.lowercase()}.db")
-                closeCurrentDatabase(code)
+                val dbFile = File(context.filesDir, DB_FILE_NAME)
+                closeCurrentDatabase()
                 try { SQLiteDatabase.deleteDatabase(dbFile) } catch (_: Exception) { dbFile.delete() }
             }
-            val recovered = ensureReady(context, code)
+            val recovered = ensureReady(context)
             if (recovered) {
-                return@withContext readVersesQuery(bookId, chapter, code)
+                return@withContext readVersesQuery(bookId, chapter)
             }
         }
         emptyList()
     }
 
-    private fun readVersesQuery(bookId: Int, chapter: Int, versionCode: String): List<OfflineVerseDto> {
-        val code = versionCode.uppercase().trim()
-        val db = databases[code] ?: run {
-            Log.e(TAG, "[$code] readVersesQuery: No open DB for $code")
-            return emptyList()
-        }
+    private fun readVersesQuery(bookId: Int, chapter: Int): List<OfflineVerseDto> {
+        val db = database ?: return emptyList()
         val results = mutableListOf<OfflineVerseDto>()
         try {
             val cursor = db.rawQuery(
@@ -310,15 +237,17 @@ object OfflineBibleManager {
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "[$code] readVersesQuery failed for $bookId:$chapter: ${e.message}", e)
+            Log.e(TAG, "Query error for book $bookId, chapter $chapter", e)
         }
         return results
     }
 
-    suspend fun getVerseCount(context: Context, bookId: Int, chapter: Int, versionCode: String = "RVR1960"): Int = withContext(Dispatchers.IO) {
-        val code = versionCode.uppercase().trim()
-        ensureReady(context, code)
-        val db = databases[code] ?: return@withContext 0
+    /**
+     * Returns only the count of verses for a given book/chapter without loading text.
+     */
+    suspend fun getVerseCount(context: Context, bookId: Int, chapter: Int): Int = withContext(Dispatchers.IO) {
+        ensureReady(context)
+        val db = database ?: return@withContext 0
         try {
             val cursor = db.rawQuery(
                 "SELECT COUNT(*) FROM bible_verses WHERE book = ? AND chapter = ?",
@@ -328,24 +257,26 @@ object OfflineBibleManager {
                 if (c.moveToFirst()) c.getInt(0) else 0
             }
         } catch (e: Exception) {
-            Log.e(TAG, "[$code] getVerseCount failed for $bookId:$chapter: ${e.message}", e)
+            Log.e(TAG, "Count error for book $bookId, chapter $chapter", e)
             0
         }
     }
 
+    /**
+     * Searches all 31,102 verses locally and offline in the RVR1960 SQLite database.
+     * Supports filtering by testament ("OT", "NT") or by specific book (1..66).
+     */
     suspend fun searchVerses(
         context: Context,
         query: String,
         testament: String? = null,
         bookId: Int? = null,
-        limit: Int = 100,
-        versionCode: String = "RVR1960"
+        limit: Int = 100
     ): List<OfflineVerseDto> = withContext(Dispatchers.IO) {
         val trimmed = query.trim()
-        val code = versionCode.uppercase().trim()
         if (trimmed.isEmpty()) return@withContext emptyList()
-        ensureReady(context, code)
-        val db = databases[code] ?: return@withContext emptyList()
+        ensureReady(context)
+        val db = database ?: return@withContext emptyList()
         val results = mutableListOf<OfflineVerseDto>()
         try {
             val conditions = mutableListOf<String>()
@@ -386,11 +317,14 @@ object OfflineBibleManager {
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "[$code] searchVerses failed: ${e.message}", e)
+            Log.e(TAG, "Search error for query: $query", e)
         }
         results
     }
 
+    /**
+     * Completely strips <br>, <br/>, and all HTML tags or encoded entities from verse texts.
+     */
     fun cleanVerseText(raw: String?): String {
         if (raw.isNullOrBlank()) return ""
         return raw

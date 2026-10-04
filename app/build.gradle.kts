@@ -70,9 +70,6 @@ android {
     compose = true
     buildConfig = true
   }
-  androidResources {
-    noCompress += listOf("gz", "bin", "json")
-  }
   testOptions { unitTests { isIncludeAndroidResources = true } }
   lint {
     abortOnError = false

@@ -41,37 +41,9 @@ class BibleReaderRepository(
             dao.deleteVersesLike("%Palabra de Dios para edificación%")
         } catch (_: Exception) {}
 
-        // One-time purge: earlier builds cached other-version text with section titles merged into the
-        // verse and stray quotes (e.g. TLA/PDT). Drop it so it is fetched again with the fixed cleaner.
+        // Pre-warm the offline RVR1960 database in background to avoid any delay
         try {
-            val prefs = context.getSharedPreferences("bible_cache_maintenance", Context.MODE_PRIVATE)
-            if (!prefs.getBoolean("clean_other_versions_v1", false)) {
-                for (v in BibleCatalog.versions) {
-                    if (!v.code.equals("RVR1960", ignoreCase = true)) {
-                        dao.deleteVersesForVersion(v.code.uppercase())
-                    }
-                }
-                prefs.edit().putBoolean("clean_other_versions_v1", true).apply()
-            }
-        } catch (_: Exception) {}
-
-        // One-time purge v4: Purge cached Room verses for all bundled versions so they are re-populated
-        // with the authentic, verified offline databases without stale or corrupted entries.
-        try {
-            val prefs = context.getSharedPreferences("bible_cache_maintenance", Context.MODE_PRIVATE)
-            if (!prefs.getBoolean("purge_bundled_versions_v4", false)) {
-                for (code in OfflineBibleManager.bundledCodes()) {
-                    dao.deleteVersesForVersion(code)
-                }
-                prefs.edit().putBoolean("purge_bundled_versions_v4", true).apply()
-            }
-        } catch (_: Exception) {}
-
-        // Pre-warm all offline bundled databases in background to avoid any delay when switching versions
-        try {
-            for (code in OfflineBibleManager.bundledCodes()) {
-                OfflineBibleManager.ensureDatabase(context, code)
-            }
+            OfflineBibleManager.ensureDatabase(context)
         } catch (_: Exception) {}
     }
 
@@ -98,17 +70,12 @@ class BibleReaderRepository(
 
     suspend fun ensureChapterVerses(bookId: Int, chapter: Int, version: String = "RVR1960") = withContext(Dispatchers.IO) {
         val normVersion = normalizeVersion(version)
-        val isOfflineOnly = OfflineBibleManager.isBundled(normVersion)
+        val isRvr1960 = normVersion == "RVR1960"
 
-        // 1. For fully bundled versions (RVR1960, TLA, DHH, NBLA), ALWAYS use the complete pre-packaged offline SQLite.
-        if (isOfflineOnly) {
-            var offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter, normVersion)
-            if (offlineVerses.isEmpty()) {
-                // Ensure extraction is complete and retry
-                OfflineBibleManager.ensureReady(context, normVersion)
-                offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter, normVersion)
-            }
-
+        // 1. For RVR1960 (primary translation), ALWAYS use the complete pre-packaged offline SQLite (31,102 verses).
+        //    OfflineBibleManager guarantees all 31,102 verses are available offline, self-healing from asset if necessary.
+        if (isRvr1960) {
+            val offlineVerses = OfflineBibleManager.getVerses(context, bookId, chapter)
             if (offlineVerses.isNotEmpty()) {
                 val existing = dao.getVersesSync(bookId, chapter, normVersion)
                 val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
@@ -119,6 +86,7 @@ class BibleReaderRepository(
                 }
                 val hasHtmlTags = existing.any { it.text.contains("<br", ignoreCase = true) || it.text.contains("<") }
 
+                // If not cached in Room yet, or incomplete, or contains synthetic placeholder, or headings need update, or has HTML tags, reload completely
                 if (existing.size != offlineVerses.size || hasSynthetic || needsHeadingRefresh || hasHtmlTags) {
                     dao.deleteVersesForChapter(bookId, chapter, normVersion)
                     val entities = offlineVerses.map { dto ->
@@ -139,13 +107,10 @@ class BibleReaderRepository(
                     dao.insertVerses(entities)
                 }
                 return@withContext
-            } else {
-                android.util.Log.e("BibleReaderRepo", "ERROR: Bundled version $normVersion returned 0 verses for $bookId:$chapter")
-                return@withContext
             }
         }
 
-        // 2. Check if we already have valid verses in Room for this chapter and version (Online APIs)
+        // 2. Check if we already have valid verses in Room for this chapter and version
         val existing = dao.getVersesSync(bookId, chapter, normVersion)
         val hasSynthetic = existing.any { it.text.contains("Palabra de Dios para edificación") }
         val hasHeadingsInCatalog = BiblePericopesCatalog.hasHeadingsForChapter(bookId, chapter)
@@ -173,8 +138,8 @@ class BibleReaderRepository(
             dao.deleteVersesForChapter(bookId, chapter, normVersion)
         }
 
-        // 3. For online versions: check if the version was fully downloaded offline in Room
-        if (!isOfflineOnly) {
+        // 3. For other versions: check if the version was fully downloaded offline in Room
+        if (!isRvr1960) {
             val cachedCount = dao.getVerseCountForVersion(normVersion)
             if (cachedCount > 5000) {
                 // Version is fully downloaded in Room, check if chapter is now present
@@ -182,10 +147,6 @@ class BibleReaderRepository(
                 if (fresh.isNotEmpty() && !fresh.any { it.text.contains("<") }) return@withContext
             }
         }
-
-        // Bundled versions are served exclusively from their own database. Never fetch another
-        // translation from the network nor cache RVR1960 text under their code.
-        if (isOfflineOnly) return@withContext
 
         // 4. For other versions not yet downloaded: attempt to fetch chapter via Bolls API
         val networkVerses = BollsBibleApiService.fetchChapter(normVersion, bookId, chapter)
