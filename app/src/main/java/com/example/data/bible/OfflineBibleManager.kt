@@ -79,7 +79,7 @@ object OfflineBibleManager {
             if (needsExtraction) {
                 Log.i(TAG, "[$code] Re-extracting database: fileExists=${dbFile.exists()}, stamp=$currentStamp, expected=$ASSET_VERSION_STAMP")
                 closeCurrentDatabase(code)
-                if (dbFile.exists()) dbFile.delete()
+                try { SQLiteDatabase.deleteDatabase(dbFile) } catch (_: Exception) { dbFile.delete() }
 
                 val extracted = extractFromAssetsAtomically(context, dbFile, code)
                 if (!extracted) {
@@ -105,7 +105,7 @@ object OfflineBibleManager {
                 } else {
                     Log.e(TAG, "[$code] Database unhealthy after opening. Forcing clean re-extraction...")
                     closeCurrentDatabase(code)
-                    dbFile.delete()
+                    try { SQLiteDatabase.deleteDatabase(dbFile) } catch (_: Exception) { dbFile.delete() }
                     val reExtracted = extractFromAssetsAtomically(context, dbFile, code)
                     if (reExtracted) {
                         val newDb = SQLiteDatabase.openDatabase(
@@ -119,9 +119,25 @@ object OfflineBibleManager {
                     return@synchronized isDatabaseHealthy(code)
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "[$code] Exception opening database: ${e.message}", e)
+                Log.e(TAG, "[$code] Exception opening database: ${e.message}. Forcing re-extraction.", e)
                 closeCurrentDatabase(code)
-                return@synchronized false
+                try { SQLiteDatabase.deleteDatabase(dbFile) } catch (_: Exception) { dbFile.delete() }
+                val reExtracted = extractFromAssetsAtomically(context, dbFile, code)
+                if (reExtracted) {
+                    try {
+                        val newDb = SQLiteDatabase.openDatabase(
+                            dbFile.absolutePath,
+                            null,
+                            SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                        )
+                        databases[code] = newDb
+                        prefs.edit().putString(versionKey, ASSET_VERSION_STAMP).apply()
+                    } catch (e2: Exception) {
+                        Log.e(TAG, "[$code] Fatal: Exception after re-extraction: ${e2.message}", e2)
+                        return@synchronized false
+                    }
+                }
+                return@synchronized isDatabaseHealthy(code)
             }
         }
     }
@@ -209,7 +225,7 @@ object OfflineBibleManager {
 
             // Quick validation check before replacing target
             if (isValidDatabaseFile(tempFile, code)) {
-                if (targetFile.exists()) targetFile.delete()
+                try { SQLiteDatabase.deleteDatabase(targetFile) } catch (_: Exception) { targetFile.delete() }
                 val renamed = tempFile.renameTo(targetFile)
                 if (!renamed) {
                     tempFile.copyTo(targetFile, overwrite = true)
@@ -255,7 +271,7 @@ object OfflineBibleManager {
             synchronized(this@OfflineBibleManager) {
                 val dbFile = File(context.filesDir, "bible_${code.lowercase()}.db")
                 closeCurrentDatabase(code)
-                dbFile.delete()
+                try { SQLiteDatabase.deleteDatabase(dbFile) } catch (_: Exception) { dbFile.delete() }
             }
             val recovered = ensureReady(context, code)
             if (recovered) {
