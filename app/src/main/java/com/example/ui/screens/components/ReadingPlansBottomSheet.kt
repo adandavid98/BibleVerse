@@ -46,7 +46,33 @@ fun ReadingPlansBottomSheet(
         BibleReadingPlanCatalog.getPlan(progress.activePlanType)
     }
 
-    val listState = rememberLazyListState()
+    val traditionalInitialIndex = remember {
+        (preferences.getLastReadDay(ReadingPlanType.TRADITIONAL) - 1).coerceAtLeast(0)
+    }
+    val traditionalListState = rememberLazyListState(initialFirstVisibleItemIndex = traditionalInitialIndex)
+
+    val chronologicalInitialIndex = remember {
+        (preferences.getLastReadDay(ReadingPlanType.CHRONOLOGICAL) - 1).coerceAtLeast(0)
+    }
+    val chronologicalListState = rememberLazyListState(initialFirstVisibleItemIndex = chronologicalInitialIndex)
+
+    val storiesInitialIndex = remember {
+        (preferences.getLastReadDay(ReadingPlanType.BIBLE_STORIES) - 1).coerceAtLeast(0)
+    }
+    val storiesListState = rememberLazyListState(initialFirstVisibleItemIndex = storiesInitialIndex)
+
+    val currentListState = when (progress.activePlanType) {
+        ReadingPlanType.TRADITIONAL -> traditionalListState
+        ReadingPlanType.CHRONOLOGICAL -> chronologicalListState
+        ReadingPlanType.BIBLE_STORIES -> storiesListState
+    }
+
+    LaunchedEffect(progress.activePlanType) {
+        val targetDay = preferences.getLastReadDay(progress.activePlanType)
+        val targetIndex = (targetDay - 1).coerceIn(0, (currentDays.size - 1).coerceAtLeast(0))
+        currentListState.scrollToItem(targetIndex)
+    }
+
     var activeReadingDay by remember { mutableStateOf<ReadingPlanDay?>(null) }
 
     Dialog(
@@ -220,11 +246,13 @@ fun ReadingPlansBottomSheet(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    // "Continuar lectura de hoy" Quick Button
-                    val nextDay = currentDays.firstOrNull { it.dayNumber == progress.nextPendingDay } ?: currentDays.first()
+                    // "Continuar lectura" Quick Button
+                    val currentDayNumber = progress.currentPlan.currentDay
+                    val currentDayObj = currentDays.firstOrNull { it.dayNumber == currentDayNumber } ?: currentDays.first()
                     Button(
                         onClick = {
-                            activeReadingDay = nextDay
+                            preferences.setLastReadDay(progress.activePlanType, currentDayObj.dayNumber)
+                            activeReadingDay = currentDayObj
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
@@ -238,7 +266,7 @@ fun ReadingPlansBottomSheet(
                         ) {
                             Icon(Icons.Default.MenuBook, contentDescription = null, modifier = Modifier.size(18.dp))
                             Text(
-                                "Leer hoy: Día ${nextDay.dayNumber} (${nextDay.passagesSummary})",
+                                "Continuar lectura: Día ${currentDayObj.dayNumber} (${currentDayObj.passagesSummary})",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -262,7 +290,7 @@ fun ReadingPlansBottomSheet(
                             .clickable {
                                 scope.launch {
                                     val index = (targetDay - 1).coerceIn(0, currentDays.size - 1)
-                                    listState.animateScrollToItem(index)
+                                    currentListState.animateScrollToItem(index)
                                 }
                             },
                         shape = RoundedCornerShape(16.dp),
@@ -283,22 +311,31 @@ fun ReadingPlansBottomSheet(
 
             // 365 Days List
             LazyColumn(
-                state = listState,
+                state = currentListState,
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(bottom = 20.dp)
             ) {
                 items(currentDays, key = { "${progress.activePlanType.name}_${it.dayNumber}" }) { day ->
                     val isCompleted = progress.completedDays.contains(day.dayNumber)
+                    val isCurrentDay = day.dayNumber == progress.currentPlan.currentDay
 
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { activeReadingDay = day },
+                            .clickable {
+                                preferences.setLastReadDay(progress.activePlanType, day.dayNumber)
+                                activeReadingDay = day
+                            },
                         shape = RoundedCornerShape(14.dp),
+                        border = if (isCurrentDay && !isCompleted) {
+                            androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+                        } else null,
                         colors = CardDefaults.cardColors(
                             containerColor = if (isCompleted) {
                                 MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
+                            } else if (isCurrentDay) {
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)
                             } else {
                                 MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
                             }
@@ -326,11 +363,28 @@ fun ReadingPlansBottomSheet(
                                     .weight(1f)
                                     .padding(horizontal = 8.dp)
                             ) {
-                                Text(
-                                    text = day.title,
-                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                    color = if (isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = day.title,
+                                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                        color = if (isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface
+                                    )
+                                    if (isCurrentDay && !isCompleted) {
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Surface(
+                                            shape = RoundedCornerShape(6.dp),
+                                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                        ) {
+                                            Text(
+                                                text = "Actual",
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                    }
+                                }
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = day.passagesSummary,
@@ -342,6 +396,7 @@ fun ReadingPlansBottomSheet(
                             // Read button
                             IconButton(
                                 onClick = {
+                                    preferences.setLastReadDay(progress.activePlanType, day.dayNumber)
                                     activeReadingDay = day
                                 },
                                 modifier = Modifier.size(36.dp)
@@ -374,7 +429,10 @@ fun ReadingPlansBottomSheet(
                 preferences.toggleDayCompleted(dayNum)
             },
             onNextDay = if (nextDayObj != null) {
-                { activeReadingDay = nextDayObj }
+                {
+                    preferences.setLastReadDay(progress.activePlanType, nextDayObj.dayNumber)
+                    activeReadingDay = nextDayObj
+                }
             } else null,
             onOpenInFullBible = { bookId, chapter, verse ->
                 activeReadingDay = null

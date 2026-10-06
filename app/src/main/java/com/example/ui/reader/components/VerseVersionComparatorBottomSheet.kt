@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.bible.BibleCatalog
@@ -89,11 +90,15 @@ fun VerseVersionComparatorBottomSheet(
         }
     }
 
-    val visibleVersions = remember(allVersions, filterOnlyDownloaded, downloadStates) {
+    val downloadedVersions = remember(allVersions, downloadStates) {
+        allVersions.filter { ver ->
+            ver.code == "RVR1960" || downloadStates[ver.code] is VersionDownloadState.Downloaded
+        }
+    }
+
+    val visibleVersions = remember(allVersions, downloadedVersions, filterOnlyDownloaded) {
         if (filterOnlyDownloaded) {
-            allVersions.filter { ver ->
-                ver.code == "RVR1960" || downloadStates[ver.code] is VersionDownloadState.Downloaded
-            }
+            downloadedVersions
         } else {
             allVersions
         }
@@ -201,13 +206,10 @@ fun VerseVersionComparatorBottomSheet(
                     label = { Text("Todas las versiones (${allVersions.size})") }
                 )
 
-                val downloadedCount = remember(downloadStates) {
-                    1 + downloadStates.values.count { it is VersionDownloadState.Downloaded }
-                }
                 FilterChip(
                     selected = filterOnlyDownloaded,
                     onClick = { filterOnlyDownloaded = true },
-                    label = { Text("Solo Descargadas ($downloadedCount)") },
+                    label = { Text("Solo Descargadas (${downloadedVersions.size})") },
                     leadingIcon = {
                         Icon(
                             Icons.Default.CheckCircle,
@@ -248,6 +250,7 @@ fun VerseVersionComparatorBottomSheet(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Row(
+                                    modifier = Modifier.weight(1f),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
@@ -268,11 +271,17 @@ fun VerseVersionComparatorBottomSheet(
                                         text = ver.name,
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f, fill = false)
                                     )
                                 }
 
+                                Spacer(modifier = Modifier.width(6.dp))
+
                                 Row(
+                                    modifier = Modifier.wrapContentWidth(),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
