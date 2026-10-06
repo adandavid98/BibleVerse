@@ -668,6 +668,17 @@ fun SearchTab(
     onNavigateToReader: (bookId: Int, chapter: Int, verse: Int) -> Unit = { _, _, _ -> }
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val readerDao = remember { com.example.data.local.BibleDatabase.getDatabase(context.applicationContext).bibleReaderDao() }
+    val prefsRepo = remember { com.example.data.preferences.ReaderPreferencesRepository(context.applicationContext) }
+    val readerPrefs by prefsRepo.readerPreferences.collectAsState(initial = null)
+    val defaultVersion = readerPrefs?.bibleVersion ?: "RVR1960"
+
+    var selectedVersionCode by remember { mutableStateOf<String?>(null) }
+    val activeVersion = selectedVersionCode ?: defaultVersion
+    val downloadStates by com.example.data.bible.OfflineBibleDownloadManager.downloadStates.collectAsState()
+    var isVersionPickerOpen by remember { mutableStateOf(false) }
+
     var searchScope by remember { mutableStateOf("ALL") } // "ALL", "OT", "NT", "BOOK"
     var selectedBook by remember { mutableStateOf<BibleBook?>(null) }
     var isBookPickerOpen by remember { mutableStateOf(false) }
@@ -677,13 +688,16 @@ fun SearchTab(
     var isSearchingOffline by remember { mutableStateOf(false) }
 
     // Execute instant search
-    LaunchedEffect(localQuery, searchScope, selectedBook) {
+    LaunchedEffect(localQuery, searchScope, selectedBook, activeVersion) {
         val trimmed = localQuery.trim()
         if (trimmed.length < 2) {
             offlineResults = emptyList()
             isSearchingOffline = false
             return@LaunchedEffect
         }
+
+        // Debounce 200ms while user is typing
+        kotlinx.coroutines.delay(200)
 
         isSearchingOffline = true
         val testamentParam = when (searchScope) {
@@ -698,7 +712,9 @@ fun SearchTab(
             query = trimmed,
             testament = testamentParam,
             bookId = bookParam,
-            limit = 80
+            limit = 80,
+            version = activeVersion,
+            dao = readerDao
         )
         offlineResults = results
         isSearchingOffline = false
@@ -754,6 +770,20 @@ fun SearchTab(
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            FilterChip(
+                selected = true,
+                onClick = { isVersionPickerOpen = true },
+                label = { Text("Versión: $activeVersion") },
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.MenuBook,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            )
+
             FilterChip(
                 selected = searchScope == "ALL",
                 onClick = { 
@@ -893,7 +923,7 @@ fun SearchTab(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "${offlineResults.size} versículo(s) encontrados (RVR1960)",
+                    text = "${offlineResults.size} versículo(s) encontrados ($activeVersion)",
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -954,7 +984,7 @@ fun SearchTab(
                                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                     IconButton(
                                         onClick = {
-                                            val quote = "«${item.text}» - $bookName ${item.chapter}:${item.verseNumber} (RVR1960)"
+                                            val quote = "«${item.text}» - $bookName ${item.chapter}:${item.verseNumber} ($activeVersion)"
                                             val clip = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                                             clip.setPrimaryClip(android.content.ClipData.newPlainText("Versículo", quote))
                                             Toast.makeText(context, "Copiado al portapapeles", Toast.LENGTH_SHORT).show()
@@ -979,7 +1009,7 @@ fun SearchTab(
                                                 context = "Versículo guardado desde Búsqueda Bíblica Offline.",
                                                 topic = "Búsqueda Bíblica",
                                                 notes = "",
-                                                bibleVersion = "RVR1960"
+                                                bibleVersion = activeVersion
                                             )
                                             Toast.makeText(context, "Guardado en Favoritos", Toast.LENGTH_SHORT).show()
                                         },
@@ -1118,6 +1148,23 @@ fun SearchTab(
             }
         )
     }
+
+    if (isVersionPickerOpen) {
+        com.example.ui.reader.components.BibleVersionSelectorDialog(
+            currentVersion = activeVersion,
+            downloadStates = downloadStates,
+            onSelectVersion = { chosen ->
+                selectedVersionCode = chosen
+                isVersionPickerOpen = false
+            },
+            onDismiss = { isVersionPickerOpen = false },
+            onDownloadVersion = { vCode ->
+                scope.launch {
+                    com.example.data.bible.OfflineBibleDownloadManager.downloadVersion(readerDao, vCode)
+                }
+            }
+        )
+    }
 }
 
 private fun buildHighlightedString(
@@ -1133,11 +1180,11 @@ private fun buildHighlightedString(
         }
 
         var currentIndex = 0
-        val lowerFull = fullText.lowercase()
-        val lowerQuery = trimmed.lowercase()
+        val cleanFull = com.example.data.bible.BibleTextSanitizer.removeAccents(fullText).lowercase()
+        val cleanQuery = com.example.data.bible.BibleTextSanitizer.removeAccents(trimmed).lowercase()
 
         while (currentIndex < fullText.length) {
-            val matchIndex = lowerFull.indexOf(lowerQuery, currentIndex)
+            val matchIndex = cleanFull.indexOf(cleanQuery, currentIndex)
             if (matchIndex == -1) {
                 append(fullText.substring(currentIndex))
                 break
@@ -1147,7 +1194,7 @@ private fun buildHighlightedString(
                 append(fullText.substring(currentIndex, matchIndex))
             }
 
-            val endIndex = matchIndex + lowerQuery.length
+            val endIndex = (matchIndex + cleanQuery.length).coerceAtMost(fullText.length)
             withStyle(
                 androidx.compose.ui.text.SpanStyle(
                     fontWeight = FontWeight.Bold,

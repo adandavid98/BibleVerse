@@ -40,4 +40,17 @@ class BibleTextSanitizerTest {
         val expected = "Y Dios llamó a la luz día, y a las tinieblas llamó noche."
         assertEquals(expected, BibleTextSanitizer.sanitize(raw))
     }
+
+    @Test
+    fun testRemoveAccents_removesSpanishDiacritics() {
+        assertEquals("jesus", BibleTextSanitizer.removeAccents("jesús"))
+        assertEquals("Jesus", BibleTextSanitizer.removeAccents("Jesús"))
+        assertEquals("corazon", BibleTextSanitizer.removeAccents("corazón"))
+        assertEquals("oracion", BibleTextSanitizer.removeAccents("oración"))
+        assertEquals("espiritu", BibleTextSanitizer.removeAccents("espíritu"))
+        assertEquals("bendicion", BibleTextSanitizer.removeAccents("bendición"))
+        assertEquals("El dio su vida", BibleTextSanitizer.removeAccents("Él dio su vida"))
+        assertEquals("antiguedad", BibleTextSanitizer.removeAccents("antigüedad"))
+    }
 }
+

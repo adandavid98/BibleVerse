@@ -59,4 +59,15 @@ object BibleTextSanitizer {
 
         return text
     }
+
+    /**
+     * Strips accents/diacritical marks from text (e.g. "Jesús" -> "Jesus", "oración" -> "oracion").
+     * Leaves other characters intact.
+     */
+    fun removeAccents(input: String?): String {
+        if (input.isNullOrBlank()) return ""
+        val normalized = java.text.Normalizer.normalize(input, java.text.Normalizer.Form.NFD)
+        return normalized.replace("\\p{InCombiningDiacriticalMarks}+".toRegex(), "")
+    }
 }
+

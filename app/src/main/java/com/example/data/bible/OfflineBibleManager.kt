@@ -185,66 +185,99 @@ object OfflineBibleManager {
         }
     }
 
+    const val SQL_ACCENT_STRIP = "replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(lower(text), 'á','a'), 'é','e'), 'í','i'), 'ó','o'), 'ú','u'), 'ü','u'), 'Á','a'), 'É','e'), 'Í','i'), 'Ó','o'), 'Ú','u'), 'Ü','u')"
+
     suspend fun searchVerses(
         context: Context,
         query: String,
         testament: String? = null,
         bookId: Int? = null,
         limit: Int = 100,
-        version: String = "RVR1960"
+        version: String = "RVR1960",
+        dao: com.example.data.local.BibleReaderDao? = null
     ): List<OfflineVerseDto> = withContext(Dispatchers.IO) {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return@withContext emptyList()
         val norm = normalizeVersion(version)
-        if (!isAssetVersion(norm)) return@withContext emptyList()
-        ensureReady(context, norm)
-        val db = database ?: return@withContext emptyList()
-        val results = mutableListOf<OfflineVerseDto>()
-        try {
-            val conditions = mutableListOf<String>()
-            val args = mutableListOf<String>()
+        val cleanQuery = BibleTextSanitizer.removeAccents(trimmed).lowercase()
 
-            conditions.add("version = ?")
-            args.add(norm)
+        // 1. Pre-packaged asset versions (RVR1960, NBLA, TLA, DHH)
+        if (isAssetVersion(norm)) {
+            ensureReady(context, norm)
+            val db = database ?: return@withContext emptyList()
+            val results = mutableListOf<OfflineVerseDto>()
+            try {
+                val conditions = mutableListOf<String>()
+                val args = mutableListOf<String>()
 
-            conditions.add("text LIKE ?")
-            args.add("%$trimmed%")
+                conditions.add("version = ?")
+                args.add(norm)
 
-            if (bookId != null && bookId in 1..66) {
-                conditions.add("book = ?")
-                args.add(bookId.toString())
-            } else if (testament == "OT") {
-                conditions.add("book <= 39")
-            } else if (testament == "NT") {
-                conditions.add("book >= 40")
-            }
+                conditions.add("$SQL_ACCENT_STRIP LIKE ?")
+                args.add("%$cleanQuery%")
 
-            val whereClause = "WHERE " + conditions.joinToString(" AND ")
-            val sql = "SELECT book, chapter, verse, text FROM bible_verses $whereClause ORDER BY book ASC, chapter ASC, verse ASC LIMIT ?"
-            args.add(limit.toString())
+                if (bookId != null && bookId in 1..66) {
+                    conditions.add("book = ?")
+                    args.add(bookId.toString())
+                } else if (testament == "OT") {
+                    conditions.add("book <= 39")
+                } else if (testament == "NT") {
+                    conditions.add("book >= 40")
+                }
 
-            val cursor = db.rawQuery(sql, args.toTypedArray())
-            cursor.use { c ->
-                val colBook = c.getColumnIndexOrThrow("book")
-                val colChap = c.getColumnIndexOrThrow("chapter")
-                val colVerse = c.getColumnIndexOrThrow("verse")
-                val colText = c.getColumnIndexOrThrow("text")
-                while (c.moveToNext()) {
-                    val rawText = c.getString(colText)
-                    results.add(
-                        OfflineVerseDto(
-                            bookId = c.getInt(colBook),
-                            chapter = c.getInt(colChap),
-                            verseNumber = c.getInt(colVerse),
-                            text = cleanVerseText(rawText)
+                val whereClause = "WHERE " + conditions.joinToString(" AND ")
+                val sql = "SELECT book, chapter, verse, text FROM bible_verses $whereClause ORDER BY book ASC, chapter ASC, verse ASC LIMIT ?"
+                args.add(limit.toString())
+
+                val cursor = db.rawQuery(sql, args.toTypedArray())
+                cursor.use { c ->
+                    val colBook = c.getColumnIndexOrThrow("book")
+                    val colChap = c.getColumnIndexOrThrow("chapter")
+                    val colVerse = c.getColumnIndexOrThrow("verse")
+                    val colText = c.getColumnIndexOrThrow("text")
+                    while (c.moveToNext()) {
+                        val rawText = c.getString(colText)
+                        results.add(
+                            OfflineVerseDto(
+                                bookId = c.getInt(colBook),
+                                chapter = c.getInt(colChap),
+                                verseNumber = c.getInt(colVerse),
+                                text = cleanVerseText(rawText)
+                            )
                         )
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Search error en asset $norm para query: $query", e)
+            }
+            return@withContext results
+        }
+
+        // 2. Downloaded versions in Room (NVI, NTV, LBLA)
+        if (dao != null) {
+            try {
+                val pattern = "%$cleanQuery%"
+                val entities = dao.searchVersesInVersion(
+                    pattern = pattern,
+                    version = norm,
+                    testament = testament,
+                    bookId = bookId,
+                    limit = limit
+                )
+                return@withContext entities.map {
+                    OfflineVerseDto(
+                        bookId = it.bookId,
+                        chapter = it.chapter,
+                        verseNumber = it.verseNumber,
+                        text = cleanVerseText(it.text)
                     )
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Search error en Room $norm para query: $query", e)
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Search error en $norm para query: $query", e)
         }
-        results
+
+        emptyList()
     }
 
     fun cleanVerseText(raw: String?): String {

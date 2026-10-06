@@ -58,6 +58,23 @@ interface BibleReaderDao {
     @Query("DELETE FROM bible_reader_verses WHERE bibleVersion = :version")
     suspend fun deleteVersesForVersion(version: String)
 
+    @Query("""
+        SELECT * FROM bible_reader_verses 
+        WHERE bibleVersion = :version 
+        AND replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(lower(text), 'á','a'), 'é','e'), 'í','i'), 'ó','o'), 'ú','u'), 'ü','u'), 'Á','a'), 'É','e'), 'Í','i'), 'Ó','o'), 'Ú','u'), 'Ü','u') LIKE :pattern 
+        AND (:bookId IS NULL OR bookId = :bookId) 
+        AND (:testament IS NULL OR (:testament = 'OT' AND bookId <= 39) OR (:testament = 'NT' AND bookId >= 40)) 
+        ORDER BY bookId ASC, chapter ASC, verseNumber ASC 
+        LIMIT :limit
+    """)
+    suspend fun searchVersesInVersion(
+        pattern: String,
+        version: String,
+        testament: String?,
+        bookId: Int?,
+        limit: Int = 100
+    ): List<BibleReaderVerseEntity>
+
     // === Highlights ===
     @Query("SELECT * FROM verse_highlights WHERE bookId = :bookId AND chapter = :chapter")
     fun getHighlights(bookId: Int, chapter: Int): Flow<List<VerseHighlightEntity>>
