@@ -39,9 +39,9 @@ enum class ReadingPlanType(
     ),
     BIBLE_STORIES(
         id = "BIBLE_STORIES",
-        title = "Historias y Sucesos Bíblicos",
-        description = "180 días con todas las historias y sucesos de la Biblia, con contexto histórico-cultural y enseñanza práctica para memorizar.",
-        totalDays = 180
+        title = "Historias Bíblicas",
+        description = "749 historias y acontecimientos bíblicos de Génesis a Apocalipsis, con búsqueda y lectura de pasajes.",
+        totalDays = 749
     )
 }
 

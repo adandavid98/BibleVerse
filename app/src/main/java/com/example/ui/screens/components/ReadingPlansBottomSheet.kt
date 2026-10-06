@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.bible.BibleReadingPlanCatalog
+import com.example.data.bible.BibleTextSanitizer
 import com.example.data.bible.ReadingPlanDay
 import com.example.data.bible.ReadingPlanType
 import com.example.data.preferences.ReadingPlanPreferences
@@ -73,7 +74,21 @@ fun ReadingPlansBottomSheet(
         currentListState.scrollToItem(targetIndex)
     }
 
-    var activeReadingDay by remember { mutableStateOf<ReadingPlanDay?>(null) }
+    val isStoriesPlan = progress.activePlanType == ReadingPlanType.BIBLE_STORIES
+    var searchQuery by remember { mutableStateOf("") }
+
+    val filteredDays = remember(currentDays, isStoriesPlan, searchQuery) {
+        if (!isStoriesPlan || searchQuery.isBlank()) {
+            currentDays
+        } else {
+            val queryClean = BibleTextSanitizer.removeAccents(searchQuery.trim()).lowercase()
+            currentDays.filter { day ->
+                val titleClean = BibleTextSanitizer.removeAccents(day.title).lowercase()
+                val summaryClean = BibleTextSanitizer.removeAccents(day.passagesSummary).lowercase()
+                titleClean.contains(queryClean) || summaryClean.contains(queryClean)
+            }
+        }
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -138,7 +153,7 @@ fun ReadingPlansBottomSheet(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "${progress.totalDays} Días • ${progress.activePlanType.title}",
+                            text = if (isStoriesPlan) "${progress.totalDays} Historias • ${progress.activePlanType.title}" else "${progress.totalDays} Días • ${progress.activePlanType.title}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -221,7 +236,7 @@ fun ReadingPlansBottomSheet(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "${progress.totalCompleted} de ${progress.totalDays} días leídos",
+                            text = if (isStoriesPlan) "${progress.totalCompleted} de ${progress.totalDays} historias leídas" else "${progress.totalCompleted} de ${progress.totalDays} días leídos",
                             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -249,6 +264,11 @@ fun ReadingPlansBottomSheet(
                     // "Continuar lectura" Quick Button
                     val currentDayNumber = progress.currentPlan.currentDay
                     val currentDayObj = currentDays.firstOrNull { it.dayNumber == currentDayNumber } ?: currentDays.first()
+                    val continueLabel = if (isStoriesPlan) {
+                        "Continuar: Historia #${currentDayObj.dayNumber} — ${currentDayObj.title}"
+                    } else {
+                        "Continuar lectura: Día ${currentDayObj.dayNumber} (${currentDayObj.passagesSummary})"
+                    }
                     Button(
                         onClick = {
                             preferences.setLastReadDay(progress.activePlanType, currentDayObj.dayNumber)
@@ -266,9 +286,11 @@ fun ReadingPlansBottomSheet(
                         ) {
                             Icon(Icons.Default.MenuBook, contentDescription = null, modifier = Modifier.size(18.dp))
                             Text(
-                                "Continuar lectura: Día ${currentDayObj.dayNumber} (${currentDayObj.passagesSummary})",
+                                text = continueLabel,
                                 fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                             )
                         }
                     }
@@ -277,48 +299,111 @@ fun ReadingPlansBottomSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Month Jump Quick Pills (Mes 1 .. Mes 12)
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                contentPadding = PaddingValues(vertical = 4.dp)
-            ) {
-                items(12) { monthIdx ->
-                    val targetDay = monthIdx * 30 + 1
-                    Surface(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .clickable {
-                                scope.launch {
-                                    val index = (targetDay - 1).coerceIn(0, currentDays.size - 1)
-                                    currentListState.animateScrollToItem(index)
-                                }
-                            },
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+            // Search box for stories
+            if (isStoriesPlan) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    placeholder = { Text("Buscar en 749 historias por título o palabra...", fontSize = 13.sp) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = "Buscar",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(
+                                    Icons.Default.Clear,
+                                    contentDescription = "Limpiar",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                    },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                    )
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            } else {
+                // Month Jump Quick Pills (Mes 1 .. Mes 12) for traditional/chronological 365-day plans
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    contentPadding = PaddingValues(vertical = 4.dp)
+                ) {
+                    items(12) { monthIdx ->
+                        val targetDay = monthIdx * 30 + 1
+                        Surface(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .clickable {
+                                    scope.launch {
+                                        val index = (targetDay - 1).coerceIn(0, currentDays.size - 1)
+                                        currentListState.animateScrollToItem(index)
+                                    }
+                                },
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                        ) {
+                            Text(
+                                text = "Mes ${monthIdx + 1}",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            // Days / Stories List
+            if (filteredDays.isEmpty() && searchQuery.isNotBlank()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(24.dp)
                     ) {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.size(40.dp)
+                        )
                         Text(
-                            text = "Mes ${monthIdx + 1}",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = "No se encontraron historias para \"$searchQuery\"",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }
                 }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // 365 Days List
-            LazyColumn(
-                state = currentListState,
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(bottom = 20.dp)
-            ) {
-                items(currentDays, key = { "${progress.activePlanType.name}_${it.dayNumber}" }) { day ->
-                    val isCompleted = progress.completedDays.contains(day.dayNumber)
-                    val isCurrentDay = day.dayNumber == progress.currentPlan.currentDay
+            } else {
+                LazyColumn(
+                    state = currentListState,
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(bottom = 20.dp)
+                ) {
+                    items(filteredDays, key = { "${progress.activePlanType.name}_${it.dayNumber}" }) { day ->
+                        val isCompleted = progress.completedDays.contains(day.dayNumber)
+                        val isCurrentDay = day.dayNumber == progress.currentPlan.currentDay
 
                     Card(
                         modifier = Modifier

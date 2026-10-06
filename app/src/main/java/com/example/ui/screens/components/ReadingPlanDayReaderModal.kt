@@ -587,8 +587,10 @@ fun ReadingPlanDayReaderModal(
                                     }
                                 }
 
-                                // Next day button (if available)
-                                if (onNextDay != null && day.dayNumber < 365) {
+                                // Next day / next story button (if available)
+                                if (onNextDay != null) {
+                                    val isStory = day.dayNumber > 365 || !day.title.startsWith("Día ")
+                                    val nextLabel = if (isStory) "Siguiente Historia" else "Continuar al Día ${day.dayNumber + 1}"
                                     OutlinedButton(
                                         onClick = onNextDay,
                                         modifier = Modifier
@@ -601,7 +603,7 @@ fun ReadingPlanDayReaderModal(
                                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                                         ) {
                                             Text(
-                                                "Continuar al Día ${day.dayNumber + 1}",
+                                                nextLabel,
                                                 fontWeight = FontWeight.SemiBold,
                                                 fontSize = 14.sp
                                             )
