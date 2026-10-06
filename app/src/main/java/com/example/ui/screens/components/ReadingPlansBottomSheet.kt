@@ -90,6 +90,8 @@ fun ReadingPlansBottomSheet(
         }
     }
 
+    var activeReadingDay by remember { mutableStateOf<ReadingPlanDay?>(null) }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -499,6 +501,7 @@ fun ReadingPlansBottomSheet(
             }
         }
     }
+}
 }
 
     // Isolated Daily Reader Sheet
