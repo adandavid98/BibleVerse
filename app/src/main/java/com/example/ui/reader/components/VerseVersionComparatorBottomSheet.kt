@@ -104,9 +104,18 @@ fun VerseVersionComparatorBottomSheet(
         }
     }
 
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { newState ->
+            // Prevent downward swipe / fling from accidentally closing the bottom sheet
+            newState != SheetValue.Hidden
+        }
+    )
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = sheetState,
+        dragHandle = null,
         containerColor = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ) {
