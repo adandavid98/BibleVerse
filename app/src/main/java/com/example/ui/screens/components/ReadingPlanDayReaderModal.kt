@@ -262,13 +262,22 @@ fun ReadingPlanDayReaderModal(
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                     }
-                                    Text(
-                                        text = day.storyNarrative,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontSize = fontSizeSp.sp,
-                                        lineHeight = (fontSizeSp * 1.55f).sp,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
+                                    val paragraphs = remember(day.storyNarrative) {
+                                        day.storyNarrative
+                                            .replace("\\n", "\n")
+                                            .split("\n\n")
+                                            .map { it.trim() }
+                                            .filter { it.isNotBlank() }
+                                    }
+                                    paragraphs.forEach { paragraph ->
+                                        Text(
+                                            text = paragraph,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontSize = fontSizeSp.sp,
+                                            lineHeight = (fontSizeSp * 1.55f).sp,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
                                 }
                             }
                         }

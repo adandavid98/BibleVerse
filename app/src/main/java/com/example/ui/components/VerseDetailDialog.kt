@@ -822,7 +822,7 @@ fun VerseDetailDialog(
                         ) {
                             Icon(Icons.Filled.Delete, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Eliminar este versículo manual")
+                            Text("Borrar versículo")
                         }
                     }
                 }
