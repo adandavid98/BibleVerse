@@ -54,10 +54,17 @@ fun ReadingPlanDayReaderModal(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
+    val richStoryDetail = remember(day.dayNumber) {
+        com.example.data.bible.BibleStoriesPlanCatalog.getStoryDetail(context, day.dayNumber)
+    }
+    val effectiveNarrative = richStoryDetail?.narrative?.takeIf { it.isNotBlank() } ?: day.storyNarrative
+    val effectiveHistoricalContext = richStoryDetail?.historicalContext?.takeIf { it.isNotBlank() } ?: day.historicalContext
+    val effectiveSpiritualLesson = richStoryDetail?.spiritualLesson?.takeIf { it.isNotBlank() } ?: day.spiritualLesson
+
     var fontSizeSp by remember { mutableStateOf(17f) }
     var isLoading by remember { mutableStateOf(true) }
     var segmentsData by remember { mutableStateOf<List<DaySegmentWithVerses>>(emptyMap<Int, String>().let { emptyList() }) }
-    var isVersesExpanded by remember(day) { mutableStateOf(day.storyNarrative.isBlank()) }
+    var isVersesExpanded by remember(day, effectiveNarrative) { mutableStateOf(effectiveNarrative.isBlank()) }
 
     val scope = rememberCoroutineScope()
     val prefsRepo = remember { com.example.data.preferences.ReaderPreferencesRepository(context.applicationContext) }
@@ -231,7 +238,7 @@ fun ReadingPlanDayReaderModal(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     // 1. Historia Narrada (si está disponible)
-                    if (day.storyNarrative.isNotBlank()) {
+                    if (effectiveNarrative.isNotBlank()) {
                         item(key = "story_narrative_${day.dayNumber}") {
                             Card(
                                 modifier = Modifier
@@ -262,8 +269,8 @@ fun ReadingPlanDayReaderModal(
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                     }
-                                    val paragraphs = remember(day.storyNarrative) {
-                                        day.storyNarrative
+                                    val paragraphs = remember(effectiveNarrative) {
+                                        effectiveNarrative
                                             .replace("\\n", "\n")
                                             .split("\n\n")
                                             .map { it.trim() }
@@ -284,7 +291,7 @@ fun ReadingPlanDayReaderModal(
                     }
 
                     // 2. Contexto Histórico-Cultural y Enseñanza
-                    if (day.historicalContext.isNotBlank() || day.spiritualLesson.isNotBlank()) {
+                    if (effectiveHistoricalContext.isNotBlank() || effectiveSpiritualLesson.isNotBlank()) {
                         item(key = "story_insights_${day.dayNumber}") {
                             Card(
                                 modifier = Modifier
@@ -299,7 +306,7 @@ fun ReadingPlanDayReaderModal(
                                     modifier = Modifier.padding(16.dp),
                                     verticalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
-                                    if (day.historicalContext.isNotBlank()) {
+                                    if (effectiveHistoricalContext.isNotBlank()) {
                                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                             Row(
                                                 verticalAlignment = Alignment.CenterVertically,
@@ -318,7 +325,7 @@ fun ReadingPlanDayReaderModal(
                                                 )
                                             }
                                             Text(
-                                                text = day.historicalContext,
+                                                text = effectiveHistoricalContext,
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                 lineHeight = 20.sp
@@ -326,8 +333,8 @@ fun ReadingPlanDayReaderModal(
                                         }
                                     }
 
-                                    if (day.spiritualLesson.isNotBlank()) {
-                                        if (day.historicalContext.isNotBlank()) {
+                                    if (effectiveSpiritualLesson.isNotBlank()) {
+                                        if (effectiveHistoricalContext.isNotBlank()) {
                                             Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                                         }
                                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -348,7 +355,7 @@ fun ReadingPlanDayReaderModal(
                                                 )
                                             }
                                             Text(
-                                                text = day.spiritualLesson,
+                                                text = effectiveSpiritualLesson,
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                 lineHeight = 20.sp

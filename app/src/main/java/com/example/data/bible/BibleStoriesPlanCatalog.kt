@@ -1,11 +1,60 @@
 package com.example.data.bible
 
+import android.content.Context
+import android.util.Log
+import org.json.JSONArray
+import java.util.concurrent.ConcurrentHashMap
+
+data class BibleStoryDetail(
+    val num: Int,
+    val title: String,
+    val narrative: String,
+    val historicalContext: String,
+    val spiritualLesson: String
+)
+
 /**
  * Catálogo del Plan de Historias Bíblicas (749 Historias).
  * Contiene el relato bíblico desarrollado de 4 párrafos, contexto histórico-cultural,
  * lección para memorizar y referencias bíblicas de cada historia canónica de Génesis a Apocalipsis.
  */
 object BibleStoriesPlanCatalog {
+
+    private const val TAG = "BibleStoriesCatalog"
+    private val storyDetailCache = ConcurrentHashMap<Int, BibleStoryDetail>()
+    @Volatile
+    private var isAssetLoaded = false
+
+    fun getStoryDetail(context: Context, dayNumber: Int): BibleStoryDetail? {
+        ensureLoaded(context)
+        return storyDetailCache[dayNumber]
+    }
+
+    private fun ensureLoaded(context: Context) {
+        if (isAssetLoaded) return
+        synchronized(storyDetailCache) {
+            if (isAssetLoaded) return
+            try {
+                context.assets.open("bible/bible_stories_749.json").use { stream ->
+                    val jsonStr = stream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                    val array = JSONArray(jsonStr)
+                    for (i in 0 until array.length()) {
+                        val obj = array.getJSONObject(i)
+                        val num = obj.getInt("num")
+                        val title = obj.optString("title", "")
+                        val narr = obj.optString("narr", "")
+                        val hist = obj.optString("hist", "")
+                        val spir = obj.optString("spir", "")
+                        storyDetailCache[num] = BibleStoryDetail(num, title, narr, hist, spir)
+                    }
+                    isAssetLoaded = true
+                    Log.d(TAG, "Cargadas ${storyDetailCache.size} historias bíblicas extensas desde assets.")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error cargando bible_stories_749.json", e)
+            }
+        }
+    }
 
     val storiesPlan: List<ReadingPlanDay> by lazy {
         chunk1() +
