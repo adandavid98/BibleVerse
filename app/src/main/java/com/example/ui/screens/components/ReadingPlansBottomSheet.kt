@@ -513,6 +513,7 @@ fun ReadingPlansBottomSheet(
         ReadingPlanDayReaderModal(
             day = dayToRead,
             isCompleted = isDayCompleted,
+            planType = progress.activePlanType,
             onToggleCompleted = { dayNum ->
                 preferences.toggleDayCompleted(dayNum)
             },

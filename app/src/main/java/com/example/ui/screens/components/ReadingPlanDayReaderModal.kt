@@ -48,23 +48,44 @@ data class DaySegmentWithVerses(
 fun ReadingPlanDayReaderModal(
     day: ReadingPlanDay,
     isCompleted: Boolean,
+    planType: com.example.data.bible.ReadingPlanType = com.example.data.bible.ReadingPlanType.TRADITIONAL,
     onToggleCompleted: (Int) -> Unit,
     onNextDay: (() -> Unit)? = null,
     onOpenInFullBible: (bookId: Int, chapter: Int, verse: Int) -> Unit,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    val richStoryDetail = remember(day.dayNumber) {
-        com.example.data.bible.BibleStoriesPlanCatalog.getStoryDetail(context, day.dayNumber)
+    val isStoriesPlan = planType == com.example.data.bible.ReadingPlanType.BIBLE_STORIES
+
+    val richStoryDetail = remember(day.dayNumber, isStoriesPlan) {
+        if (isStoriesPlan) {
+            com.example.data.bible.BibleStoriesPlanCatalog.getStoryDetail(context, day.dayNumber)
+        } else {
+            null
+        }
     }
-    val effectiveNarrative = richStoryDetail?.narrative?.takeIf { it.isNotBlank() } ?: day.storyNarrative
-    val effectiveHistoricalContext = richStoryDetail?.historicalContext?.takeIf { it.isNotBlank() } ?: day.historicalContext
-    val effectiveSpiritualLesson = richStoryDetail?.spiritualLesson?.takeIf { it.isNotBlank() } ?: day.spiritualLesson
+    val effectiveNarrative = if (isStoriesPlan) {
+        richStoryDetail?.narrative?.takeIf { it.isNotBlank() } ?: day.storyNarrative
+    } else {
+        ""
+    }
+    val effectiveHistoricalContext = if (isStoriesPlan) {
+        richStoryDetail?.historicalContext?.takeIf { it.isNotBlank() } ?: day.historicalContext
+    } else {
+        ""
+    }
+    val effectiveSpiritualLesson = if (isStoriesPlan) {
+        richStoryDetail?.spiritualLesson?.takeIf { it.isNotBlank() } ?: day.spiritualLesson
+    } else {
+        ""
+    }
 
     var fontSizeSp by remember { mutableStateOf(17f) }
     var isLoading by remember { mutableStateOf(true) }
-    var segmentsData by remember { mutableStateOf<List<DaySegmentWithVerses>>(emptyMap<Int, String>().let { emptyList() }) }
-    var isVersesExpanded by remember(day, effectiveNarrative) { mutableStateOf(effectiveNarrative.isBlank()) }
+    var segmentsData by remember { mutableStateOf<List<DaySegmentWithVerses>>(emptyList()) }
+    var isVersesExpanded by remember(day, effectiveNarrative, isStoriesPlan) {
+        mutableStateOf(!isStoriesPlan || effectiveNarrative.isBlank())
+    }
 
     val scope = rememberCoroutineScope()
     val prefsRepo = remember { com.example.data.preferences.ReaderPreferencesRepository(context.applicationContext) }
@@ -381,7 +402,7 @@ fun ReadingPlanDayReaderModal(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { isVersesExpanded = !isVersesExpanded }
+                                    .then(if (isStoriesPlan) Modifier.clickable { isVersesExpanded = !isVersesExpanded } else Modifier)
                                     .padding(horizontal = 14.dp, vertical = 12.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
@@ -399,7 +420,7 @@ fun ReadingPlanDayReaderModal(
                                     )
                                     Column {
                                         Text(
-                                            text = if (day.storyNarrative.isNotBlank()) "Texto Bíblico de Referencia" else "Pasajes Bíblicos",
+                                            text = if (isStoriesPlan) "Texto Bíblico de Referencia" else "Pasajes Bíblicos",
                                             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
@@ -449,12 +470,14 @@ fun ReadingPlanDayReaderModal(
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }
-                                    IconButton(onClick = { isVersesExpanded = !isVersesExpanded }) {
-                                        Icon(
-                                            if (isVersesExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                            contentDescription = if (isVersesExpanded) "Colapsar" else "Expandir",
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
+                                    if (isStoriesPlan) {
+                                        IconButton(onClick = { isVersesExpanded = !isVersesExpanded }) {
+                                            Icon(
+                                                if (isVersesExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                                contentDescription = if (isVersesExpanded) "Colapsar" else "Expandir",
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -562,7 +585,11 @@ fun ReadingPlanDayReaderModal(
                                 }
 
                                 Text(
-                                    text = if (isCompleted) "¡Día ${day.dayNumber} Completado!" else "¡Has llegado al final de la lectura!",
+                                    text = if (isCompleted) {
+                                        if (isStoriesPlan) "¡Historia #${day.dayNumber} Completada!" else "¡Día ${day.dayNumber} Completado!"
+                                    } else {
+                                        "¡Has llegado al final de la lectura!"
+                                    },
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     color = MaterialTheme.colorScheme.onSurface,
                                     textAlign = TextAlign.Center
@@ -570,9 +597,9 @@ fun ReadingPlanDayReaderModal(
 
                                 Text(
                                     text = if (isCompleted) {
-                                        "Tu progreso ha sido guardado. Puedes continuar con el siguiente día."
+                                        if (isStoriesPlan) "Tu progreso ha sido guardado. Puedes continuar con la siguiente historia." else "Tu progreso ha sido guardado. Puedes continuar con el siguiente día."
                                     } else {
-                                        "Presiona el botón a continuación para registrar tu avance de hoy."
+                                        if (isStoriesPlan) "Presiona el botón a continuación para registrar esta historia como leída." else "Presiona el botón a continuación para registrar tu avance de hoy."
                                     },
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -596,7 +623,11 @@ fun ReadingPlanDayReaderModal(
                                     ) {
                                         Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(20.dp))
                                         Text(
-                                            text = if (isCompleted) "✔ Día ${day.dayNumber} Completado" else "Completar Día ${day.dayNumber}",
+                                            text = if (isCompleted) {
+                                                if (isStoriesPlan) "✔ Historia #${day.dayNumber} Completada" else "✔ Día ${day.dayNumber} Completado"
+                                            } else {
+                                                if (isStoriesPlan) "Completar Historia #${day.dayNumber}" else "Completar Día ${day.dayNumber}"
+                                            },
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 15.sp
                                         )
@@ -605,8 +636,7 @@ fun ReadingPlanDayReaderModal(
 
                                 // Next day / next story button (if available)
                                 if (onNextDay != null) {
-                                    val isStory = day.dayNumber > 365 || !day.title.startsWith("Día ")
-                                    val nextLabel = if (isStory) "Siguiente Historia" else "Continuar al Día ${day.dayNumber + 1}"
+                                    val nextLabel = if (isStoriesPlan) "Siguiente Historia" else "Continuar al Día ${day.dayNumber + 1}"
                                     OutlinedButton(
                                         onClick = onNextDay,
                                         modifier = Modifier
