@@ -43,16 +43,17 @@ class BibleReaderRepository(
             dao.deleteVersesLike("%Palabra de Dios para edificación%")
         } catch (_: Exception) {}
 
-        // One-time purge of earlier contaminated TLA/DHH/NBLA cache so they are freshly
+        // One-time purge of earlier contaminated TLA/DHH/NBLA/NVI cache so they are freshly
         // populated with genuine authentic text from their respective asset packages.
         try {
             val prefs = context.getSharedPreferences("bible_cache_maintenance", Context.MODE_PRIVATE)
-            if (!prefs.getBoolean("clean_asset_versions_v8", false)) {
+            if (!prefs.getBoolean("clean_asset_versions_v9", false)) {
                 dao.deleteVersesForVersion("TLA")
                 dao.deleteVersesForVersion("DHH")
                 dao.deleteVersesForVersion("DHH94PC")
                 dao.deleteVersesForVersion("NBLA")
-                prefs.edit().putBoolean("clean_asset_versions_v8", true).apply()
+                dao.deleteVersesForVersion("NVI")
+                prefs.edit().putBoolean("clean_asset_versions_v9", true).apply()
             }
         } catch (_: Exception) {}
 

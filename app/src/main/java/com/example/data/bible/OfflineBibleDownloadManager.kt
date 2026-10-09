@@ -35,7 +35,8 @@ object OfflineBibleDownloadManager {
             "NBLA" to VersionDownloadState.Downloaded,
             "TLA" to VersionDownloadState.Downloaded,
             "DHH" to VersionDownloadState.Downloaded,
-            "DHH94PC" to VersionDownloadState.Downloaded
+            "DHH94PC" to VersionDownloadState.Downloaded,
+            "NVI" to VersionDownloadState.Downloaded
         )
     )
     val downloadStates: StateFlow<Map<String, VersionDownloadState>> = _downloadStates.asStateFlow()

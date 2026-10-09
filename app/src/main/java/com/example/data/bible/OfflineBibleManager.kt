@@ -29,11 +29,12 @@ object OfflineBibleManager {
         return when (val upper = version.uppercase().trim()) {
             "RV1960", "REINA-VALERA 1960" -> "RVR1960"
             "DHH94PC" -> "DHH"
+            "NUEVA VERSIÓN INTERNACIONAL" -> "NVI"
             else -> upper
         }
     }
 
-    private val ASSET_VERSIONS = setOf("RVR1960", "NBLA", "TLA", "DHH")
+    private val ASSET_VERSIONS = setOf("RVR1960", "NBLA", "TLA", "DHH", "NVI")
 
     fun isAssetVersion(version: String): Boolean {
         val norm = normalizeVersion(version)
@@ -43,10 +44,10 @@ object OfflineBibleManager {
     private fun getDbFile(context: Context): File {
         val standardDb = context.getDatabasePath(DB_FILE_NAME)
         val filesDb = File(context.filesDir, DB_FILE_NAME)
-        if (filesDb.exists() && filesDb.length() > 10_000_000L) {
+        if (filesDb.exists() && filesDb.length() > 26_000_000L) {
             return filesDb
         }
-        if (standardDb.exists() && standardDb.length() > 10_000_000L) {
+        if (standardDb.exists() && standardDb.length() > 26_000_000L) {
             return standardDb
         }
         val parent = standardDb.parentFile ?: context.filesDir
@@ -71,7 +72,7 @@ object OfflineBibleManager {
             val targetFile = getDbFile(context)
 
             // If file missing or incomplete, copy directly from assets
-            if (!targetFile.exists() || targetFile.length() < 10_000_000L) {
+            if (!targetFile.exists() || targetFile.length() < 26_000_000L) {
                 try {
                     val parent = targetFile.parentFile ?: context.filesDir
                     if (!parent.exists()) parent.mkdirs()
@@ -86,7 +87,7 @@ object OfflineBibleManager {
                         }
                     }
 
-                    if (tempFile.length() > 10_000_000L) {
+                    if (tempFile.length() > 26_000_000L) {
                         try { SQLiteDatabase.deleteDatabase(targetFile) } catch (_: Exception) { targetFile.delete() }
                         val renamed = tempFile.renameTo(targetFile)
                         if (!renamed) {
