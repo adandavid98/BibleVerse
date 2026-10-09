@@ -39,10 +39,10 @@ fun CreateCustomPlanDialog(
     onDismiss: () -> Unit,
     onCreatePlan: (title: String, description: String, selectedBookIds: List<Int>, mode: PlanDistributionMode, targetDays: Int, chaptersPerDay: Int) -> Unit
 ) {
-    // Selected Preset & Identity
-    var selectedPresetId by remember { mutableStateOf("gospels") }
-    var planTitle by remember { mutableStateOf("Los 4 Evangelios") }
-    var selectedBookIds by remember { mutableStateOf(setOf(40, 41, 42, 43)) }
+    // Selected Preset & Identity (starts clean with no preselection)
+    var selectedPresetId by remember { mutableStateOf<String?>(null) }
+    var planTitle by remember { mutableStateOf("") }
+    var selectedBookIds by remember { mutableStateOf(emptySet<Int>()) }
 
     // Distribution Mode
     var distributionMode by remember { mutableStateOf(PlanDistributionMode.BY_TARGET_DAYS) }
@@ -61,7 +61,9 @@ fun CreateCustomPlanDialog(
 
     // Dynamic duration preview
     val calculatedDays = remember(totalChapters, distributionMode, targetDays, chaptersPerDay) {
-        if (distributionMode == PlanDistributionMode.BY_TARGET_DAYS) {
+        if (totalChapters == 0) {
+            0
+        } else if (distributionMode == PlanDistributionMode.BY_TARGET_DAYS) {
             targetDays.coerceIn(1, totalChapters.coerceAtLeast(1))
         } else {
             val perDay = chaptersPerDay.coerceAtLeast(1)
@@ -70,7 +72,9 @@ fun CreateCustomPlanDialog(
     }
 
     val calculatedAvgPerDay = remember(totalChapters, distributionMode, targetDays, chaptersPerDay) {
-        if (distributionMode == PlanDistributionMode.BY_TARGET_DAYS) {
+        if (totalChapters == 0) {
+            "0"
+        } else if (distributionMode == PlanDistributionMode.BY_TARGET_DAYS) {
             val days = targetDays.coerceIn(1, totalChapters.coerceAtLeast(1))
             val avg = totalChapters.toFloat() / days.toFloat()
             String.format(Locale.getDefault(), "%.1f", avg)
@@ -80,10 +84,14 @@ fun CreateCustomPlanDialog(
     }
 
     val estimatedEndDateString = remember(calculatedDays) {
-        val cal = Calendar.getInstance()
-        cal.add(Calendar.DAY_OF_YEAR, calculatedDays)
-        val format = SimpleDateFormat("d 'de' MMMM, yyyy", Locale("es", "ES"))
-        format.format(cal.time)
+        if (calculatedDays == 0) {
+            "Sin libros seleccionados"
+        } else {
+            val cal = Calendar.getInstance()
+            cal.add(Calendar.DAY_OF_YEAR, calculatedDays)
+            val format = SimpleDateFormat("d 'de' MMMM, yyyy", Locale("es", "ES"))
+            format.format(cal.time)
+        }
     }
 
     Dialog(
@@ -170,9 +178,16 @@ fun CreateCustomPlanDialog(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(12.dp))
                                         .clickable {
-                                            selectedPresetId = preset.id
-                                            planTitle = preset.title
-                                            selectedBookIds = preset.bookIds.toSet()
+                                            if (isSelected) {
+                                                // Toggling off the preset to return to clean state
+                                                selectedPresetId = null
+                                                planTitle = ""
+                                                selectedBookIds = emptySet()
+                                            } else {
+                                                selectedPresetId = preset.id
+                                                planTitle = preset.title
+                                                selectedBookIds = preset.bookIds.toSet()
+                                            }
                                         },
                                     shape = RoundedCornerShape(12.dp),
                                     color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
@@ -206,9 +221,17 @@ fun CreateCustomPlanDialog(
                         )
                         OutlinedTextField(
                             value = planTitle,
-                            onValueChange = { planTitle = it },
+                            onValueChange = {
+                                planTitle = it
+                                if (selectedPresetId != null) {
+                                    val currentPreset = CustomPlanPresets.presets.find { p -> p.id == selectedPresetId }
+                                    if (currentPreset?.title != it) {
+                                        selectedPresetId = null
+                                    }
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text("Ej. Los 4 Evangelios en 30 días") },
+                            placeholder = { Text("Ej. Mi Plan Personalizado, Evangelios, etc.") },
                             singleLine = true,
                             leadingIcon = {
                                 Icon(Icons.Default.Book, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
@@ -266,17 +289,25 @@ fun CreateCustomPlanDialog(
                                     }
                                 }
 
-                                val bookNames = remember(selectedBookIds) {
-                                    selectedBookIds.mapNotNull { id -> BibleCatalog.books.find { it.bookId == id }?.name }.take(6)
+                                if (selectedBookIds.isEmpty()) {
+                                    Text(
+                                        text = "Ningún libro seleccionado aún. Toca 'Personalizar libros' para elegir o selecciona un preset sugerido arriba.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                } else {
+                                    val bookNames = remember(selectedBookIds) {
+                                        selectedBookIds.mapNotNull { id -> BibleCatalog.books.find { it.bookId == id }?.name }.take(6)
+                                    }
+                                    val hasMore = selectedBookIds.size > 6
+                                    Text(
+                                        text = bookNames.joinToString(", ") + if (hasMore) " y ${selectedBookIds.size - 6} más..." else "",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
                                 }
-                                val hasMore = selectedBookIds.size > 6
-                                Text(
-                                    text = bookNames.joinToString(", ") + if (hasMore) " y ${selectedBookIds.size - 6} más..." else "",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis
-                                )
                             }
                         }
                     }
@@ -396,17 +427,31 @@ fun CreateCustomPlanDialog(
                                     )
                                 }
                                 Column {
-                                    Text(
-                                        text = "$calculatedDays días en total • ~$calculatedAvgPerDay caps/día",
-                                        fontWeight = FontWeight.Bold,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = "Fecha estimada de finalización: $estimatedEndDateString",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                    if (selectedBookIds.isEmpty()) {
+                                        Text(
+                                            text = "Selecciona libros para calcular el plan",
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = "La duración se ajustará según los libros elegidos",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    } else {
+                                        Text(
+                                            text = "$calculatedDays días en total • ~$calculatedAvgPerDay caps/día",
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = "Fecha estimada de finalización: $estimatedEndDateString",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -445,7 +490,9 @@ fun CreateCustomPlanDialog(
                         Icon(Icons.Default.Check, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Crear y Comenzar Plan",
+                            text = if (selectedBookIds.isEmpty()) "Selecciona libros primero"
+                                   else if (planTitle.isBlank()) "Ingresa un nombre para el plan"
+                                   else "Crear y Comenzar Plan",
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp
                         )
@@ -462,6 +509,15 @@ fun CreateCustomPlanDialog(
             onDismiss = { showBookPickerSheet = false },
             onApply = { newSelection ->
                 selectedBookIds = newSelection
+                selectedPresetId = null
+                if (planTitle.isBlank() && newSelection.isNotEmpty()) {
+                    if (newSelection.size == 1) {
+                        val singleName = BibleCatalog.books.find { it.bookId == newSelection.first() }?.name ?: ""
+                        planTitle = "Lectura de $singleName"
+                    } else {
+                        planTitle = "Plan Personalizado (${newSelection.size} libros)"
+                    }
+                }
                 showBookPickerSheet = false
             }
         )
@@ -535,28 +591,39 @@ private fun CustomBookPickerModal(
                 // Quick Select Buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     OutlinedButton(
                         onClick = { tempSelected = (1..66).toSet() },
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(10.dp)
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 6.dp)
                     ) {
-                        Text("Todos (66)", fontSize = 12.sp)
+                        Text("Todos (66)", fontSize = 11.sp)
+                    }
+                    OutlinedButton(
+                        onClick = { tempSelected = (1..39).toSet() },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 6.dp)
+                    ) {
+                        Text("Solo AT (39)", fontSize = 11.sp)
                     }
                     OutlinedButton(
                         onClick = { tempSelected = (40..66).toSet() },
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(10.dp)
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 6.dp)
                     ) {
-                        Text("Solo NT (27)", fontSize = 12.sp)
+                        Text("Solo NT (27)", fontSize = 11.sp)
                     }
                     OutlinedButton(
                         onClick = { tempSelected = emptySet() },
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(10.dp)
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 6.dp)
                     ) {
-                        Text("Limpiar", fontSize = 12.sp)
+                        Text("Limpiar", fontSize = 11.sp)
                     }
                 }
 
