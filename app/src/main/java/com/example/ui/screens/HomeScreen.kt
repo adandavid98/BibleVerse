@@ -1,113 +1,48 @@
 package com.example.ui.screens
 
-import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Alarm
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.AutoStories
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Brightness4
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Cloud
-import com.example.ui.reader.BibleReaderScreen
-import com.example.ui.reader.viewmodel.BibleReaderViewModel
-import androidx.compose.material.icons.filled.CloudDone
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FormatSize
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.Nightlight
-import androidx.compose.material.icons.filled.NotificationsActive
-import androidx.compose.material.icons.filled.PictureAsPdf
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.ArrowForward
-import com.example.ui.screens.components.ReadingPlansBottomSheet
-import com.example.data.bible.OfflineBibleManager
-import com.example.data.bible.OfflineVerseDto
-import com.example.data.bible.BibleCatalog
-import com.example.data.bible.BibleBook
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.MenuBook
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.ui.text.withStyle
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -117,37 +52,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.BuildConfig
-import com.example.data.model.VerseEntity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.data.bible.BibleCatalog
 import com.example.ui.components.AddVerseDialog
-import com.example.ui.components.CloudSyncDialog
-import com.example.ui.components.ExportDialog
-import com.example.ui.components.UpdateDialog
-import com.example.ui.components.VerseCard
-import com.example.ui.components.VerseDetailDialog
-import com.example.ui.theme.AppReadingTheme
-import com.example.ui.theme.BibleHighlightColors
 import com.example.ui.components.BibleChatDialog
-import androidx.compose.material.icons.filled.AutoAwesome
+import com.example.ui.components.CloudSyncDialog
+import com.example.ui.components.UpdateDialog
+import com.example.ui.components.VerseDetailDialog
+import com.example.ui.reader.BibleReaderScreen
+import com.example.ui.reader.viewmodel.BibleReaderViewModel
+import com.example.ui.screens.components.ReadingPlansBottomSheet
 import com.example.ui.viewmodel.BibleUiState
 import com.example.ui.viewmodel.BibleViewModel
 import com.example.ui.viewmodel.VerseFilter
-import com.example.update.UpdateDownloadStatus
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.material.icons.filled.SystemUpdate
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.OpenInBrowser
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Edit
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -165,6 +86,7 @@ fun HomeScreen(
     var selectedTab by remember { mutableIntStateOf(0) }
     val versesListState = rememberLazyListState()
     var showReadingPlans by remember { mutableStateOf(false) }
+    var readingPlansInitialTab by remember { mutableIntStateOf(0) }
 
     val showUpdateDialog by viewModel.showUpdateDialog.collectAsStateWithLifecycle()
     val updateInfo by viewModel.updateInfo.collectAsStateWithLifecycle()
@@ -176,6 +98,11 @@ fun HomeScreen(
     val isChatLoading by viewModel.isChatLoading.collectAsStateWithLifecycle()
     val isGeneratingContext by viewModel.isGeneratingContext.collectAsStateWithLifecycle()
     val readerUiState by readerViewModel.uiState.collectAsStateWithLifecycle()
+
+    // Smooth Android back button handling: Return from Settings to home
+    BackHandler(enabled = selectedTab == 4) {
+        selectedTab = 0
+    }
 
     // Notify user of sync messages
     LaunchedEffect(uiState.syncStatusMessage) {
@@ -189,7 +116,8 @@ fun HomeScreen(
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            if (selectedTab != 1) {
+            // Main TopBar displayed on main tabs (0, 2, 3). Hidden on Reader (1) and Settings (4)
+            if (selectedTab in listOf(0, 2, 3)) {
                 TopAppBar(
                     title = {
                         Row(
@@ -230,6 +158,7 @@ fun HomeScreen(
                         }
                     },
                     actions = {
+                        // AI Assistant action button
                         IconButton(
                             onClick = { viewModel.showBibleChat(true) },
                             modifier = Modifier.testTag("btn_top_chat_ai")
@@ -241,17 +170,7 @@ fun HomeScreen(
                             )
                         }
 
-                        IconButton(
-                            onClick = { viewModel.showAddVerseDialog(true) },
-                            modifier = Modifier.testTag("btn_top_add")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Add,
-                                contentDescription = "Añadir Versículo Manual",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-
+                        // Reading Plans action button
                         IconButton(
                             onClick = { showReadingPlans = true },
                             modifier = Modifier.testTag("btn_top_reading_plans")
@@ -263,6 +182,7 @@ fun HomeScreen(
                             )
                         }
 
+                        // Settings action button
                         IconButton(
                             onClick = { selectedTab = 4 },
                             modifier = Modifier.testTag("btn_top_settings")
@@ -281,7 +201,8 @@ fun HomeScreen(
             }
         },
         bottomBar = {
-            val showBottomBar = selectedTab != 1 || readerUiState.isReaderBarsVisible
+            // Bottom navigation bar only on tabs 0..3 (hidden in Settings to avoid phantom unselected tabs)
+            val showBottomBar = (selectedTab in 0..3) && (selectedTab != 1 || readerUiState.isReaderBarsVisible)
 
             AnimatedVisibility(
                 visible = showBottomBar,
@@ -339,31 +260,15 @@ fun HomeScreen(
             }
         },
         floatingActionButton = {
+            // Single, focused FAB: Dedicated Add Verse action without confusing duplication
             if (selectedTab == 0 || selectedTab == 3) {
-                Column(
-                    horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                FloatingActionButton(
+                    onClick = { viewModel.showAddVerseDialog(true) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.testTag("fab_add_verse")
                 ) {
-                    SmallFloatingActionButton(
-                        onClick = { viewModel.showBibleChat(true) },
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.testTag("fab_bible_chat")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.AutoAwesome,
-                            contentDescription = "Consultar Asistente Bíblico IA"
-                        )
-                    }
-
-                    FloatingActionButton(
-                        onClick = { viewModel.showAddVerseDialog(true) },
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.testTag("fab_add_verse")
-                    ) {
-                        Icon(Icons.Filled.Add, contentDescription = "Añadir Versículo")
-                    }
+                    Icon(Icons.Filled.Add, contentDescription = "Añadir Versículo")
                 }
             }
         }
@@ -372,7 +277,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    if (selectedTab == 1 && !readerUiState.isReaderBarsVisible) {
+                    if ((selectedTab == 1 && !readerUiState.isReaderBarsVisible) || selectedTab == 4) {
                         PaddingValues(0.dp)
                     } else {
                         paddingValues
@@ -384,6 +289,10 @@ fun HomeScreen(
                 0 -> VersesListTab(
                     viewModel = viewModel,
                     uiState = uiState,
+                    lastReadBookName = readerUiState.currentBook?.name ?: "Génesis",
+                    lastReadBookId = readerUiState.currentBook?.id ?: 1,
+                    lastReadChapter = readerUiState.currentChapter,
+                    lastReadVersion = readerUiState.preferences.bibleVersion,
                     listState = versesListState,
                     onOpenReadingPlans = { showReadingPlans = true },
                     onNavigateToReader = { bookId, chapter, verse ->
@@ -401,7 +310,15 @@ fun HomeScreen(
                     }
                 )
                 3 -> FavoritesAndNotesTab(viewModel, uiState)
-                4 -> SettingsTab(viewModel, uiState, onBack = { selectedTab = 0 })
+                4 -> SettingsTab(
+                    viewModel = viewModel,
+                    uiState = uiState,
+                    onBack = { selectedTab = 0 },
+                    onOpenReadingPlans = { tab ->
+                        readingPlansInitialTab = tab
+                        showReadingPlans = true
+                    }
+                )
             }
         }
     }
@@ -511,1549 +428,13 @@ fun HomeScreen(
 
     if (showReadingPlans) {
         ReadingPlansBottomSheet(
+            viewModel = viewModel,
+            initialTab = readingPlansInitialTab,
             onNavigateToReader = { bookId, chapter, verse ->
                 readerViewModel.navigateToVerse(bookId, chapter, verse)
                 selectedTab = 1
             },
             onDismiss = { showReadingPlans = false }
         )
-    }
-}
-
-@Composable
-fun VersesListTab(
-    viewModel: BibleViewModel,
-    uiState: BibleUiState,
-    listState: LazyListState = rememberLazyListState(),
-    onOpenReadingPlans: () -> Unit = {},
-    onNavigateToReader: (bookId: Int, chapter: Int, verse: Int) -> Unit = { _, _, _ -> }
-) {
-    val context = LocalContext.current
-    val otCount = remember(uiState.verses) { uiState.verses.count { it.testament.contains("Antiguo", ignoreCase = true) } }
-    val ntCount = remember(uiState.verses) { uiState.verses.count { it.testament.contains("Nuevo", ignoreCase = true) } }
-
-    LazyColumn(
-        state = listState,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-        contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp)
-    ) {
-        // Verse of the Day Card (Destacado del Día)
-        uiState.verseOfTheDay?.let { vod ->
-            item {
-                VerseOfTheDayCard(
-                    verse = vod,
-                    fontScale = uiState.fontSizeScale,
-                    onClick = { viewModel.openVerseDetail(vod) },
-                    onFavoriteToggle = { viewModel.toggleFavorite(vod) },
-                    onShare = { viewModel.shareVerse(context, vod) }
-                )
-            }
-        }
-
-        // Reading Plan Quick Banner
-        item {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .clickable { onOpenReadingPlans() },
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
-                )
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(
-                        modifier = Modifier.weight(1f),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    Icons.Default.CalendarMonth,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-                        Column {
-                            Text(
-                                text = "Plan de Lectura Anual",
-                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = "365 días • Clásico y Cronológico",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                    Button(
-                        onClick = onOpenReadingPlans,
-                        shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text("Ver Plan", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
-        }
-
-        // Filter Pills: Todos, Antiguo Testamento, Nuevo Testamento
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterChip(
-                    selected = uiState.selectedFilter == VerseFilter.TODOS,
-                    onClick = { viewModel.onFilterSelected(VerseFilter.TODOS) },
-                    label = { Text("Todos (${uiState.verses.size})") },
-                    modifier = Modifier.testTag("filter_all")
-                )
-                FilterChip(
-                    selected = uiState.selectedFilter == VerseFilter.ANTIGUO,
-                    onClick = { viewModel.onFilterSelected(VerseFilter.ANTIGUO) },
-                    label = { Text("Antiguo Testamento ($otCount)") },
-                    modifier = Modifier.testTag("filter_ot")
-                )
-                FilterChip(
-                    selected = uiState.selectedFilter == VerseFilter.NUEVO,
-                    onClick = { viewModel.onFilterSelected(VerseFilter.NUEVO) },
-                    label = { Text("Nuevo Testamento ($ntCount)") },
-                    modifier = Modifier.testTag("filter_nt")
-                )
-            }
-        }
-
-        // Verses Cards List
-        items(
-            items = uiState.filteredVerses,
-            key = { it.id }
-        ) { verse ->
-            VerseCard(
-                verse = verse,
-                fontScale = uiState.fontSizeScale,
-                onClick = { viewModel.openVerseDetail(verse) },
-                onFavoriteToggle = { viewModel.toggleFavorite(verse) },
-                onShare = { viewModel.shareVerse(context, verse) },
-                onHighlightClick = { viewModel.openVerseDetail(verse) }
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SearchTab(
-    viewModel: BibleViewModel,
-    uiState: BibleUiState,
-    onNavigateToReader: (bookId: Int, chapter: Int, verse: Int) -> Unit = { _, _, _ -> }
-) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val readerDao = remember { com.example.data.local.BibleDatabase.getDatabase(context.applicationContext).bibleReaderDao() }
-    val prefsRepo = remember { com.example.data.preferences.ReaderPreferencesRepository(context.applicationContext) }
-    val readerPrefs by prefsRepo.readerPreferences.collectAsState(initial = null)
-    val defaultVersion = readerPrefs?.bibleVersion ?: "RVR1960"
-
-    var selectedVersionCode by remember { mutableStateOf<String?>(null) }
-    val activeVersion = selectedVersionCode ?: defaultVersion
-    val downloadStates by com.example.data.bible.OfflineBibleDownloadManager.downloadStates.collectAsState()
-    var isVersionPickerOpen by remember { mutableStateOf(false) }
-
-    var searchScope by remember { mutableStateOf("ALL") } // "ALL", "OT", "NT", "BOOK"
-    var selectedBook by remember { mutableStateOf<BibleBook?>(null) }
-    var isBookPickerOpen by remember { mutableStateOf(false) }
-
-    var localQuery by remember { mutableStateOf("") }
-    var offlineResults by remember { mutableStateOf<List<OfflineVerseDto>>(emptyList()) }
-    var isSearchingOffline by remember { mutableStateOf(false) }
-
-    // Execute instant search
-    LaunchedEffect(localQuery, searchScope, selectedBook, activeVersion) {
-        val trimmed = localQuery.trim()
-        if (trimmed.length < 2) {
-            offlineResults = emptyList()
-            isSearchingOffline = false
-            return@LaunchedEffect
-        }
-
-        // Debounce 200ms while user is typing
-        kotlinx.coroutines.delay(200)
-
-        isSearchingOffline = true
-        val testamentParam = when (searchScope) {
-            "OT" -> "OT"
-            "NT" -> "NT"
-            else -> null
-        }
-        val bookParam = if (searchScope == "BOOK") selectedBook?.order else null
-
-        val results = OfflineBibleManager.searchVerses(
-            context = context,
-            query = trimmed,
-            testament = testamentParam,
-            bookId = bookParam,
-            limit = 80,
-            version = activeVersion,
-            dao = readerDao
-        )
-        offlineResults = results
-        isSearchingOffline = false
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        // Search bar
-        OutlinedTextField(
-            value = localQuery,
-            onValueChange = { 
-                localQuery = it
-                viewModel.onSearchQueryChange(it)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("search_input_field"),
-            placeholder = { Text("Buscar en toda la Biblia (gracia, fe, justicia...)") },
-            leadingIcon = {
-                Icon(Icons.Filled.Search, contentDescription = "Buscar")
-            },
-            trailingIcon = {
-                if (localQuery.isNotEmpty()) {
-                    IconButton(onClick = { 
-                        localQuery = ""
-                        viewModel.onSearchQueryChange("")
-                    }) {
-                        Icon(Icons.Filled.Clear, contentDescription = "Limpiar")
-                    }
-                }
-            },
-            singleLine = true,
-            shape = RoundedCornerShape(16.dp)
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        // Search Scope Filter Chips
-        Text(
-            text = "Ámbito de búsqueda bíblica (Offline):",
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            FilterChip(
-                selected = true,
-                onClick = { isVersionPickerOpen = true },
-                label = { Text("Versión: $activeVersion") },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.MenuBook,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            )
-
-            FilterChip(
-                selected = searchScope == "ALL",
-                onClick = { 
-                    searchScope = "ALL"
-                    selectedBook = null
-                },
-                label = { Text("Toda la Biblia") }
-            )
-            FilterChip(
-                selected = searchScope == "OT",
-                onClick = { 
-                    searchScope = "OT"
-                    selectedBook = null
-                },
-                label = { Text("Antiguo Testamento") }
-            )
-            FilterChip(
-                selected = searchScope == "NT",
-                onClick = { 
-                    searchScope = "NT"
-                    selectedBook = null
-                },
-                label = { Text("Nuevo Testamento") }
-            )
-            FilterChip(
-                selected = searchScope == "BOOK",
-                onClick = { 
-                    searchScope = "BOOK"
-                    isBookPickerOpen = true
-                },
-                label = { 
-                    Text(if (selectedBook != null) "Libro: ${selectedBook!!.name}" else "Por Libro...") 
-                }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        if (isSearchingOffline) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(modifier = Modifier.size(32.dp))
-            }
-        } else if (localQuery.trim().length < 2) {
-            // Initial state with suggested keywords
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-                    modifier = Modifier.size(64.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Filled.Search,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(14.dp))
-                Text(
-                    text = "Búsqueda Bíblica Offline",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Busca al instante en los 31,102 versículos de la Biblia sin conexión a internet.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 24.dp)
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-                Text(
-                    text = "Palabras clave sugeridas:",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                val quickKeywords = listOf("Gracia", "Justicia", "Fe", "Amor", "Paz", "Salvación", "Esperanza", "Perdón", "Sabiduría", "Verdad")
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp)
-                ) {
-                    items(quickKeywords) { keyword ->
-                        SuggestionChip(
-                            onClick = { localQuery = keyword },
-                            label = { Text(keyword) }
-                        )
-                    }
-                }
-            }
-        } else if (offlineResults.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Outlined.Search,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.outline,
-                        modifier = Modifier.size(54.dp)
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = "No se encontraron versículos con «$localQuery» en el ámbito seleccionado",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    )
-                }
-            }
-        } else {
-            // Results list
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "${offlineResults.size} versículo(s) encontrados ($activeVersion)",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(bottom = 16.dp)
-            ) {
-                items(offlineResults, key = { "${it.bookId}_${it.chapter}_${it.verseNumber}" }) { item ->
-                    val bookName = BibleCatalog.books.getOrNull(item.bookId - 1)?.name ?: "Libro ${item.bookId}"
-                    val testament = if (item.bookId <= 39) "Antiguo Testamento" else "Nuevo Testamento"
-
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
-                        )
-                    ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "$bookName ${item.chapter}:${item.verseNumber}",
-                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = testament,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(6.dp))
-
-                            // Highlighted query in verse text
-                            Text(
-                                text = buildHighlightedString(item.text, localQuery, MaterialTheme.colorScheme.primary),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-
-                            Spacer(modifier = Modifier.height(10.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    IconButton(
-                                        onClick = {
-                                            val quote = "«${item.text}» - $bookName ${item.chapter}:${item.verseNumber} ($activeVersion)"
-                                            val clip = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                                            clip.setPrimaryClip(android.content.ClipData.newPlainText("Versículo", quote))
-                                            Toast.makeText(context, "Copiado al portapapeles", Toast.LENGTH_SHORT).show()
-                                        },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.ContentCopy,
-                                            contentDescription = "Copiar",
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
-
-                                    IconButton(
-                                        onClick = {
-                                            viewModel.addCustomVerse(
-                                                book = bookName,
-                                                chapterVerse = "${item.chapter}:${item.verseNumber}",
-                                                testament = testament,
-                                                text = item.text,
-                                                context = "Versículo guardado desde Búsqueda Bíblica Offline.",
-                                                topic = "Búsqueda Bíblica",
-                                                notes = "",
-                                                bibleVersion = activeVersion
-                                            )
-                                            Toast.makeText(context, "Guardado en Favoritos", Toast.LENGTH_SHORT).show()
-                                        },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Favorite,
-                                            contentDescription = "Guardar",
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
-                                }
-
-                                Button(
-                                    onClick = {
-                                        onNavigateToReader(item.bookId, item.chapter, item.verseNumber)
-                                    },
-                                    shape = RoundedCornerShape(10.dp),
-                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary
-                                    )
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Text("Leer en contexto", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                        Icon(Icons.Default.ArrowForward, contentDescription = null, modifier = Modifier.size(14.dp))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Book Picker Dialog
-    if (isBookPickerOpen) {
-        AlertDialog(
-            onDismissRequest = { isBookPickerOpen = false },
-            title = { Text("Seleccionar Libro para Filtrar", fontWeight = FontWeight.Bold) },
-            text = {
-                var bookSearch by remember { mutableStateOf("") }
-                val filteredBooks = remember(bookSearch) {
-                    if (bookSearch.isBlank()) BibleCatalog.books
-                    else BibleCatalog.books.filter { it.name.contains(bookSearch, ignoreCase = true) }
-                }
-
-                Column(modifier = Modifier.fillMaxWidth().height(350.dp)) {
-                    OutlinedTextField(
-                        value = bookSearch,
-                        onValueChange = { bookSearch = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Buscar libro...") },
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    LazyColumn(modifier = Modifier.weight(1f)) {
-                        item {
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        selectedBook = null
-                                        searchScope = "ALL"
-                                        isBookPickerOpen = false
-                                    }
-                                    .padding(vertical = 10.dp, horizontal = 8.dp)
-                            ) {
-                                Text("Todos los libros (Sin filtro)", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                            }
-                            Divider()
-                        }
-                        itemsIndexed(filteredBooks) { index, book ->
-                            val isFirstNt = index > 0 && filteredBooks[index - 1].order <= 39 && book.order > 39
-                            if (isFirstNt) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Divider(
-                                        modifier = Modifier.weight(1f),
-                                        thickness = 1.dp,
-                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
-                                    )
-                                    Text(
-                                        text = "Nuevo Testamento",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(horizontal = 8.dp)
-                                    )
-                                    Divider(
-                                        modifier = Modifier.weight(1f),
-                                        thickness = 1.dp,
-                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
-                                    )
-                                }
-                            }
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        selectedBook = book
-                                        isBookPickerOpen = false
-                                    }
-                                    .padding(vertical = 8.dp, horizontal = 8.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(book.name, fontWeight = FontWeight.Medium)
-                                    Text(
-                                        if (book.order <= 39) "AT" else "NT",
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontSize = 12.sp
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { isBookPickerOpen = false }) {
-                    Text("Cerrar")
-                }
-            }
-        )
-    }
-
-    if (isVersionPickerOpen) {
-        com.example.ui.reader.components.BibleVersionSelectorDialog(
-            currentVersion = activeVersion,
-            downloadStates = downloadStates,
-            onSelectVersion = { chosen ->
-                selectedVersionCode = chosen
-                isVersionPickerOpen = false
-            },
-            onDismiss = { isVersionPickerOpen = false },
-            onDownloadVersion = { vCode ->
-                scope.launch {
-                    com.example.data.bible.OfflineBibleDownloadManager.downloadVersion(readerDao, vCode)
-                }
-            }
-        )
-    }
-}
-
-private fun buildHighlightedString(
-    fullText: String,
-    query: String,
-    highlightColor: Color
-): androidx.compose.ui.text.AnnotatedString {
-    return androidx.compose.ui.text.buildAnnotatedString {
-        val trimmed = query.trim()
-        if (trimmed.isEmpty()) {
-            append(fullText)
-            return@buildAnnotatedString
-        }
-
-        var currentIndex = 0
-        val cleanFull = com.example.data.bible.BibleTextSanitizer.removeAccents(fullText).lowercase()
-        val cleanQuery = com.example.data.bible.BibleTextSanitizer.removeAccents(trimmed).lowercase()
-
-        while (currentIndex < fullText.length) {
-            val matchIndex = cleanFull.indexOf(cleanQuery, currentIndex)
-            if (matchIndex == -1) {
-                append(fullText.substring(currentIndex))
-                break
-            }
-
-            if (matchIndex > currentIndex) {
-                append(fullText.substring(currentIndex, matchIndex))
-            }
-
-            val endIndex = (matchIndex + cleanQuery.length).coerceAtMost(fullText.length)
-            withStyle(
-                androidx.compose.ui.text.SpanStyle(
-                    fontWeight = FontWeight.Bold,
-                    color = highlightColor
-                )
-            ) {
-                append(fullText.substring(matchIndex, endIndex))
-            }
-
-            currentIndex = endIndex
-        }
-    }
-}
-
-@Composable
-fun FavoritesAndNotesTab(
-    viewModel: BibleViewModel,
-    uiState: BibleUiState
-) {
-    val context = LocalContext.current
-    val activeFilter = when (uiState.selectedFilter) {
-        VerseFilter.RESALTADOS -> VerseFilter.RESALTADOS
-        VerseFilter.CON_NOTAS -> VerseFilter.CON_NOTAS
-        else -> VerseFilter.FAVORITOS
-    }
-
-    val displayedVerses = when (activeFilter) {
-        VerseFilter.FAVORITOS -> uiState.verses.filter { it.isFavorite }
-        VerseFilter.RESALTADOS -> uiState.verses.filter { it.highlightColor.isNotBlank() }
-        VerseFilter.CON_NOTAS -> uiState.verses.filter { it.notes.isNotBlank() }
-        else -> uiState.verses.filter { it.isFavorite }
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            FilterChip(
-                selected = activeFilter == VerseFilter.FAVORITOS,
-                onClick = { viewModel.onFilterSelected(VerseFilter.FAVORITOS) },
-                label = {
-                    Text(
-                        text = "Favoritos (${uiState.verses.count { it.isFavorite }})",
-                        maxLines = 1,
-                        softWrap = false
-                    )
-                },
-                leadingIcon = { Icon(Icons.Filled.Favorite, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                modifier = Modifier.testTag("chip_sub_favorites")
-            )
-            FilterChip(
-                selected = activeFilter == VerseFilter.RESALTADOS,
-                onClick = { viewModel.onFilterSelected(VerseFilter.RESALTADOS) },
-                label = {
-                    Text(
-                        text = "Resaltados (${uiState.verses.count { it.highlightColor.isNotBlank() }})",
-                        maxLines = 1,
-                        softWrap = false
-                    )
-                },
-                leadingIcon = { Icon(Icons.Filled.Bookmark, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                modifier = Modifier.testTag("chip_sub_highlights")
-            )
-            FilterChip(
-                selected = activeFilter == VerseFilter.CON_NOTAS,
-                onClick = { viewModel.onFilterSelected(VerseFilter.CON_NOTAS) },
-                label = {
-                    Text(
-                        text = "Con Notas (${uiState.verses.count { it.notes.isNotBlank() }})",
-                        maxLines = 1,
-                        softWrap = false
-                    )
-                },
-                leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                modifier = Modifier.testTag("chip_sub_notes")
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        if (displayedVerses.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(24.dp)
-                ) {
-                    Icon(
-                        imageVector = when (activeFilter) {
-                            VerseFilter.FAVORITOS -> Icons.Outlined.FavoriteBorder
-                            VerseFilter.RESALTADOS -> Icons.Outlined.BookmarkBorder
-                            else -> Icons.Filled.Edit
-                        },
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.outline,
-                        modifier = Modifier.size(54.dp)
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = when (activeFilter) {
-                            VerseFilter.FAVORITOS -> "Aún no tienes versículos favoritos marcados."
-                            VerseFilter.RESALTADOS -> "No has resaltado ningún versículo todavía."
-                            else -> "No has escrito notas personales en ningún versículo."
-                        },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = "Toca el corazón o el resaltador en cualquier versículo para guardarlo aquí.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.outline,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(bottom = 16.dp)
-            ) {
-                items(displayedVerses, key = { it.id }) { verse ->
-                    VerseCard(
-                        verse = verse,
-                        fontScale = uiState.fontSizeScale,
-                        onClick = { viewModel.openVerseDetail(verse) },
-                        onFavoriteToggle = { viewModel.toggleFavorite(verse) },
-                        onShare = { viewModel.shareVerse(context, verse) },
-                        onHighlightClick = { viewModel.openVerseDetail(verse) }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun SettingsTab(
-    viewModel: BibleViewModel,
-    uiState: BibleUiState,
-    onBack: (() -> Unit)? = null
-) {
-    val context = LocalContext.current
-    var reminderHour by remember(uiState.reminderHour) { mutableIntStateOf(uiState.reminderHour) }
-    var reminderMinute by remember(uiState.reminderMinute) { mutableIntStateOf(uiState.reminderMinute) }
-    var reminderEnabled by remember(uiState.reminderEnabled) { mutableStateOf(uiState.reminderEnabled) }
-    var showTimePickerDialog by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-        if (onBack != null) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 2.dp)
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Regresar",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-                Spacer(modifier = Modifier.width(4.dp))
-                Column {
-                    Text(
-                        text = "Configuración",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "Ajustes, Copias y Nube",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-        }
-        // Section: Visual Themes (Modo Lectura Nocturna Anti-Fatiga)
-        Text(
-            text = "MODO DE LECTURA & VISUALIZACIÓN",
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
-            ),
-            color = MaterialTheme.colorScheme.secondary
-        )
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    text = "Tema de la aplicación:",
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // Modo Claro
-                    ThemeOptionCard(
-                        title = "Claro",
-                        subtitle = "Día",
-                        icon = Icons.Filled.LightMode,
-                        isSelected = uiState.readingTheme == AppReadingTheme.LIGHT,
-                        onClick = { viewModel.setReadingTheme(AppReadingTheme.LIGHT) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .testTag("theme_light")
-                    )
-
-                    // Modo Lectura Nocturna Sepia (Anti-Fatiga)
-                    ThemeOptionCard(
-                        title = "Nocturno",
-                        subtitle = "Anti-fatiga",
-                        icon = Icons.Filled.Nightlight,
-                        isSelected = uiState.readingTheme == AppReadingTheme.SEPIA_NIGHT,
-                        onClick = { viewModel.setReadingTheme(AppReadingTheme.SEPIA_NIGHT) },
-                        modifier = Modifier
-                            .weight(1.15f)
-                            .testTag("theme_sepia")
-                    )
-
-                    // Modo Oscuro Profundo
-                    ThemeOptionCard(
-                        title = "Oscuro",
-                        subtitle = "OLED",
-                        icon = Icons.Filled.DarkMode,
-                        isSelected = uiState.readingTheme == AppReadingTheme.DARK,
-                        onClick = { viewModel.setReadingTheme(AppReadingTheme.DARK) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .testTag("theme_dark")
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Font size scale
-                Text(
-                    text = "Tamaño del texto bíblico:",
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    listOf(
-                        "Normal" to 1.0f,
-                        "Grande" to 1.18f,
-                        "Muy Grande" to 1.35f
-                    ).forEach { (label, scale) ->
-                        val isSelected = kotlin.math.abs(uiState.fontSizeScale - scale) < 0.05f
-                        FilterChip(
-                            selected = isSelected,
-                            onClick = { viewModel.setFontSizeScale(scale) },
-                            label = { Text(label) },
-                            modifier = Modifier
-                                .weight(1f)
-                                .testTag("font_scale_$label")
-                        )
-                    }
-                }
-            }
-        }
-
-        // Section: Daily Reminders / Notifications
-        Text(
-            text = "RECORDATORIOS DIARIOS DE VERSÍCULOS",
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
-            ),
-            color = MaterialTheme.colorScheme.secondary
-        )
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Notificación diaria",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                        )
-                        Text(
-                            text = "Recibe el versículo del día y su reflexión cada mañana",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = reminderEnabled,
-                        onCheckedChange = { enabled ->
-                            reminderEnabled = enabled
-                            viewModel.setDailyReminder(reminderHour, reminderMinute, enabled)
-                        },
-                        modifier = Modifier.testTag("switch_reminder")
-                    )
-                }
-
-                if (reminderEnabled) {
-                    Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = "Hora preferida:",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
-                            )
-                            val timeStr = String.format("%02d:%02d", reminderHour, reminderMinute)
-                            Text(
-                                text = "$timeStr hrs",
-                                style = MaterialTheme.typography.headlineSmall.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            )
-                        }
-
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            // Quick buttons to adjust hour
-                            OutlinedButton(
-                                onClick = {
-                                    reminderHour = (reminderHour + 1) % 24
-                                    viewModel.setDailyReminder(reminderHour, reminderMinute, true)
-                                },
-                                modifier = Modifier.testTag("btn_change_hour")
-                            ) {
-                                Text("+1 Hora")
-                            }
-
-                            Button(
-                                onClick = {
-                                    reminderHour = (reminderHour + 23) % 24
-                                    viewModel.setDailyReminder(reminderHour, reminderMinute, true)
-                                }
-                            ) {
-                                Text("-1 Hora")
-                            }
-                        }
-                    }
-
-                    // Test notification button
-                    OutlinedButton(
-                        onClick = {
-                            viewModel.testDailyNotification()
-                            Toast.makeText(context, "Notificación enviada", Toast.LENGTH_SHORT).show()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("btn_test_notification")
-                    ) {
-                        Icon(Icons.Filled.NotificationsActive, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Probar Notificación Ahora")
-                    }
-                }
-            }
-        }
-
-        // Section: Nube y Copia de Seguridad
-        Text(
-            text = "NUBE Y COPIA DE SEGURIDAD",
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
-            ),
-            color = MaterialTheme.colorScheme.secondary
-        )
-
-        val firebaseUserState by viewModel.firebaseUserState.collectAsStateWithLifecycle()
-        val firebaseSyncOperation by viewModel.firebaseSyncOperation.collectAsStateWithLifecycle()
-
-        com.example.ui.components.CloudSyncCardContent(
-            syncId = uiState.cloudSyncId,
-            lastSyncTime = uiState.lastSyncTime,
-            userState = firebaseUserState,
-            syncOperation = firebaseSyncOperation,
-            onDismiss = null,
-            onSignInGoogle = { viewModel.signInWithGoogle(context) },
-            onSignInAnonymous = { viewModel.signInAnonymously() },
-            onSignInEmailPassword = { email, pass -> viewModel.signInWithEmailPassword(email, pass) },
-            onSignOut = { viewModel.signOutFirebase(context) },
-            onUploadFirestore = { viewModel.uploadToFirestore() },
-            onDownloadFirestore = { viewModel.downloadFromFirestore() },
-            onPerformBackup = { viewModel.performCloudBackup() },
-            onPerformRestore = { viewModel.performCloudRestore(it) },
-            permanentSha1 = viewModel.permanentSha1,
-            currentWebClientId = viewModel.getResolvedFirebaseWebClientId(context),
-            onSaveWebClientId = { id -> viewModel.saveFirebaseWebClientId(context, id) },
-            isDialog = false
-        )
-
-        // Section: Versiones Bíblicas & Descarga Offline
-        Text(
-            text = "VERSIONES BÍBLICAS & MODO OFFLINE",
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
-            ),
-            color = MaterialTheme.colorScheme.secondary
-        )
-
-        val offlineStates by viewModel.offlineDownloadStates.collectAsStateWithLifecycle()
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Column {
-                    Text(
-                        text = "Traducciones para uso sin internet",
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
-                    )
-                    Text(
-                        text = "RVR1960 está incluida permanentemente. Descarga versiones completas adicionales para leer 100% offline.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
-                com.example.data.bible.BibleCatalog.versions.forEach { ver ->
-                    val state = offlineStates[ver.code] ?: com.example.data.bible.VersionDownloadState.Idle
-                    val isRvr = ver.code.equals("RVR1960", ignoreCase = true)
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = ver.code,
-                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = ver.name,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1
-                                )
-                            }
-                        }
-
-                        when {
-                            isRvr || state is com.example.data.bible.VersionDownloadState.Downloaded -> {
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = Color(0xFF10B981).copy(alpha = 0.15f)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            Icons.Filled.CheckCircle,
-                                            contentDescription = null,
-                                            tint = Color(0xFF10B981),
-                                            modifier = Modifier.size(14.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(
-                                            text = if (isRvr) "Incluida" else "Descargada",
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color(0xFF10B981)
-                                        )
-                                    }
-                                }
-                            }
-                            state is com.example.data.bible.VersionDownloadState.Downloading -> {
-                                Column(horizontalAlignment = Alignment.End) {
-                                    Text(
-                                        text = "${state.progressPercent}%",
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                    CircularProgressIndicator(
-                                        progress = { state.progressPercent / 100f },
-                                        modifier = Modifier.size(18.dp),
-                                        strokeWidth = 2.dp
-                                    )
-                                }
-                            }
-                            else -> {
-                                OutlinedButton(
-                                    onClick = { viewModel.downloadOfflineVersion(ver.code) },
-                                    shape = RoundedCornerShape(8.dp),
-                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
-                                    modifier = Modifier.height(30.dp)
-                                ) {
-                                    Text("Descargar", fontSize = 11.sp)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Section: Updates and GitHub Releases
-        Text(
-            text = "ACTUALIZACIONES DE LA APLICACIÓN",
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
-            ),
-            color = MaterialTheme.colorScheme.secondary
-        )
-
-        val updateDownloadStatus by viewModel.updateDownloadStatus.collectAsStateWithLifecycle()
-        val updateInfo by viewModel.updateInfo.collectAsStateWithLifecycle()
-        val autoCheckUpdates by viewModel.autoCheckUpdates.collectAsStateWithLifecycle()
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Versión instalada",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "v${BuildConfig.VERSION_NAME.removePrefix("v").removePrefix("V")}",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer
-                    ) {
-                        Text(
-                            text = "Oficial",
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
-                    }
-                }
-
-                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
-
-                // Switch for automatic update checking on app start
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Buscar actualizaciones al abrir",
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = if (autoCheckUpdates) "Avisa cuando haya una versión nueva" else "Solo buscar manualmente",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = autoCheckUpdates,
-                        onCheckedChange = { viewModel.setAutoCheckUpdates(it) },
-                        modifier = Modifier.testTag("switch_auto_check_updates")
-                    )
-                }
-
-                // If update is available or status
-                val currentStatus = updateDownloadStatus
-                when (currentStatus) {
-                    is UpdateDownloadStatus.Available -> {
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable { viewModel.setShowUpdateDialog(true) },
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    Icons.Filled.SystemUpdate,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "¡Nueva versión disponible: ${currentStatus.info.tagName}!",
-                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Text(
-                                        text = "Toca para ver novedades e instalar actualización",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    is UpdateDownloadStatus.UpToDate -> {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Filled.CheckCircle,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "Tienes la versión más reciente.",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-
-                    else -> {}
-                }
-
-                // Button: Check for updates
-                Button(
-                    onClick = { viewModel.checkForUpdates(silent = false) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("btn_check_updates")
-                ) {
-                    if (updateDownloadStatus is UpdateDownloadStatus.Checking) {
-                        Icon(Icons.Filled.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Buscando actualizaciones...")
-                    } else {
-                        Icon(Icons.Filled.SystemUpdate, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Buscar Actualizaciones Ahora")
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ThemeOptionCard(
-    title: String,
-    subtitle: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .clickable { onClick() }
-            .border(
-                width = if (isSelected) 2.dp else 1.dp,
-                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                shape = RoundedCornerShape(12.dp)
-            ),
-        color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-    ) {
-        Column(
-            modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.5.sp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-fun VerseOfTheDayCard(
-    verse: VerseEntity,
-    fontScale: Float = 1.0f,
-    onClick: () -> Unit,
-    onFavoriteToggle: () -> Unit,
-    onShare: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .clickable { onClick() }
-            .testTag("card_verse_of_the_day"),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.AutoAwesome,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "VERSÍCULO DEL DÍA",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.2.sp
-                        ),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                Row {
-                    IconButton(
-                        onClick = onFavoriteToggle,
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(
-                            imageVector = if (verse.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                            contentDescription = "Favorito",
-                            tint = if (verse.isFavorite) Color(0xFFE53935) else MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                    IconButton(
-                        onClick = onShare,
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Share,
-                            contentDescription = "Compartir",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = verse.text,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontFamily = FontFamily.Serif,
-                    fontStyle = FontStyle.Italic,
-                    fontSize = (18 * fontScale).sp,
-                    lineHeight = (26 * fontScale).sp,
-                    fontWeight = FontWeight.Medium
-                ),
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "— ${verse.reference}",
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                ) {
-                    Text(
-                        text = verse.topic,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-        }
     }
 }

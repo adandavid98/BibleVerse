@@ -93,6 +93,7 @@ fun ShareTemplateDialog(
                         ShareCardTemplate.MINIMALIST -> MinimalistCardPreview(cleanVerseText, citationText)
                         ShareCardTemplate.SACRED_GRADIENT -> SacredGradientCardPreview(cleanVerseText, citationText)
                         ShareCardTemplate.PARCHMENT -> ParchmentCardPreview(cleanVerseText, citationText)
+                        ShareCardTemplate.DEEP_NIGHT -> DeepNightCardPreview(cleanVerseText, citationText)
                     }
                 }
 
@@ -341,6 +342,53 @@ private fun ParchmentCardPreview(verseText: String, citationText: String) {
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.sp,
                 color = Color(0xFF4A2810)
+            )
+        }
+    }
+}
+
+@Composable
+private fun DeepNightCardPreview(verseText: String, citationText: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0B0F19))
+            .padding(14.dp)
+            .border(2.dp, Color(0xFFD97706).copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+            .padding(4.dp)
+            .border(1.dp, Color(0xFFF59E0B).copy(alpha = 0.25f), RoundedCornerShape(10.dp))
+            .padding(12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "✦  LUZ Y VERDAD  ✦",
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFF59E0B),
+                letterSpacing = 1.5.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "“$verseText”",
+                fontFamily = FontFamily.Serif,
+                fontSize = 13.sp,
+                textAlign = TextAlign.Center,
+                color = Color(0xFFF8FAFC),
+                maxLines = 6
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Divider(color = Color(0xFFD97706), thickness = 1.dp, modifier = Modifier.width(50.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = citationText,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                color = Color(0xFFFDE68A)
             )
         }
     }

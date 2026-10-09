@@ -53,6 +53,7 @@ object CardBitmapRenderer {
             ShareCardTemplate.MINIMALIST -> drawMinimalist(canvas, width, height, clean, citationText)
             ShareCardTemplate.SACRED_GRADIENT -> drawSacredGradient(canvas, width, height, clean, citationText)
             ShareCardTemplate.PARCHMENT -> drawParchment(canvas, width, height, clean, citationText)
+            ShareCardTemplate.DEEP_NIGHT -> drawDeepNight(canvas, width, height, clean, citationText)
         }
 
         return bitmap
@@ -350,6 +351,106 @@ object CardBitmapRenderer {
         } else {
             StaticLayout(text, paint, width, alignment, 1.25f, 8f, false)
         }
+    }
+
+    private fun drawDeepNight(canvas: Canvas, w: Int, h: Int, text: String, citation: String) {
+        // Deep Night background
+        val bgPaint = Paint().apply {
+            color = Color.parseColor("#0B0F19")
+            style = Paint.Style.FILL
+        }
+        canvas.drawRect(0f, 0f, w.toFloat(), h.toFloat(), bgPaint)
+
+        // Outer warm gold frame
+        val outerBorder = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#D97706")
+            alpha = 140
+            style = Paint.Style.STROKE
+            strokeWidth = 3f
+        }
+        canvas.drawRoundRect(40f, 40f, (w - 40).toFloat(), (h - 40).toFloat(), 20f, 20f, outerBorder)
+
+        // Inner subtle accent border
+        val innerBorder = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#F59E0B")
+            alpha = 70
+            style = Paint.Style.STROKE
+            strokeWidth = 1.5f
+        }
+        canvas.drawRoundRect(54f, 54f, (w - 54).toFloat(), (h - 54).toFloat(), 14f, 14f, innerBorder)
+
+        // 4 Golden Corner Dots
+        val cornerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#D97706")
+            style = Paint.Style.FILL
+        }
+        canvas.drawCircle(54f, 54f, 4f, cornerPaint)
+        canvas.drawCircle((w - 54).toFloat(), 54f, 4f, cornerPaint)
+        canvas.drawCircle(54f, (h - 54).toFloat(), 4f, cornerPaint)
+        canvas.drawCircle((w - 54).toFloat(), (h - 54).toFloat(), 4f, cornerPaint)
+
+        // Top tag
+        val tagPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#F59E0B")
+            textSize = 24f
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+            textAlign = Paint.Align.CENTER
+            letterSpacing = 0.2f
+        }
+        canvas.drawText("✦  LUZ Y VERDAD  ✦", w / 2f, 125f, tagPaint)
+
+        // Decorative quote mark
+        val quoteMarkPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#D97706")
+            alpha = 80
+            textSize = 110f
+            typeface = Typeface.create(Typeface.SERIF, Typeface.BOLD)
+            textAlign = Paint.Align.CENTER
+        }
+        canvas.drawText("“", w / 2f, 215f, quoteMarkPaint)
+
+        val headerBottom = 230f
+        val divY = h - 220f
+
+        // Verse Text (Centered)
+        val contentWidth = w - 180
+        val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#F8FAFC")
+            typeface = Typeface.create(Typeface.SERIF, Typeface.NORMAL)
+            textSize = calculateOptimalFontSize(text, contentWidth, (divY - headerBottom - 30f).toInt(), typeface)
+        }
+
+        val textLayout = createStaticLayout(text, textPaint, contentWidth, Layout.Alignment.ALIGN_CENTER)
+        canvas.save()
+        val textY = headerBottom + ((divY - headerBottom) - textLayout.height) / 2f
+        canvas.translate(90f, textY.coerceAtLeast(headerBottom))
+        textLayout.draw(canvas)
+        canvas.restore()
+
+        // Gold Divider
+        val divPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#D97706")
+            strokeWidth = 2f
+        }
+        canvas.drawLine((w / 2f) - 70f, divY, (w / 2f) + 70f, divY, divPaint)
+
+        // Citation
+        val citPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#FDE68A")
+            textSize = 36f
+            typeface = Typeface.create(Typeface.SERIF, Typeface.BOLD)
+            textAlign = Paint.Align.CENTER
+        }
+        canvas.drawText(citation, w / 2f, divY + 68f, citPaint)
+
+        // Subtitle / Watermark
+        val footPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#94A3B8")
+            textSize = 22f
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
+            textAlign = Paint.Align.CENTER
+        }
+        canvas.drawText("BibleVerse • Lámpara a mis pies", w / 2f, divY + 115f, footPaint)
     }
 
     private fun saveBitmapToCache(context: Context, bitmap: Bitmap): Uri? {

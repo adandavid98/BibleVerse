@@ -15,7 +15,10 @@ data class BibleBook(
     val category: String,
     val abbreviation: String,
     val order: Int
-)
+) {
+    val id: Int get() = order
+    val bookId: Int get() = order
+}
 
 object BibleCatalog {
 

@@ -133,8 +133,12 @@ fun VerseCard(
                     }
                 }
 
+                val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
                 IconButton(
-                    onClick = onFavoriteToggle,
+                    onClick = {
+                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                        onFavoriteToggle()
+                    },
                     modifier = Modifier
                         .size(36.dp)
                         .testTag("btn_favorite_${verse.id}")

@@ -27,6 +27,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -67,7 +70,12 @@ fun BibleReaderScreen(
     val uiState by viewModel.uiState.collectAsState()
     val audioState by BibleAudioController.audioState.collectAsState()
     val listState = rememberLazyListState()
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     var showVersionSelectorModal by remember { mutableStateOf(false) }
+
+    val density = LocalDensity.current
+    val swipeThresholdPx = remember(density) { with(density) { 72.dp.toPx() } }
+    var horizontalDragOffset by remember { mutableFloatStateOf(0f) }
 
     // Ensure active chapter is loaded if screen appears empty
     LaunchedEffect(uiState.currentBook, uiState.currentChapter, uiState.verses.size) {
@@ -353,14 +361,17 @@ fun BibleReaderScreen(
                     }
                 }
             } else {
-                val nestedScrollConnection = remember {
+                val nestedScrollConnection = remember(uiState.selectedVerseNumbers.isEmpty()) {
                     object : NestedScrollConnection {
                         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                            if (uiState.selectedVerseNumbers.isNotEmpty()) {
+                                return Offset.Zero
+                            }
                             val delta = available.y
-                            if (delta < -12f) {
+                            if (delta < -14f) {
                                 // Scrolling down (reading forward into the chapter) -> Hide bottom bars for full screen
                                 viewModel.setReaderBarsVisible(false)
-                            } else if (delta > 12f) {
+                            } else if (delta > 14f) {
                                 // Swipe down (scrolling up to previous text) -> Show bottom bars
                                 viewModel.setReaderBarsVisible(true)
                             }
@@ -374,8 +385,30 @@ fun BibleReaderScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .nestedScroll(nestedScrollConnection)
+                        .pointerInput(uiState.currentBook?.id, uiState.currentChapter, uiState.selectedVerseNumbers.isEmpty()) {
+                            if (uiState.selectedVerseNumbers.isEmpty()) {
+                                detectHorizontalDragGestures(
+                                    onDragStart = { horizontalDragOffset = 0f },
+                                    onDragEnd = {
+                                        if (horizontalDragOffset < -swipeThresholdPx) {
+                                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                            viewModel.nextChapter()
+                                        } else if (horizontalDragOffset > swipeThresholdPx) {
+                                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                            viewModel.previousChapter()
+                                        }
+                                        horizontalDragOffset = 0f
+                                    },
+                                    onDragCancel = { horizontalDragOffset = 0f },
+                                    onHorizontalDrag = { change, dragAmount ->
+                                        change.consume()
+                                        horizontalDragOffset += dragAmount
+                                    }
+                                )
+                            }
+                        }
                         .padding(horizontal = 22.dp),
-                    contentPadding = PaddingValues(top = 12.dp, bottom = if (uiState.isReaderBarsVisible) 120.dp else 80.dp),
+                    contentPadding = PaddingValues(top = 12.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     itemsIndexed(
@@ -491,6 +524,7 @@ fun BibleReaderScreen(
                                 isPrevSameHighlight = isPrevSameHighlight,
                                 isNextSameHighlight = isNextSameHighlight,
                                 onClick = {
+                                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                                     viewModel.clearTransientHighlights()
                                     viewModel.toggleVerseSelection(verse.verseNumber)
                                 }
@@ -515,163 +549,179 @@ fun BibleReaderScreen(
                         }
                     }
 
-                    // Bottom spacer before bottom controls
+                    // Bottom spacer dynamically calculated so verses never get obscured
                     item {
-                        Spacer(modifier = Modifier.height(if (audioState.isActive) 140.dp else 40.dp))
+                        val bottomControlsHeight = remember(audioState.isActive, uiState.selectedVerseNumbers.size, uiState.isReaderBarsVisible) {
+                            var h = 32.dp
+                            if (audioState.isActive) h += 86.dp
+                            if (uiState.selectedVerseNumbers.isNotEmpty()) {
+                                h += 160.dp
+                            } else if (uiState.isReaderBarsVisible) {
+                                h += 72.dp
+                            }
+                            h
+                        }
+                        Spacer(modifier = Modifier.height(bottomControlsHeight))
                     }
                 }
             }
 
-            // Bottom audio player + Navigation buttons permanently at the bottom
+            // Coordinated Bottom Controls (Audio Player + VerseActionBar / Navigation)
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(bottom = if (uiState.isReaderBarsVisible) 14.dp else 8.dp)
             ) {
+                // 1. Bottom audio player bar when active (always cleanly above actions)
                 if (audioState.isActive) {
                     BibleAudioBottomBar(
                         audioState = audioState,
                         themeBg = themeBg,
                         themeText = themeText,
                         themeSecondary = themeSecondary,
-                        themeAccent = themeAccent
+                        themeAccent = themeAccent,
+                        modifier = Modifier.padding(bottom = 2.dp)
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Left extreme: Previous chapter button (pointing left)
-                Surface(
-                    modifier = Modifier
-                        .size(46.dp)
-                        .clip(CircleShape)
-                        .shadow(6.dp, CircleShape)
-                        .clickable { viewModel.previousChapter() },
-                    shape = CircleShape,
-                    color = themeBg,
-                    border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.3f))
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Default.ArrowBack,
-                            contentDescription = "Capítulo anterior",
-                            tint = themeText,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-
-                // Center: Current Book & Chapter pill (Click opens selector modal)
-                Surface(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
-                        .shadow(8.dp, RoundedCornerShape(24.dp))
-                        .clickable { viewModel.openBookChapterSelector() },
-                    shape = RoundedCornerShape(24.dp),
-                    color = themeBg,
-                    border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.35f))
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(CircleShape)
-                                .background(themeAccent.copy(alpha = 0.15f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Default.PlayArrow,
-                                contentDescription = null,
-                                tint = themeAccent,
-                                modifier = Modifier.size(16.dp)
-                            )
+                // 2. Either VerseActionBar (when verses are selected) OR Chapter Navigation buttons
+                if (uiState.selectedVerseNumbers.isNotEmpty()) {
+                    VerseActionBar(
+                        selectedCount = uiState.selectedVerseNumbers.size,
+                        onCopy = {
+                            val formatted = viewModel.getFormattedQuotation()
+                            copyToClipboard(context, formatted)
+                            Toast.makeText(context, "Versículo copiado", Toast.LENGTH_SHORT).show()
+                            viewModel.clearSelection()
+                        },
+                        onHighlight = { hex ->
+                            viewModel.applyHighlightToSelection(hex)
+                        },
+                        onRemoveHighlight = {
+                            viewModel.removeHighlightFromSelection()
+                        },
+                        onSaveToVerses = {
+                            viewModel.saveSelectedVersesToMainModule()
+                            Toast.makeText(context, "Versículo guardado en Favoritos", Toast.LENGTH_SHORT).show()
+                        },
+                        onShareText = {
+                            val formatted = viewModel.getFormattedQuotation()
+                            sharePlainText(context, formatted)
+                        },
+                        onShareCard = {
+                            viewModel.openShareDialog()
+                        },
+                        onCompareVersions = {
+                            viewModel.openCompareModal()
+                        },
+                        onCrossReferences = {
+                            val firstSelected = viewModel.getSelectedVerses().firstOrNull()
+                            if (firstSelected != null) {
+                                viewModel.openCrossReferences(firstSelected)
+                            }
+                        },
+                        onClearSelection = {
+                            viewModel.clearSelection()
                         }
-                        Text(
-                            text = "${(uiState.currentBook?.name ?: "LIBRO").uppercase()} ${uiState.currentChapter}",
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 1.5.sp,
-                            fontSize = 13.sp,
-                            color = themeText
-                        )
-                    }
-                }
+                    )
+                } else if (uiState.isReaderBarsVisible) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Left extreme: Previous chapter button (pointing left)
+                        Surface(
+                            modifier = Modifier
+                                .size(46.dp)
+                                .clip(CircleShape)
+                                .shadow(6.dp, CircleShape)
+                                .clickable {
+                                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                    viewModel.previousChapter()
+                                },
+                            shape = CircleShape,
+                            color = themeBg,
+                            border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.3f))
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Default.ArrowBack,
+                                    contentDescription = "Capítulo anterior",
+                                    tint = themeText,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
 
-                // Right extreme: Next chapter button (pointing right)
-                Surface(
-                    modifier = Modifier
-                        .size(46.dp)
-                        .clip(CircleShape)
-                        .shadow(6.dp, CircleShape)
-                        .clickable { viewModel.nextChapter() },
-                    shape = CircleShape,
-                    color = themeBg,
-                    border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.3f))
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Default.ArrowForward,
-                            contentDescription = "Capítulo siguiente",
-                            tint = themeText,
-                            modifier = Modifier.size(20.dp)
-                        )
+                        // Center: Current Book & Chapter pill (Click opens selector modal)
+                        Surface(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(24.dp))
+                                .shadow(8.dp, RoundedCornerShape(24.dp))
+                                .clickable { viewModel.openBookChapterSelector() },
+                            shape = RoundedCornerShape(24.dp),
+                            color = themeBg,
+                            border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.35f))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .clip(CircleShape)
+                                        .background(themeAccent.copy(alpha = 0.15f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        Icons.Default.PlayArrow,
+                                        contentDescription = null,
+                                        tint = themeAccent,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                                Text(
+                                    text = "${(uiState.currentBook?.name ?: "LIBRO").uppercase()} ${uiState.currentChapter}",
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 1.5.sp,
+                                    fontSize = 13.sp,
+                                    color = themeText
+                                )
+                            }
+                        }
+
+                        // Right extreme: Next chapter button (pointing right)
+                        Surface(
+                            modifier = Modifier
+                                .size(46.dp)
+                                .clip(CircleShape)
+                                .shadow(6.dp, CircleShape)
+                                .clickable {
+                                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                    viewModel.nextChapter()
+                                },
+                            shape = CircleShape,
+                            color = themeBg,
+                            border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.3f))
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Default.ArrowForward,
+                                    contentDescription = "Capítulo siguiente",
+                                    tint = themeText,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
-        }
-
-        // Contextual Floating Action Bar when verses are selected
-            VerseActionBar(
-                selectedCount = uiState.selectedVerseNumbers.size,
-                onCopy = {
-                    val formatted = viewModel.getFormattedQuotation()
-                    copyToClipboard(context, formatted)
-                    Toast.makeText(context, "Versículo copiado", Toast.LENGTH_SHORT).show()
-                    viewModel.clearSelection()
-                },
-                onHighlight = { hex ->
-                    viewModel.applyHighlightToSelection(hex)
-                },
-                onRemoveHighlight = {
-                    viewModel.removeHighlightFromSelection()
-                },
-                onSaveToVerses = {
-                    viewModel.saveSelectedVersesToMainModule()
-                    Toast.makeText(context, "Versículo guardado en Favoritos", Toast.LENGTH_SHORT).show()
-                },
-                onShareText = {
-                    val formatted = viewModel.getFormattedQuotation()
-                    sharePlainText(context, formatted)
-                },
-                onShareCard = {
-                    viewModel.openShareDialog()
-                },
-                onCompareVersions = {
-                    viewModel.openCompareModal()
-                },
-                onCrossReferences = {
-                    val firstSelected = viewModel.getSelectedVerses().firstOrNull()
-                    if (firstSelected != null) {
-                        viewModel.openCrossReferences(firstSelected)
-                    }
-                },
-                onClearSelection = {
-                    viewModel.clearSelection()
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-            )
         }
     }
 

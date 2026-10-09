@@ -9,6 +9,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.data.initial.InitialVersesData
 import com.example.data.model.BibleBookEntity
 import com.example.data.model.BibleReaderVerseEntity
+import com.example.data.model.CustomPlanDayEntity
+import com.example.data.model.CustomReadingPlanEntity
 import com.example.data.model.VerseEntity
 import com.example.data.model.VerseHighlightEntity
 import kotlinx.coroutines.CoroutineScope
@@ -20,15 +22,18 @@ import kotlinx.coroutines.launch
         VerseEntity::class,
         BibleBookEntity::class,
         BibleReaderVerseEntity::class,
-        VerseHighlightEntity::class
+        VerseHighlightEntity::class,
+        CustomReadingPlanEntity::class,
+        CustomPlanDayEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class BibleDatabase : RoomDatabase() {
 
     abstract fun verseDao(): VerseDao
     abstract fun bibleReaderDao(): BibleReaderDao
+    abstract fun customReadingPlanDao(): CustomReadingPlanDao
 
     companion object {
         @Volatile
@@ -101,6 +106,45 @@ abstract class BibleDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS custom_reading_plans (
+                        id TEXT PRIMARY KEY NOT NULL,
+                        title TEXT NOT NULL,
+                        description TEXT NOT NULL DEFAULT '',
+                        selectedBookIds TEXT NOT NULL,
+                        totalChapters INTEGER NOT NULL,
+                        totalDays INTEGER NOT NULL,
+                        distributionMode TEXT NOT NULL DEFAULT 'BY_TARGET_DAYS',
+                        chaptersPerDay INTEGER,
+                        createdAt INTEGER NOT NULL,
+                        startDate INTEGER NOT NULL,
+                        completedAt INTEGER,
+                        isCompleted INTEGER NOT NULL DEFAULT 0,
+                        isArchived INTEGER NOT NULL DEFAULT 0
+                    )
+                """.trimIndent())
+
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS custom_plan_days (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        planId TEXT NOT NULL,
+                        dayNumber INTEGER NOT NULL,
+                        passageSummary TEXT NOT NULL,
+                        primaryBookId INTEGER NOT NULL,
+                        primaryChapter INTEGER NOT NULL,
+                        passagesJson TEXT NOT NULL,
+                        isCompleted INTEGER NOT NULL DEFAULT 0,
+                        completedAt INTEGER,
+                        FOREIGN KEY(planId) REFERENCES custom_reading_plans(id) ON DELETE CASCADE
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_custom_plan_days_planId ON custom_plan_days(planId)")
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_custom_plan_days_planId_dayNumber ON custom_plan_days(planId, dayNumber)")
+            }
+        }
+
         fun getDatabase(context: Context, scope: CoroutineScope? = null): BibleDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -108,7 +152,7 @@ abstract class BibleDatabase : RoomDatabase() {
                     BibleDatabase::class.java,
                     "bible_verses_database"
                 )
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                 .fallbackToDestructiveMigration(false)
                 .build()
                 INSTANCE = instance

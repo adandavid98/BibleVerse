@@ -24,6 +24,10 @@ import com.example.ui.theme.AppReadingTheme
 import com.example.update.AppUpdateInfo
 import com.example.update.AppUpdateManager
 import com.example.update.UpdateDownloadStatus
+import com.example.data.model.CustomPlanWithDays
+import com.example.data.model.CustomReadingPlanEntity
+import com.example.data.model.PlanDistributionMode
+import com.example.data.repository.CustomReadingPlanRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -130,10 +134,21 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     private lateinit var bibleReaderDao: com.example.data.local.BibleReaderDao
     val offlineDownloadStates = com.example.data.bible.OfflineBibleDownloadManager.downloadStates
 
+    val customPlanRepository: CustomReadingPlanRepository
+    val activeCustomPlans: StateFlow<List<CustomPlanWithDays>>
+    val completedCustomPlans: StateFlow<List<CustomPlanWithDays>>
+
     init {
         val db = BibleDatabase.getDatabase(application, viewModelScope)
         repository = VerseRepository(db.verseDao())
         bibleReaderDao = db.bibleReaderDao()
+
+        val customDao = db.customReadingPlanDao()
+        customPlanRepository = CustomReadingPlanRepository(customDao)
+        activeCustomPlans = customPlanRepository.getActivePlansWithDays()
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        completedCustomPlans = customPlanRepository.getCompletedPlansWithDays()
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
         // Refresh offline versions statuses
         viewModelScope.launch {
@@ -299,6 +314,24 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onSearchQueryChange(newQuery: String) {
         _searchQuery.value = newQuery
+    }
+
+    suspend fun searchBibleOffline(
+        query: String,
+        testament: String?,
+        bookId: Int?,
+        version: String
+    ): List<com.example.data.bible.OfflineVerseDto> {
+        val dao = BibleDatabase.getDatabase(getApplication()).bibleReaderDao()
+        return com.example.data.bible.OfflineBibleManager.searchVerses(
+            context = getApplication(),
+            query = query,
+            testament = testament,
+            bookId = bookId,
+            limit = 80,
+            version = version,
+            dao = dao
+        )
     }
 
     fun onFilterSelected(filter: VerseFilter) {
@@ -977,6 +1010,49 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     fun refreshOfflineVersions() {
         viewModelScope.launch {
             com.example.data.bible.OfflineBibleDownloadManager.refreshStatuses(bibleReaderDao)
+        }
+    }
+
+    fun createCustomPlan(
+        title: String,
+        description: String = "",
+        selectedBookIds: List<Int>,
+        mode: PlanDistributionMode,
+        targetDays: Int = 30,
+        chaptersPerDay: Int = 2,
+        onSuccess: (CustomReadingPlanEntity) -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            val created = customPlanRepository.createPlan(
+                title = title,
+                description = description,
+                selectedBookIds = selectedBookIds,
+                mode = mode,
+                targetDays = targetDays,
+                chaptersPerDay = chaptersPerDay
+            )
+            onSuccess(created)
+        }
+    }
+
+    fun togglePlanDay(planId: String, dayNumber: Int, completed: Boolean, onPlanCompleted: (() -> Unit)? = null) {
+        viewModelScope.launch {
+            val justCompleted = customPlanRepository.toggleDayCompleted(planId, dayNumber, completed)
+            if (justCompleted) {
+                onPlanCompleted?.invoke()
+            }
+        }
+    }
+
+    fun restartCustomPlan(planId: String) {
+        viewModelScope.launch {
+            customPlanRepository.restartPlan(planId)
+        }
+    }
+
+    fun deleteCustomPlan(planId: String) {
+        viewModelScope.launch {
+            customPlanRepository.deletePlan(planId)
         }
     }
 }

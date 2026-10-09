@@ -99,6 +99,7 @@ fun VerseActionBar(
                     }
 
                     // Direct Highlight Color Palette Swatches (Immediate 1-tap highlighting)
+                    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
                     Row(
                         modifier = Modifier
                             .weight(1f, fill = false)
@@ -114,13 +115,19 @@ fun VerseActionBar(
                                     .clip(CircleShape)
                                     .background(Color(android.graphics.Color.parseColor(colorItem.hex)))
                                     .border(1.dp, Color.Black.copy(alpha = 0.15f), CircleShape)
-                                    .clickable { onHighlight(colorItem.hex) }
+                                    .clickable {
+                                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                        onHighlight(colorItem.hex)
+                                    }
                             )
                         }
 
                         // Remove highlight icon
                         IconButton(
-                            onClick = onRemoveHighlight,
+                            onClick = {
+                                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                onRemoveHighlight()
+                            },
                             modifier = Modifier.size(30.dp)
                         ) {
                             Icon(

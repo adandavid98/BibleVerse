@@ -23,6 +23,11 @@ enum class ShareCardTemplate(
         title = "Pergamino Clásico",
         subtitle = "Estilo clásico cálido con detalles históricos",
         previewColorHex = "#FBF0D9"
+    ),
+    DEEP_NIGHT(
+        title = "Noche y Oro",
+        subtitle = "Elegancia oscura solemne con acentos dorados",
+        previewColorHex = "#0B0F19"
     )
 }
 
