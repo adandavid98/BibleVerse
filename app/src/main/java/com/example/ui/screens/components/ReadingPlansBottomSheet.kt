@@ -332,52 +332,137 @@ fun ReadingPlansBottomSheet(
                     // TAB 1: CATÁLOGO DE PLANES PREDETERMINADOS (IDÉNTICO A PRODUCCIÓN)
                     1 -> {
                         Column(modifier = Modifier.fillMaxSize()) {
-                            // Subtabs: Clásico vs Cronológico vs Historias
-                            val selectedCatalogTab = when (progress.activePlanType) {
-                                ReadingPlanType.TRADITIONAL -> 0
-                                ReadingPlanType.CHRONOLOGICAL -> 1
-                                ReadingPlanType.BIBLE_STORIES -> 2
-                            }
-                            TabRow(
-                                selectedTabIndex = selectedCatalogTab,
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(14.dp))
+                            // Selector visual de planes del catálogo (Propuesta 3: 3 tarjetas)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Tab(
-                                    selected = progress.activePlanType == ReadingPlanType.TRADITIONAL,
-                                    onClick = { preferences.setPlanType(ReadingPlanType.TRADITIONAL) },
-                                    text = {
-                                        Text(
-                                            "Clásico",
-                                            fontSize = 13.sp,
-                                            fontWeight = if (progress.activePlanType == ReadingPlanType.TRADITIONAL) FontWeight.Bold else FontWeight.Normal
-                                        )
-                                    }
+                                val catalogOptions = listOf(
+                                    Triple(ReadingPlanType.TRADITIONAL, "Clásico", "365 días"),
+                                    Triple(ReadingPlanType.CHRONOLOGICAL, "Cronológico", "365 días"),
+                                    Triple(ReadingPlanType.BIBLE_STORIES, "Historias", "749 relatos")
                                 )
-                                Tab(
-                                    selected = progress.activePlanType == ReadingPlanType.CHRONOLOGICAL,
-                                    onClick = { preferences.setPlanType(ReadingPlanType.CHRONOLOGICAL) },
-                                    text = {
-                                        Text(
-                                            "Cronológico",
-                                            fontSize = 13.sp,
-                                            fontWeight = if (progress.activePlanType == ReadingPlanType.CHRONOLOGICAL) FontWeight.Bold else FontWeight.Normal
-                                        )
+
+                                catalogOptions.forEach { (type, title, subtitle) ->
+                                    val isSelected = progress.activePlanType == type
+                                    val planProg = progress.plans[type] ?: com.example.data.preferences.SinglePlanProgress(type)
+                                    val icon = when (type) {
+                                        ReadingPlanType.TRADITIONAL -> Icons.Filled.MenuBook
+                                        ReadingPlanType.CHRONOLOGICAL -> Icons.Filled.History
+                                        ReadingPlanType.BIBLE_STORIES -> Icons.Filled.AutoStories
                                     }
-                                )
-                                Tab(
-                                    selected = progress.activePlanType == ReadingPlanType.BIBLE_STORIES,
-                                    onClick = { preferences.setPlanType(ReadingPlanType.BIBLE_STORIES) },
-                                    text = {
-                                        Text(
-                                            "Historias",
-                                            fontSize = 13.sp,
-                                            fontWeight = if (progress.activePlanType == ReadingPlanType.BIBLE_STORIES) FontWeight.Bold else FontWeight.Normal
-                                        )
+
+                                    Card(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .clickable { preferences.setPlanType(type) },
+                                        shape = RoundedCornerShape(14.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = if (isSelected)
+                                                MaterialTheme.colorScheme.primaryContainer
+                                            else
+                                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                        ),
+                                        border = if (isSelected)
+                                            BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+                                        else
+                                            BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 8.dp, vertical = 10.dp)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Surface(
+                                                    shape = CircleShape,
+                                                    color = if (isSelected)
+                                                        MaterialTheme.colorScheme.primary
+                                                    else
+                                                        MaterialTheme.colorScheme.surfaceVariant,
+                                                    modifier = Modifier.size(28.dp)
+                                                ) {
+                                                    Box(contentAlignment = Alignment.Center) {
+                                                        Icon(
+                                                            imageVector = icon,
+                                                            contentDescription = null,
+                                                            tint = if (isSelected)
+                                                                MaterialTheme.colorScheme.onPrimary
+                                                            else
+                                                                MaterialTheme.colorScheme.onSurfaceVariant,
+                                                            modifier = Modifier.size(16.dp)
+                                                        )
+                                                    }
+                                                }
+
+                                                if (isSelected) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.CheckCircle,
+                                                        contentDescription = "Seleccionado",
+                                                        tint = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                }
+                                            }
+
+                                            Spacer(modifier = Modifier.height(8.dp))
+
+                                            Text(
+                                                text = title,
+                                                style = MaterialTheme.typography.labelLarge.copy(
+                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold
+                                                ),
+                                                color = if (isSelected)
+                                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                                else
+                                                    MaterialTheme.colorScheme.onSurface,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+
+                                            Text(
+                                                text = subtitle,
+                                                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                maxLines = 1
+                                            )
+
+                                            Spacer(modifier = Modifier.height(6.dp))
+
+                                            LinearProgressIndicator(
+                                                progress = { planProg.progressPercentage },
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(4.dp)
+                                                    .clip(RoundedCornerShape(2.dp)),
+                                                color = if (isSelected)
+                                                    MaterialTheme.colorScheme.primary
+                                                else
+                                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                                                trackColor = MaterialTheme.colorScheme.surfaceVariant
+                                            )
+
+                                            Spacer(modifier = Modifier.height(4.dp))
+
+                                            Text(
+                                                text = "${(planProg.progressPercentage * 100).toInt()}%",
+                                                style = MaterialTheme.typography.labelSmall.copy(
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 10.sp
+                                                ),
+                                                color = if (isSelected)
+                                                    MaterialTheme.colorScheme.primary
+                                                else
+                                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
                                     }
-                                )
+                                }
                             }
 
                             Spacer(modifier = Modifier.height(14.dp))

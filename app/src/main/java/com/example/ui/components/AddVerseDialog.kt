@@ -123,9 +123,6 @@ fun AddVerseDialog(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    // Mode selection: 0 = Selector de Libros y Versiones, 1 = Entrada Manual
-    var selectedTab by remember { mutableIntStateOf(0) }
-
     // Selected Bible Translation Version
     var selectedVersion by remember { mutableStateOf(BibleCatalog.versions.first()) }
     var showVersionModal by remember { mutableStateOf(false) }
@@ -133,7 +130,7 @@ fun AddVerseDialog(
     val context = androidx.compose.ui.platform.LocalContext.current
     var showReferencePickerWindow by remember { mutableStateOf(false) }
 
-    // === STATE FOR OPTION 1: BIBLE BOOK SELECTOR ===
+    // === STATE FOR BIBLE BOOK SELECTOR ===
     var selectedTestamentFilter by remember { mutableStateOf("Todos") } // "Todos", "Antiguo Testamento", "Nuevo Testamento"
     var bookSearchQuery by remember { mutableStateOf("") }
     var selectedBook by remember { mutableStateOf(BibleCatalog.books.first()) }
@@ -146,17 +143,6 @@ fun AddVerseDialog(
     var isGeneratingAiTab0 by remember { mutableStateOf(false) }
     var contextSourceBadgeTab0 by remember { mutableStateOf("Catálogo Local") }
     var isFetchingVerseText by remember { mutableStateOf(false) }
-
-    // === STATE FOR OPTION 2: MANUAL ENTRY ===
-    var manualBook by remember { mutableStateOf("") }
-    var manualChapterVerse by remember { mutableStateOf("") }
-    var manualTestament by remember { mutableStateOf("Nuevo Testamento") }
-    var manualTopic by remember { mutableStateOf("") }
-    var manualText by remember { mutableStateOf("") }
-    var manualContext by remember { mutableStateOf("") }
-    var manualNotes by remember { mutableStateOf("") }
-    var isGeneratingAiTab1 by remember { mutableStateOf(false) }
-    var contextSourceBadgeTab1 by remember { mutableStateOf<String?>(null) }
 
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
@@ -320,7 +306,7 @@ fun AddVerseDialog(
                                 color = MaterialTheme.colorScheme.onBackground
                             )
                             Text(
-                                text = "Explora libros o escribe manualmente",
+                                text = "Explora libros y selecciona versículos",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -337,58 +323,6 @@ fun AddVerseDialog(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // TABS: 2 OPCIONES (Libros de la Biblia vs Entrada Manual)
-                TabRow(
-                    selectedTabIndex = selectedTab,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp)),
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-                ) {
-                    Tab(
-                        selected = selectedTab == 0,
-                        onClick = { selectedTab = 0; errorMessage = null },
-                        text = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Icon(Icons.Filled.AutoStories, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Text(
-                                    text = "Libros de la Biblia",
-                                    fontSize = 13.sp,
-                                    fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Normal
-                                )
-                            }
-                        },
-                        modifier = Modifier.testTag("tab_bible_selector")
-                    )
-
-                    Tab(
-                        selected = selectedTab == 1,
-                        onClick = { selectedTab = 1; errorMessage = null },
-                        text = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Icon(Icons.Filled.EditNote, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Text(
-                                    text = "Agregar Manual",
-                                    fontSize = 13.sp,
-                                    fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Normal
-                                )
-                            }
-                        },
-                        modifier = Modifier.testTag("tab_manual_entry")
-                    )
-                }
-
-                Divider(
-                    modifier = Modifier.padding(vertical = 12.dp),
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                )
-
                 // BODY CONTENT
                 Column(
                     modifier = Modifier
@@ -396,7 +330,7 @@ fun AddVerseDialog(
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    // SELECCIONADOR DE VERSIÓN (Aplica a ambas opciones)
+                    // SELECCIONADOR DE VERSIÓN (Tarjeta entera clickeable)
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -412,7 +346,7 @@ fun AddVerseDialog(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(12.dp),
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
@@ -422,6 +356,7 @@ fun AddVerseDialog(
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -445,22 +380,16 @@ fun AddVerseDialog(
                                 }
                             }
 
-                            OutlinedButton(
-                                onClick = { showVersionModal = true },
-                                shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier.testTag("btn_change_version")
-                            ) {
-                                Text("Cambiar", fontSize = 12.sp)
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Icon(Icons.Filled.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
-                            }
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = "Seleccionar versión",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(24.dp)
+                            )
                         }
                     }
 
-                    if (selectedTab == 0) {
-                        // ==========================================
-                        // OPCIÓN 1: SELECTOR PRECISO (VENTANA 3 PASOS)
-                        // ==========================================
+                    // SELECTOR PRECISO (VENTANA 3 PASOS)
 
                         Card(
                             modifier = Modifier.fillMaxWidth(),
@@ -747,279 +676,10 @@ fun AddVerseDialog(
                             placeholder = { Text("Tus notas o reflexiones devocionales...") },
                             modifier = Modifier.fillMaxWidth().testTag("input_bible_notes"),
                             minLines = 2,
-                            maxLines = 4,
-                            shape = RoundedCornerShape(12.dp)
+                            maxLines = 4
                         )
 
-                    } else {
-                        // ==========================================
-                        // OPCIÓN 2: AGREGAR MANUAL (COMO YA ESTÁ)
-                        // ==========================================
-
-                        // Testamento Chips
-                        Text(
-                            text = "Testamento:",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            FilterChip(
-                                selected = manualTestament == "Antiguo Testamento",
-                                onClick = { manualTestament = "Antiguo Testamento" },
-                                label = { Text("Antiguo Testamento") },
-                                modifier = Modifier.testTag("chip_antiguo")
-                            )
-                            FilterChip(
-                                selected = manualTestament == "Nuevo Testamento",
-                                onClick = { manualTestament = "Nuevo Testamento" },
-                                label = { Text("Nuevo Testamento") },
-                                modifier = Modifier.testTag("chip_nuevo")
-                            )
-                        }
-
-                        // Libro y Capítulo:Versículo
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            OutlinedTextField(
-                                value = manualBook,
-                                onValueChange = { manualBook = it },
-                                label = { Text("Libro (ej. Salmos)") },
-                                modifier = Modifier
-                                    .weight(1.3f)
-                                    .testTag("input_book"),
-                                singleLine = true,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-
-                            OutlinedTextField(
-                                value = manualChapterVerse,
-                                onValueChange = { manualChapterVerse = it },
-                                label = { Text("Capítulo:Versículo") },
-                                placeholder = { Text("ej. 23:1") },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .testTag("input_chapter_verse"),
-                                singleLine = true,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                        }
-
-                        // Tema o Categoría
-                        OutlinedTextField(
-                            value = manualTopic,
-                            onValueChange = { manualTopic = it },
-                            label = { Text("Tema o Categoría (ej. Confianza, Promesa)") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("input_topic"),
-                            singleLine = true,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-
-                        // Texto Bíblico
-                        OutlinedTextField(
-                            value = manualText,
-                            onValueChange = { manualText = it },
-                            label = { Text("Texto Bíblico *") },
-                            placeholder = { Text("Escribe el texto del versículo...") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("input_text"),
-                            minLines = 3,
-                            maxLines = 6,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-
-                        // Panel de Contexto Inteligente (Manual)
-                        Card(
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(12.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.AutoAwesome,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Text(
-                                            text = "Llenado Inteligente de Contexto",
-                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-
-                                    if (contextSourceBadgeTab1 != null) {
-                                        Surface(
-                                            shape = RoundedCornerShape(6.dp),
-                                            color = if (contextSourceBadgeTab1!!.contains("IA")) {
-                                                MaterialTheme.colorScheme.primary
-                                            } else {
-                                                MaterialTheme.colorScheme.secondaryContainer
-                                            }
-                                        ) {
-                                            Text(
-                                                text = contextSourceBadgeTab1!!,
-                                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                                color = if (contextSourceBadgeTab1!!.contains("IA")) {
-                                                    MaterialTheme.colorScheme.onPrimary
-                                                } else {
-                                                    MaterialTheme.colorScheme.onSecondaryContainer
-                                                },
-                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Button(
-                                        onClick = {
-                                            if (manualBook.isBlank()) {
-                                                errorMessage = "Indica al menos el nombre del libro (ej. Salmos)"
-                                                return@Button
-                                            }
-                                            isGeneratingAiTab1 = true
-                                            val cvParts = manualChapterVerse.split(":")
-                                            val ch = cvParts.getOrNull(0)?.filter { it.isDigit() }?.toIntOrNull() ?: 1
-                                            val vs = cvParts.getOrNull(1)?.ifBlank { "1" } ?: "1"
-
-                                            if (onGenerateContext != null) {
-                                                onGenerateContext(
-                                                    manualBook,
-                                                    ch,
-                                                    vs,
-                                                    manualText,
-                                                    selectedVersion.code,
-                                                    false
-                                                ) { res, isAi ->
-                                                    manualContext = res
-                                                    contextSourceBadgeTab1 = if (isAi) "✨ IA (Gemini)" else "Catálogo Local"
-                                                    isGeneratingAiTab1 = false
-                                                }
-                                            } else {
-                                                coroutineScope.launch {
-                                                    val res = GeminiVerseContextService.generateContext(
-                                                        book = manualBook,
-                                                        chapter = ch,
-                                                        verse = vs,
-                                                        verseText = manualText,
-                                                        bibleVersion = selectedVersion.code
-                                                    )
-                                                    when (res) {
-                                                        is ContextGenerationResult.Success -> {
-                                                            manualContext = res.contextText
-                                                            contextSourceBadgeTab1 = if (res.source == ContextSource.AI_GEMINI) "✨ IA (Gemini)" else "Catálogo Local"
-                                                        }
-                                                        is ContextGenerationResult.Error -> {
-                                                            manualContext = res.fallbackContext
-                                                            contextSourceBadgeTab1 = "Catálogo Local"
-                                                        }
-                                                    }
-                                                    isGeneratingAiTab1 = false
-                                                }
-                                            }
-                                        },
-                                        enabled = !isGeneratingAiTab1,
-                                        shape = RoundedCornerShape(8.dp),
-                                        modifier = Modifier
-                                            .weight(1.3f)
-                                            .testTag("btn_enrich_ai_tab1")
-                                    ) {
-                                        if (isGeneratingAiTab1) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.size(14.dp),
-                                                strokeWidth = 2.dp,
-                                                color = MaterialTheme.colorScheme.onPrimary
-                                            )
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text("Generando...", fontSize = 11.sp)
-                                        } else {
-                                            Icon(Icons.Filled.AutoAwesome, contentDescription = null, modifier = Modifier.size(14.dp))
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text("Llenar con IA", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-
-                                    OutlinedButton(
-                                        onClick = {
-                                            if (manualBook.isBlank()) {
-                                                errorMessage = "Indica al menos el nombre del libro (ej. Salmos)"
-                                                return@OutlinedButton
-                                            }
-                                            val cvParts = manualChapterVerse.split(":")
-                                            val ch = cvParts.getOrNull(0)?.filter { it.isDigit() }?.toIntOrNull() ?: 1
-                                            val vs = cvParts.getOrNull(1)?.ifBlank { "1" } ?: "1"
-                                            manualContext = BibleContextEngine.getLocalContext(manualBook, ch, vs, manualText)
-                                            contextSourceBadgeTab1 = "Catálogo Local"
-                                        },
-                                        enabled = !isGeneratingAiTab1,
-                                        shape = RoundedCornerShape(8.dp),
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .testTag("btn_restore_local_tab1")
-                                    ) {
-                                        Icon(Icons.Filled.MenuBook, contentDescription = null, modifier = Modifier.size(14.dp))
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Local", fontSize = 11.sp)
-                                    }
-                                }
-                            }
-                        }
-
-                        // Contexto Teológico y Moral
-                        OutlinedTextField(
-                            value = manualContext,
-                            onValueChange = { 
-                                manualContext = it
-                                contextSourceBadgeTab1 = "Personalizado"
-                            },
-                            label = { Text("Contexto Teológico y Moral *") },
-                            placeholder = { Text("Explica el significado histórico, moral y teológico del pasaje...") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("input_context"),
-                            minLines = 4,
-                            maxLines = 8,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-
-                        // Notas Personales
-                        OutlinedTextField(
-                            value = manualNotes,
-                            onValueChange = { manualNotes = it },
-                            label = { Text("Notas Personales (Opcional)") },
-                            placeholder = { Text("Tus reflexiones personales para este versículo...") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("input_initial_notes"),
-                            minLines = 2,
-                            maxLines = 4,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                    }
-
-                    if (errorMessage != null) {
+                        if (errorMessage != null) {
                         Surface(
                             shape = RoundedCornerShape(8.dp),
                             color = MaterialTheme.colorScheme.errorContainer,
@@ -1055,39 +715,20 @@ fun AddVerseDialog(
 
                     Button(
                         onClick = {
-                            if (selectedTab == 0) {
-                                // Validate Option 1: Bible Selector
-                                if (selectedBook.name.isBlank() || verseInput.isBlank() || bibleText.isBlank() || bibleContext.isBlank()) {
-                                    errorMessage = "Por favor completa el texto bíblico y su contexto teológico."
-                                } else {
-                                    val chv = "$selectedChapter:$verseInput".trim()
-                                    onAddVerse(
-                                        selectedBook.name.trim(),
-                                        chv,
-                                        selectedBook.testament,
-                                        bibleText.trim(),
-                                        bibleContext.trim(),
-                                        bibleTopic.trim().ifBlank { "General" },
-                                        bibleNotes.trim(),
-                                        selectedVersion.code
-                                    )
-                                }
+                            if (selectedBook.name.isBlank() || verseInput.isBlank() || bibleText.isBlank() || bibleContext.isBlank()) {
+                                errorMessage = "Por favor completa el texto bíblico y su contexto teológico."
                             } else {
-                                // Validate Option 2: Manual
-                                if (manualBook.isBlank() || manualChapterVerse.isBlank() || manualText.isBlank() || manualContext.isBlank()) {
-                                    errorMessage = "Por favor completa el libro, versículo, texto y contexto."
-                                } else {
-                                    onAddVerse(
-                                        manualBook.trim(),
-                                        manualChapterVerse.trim(),
-                                        manualTestament,
-                                        manualText.trim(),
-                                        manualContext.trim(),
-                                        manualTopic.trim(),
-                                        manualNotes.trim(),
-                                        selectedVersion.code
-                                    )
-                                }
+                                val chv = "$selectedChapter:$verseInput".trim()
+                                onAddVerse(
+                                    selectedBook.name.trim(),
+                                    chv,
+                                    selectedBook.testament,
+                                    bibleText.trim(),
+                                    bibleContext.trim(),
+                                    bibleTopic.trim().ifBlank { "General" },
+                                    bibleNotes.trim(),
+                                    selectedVersion.code
+                                )
                             }
                         },
                         modifier = Modifier.testTag("btn_confirm_add_verse"),
