@@ -309,7 +309,15 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = BibleUiState()
+        initialValue = BibleUiState(
+            readingTheme = _readingTheme.value,
+            fontSizeScale = _fontSizeScale.value,
+            reminderHour = _reminderHour.value,
+            reminderMinute = _reminderMinute.value,
+            reminderEnabled = _reminderEnabled.value,
+            cloudSyncId = _cloudSyncId.value,
+            lastSyncTime = _lastSyncTime.value
+        )
     )
 
     fun onSearchQueryChange(newQuery: String) {
