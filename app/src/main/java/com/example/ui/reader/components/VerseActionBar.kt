@@ -108,33 +108,41 @@ fun VerseActionBar(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // 1. PRIMERO: Botón para quitar color / resetear resaltador
+                        Surface(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                    onRemoveHighlight()
+                                },
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.4f))
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Default.FormatColorReset,
+                                    contentDescription = "Quitar color",
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(17.dp)
+                                )
+                            }
+                        }
+
+                        // 2. Colores disponibles (oscuros y clásicos)
                         HighlightPalette.colors.forEach { colorItem ->
                             Box(
                                 modifier = Modifier
                                     .size(30.dp)
                                     .clip(CircleShape)
                                     .background(Color(android.graphics.Color.parseColor(colorItem.hex)))
-                                    .border(1.dp, Color.Black.copy(alpha = 0.15f), CircleShape)
+                                    .border(1.dp, Color.Black.copy(alpha = 0.2f), CircleShape)
                                     .clickable {
                                         haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                                         onHighlight(colorItem.hex)
                                     }
-                            )
-                        }
-
-                        // Remove highlight icon
-                        IconButton(
-                            onClick = {
-                                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                                onRemoveHighlight()
-                            },
-                            modifier = Modifier.size(30.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.FormatColorReset,
-                                contentDescription = "Quitar color",
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(18.dp)
                             )
                         }
                     }

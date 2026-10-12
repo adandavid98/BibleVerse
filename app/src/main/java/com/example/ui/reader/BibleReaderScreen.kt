@@ -846,9 +846,9 @@ private fun CompactVerseRow(
     val highlightColor = remember(verse.highlightColorHex, isDarkTheme) {
         if (!verse.highlightColorHex.isNullOrBlank()) {
             try {
-                // Soft, integrated highlight tint without harsh contrast
+                // Integrated highlight tint with 35% transparency
                 Color(android.graphics.Color.parseColor(verse.highlightColorHex))
-                    .copy(alpha = if (isDarkTheme) 0.24f else 0.28f)
+                    .copy(alpha = 0.35f)
             } catch (e: Exception) {
                 null
             }
