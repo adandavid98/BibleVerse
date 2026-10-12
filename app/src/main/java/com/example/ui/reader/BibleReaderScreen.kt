@@ -556,8 +556,8 @@ fun BibleReaderScreen(
                             if (audioState.isActive) h += 86.dp
                             if (uiState.selectedVerseNumbers.isNotEmpty()) {
                                 h += 160.dp
-                            } else if (uiState.isReaderBarsVisible) {
-                                h += 72.dp
+                            } else {
+                                h += if (uiState.isReaderBarsVisible) 140.dp else 72.dp
                             }
                             h
                         }
@@ -624,12 +624,16 @@ fun BibleReaderScreen(
                             viewModel.clearSelection()
                         }
                     )
-                } else if (uiState.isReaderBarsVisible) {
+                } else {
+                    val bottomRowPadding by androidx.compose.animation.core.animateDpAsState(
+                        targetValue = if (uiState.isReaderBarsVisible) 88.dp else 12.dp,
+                        label = "chapter_nav_bottom_padding"
+                    )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .navigationBarsPadding()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = bottomRowPadding),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {

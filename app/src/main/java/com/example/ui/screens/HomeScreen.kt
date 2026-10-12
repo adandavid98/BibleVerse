@@ -277,7 +277,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    if ((selectedTab == 1 && !readerUiState.isReaderBarsVisible) || selectedTab == 4) {
+                    if (selectedTab == 1 || selectedTab == 4) {
                         PaddingValues(0.dp)
                     } else {
                         paddingValues
