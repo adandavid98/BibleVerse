@@ -177,27 +177,14 @@ fun SettingsTab(
                     }
                 }
 
-                Row(
+                Button(
+                    onClick = { onOpenReadingPlans?.invoke(2) },
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    shape = RoundedCornerShape(10.dp)
                 ) {
-                    OutlinedButton(
-                        onClick = { onOpenReadingPlans?.invoke(0) },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text("Mis Planes", fontSize = 12.sp)
-                    }
-
-                    Button(
-                        onClick = { onOpenReadingPlans?.invoke(2) },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Icon(Icons.Default.EmojiEvents, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Historial", fontSize = 12.sp)
-                    }
+                    Icon(Icons.Default.EmojiEvents, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Historial de Planes", fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

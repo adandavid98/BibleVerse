@@ -60,7 +60,7 @@ fun ReadingPlansBottomSheet(
     val completedCustomPlans by (viewModel?.completedCustomPlans ?: remember { MutableStateFlow(emptyList()) }).collectAsState()
 
     // Tabs: 0: Mis Planes, 1: Catálogo, 2: Historial
-    var selectedMainTab by remember { mutableIntStateOf(if (activeCustomPlans.isNotEmpty()) 0 else initialTab) }
+    var selectedMainTab by remember(initialTab) { mutableIntStateOf(initialTab) }
 
     // Dialogs state
     var showCreatePlanDialog by remember { mutableStateOf(false) }
