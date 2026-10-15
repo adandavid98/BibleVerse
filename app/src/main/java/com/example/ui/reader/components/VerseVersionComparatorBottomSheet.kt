@@ -24,11 +24,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.bible.BibleCatalog
@@ -119,11 +124,28 @@ fun VerseVersionComparatorBottomSheet(
         }
     )
 
+    // Intercept downward drag/fling over content to prevent bottom sheet from moving down
+    val noDragNestedScroll = remember {
+        object : NestedScrollConnection {
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                // Consume unconsumed downward scroll so ModalBottomSheet never moves down
+                return if (available.y > 0f) Offset(0f, available.y) else Offset.Zero
+            }
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                return if (available.y > 0f) Velocity(0f, available.y) else Velocity.Zero
+            }
+        }
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         dragHandle = null,
-        sheetGesturesEnabled = false,
         containerColor = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ) {
@@ -131,6 +153,7 @@ fun VerseVersionComparatorBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.85f)
+                .nestedScroll(noDragNestedScroll)
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 8.dp)
         ) {
@@ -488,16 +511,13 @@ private fun DismissibleVersionCard(
     modifier: Modifier = Modifier
 ) {
     key(ver.code) {
-        val dismissState = rememberSwipeToDismissBoxState(
-            confirmValueChange = { dismissValue ->
-                if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
-                    onRemove()
-                    true
-                } else {
-                    false
-                }
+        val dismissState = rememberSwipeToDismissBoxState()
+
+        LaunchedEffect(dismissState.currentValue) {
+            if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+                onRemove()
             }
-        )
+        }
 
         SwipeToDismissBox(
             state = dismissState,
