@@ -216,26 +216,19 @@ fun UpdateDialog(
                     }
 
                     is UpdateDownloadStatus.ReadyToInstall -> {
-                        Column(
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
-                                .padding(14.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                .padding(horizontal = 14.dp, vertical = 12.dp)
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "¡Descarga completa! Lista para instalar.",
-                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
+                            Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "⚠️ Si Android muestra \"App not installed as package conflicts with an existing package\":\nEsto ocurre porque la versión anterior en tu teléfono fue instalada con una clave/firma de prueba diferente. Para resolverlo definitivamente, desinstala la aplicación actual e instala este instalador descargado. A partir de entonces, todas las actualizaciones se instalarán automáticamente sin conflictos.",
-                                style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                text = "¡Descarga completa!",
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
