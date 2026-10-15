@@ -201,8 +201,9 @@ fun HomeScreen(
             }
         },
         bottomBar = {
-            // Bottom navigation bar only on tabs 0..3 (hidden in Settings to avoid phantom unselected tabs)
-            val showBottomBar = (selectedTab in 0..3) && (selectedTab != 1 || readerUiState.isReaderBarsVisible)
+            // Bottom navigation bar only on tabs 0..3 (hidden in Settings and hidden when selecting verses in Reader)
+            val isSelectingVerses = selectedTab == 1 && readerUiState.selectedVerseNumbers.isNotEmpty()
+            val showBottomBar = (selectedTab in 0..3) && (selectedTab != 1 || readerUiState.isReaderBarsVisible) && !isSelectingVerses
 
             AnimatedVisibility(
                 visible = showBottomBar,
