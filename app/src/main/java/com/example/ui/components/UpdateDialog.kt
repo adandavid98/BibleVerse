@@ -171,33 +171,6 @@ fun UpdateDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Release notes section
-                Text(
-                    text = "Novedades y cambios:",
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 140.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(MaterialTheme.colorScheme.surface)
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(10.dp))
-                        .padding(10.dp)
-                ) {
-                    Text(
-                        text = updateInfo.releaseNotes.ifBlank { "Mejoras de rendimiento y correcciones generales." },
-                        style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.verticalScroll(rememberScrollState())
-                    )
-                }
-
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Download / Installation State Progress
