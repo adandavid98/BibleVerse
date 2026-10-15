@@ -13,7 +13,13 @@ class DailyVerseReminderReceiver : BroadcastReceiver() {
         val hour = prefs.getInt(NotificationHelper.KEY_REMINDER_HOUR, 8)
         val minute = prefs.getInt(NotificationHelper.KEY_REMINDER_MINUTE, 0)
 
-        if (isEnabled) {
+        if (!isEnabled) return
+
+        if (intent?.action == Intent.ACTION_BOOT_COMPLETED) {
+            // Reprogram reminder on system reboot without showing notification immediately
+            NotificationHelper.scheduleDailyReminder(context, hour, minute)
+        } else {
+            // Alarm trigger: show notification and reschedule for the next day
             val verse = NotificationHelper.getVerseOfTheDay()
             NotificationHelper.showVerseNotification(
                 context = context,
@@ -21,7 +27,6 @@ class DailyVerseReminderReceiver : BroadcastReceiver() {
                 text = verse.text,
                 reflection = verse.context
             )
-            // Reschedule for next day
             NotificationHelper.scheduleDailyReminder(context, hour, minute)
         }
     }

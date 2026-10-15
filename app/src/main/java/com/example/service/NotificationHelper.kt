@@ -21,7 +21,7 @@ import java.util.Calendar
 object NotificationHelper {
     const val CHANNEL_ID = "bible_daily_verse_channel"
     const val NOTIFICATION_ID = 1001
-    const val PREFS_NAME = "bible_reminder_prefs"
+    const val PREFS_NAME = "bible_app_settings"
     const val KEY_REMINDER_ENABLED = "reminder_enabled"
     const val KEY_REMINDER_HOUR = "reminder_hour"
     const val KEY_REMINDER_MINUTE = "reminder_minute"
