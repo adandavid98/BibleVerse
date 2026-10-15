@@ -348,8 +348,9 @@ fun ReadingPlanDayReaderModal(
                                             Text(
                                                 text = effectiveHistoricalContext,
                                                 style = MaterialTheme.typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                lineHeight = 20.sp
+                                                fontSize = (fontSizeSp - 1f).sp,
+                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.88f),
+                                                lineHeight = ((fontSizeSp - 1f) * 1.5f).sp
                                             )
                                         }
                                     }
@@ -378,8 +379,9 @@ fun ReadingPlanDayReaderModal(
                                             Text(
                                                 text = effectiveSpiritualLesson,
                                                 style = MaterialTheme.typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                lineHeight = 20.sp
+                                                fontSize = (fontSizeSp - 1f).sp,
+                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.88f),
+                                                lineHeight = ((fontSizeSp - 1f) * 1.5f).sp
                                             )
                                         }
                                     }
