@@ -71,19 +71,37 @@ fun VerseVersionComparatorBottomSheet(
     // All available canonical versions in the app
     val allVersions = remember { BibleCatalog.versions }
 
-    // Initial list of downloaded versions
-    val initialDownloadedVersions = remember {
-        val downloaded = allVersions.filter { ver ->
-            ver.code == "RVR1960" ||
-            downloadStates[ver.code] is VersionDownloadState.Downloaded ||
-            OfflineBibleDownloadManager.isAssetVersion(ver.code)
-        }
-        if (downloaded.isNotEmpty()) downloaded else listOfNotNull(allVersions.firstOrNull())
+    val prefs = remember(context) {
+        context.getSharedPreferences("bible_app_settings", Context.MODE_PRIVATE)
     }
 
-    // Active versions being compared (starts with only downloaded versions)
+    // Initial list of compared versions, restoring saved preferences if available
+    val initialComparedVersions = remember {
+        val savedString = prefs.getString("comparator_active_versions", null)
+        if (savedString != null) {
+            val savedCodes = savedString.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+            val restored = savedCodes.mapNotNull { code ->
+                allVersions.firstOrNull { it.code.equals(code, ignoreCase = true) }
+            }
+            restored
+        } else {
+            val downloaded = allVersions.filter { ver ->
+                ver.code == "RVR1960" ||
+                downloadStates[ver.code] is VersionDownloadState.Downloaded ||
+                OfflineBibleDownloadManager.isAssetVersion(ver.code)
+            }
+            if (downloaded.isNotEmpty()) downloaded else listOfNotNull(allVersions.firstOrNull())
+        }
+    }
+
+    // Active versions being compared (persisted across app restarts)
     var comparedVersions by remember {
-        mutableStateOf(initialDownloadedVersions)
+        mutableStateOf(initialComparedVersions)
+    }
+
+    fun persistVersions(versions: List<BibleVersion>) {
+        comparedVersions = versions
+        prefs.edit().putString("comparator_active_versions", versions.joinToString(",") { it.code }).apply()
     }
 
     var showAddVersionDialog by remember { mutableStateOf(false) }
@@ -271,7 +289,7 @@ fun VerseVersionComparatorBottomSheet(
                             isOffline = isOffline,
                             state = state,
                             onRemove = {
-                                comparedVersions = comparedVersions.filter { it.code != ver.code }
+                                persistVersions(comparedVersions.filter { it.code != ver.code })
                             },
                             onRetry = {
                                 versionsMap = versionsMap + (ver.code to VersionTextState.Loading)
@@ -391,7 +409,7 @@ fun VerseVersionComparatorBottomSheet(
                                 onClick = {
                                     showAddVersionDialog = false
                                     if (comparedVersions.none { it.code == ver.code }) {
-                                        comparedVersions = comparedVersions + ver
+                                        persistVersions(comparedVersions + ver)
                                         if (versionsMap[ver.code] !is VersionTextState.Success) {
                                             versionsMap = versionsMap + (ver.code to VersionTextState.Loading)
                                             scope.launch(Dispatchers.IO) {
@@ -512,10 +530,19 @@ private fun DismissibleVersionCard(
 ) {
     key(ver.code) {
         val dismissState = rememberSwipeToDismissBoxState()
+        var isReadyForDismiss by remember(ver.code) { mutableStateOf(false) }
+
+        LaunchedEffect(ver.code) {
+            if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
+                dismissState.snapTo(SwipeToDismissBoxValue.Settled)
+            }
+            isReadyForDismiss = true
+        }
 
         LaunchedEffect(dismissState.currentValue) {
-            if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+            if (isReadyForDismiss && dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
                 onRemove()
+                dismissState.snapTo(SwipeToDismissBoxValue.Settled)
             }
         }
 
