@@ -44,7 +44,6 @@ object HighlightPalette {
         HighlightColorItem("#7E22CE", "Púrpura Imperial"),
         HighlightColorItem("#991B1B", "Rojo Carmesí"),
         HighlightColorItem("#B45309", "Ámbar Intenso"),
-        HighlightColorItem("#334155", "Pizarra Oscuro"),
         // Tonos clásicos
         HighlightColorItem("#FEF08A", "Amarillo Sol"),
         HighlightColorItem("#A7F3D0", "Verde Menta"),
