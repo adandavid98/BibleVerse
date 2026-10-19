@@ -261,7 +261,7 @@ fun VerseVersionComparatorBottomSheet(
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(bottom = 20.dp)
+                contentPadding = PaddingValues(bottom = 12.dp)
             ) {
                 if (comparedVersions.isEmpty()) {
                     item(key = "empty_state") {
@@ -327,37 +327,35 @@ fun VerseVersionComparatorBottomSheet(
                         )
                     }
                 }
+            }
 
-                // "+ Agregar versión" button at the bottom of the list
-                item(key = "add_version_button") {
-                    val remainingVersions = allVersions.filter { ver ->
-                        comparedVersions.none { it.code == ver.code }
-                    }
-                    if (remainingVersions.isNotEmpty()) {
-                        OutlinedButton(
-                            onClick = { showAddVersionDialog = true },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 4.dp, bottom = 12.dp),
-                            shape = RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.primary
-                            ),
-                            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
-                        ) {
-                            Icon(
-                                Icons.Default.Add,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Agregar versión",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp
-                            )
-                        }
-                    }
+            // Fixed bottom "+ Agregar versión" button
+            val remainingVersions = allVersions.filter { ver ->
+                comparedVersions.none { it.code == ver.code }
+            }
+            if (remainingVersions.isNotEmpty()) {
+                OutlinedButton(
+                    onClick = { showAddVersionDialog = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 4.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    ),
+                    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Agregar versión",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
                 }
             }
                 }
