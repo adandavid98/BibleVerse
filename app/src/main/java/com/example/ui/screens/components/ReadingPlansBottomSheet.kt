@@ -79,7 +79,7 @@ fun ReadingPlansBottomSheet(
             currentSegmentIndex = startIdx,
             readSegmentIndices = readSegments,
             isCustomPlan = false,
-            storyNarrative = if (isStories) day.storyNarrative else null
+            storyNarrative = null
         )
         preferences.setLastReadDay(progress.activePlanType, day.dayNumber)
         onDismiss()

@@ -474,48 +474,6 @@ fun BibleReaderScreen(
                     contentPadding = PaddingValues(top = 12.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    if (uiState.activePlanSession?.storyNarrative != null) {
-                        item {
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 10.dp),
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(containerColor = themeAccent.copy(alpha = 0.1f)),
-                                border = BorderStroke(1.dp, themeAccent.copy(alpha = 0.3f))
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.AutoStories,
-                                            contentDescription = null,
-                                            tint = themeAccent,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Text(
-                                            text = "Relato Bíblico / Devocional",
-                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                            color = themeAccent
-                                        )
-                                    }
-                                    Text(
-                                        text = uiState.activePlanSession!!.storyNarrative!!,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontFamily = selectedFontFamily,
-                                        color = themeText,
-                                        lineHeight = 22.sp
-                                    )
-                                }
-                            }
-                        }
-                    }
-
                     itemsIndexed(
                         items = uiState.verses,
                         key = { _, v -> "${v.bookId}_${v.chapter}_${v.verseNumber}" }
