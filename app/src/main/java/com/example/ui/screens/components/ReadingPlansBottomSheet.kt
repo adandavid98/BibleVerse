@@ -131,6 +131,7 @@ fun ReadingPlansBottomSheet(
     }
     var celebrationPlan by remember { mutableStateOf<CustomReadingPlanEntity?>(null) }
     var activeReadingDay by remember { mutableStateOf<ReadingPlanDay?>(null) }
+    var showResetCatalogConfirmDialog by remember { mutableStateOf<ReadingPlanType?>(null) }
 
     // Pre-defined catalog state
     val currentDays = remember(progress.activePlanType) {
@@ -520,43 +521,158 @@ fun ReadingPlansBottomSheet(
 
                             Spacer(modifier = Modifier.height(14.dp))
 
-                            // Progress Banner
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
-                                )
-                            ) {
-                                Column(modifier = Modifier.padding(14.dp)) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
+                            val isCatalogPlanCompleted = progress.totalCompleted >= progress.totalDays && progress.totalDays > 0
+
+                            if (isCatalogPlanCompleted) {
+                                // 100% Completion Celebration Banner
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Color(0xFFFEF3C7)
+                                    ),
+                                    border = BorderStroke(1.5.dp, Color(0xFFF59E0B))
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(16.dp),
+                                        verticalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
-                                        Text(
-                                            text = if (isStoriesPlan) "${progress.totalCompleted} de ${progress.totalDays} historias leídas" else "${progress.totalCompleted} de ${progress.totalDays} días leídos",
-                                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                            color = MaterialTheme.colorScheme.onSurface
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(38.dp)
+                                                        .clip(CircleShape)
+                                                        .background(Color(0xFFFDE68A)),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        Icons.Default.EmojiEvents,
+                                                        contentDescription = null,
+                                                        tint = Color(0xFFD97706),
+                                                        modifier = Modifier.size(22.dp)
+                                                    )
+                                                }
+                                                Column {
+                                                    Text(
+                                                        text = "¡Plan Completado al 100%! 🏆",
+                                                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                                        color = Color(0xFF92400E)
+                                                    )
+                                                    Text(
+                                                        text = "${progress.totalDays} de ${progress.totalDays} ${if (isStoriesPlan) "historias leídas" else "días leídos"}",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = Color(0xFFB45309)
+                                                    )
+                                                }
+                                            }
+
+                                            Surface(
+                                                shape = RoundedCornerShape(8.dp),
+                                                color = Color(0xFFD1FAE5)
+                                            ) {
+                                                Text(
+                                                    text = "100%",
+                                                    fontWeight = FontWeight.Black,
+                                                    style = MaterialTheme.typography.labelMedium,
+                                                    color = Color(0xFF047857),
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                                )
+                                            }
+                                        }
+
+                                        LinearProgressIndicator(
+                                            progress = { 1.0f },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(8.dp)
+                                                .clip(RoundedCornerShape(4.dp)),
+                                            color = Color(0xFF10B981),
+                                            trackColor = Color(0xFFE5E7EB)
                                         )
+
                                         Text(
-                                            text = "${(progress.progressPercentage * 100).toInt()}%",
-                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Black),
-                                            color = MaterialTheme.colorScheme.primary
+                                            text = "¡Gloria a Dios! Has culminado con fidelidad todo el plan. Puedes reiniciar el plan para volver a leerlo desde el Día 1 cuando lo desees.",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color(0xFF78350F)
+                                        )
+
+                                        Button(
+                                            onClick = { showResetCatalogConfirmDialog = progress.activePlanType },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD97706))
+                                        ) {
+                                            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.White)
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text("Reiniciar plan desde el Día 1", fontWeight = FontWeight.Bold, color = Color.White)
+                                        }
+                                    }
+                                }
+                            } else {
+                                // Regular Progress Banner
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+                                    )
+                                ) {
+                                    Column(modifier = Modifier.padding(14.dp)) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = if (isStoriesPlan) "${progress.totalCompleted} de ${progress.totalDays} historias leídas" else "${progress.totalCompleted} de ${progress.totalDays} días leídos",
+                                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                            ) {
+                                                Text(
+                                                    text = "${(progress.progressPercentage * 100).toInt()}%",
+                                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Black),
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                                if (progress.totalCompleted > 0) {
+                                                    IconButton(
+                                                        onClick = { showResetCatalogConfirmDialog = progress.activePlanType },
+                                                        modifier = Modifier.size(24.dp)
+                                                    ) {
+                                                        Icon(
+                                                            Icons.Default.Refresh,
+                                                            contentDescription = "Reiniciar plan",
+                                                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                            modifier = Modifier.size(16.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.height(8.dp))
+
+                                        LinearProgressIndicator(
+                                            progress = { progress.progressPercentage },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(8.dp)
+                                                .clip(RoundedCornerShape(4.dp)),
+                                            color = MaterialTheme.colorScheme.primary,
+                                            trackColor = MaterialTheme.colorScheme.surfaceVariant
                                         )
                                     }
-
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    LinearProgressIndicator(
-                                        progress = { progress.progressPercentage },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(8.dp)
-                                            .clip(RoundedCornerShape(4.dp)),
-                                        color = MaterialTheme.colorScheme.primary,
-                                        trackColor = MaterialTheme.colorScheme.surfaceVariant
-                                    )
                                 }
                             }
 
@@ -933,6 +1049,34 @@ fun ReadingPlansBottomSheet(
                 launchCatalogDay(day)
             },
             onDismiss = { activeReadingDay = null }
+        )
+    }
+
+    // Diálogo de confirmación para reiniciar plan de catálogo
+    showResetCatalogConfirmDialog?.let { planToReset ->
+        AlertDialog(
+            onDismissRequest = { showResetCatalogConfirmDialog = null },
+            icon = { Icon(Icons.Default.Refresh, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+            title = { Text("Reiniciar plan de lectura", fontWeight = FontWeight.Bold) },
+            text = {
+                Text("¿Estás seguro de que deseas reiniciar tu progreso en el plan «${planToReset.title}»? Se borrarán los días completados y comenzarás nuevamente desde el Día 1.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        preferences.resetPlanProgress(planToReset)
+                        showResetCatalogConfirmDialog = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Sí, reiniciar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetCatalogConfirmDialog = null }) {
+                    Text("Cancelar")
+                }
+            }
         )
     }
 }

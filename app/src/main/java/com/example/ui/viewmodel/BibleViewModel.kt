@@ -166,11 +166,14 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
             NotificationHelper.scheduleDailyReminder(application, _reminderHour.value, _reminderMinute.value)
         }
 
-        // Check for updates in background shortly after launch (only if enabled)
+        // Check for updates periodically in background while app is alive (every 20 minutes)
         viewModelScope.launch {
             delay(3500)
-            if (AppUpdateManager.isAutoCheckEnabled(application)) {
-                checkForUpdates(silent = true)
+            while (kotlinx.coroutines.isActive) {
+                if (AppUpdateManager.isAutoCheckEnabled(application)) {
+                    checkForUpdates(silent = true)
+                }
+                delay(20 * 60 * 1000L)
             }
         }
     }
@@ -782,7 +785,21 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         _syncStatusMessage.value = null
     }
 
+    private var lastUpdateCheckTimestamp: Long = 0L
+
+    fun onAppResumed() {
+        val now = System.currentTimeMillis()
+        // If at least 10 minutes have passed since last check, verify again on resume
+        if (now - lastUpdateCheckTimestamp > 10 * 60 * 1000L) {
+            val app = getApplication<Application>()
+            if (AppUpdateManager.isAutoCheckEnabled(app)) {
+                checkForUpdates(silent = true)
+            }
+        }
+    }
+
     fun checkForUpdates(silent: Boolean = false) {
+        lastUpdateCheckTimestamp = System.currentTimeMillis()
         val app = getApplication<Application>()
         _updateDownloadStatus.value = UpdateDownloadStatus.Checking
         viewModelScope.launch {
@@ -794,6 +811,11 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
                     // If checked automatically in background (silent), respect postpone/ignore preferences
                     if (!silent || AppUpdateManager.shouldShowAutomaticPrompt(app, info.tagName)) {
                         _showUpdateDialog.value = true
+                        NotificationHelper.showUpdateAvailableNotification(
+                            app,
+                            info.tagName,
+                            info.releaseNotes
+                        )
                     }
                 } else {
                     _updateDownloadStatus.value = UpdateDownloadStatus.UpToDate

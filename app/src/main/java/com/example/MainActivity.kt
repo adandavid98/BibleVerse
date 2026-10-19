@@ -18,13 +18,25 @@ import com.example.ui.screens.HomeScreen
 import com.example.ui.theme.BibleAppTheme
 import com.example.ui.viewmodel.BibleViewModel
 
+import android.content.Intent
+
 class MainActivity : ComponentActivity() {
+  private var bibleViewModel: BibleViewModel? = null
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
     setContent {
       val viewModel: BibleViewModel = viewModel()
+      bibleViewModel = viewModel
       val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+      // Handle intent to open update dialog directly if launched from notification
+      LaunchedEffect(intent) {
+        if (intent.getBooleanExtra("extra_open_update", false)) {
+          viewModel.setShowUpdateDialog(true)
+        }
+      }
 
       // Request notification permission on Android 13+
       val notificationPermissionLauncher = rememberLauncherForActivityResult(
@@ -50,6 +62,19 @@ class MainActivity : ComponentActivity() {
         )
       }
     }
+  }
+
+  override fun onNewIntent(intent: Intent) {
+    super.onNewIntent(intent)
+    setIntent(intent)
+    if (intent.getBooleanExtra("extra_open_update", false)) {
+      bibleViewModel?.setShowUpdateDialog(true)
+    }
+  }
+
+  override fun onResume() {
+    super.onResume()
+    bibleViewModel?.onAppResumed()
   }
 }
 

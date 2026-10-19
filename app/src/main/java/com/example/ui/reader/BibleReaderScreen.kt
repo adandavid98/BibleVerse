@@ -746,9 +746,23 @@ fun BibleReaderScreen(
                                                     readingPlanPreferences.setDayCompleted(session.dayNumber, true, planType)
                                                 }
 
+                                                val isAllCompleted = if (!session.isCustomPlan) {
+                                                    val planType = runCatching { com.example.data.bible.ReadingPlanType.valueOf(session.planId) }.getOrNull()
+                                                    if (planType != null) {
+                                                        val compDays = readingPlanPreferences.progressFlow.value.plans[planType]?.completedDays ?: emptySet()
+                                                        (compDays + session.dayNumber).size >= planType.totalDays
+                                                    } else false
+                                                } else false
+
+                                                val message = if (isAllCompleted) {
+                                                    "¡GLORIA A DIOS! 🏆 Has completado al 100% el plan ${session.planTitle} 🎉"
+                                                } else {
+                                                    "¡Felicitaciones! Has completado las lecturas del Día ${session.dayNumber} 🎉"
+                                                }
+
                                                 Toast.makeText(
                                                     context,
-                                                    "¡Felicitaciones! Has completado las lecturas del Día ${session.dayNumber} 🎉",
+                                                    message,
                                                     Toast.LENGTH_LONG
                                                 ).show()
 

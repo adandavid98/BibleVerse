@@ -20,7 +20,9 @@ import java.util.Calendar
 
 object NotificationHelper {
     const val CHANNEL_ID = "bible_daily_verse_channel"
+    const val CHANNEL_UPDATES_ID = "bible_app_updates_channel"
     const val NOTIFICATION_ID = 1001
+    const val NOTIFICATION_UPDATE_ID = 2002
     const val PREFS_NAME = "bible_app_settings"
     const val KEY_REMINDER_ENABLED = "reminder_enabled"
     const val KEY_REMINDER_HOUR = "reminder_hour"
@@ -28,17 +30,67 @@ object NotificationHelper {
 
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Versículo Diario"
-            val descriptionText = "Notificaciones diarias con el versículo bíblico y reflexión para el día"
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-                enableVibration(true)
-            }
             val notificationManager: NotificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+
+            val verseChannel = NotificationChannel(
+                CHANNEL_ID,
+                "Versículo Diario",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Notificaciones diarias con el versículo bíblico y reflexión para el día"
+                enableVibration(true)
+            }
+            notificationManager.createNotificationChannel(verseChannel)
+
+            val updateChannel = NotificationChannel(
+                CHANNEL_UPDATES_ID,
+                "Actualizaciones de la Aplicación",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Avisos de nuevas versiones disponibles para actualizar"
+                enableVibration(true)
+            }
+            notificationManager.createNotificationChannel(updateChannel)
         }
+    }
+
+    fun showUpdateAvailableNotification(context: Context, newVersion: String, releaseNotes: String) {
+        createNotificationChannel(context)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return
+            }
+        }
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            putExtra("extra_open_update", true)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            NOTIFICATION_UPDATE_ID,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val cleanNotes = if (releaseNotes.isNotBlank()) releaseNotes.take(150) else "Nueva versión disponible con mejoras y correcciones."
+        val builder = NotificationCompat.Builder(context, CHANNEL_UPDATES_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle("Nueva actualización $newVersion disponible 🚀")
+            .setContentText("Toca para actualizar la aplicación a la última versión.")
+            .setStyle(NotificationCompat.BigTextStyle().bigText("Versión $newVersion:\n$cleanNotes\n\nToca aquí para descargar e instalar la actualización."))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+
+        val notificationManager = NotificationManagerCompat.from(context)
+        notificationManager.notify(NOTIFICATION_UPDATE_ID, builder.build())
     }
 
     fun showVerseNotification(context: Context, reference: String, text: String, reflection: String) {
