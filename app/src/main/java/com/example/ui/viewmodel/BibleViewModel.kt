@@ -29,6 +29,7 @@ import com.example.data.model.CustomReadingPlanEntity
 import com.example.data.model.PlanDistributionMode
 import com.example.data.repository.CustomReadingPlanRepository
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -169,7 +170,7 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         // Check for updates periodically in background while app is alive (every 20 minutes)
         viewModelScope.launch {
             delay(3500)
-            while (kotlinx.coroutines.isActive) {
+            while (isActive) {
                 if (AppUpdateManager.isAutoCheckEnabled(application)) {
                     checkForUpdates(silent = true)
                 }
