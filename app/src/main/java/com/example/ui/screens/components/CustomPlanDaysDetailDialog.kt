@@ -35,16 +35,41 @@ fun CustomPlanDaysDetailDialog(
     onDismiss: () -> Unit,
     onToggleDay: (dayNumber: Int, completed: Boolean) -> Unit,
     onNavigateToReader: (bookId: Int, chapter: Int, verse: Int) -> Unit,
+    onStartPlanSession: (com.example.ui.reader.model.ReadingPlanSession) -> Unit = {},
     onDeletePlan: () -> Unit,
     onRestartPlan: () -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val haptic = LocalHapticFeedback.current
+    val preferences = remember { com.example.data.preferences.ReadingPlanPreferences(context) }
     var showMenu by remember { mutableStateOf(false) }
-    var activeReadingDayNumber by remember { mutableStateOf<Int?>(null) }
-    val liveDayEntity = remember(activeReadingDayNumber, planWithDays) {
-        activeReadingDayNumber?.let { dayNum ->
-            planWithDays.days.find { it.dayNumber == dayNum }
+
+    val launchPlanDay = { targetDay: CustomPlanDayEntity ->
+        val passages = CustomPlanGenerator.deserializeSegmentsFromJson(targetDay.passagesJson).ifEmpty {
+            listOf(
+                com.example.data.bible.PlanPassageSegment(
+                    targetDay.primaryBookId,
+                    com.example.data.bible.BibleCatalog.books.getOrNull(targetDay.primaryBookId - 1)?.name ?: "Libro",
+                    targetDay.primaryChapter
+                )
+            )
         }
+        val planKey = "CUSTOM_${targetDay.planId}"
+        val readSegments = preferences.getDayReadSegments(planKey, targetDay.dayNumber)
+        val lastSeg = preferences.getLastReadSegment(planKey, targetDay.dayNumber)
+        val startIdx = if (lastSeg in passages.indices) lastSeg else (passages.indices.firstOrNull { it !in readSegments } ?: 0)
+        val session = com.example.ui.reader.model.ReadingPlanSession(
+            planId = targetDay.planId,
+            planTitle = planWithDays.plan.title,
+            dayNumber = targetDay.dayNumber,
+            dayTitle = "Día ${targetDay.dayNumber}: ${targetDay.passageSummary}",
+            segments = passages,
+            currentSegmentIndex = startIdx,
+            readSegmentIndices = readSegments,
+            isCustomPlan = true
+        )
+        onDismiss()
+        onStartPlanSession(session)
     }
 
     Dialog(
@@ -147,12 +172,18 @@ fun CustomPlanDaysDetailDialog(
                 ) {
                     items(planWithDays.days.sortedBy { it.dayNumber }, key = { it.id }) { day ->
                         val isCurrentDay = day.dayNumber == nextDayNumber
+                        val planKey = "CUSTOM_${day.planId}"
+                        val readSegments = preferences.getDayReadSegments(planKey, day.dayNumber)
+                        val passagesCount = remember(day.passagesJson) {
+                            CustomPlanGenerator.deserializeSegmentsFromJson(day.passagesJson).size.coerceAtLeast(1)
+                        }
+                        val isPartial = !day.isCompleted && readSegments.isNotEmpty()
 
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    activeReadingDayNumber = day.dayNumber
+                                    launchPlanDay(day)
                                 },
                             shape = RoundedCornerShape(14.dp),
                             border = if (isCurrentDay && !day.isCompleted) {
@@ -214,6 +245,21 @@ fun CustomPlanDaysDetailDialog(
                                                 )
                                             }
                                         }
+                                        if (isPartial) {
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Surface(
+                                                shape = RoundedCornerShape(6.dp),
+                                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                            ) {
+                                                Text(
+                                                    text = "${readSegments.size}/$passagesCount caps",
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                )
+                                            }
+                                        }
                                     }
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
@@ -226,7 +272,7 @@ fun CustomPlanDaysDetailDialog(
                                 // Arrow button
                                 IconButton(
                                     onClick = {
-                                        activeReadingDayNumber = day.dayNumber
+                                        launchPlanDay(day)
                                     },
                                     modifier = Modifier.size(36.dp)
                                 ) {
@@ -243,44 +289,5 @@ fun CustomPlanDaysDetailDialog(
                 }
             }
         }
-    }
-
-    // Modal de lectura del día para planes personalizados (con opción opcional de abrir en la Biblia completa)
-    liveDayEntity?.let { dayEntity ->
-        val passages = remember(dayEntity.passagesJson) {
-            CustomPlanGenerator.deserializeSegmentsFromJson(dayEntity.passagesJson)
-        }
-        val readingPlanDay = remember(dayEntity.dayNumber, dayEntity.passageSummary, passages) {
-            ReadingPlanDay(
-                dayNumber = dayEntity.dayNumber,
-                title = "Día ${dayEntity.dayNumber}: ${dayEntity.passageSummary}",
-                passagesSummary = dayEntity.passageSummary,
-                primaryBookId = dayEntity.primaryBookId,
-                primaryChapter = dayEntity.primaryChapter,
-                primaryVerse = 1,
-                passages = passages
-            )
-        }
-        val nextDayEntity = planWithDays.days.firstOrNull { it.dayNumber == dayEntity.dayNumber + 1 }
-
-        ReadingPlanDayReaderModal(
-            day = readingPlanDay,
-            isCompleted = dayEntity.isCompleted,
-            planType = ReadingPlanType.TRADITIONAL,
-            onToggleCompleted = {
-                onToggleDay(dayEntity.dayNumber, !dayEntity.isCompleted)
-            },
-            onNextDay = if (nextDayEntity != null) {
-                {
-                    activeReadingDayNumber = nextDayEntity.dayNumber
-                }
-            } else null,
-            onOpenInFullBible = { bookId, chapter, verse ->
-                activeReadingDayNumber = null
-                onDismiss()
-                onNavigateToReader(bookId, chapter, verse)
-            },
-            onDismiss = { activeReadingDayNumber = null }
-        )
     }
 }

@@ -301,7 +301,16 @@ fun HomeScreen(
                         selectedTab = 1
                     }
                 )
-                1 -> BibleReaderScreen(viewModel = readerViewModel)
+                1 -> BibleReaderScreen(
+                    viewModel = readerViewModel,
+                    onCompleteCustomPlanDay = { planId, dayNumber ->
+                        viewModel.togglePlanDay(
+                            planId = planId,
+                            dayNumber = dayNumber,
+                            completed = true
+                        )
+                    }
+                )
                 2 -> SearchTab(
                     viewModel = viewModel,
                     uiState = uiState,
@@ -434,6 +443,11 @@ fun HomeScreen(
             onNavigateToReader = { bookId, chapter, verse ->
                 readerViewModel.navigateToVerse(bookId, chapter, verse)
                 selectedTab = 1
+            },
+            onStartPlanSession = { session ->
+                readerViewModel.startPlanReadingSession(session)
+                selectedTab = 1
+                showReadingPlans = false
             },
             onDismiss = { showReadingPlans = false }
         )

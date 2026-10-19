@@ -47,6 +47,7 @@ fun ReadingPlansBottomSheet(
     viewModel: BibleViewModel? = null,
     initialTab: Int = 0,
     onNavigateToReader: (bookId: Int, chapter: Int, verse: Int) -> Unit,
+    onStartPlanSession: (com.example.ui.reader.model.ReadingPlanSession) -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -54,6 +55,64 @@ fun ReadingPlansBottomSheet(
     val haptic = LocalHapticFeedback.current
     val preferences = remember { ReadingPlanPreferences(context) }
     val progress by preferences.progressFlow.collectAsState()
+
+    val launchCatalogDay = { day: ReadingPlanDay ->
+        val readSegments = preferences.getDayReadSegments(progress.activePlanType.name, day.dayNumber)
+        val lastSeg = preferences.getLastReadSegment(progress.activePlanType.name, day.dayNumber)
+        val segments = day.passages.ifEmpty {
+            listOf(
+                com.example.data.bible.PlanPassageSegment(
+                    day.primaryBookId,
+                    com.example.data.bible.BibleCatalog.books.getOrNull(day.primaryBookId - 1)?.name ?: "Libro",
+                    day.primaryChapter
+                )
+            )
+        }
+        val startIdx = if (lastSeg in segments.indices) lastSeg else (segments.indices.firstOrNull { it !in readSegments } ?: 0)
+        val isStories = progress.activePlanType == ReadingPlanType.BIBLE_STORIES
+        val session = com.example.ui.reader.model.ReadingPlanSession(
+            planId = progress.activePlanType.name,
+            planTitle = progress.activePlanType.title,
+            dayNumber = day.dayNumber,
+            dayTitle = day.title,
+            segments = segments,
+            currentSegmentIndex = startIdx,
+            readSegmentIndices = readSegments,
+            isCustomPlan = false,
+            storyNarrative = if (isStories) day.storyNarrative else null
+        )
+        preferences.setLastReadDay(progress.activePlanType, day.dayNumber)
+        onDismiss()
+        onStartPlanSession(session)
+    }
+
+    val launchCustomDay = { planWithDays: CustomPlanWithDays, dayEntity: CustomPlanDayEntity ->
+        val passages = CustomPlanGenerator.deserializeSegmentsFromJson(dayEntity.passagesJson).ifEmpty {
+            listOf(
+                com.example.data.bible.PlanPassageSegment(
+                    dayEntity.primaryBookId,
+                    com.example.data.bible.BibleCatalog.books.getOrNull(dayEntity.primaryBookId - 1)?.name ?: "Libro",
+                    dayEntity.primaryChapter
+                )
+            )
+        }
+        val planKey = "CUSTOM_${dayEntity.planId}"
+        val readSegments = preferences.getDayReadSegments(planKey, dayEntity.dayNumber)
+        val lastSeg = preferences.getLastReadSegment(planKey, dayEntity.dayNumber)
+        val startIdx = if (lastSeg in passages.indices) lastSeg else (passages.indices.firstOrNull { it !in readSegments } ?: 0)
+        val session = com.example.ui.reader.model.ReadingPlanSession(
+            planId = dayEntity.planId,
+            planTitle = planWithDays.plan.title,
+            dayNumber = dayEntity.dayNumber,
+            dayTitle = "Día ${dayEntity.dayNumber}: ${dayEntity.passageSummary}",
+            segments = passages,
+            currentSegmentIndex = startIdx,
+            readSegmentIndices = readSegments,
+            isCustomPlan = true
+        )
+        onDismiss()
+        onStartPlanSession(session)
+    }
 
     // Custom Plans state from Room Database
     val activeCustomPlans by (viewModel?.activeCustomPlans ?: remember { MutableStateFlow(emptyList()) }).collectAsState()
@@ -107,15 +166,6 @@ fun ReadingPlansBottomSheet(
                 titleClean.contains(queryClean) || summaryClean.contains(queryClean)
             }
         }
-    }
-
-    var activeReadingDay by remember { mutableStateOf<ReadingPlanDay?>(null) }
-    var activeCustomReadingPlanId by remember { mutableStateOf<String?>(null) }
-    var activeCustomReadingDayNumber by remember { mutableStateOf<Int?>(null) }
-    val liveCustomDay = remember(activeCustomReadingPlanId, activeCustomReadingDayNumber, activeCustomPlans) {
-        if (activeCustomReadingPlanId != null && activeCustomReadingDayNumber != null) {
-            activeCustomPlans.find { it.plan.id == activeCustomReadingPlanId }?.days?.find { it.dayNumber == activeCustomReadingDayNumber }
-        } else null
     }
 
     Dialog(
@@ -303,8 +353,7 @@ fun ReadingPlansBottomSheet(
                                         planWithDays = planWithDays,
                                         onViewDetails = { selectedPlanIdForDetail = planWithDays.plan.id },
                                         onReadDay = { dayEntity ->
-                                            activeCustomReadingPlanId = dayEntity.planId
-                                            activeCustomReadingDayNumber = dayEntity.dayNumber
+                                            launchCustomDay(planWithDays, dayEntity)
                                         },
                                         onToggleDay = { dayNumber, completed ->
                                             haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
@@ -585,13 +634,15 @@ fun ReadingPlansBottomSheet(
                                     items(filteredCatalogDays, key = { "${progress.activePlanType.name}_${it.dayNumber}" }) { day ->
                                         val isCompleted = progress.completedDays.contains(day.dayNumber)
                                         val isCurrentDay = day.dayNumber == preferences.getLastReadDay(progress.activePlanType)
+                                        val readSegments = preferences.getDayReadSegments(progress.activePlanType.name, day.dayNumber)
+                                        val totalSegments = day.passages.size.coerceAtLeast(1)
+                                        val isPartial = !isCompleted && readSegments.isNotEmpty()
 
                                         Card(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clickable {
-                                                    preferences.setLastReadDay(progress.activePlanType, day.dayNumber)
-                                                    activeReadingDay = day
+                                                    launchCatalogDay(day)
                                                 },
                                             shape = RoundedCornerShape(14.dp),
                                             border = if (isCurrentDay && !isCompleted) {
@@ -653,6 +704,21 @@ fun ReadingPlansBottomSheet(
                                                                 )
                                                             }
                                                         }
+                                                        if (isPartial) {
+                                                            Spacer(modifier = Modifier.width(6.dp))
+                                                            Surface(
+                                                                shape = RoundedCornerShape(6.dp),
+                                                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                                            ) {
+                                                                Text(
+                                                                    text = "${readSegments.size}/$totalSegments caps",
+                                                                    fontSize = 10.sp,
+                                                                    fontWeight = FontWeight.Bold,
+                                                                    color = MaterialTheme.colorScheme.primary,
+                                                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                                )
+                                                            }
+                                                        }
                                                     }
                                                     Spacer(modifier = Modifier.height(2.dp))
                                                     Text(
@@ -665,8 +731,7 @@ fun ReadingPlansBottomSheet(
                                                 // Read arrow button
                                                 IconButton(
                                                     onClick = {
-                                                        preferences.setLastReadDay(progress.activePlanType, day.dayNumber)
-                                                        activeReadingDay = day
+                                                        launchCatalogDay(day)
                                                     },
                                                     modifier = Modifier.size(36.dp)
                                                 ) {
@@ -803,6 +868,11 @@ fun ReadingPlansBottomSheet(
                 onDismiss()
                 onNavigateToReader(bId, ch, v)
             },
+            onStartPlanSession = { session ->
+                selectedPlanIdForDetail = null
+                onDismiss()
+                onStartPlanSession(session)
+            },
             onDeletePlan = {
                 viewModel?.deleteCustomPlan(planWithDays.plan.id)
                 selectedPlanIdForDetail = null
@@ -819,86 +889,6 @@ fun ReadingPlansBottomSheet(
             planTitle = plan.title,
             totalDays = plan.totalDays,
             onDismiss = { celebrationPlan = null }
-        )
-    }
-
-    // Traditional Day Reader Modal
-    activeReadingDay?.let { dayToRead ->
-        val isDayCompleted = progress.completedDays.contains(dayToRead.dayNumber)
-        val nextDayNumber = dayToRead.dayNumber + 1
-        val nextDayObj = currentDays.firstOrNull { it.dayNumber == nextDayNumber }
-
-        ReadingPlanDayReaderModal(
-            day = dayToRead,
-            isCompleted = isDayCompleted,
-            planType = progress.activePlanType,
-            onToggleCompleted = { dayNum ->
-                preferences.toggleDayCompleted(dayNum)
-            },
-            onNextDay = if (nextDayObj != null) {
-                {
-                    preferences.setLastReadDay(progress.activePlanType, nextDayObj.dayNumber)
-                    activeReadingDay = nextDayObj
-                }
-            } else null,
-            onOpenInFullBible = { bookId, chapter, verse ->
-                activeReadingDay = null
-                onDismiss()
-                onNavigateToReader(bookId, chapter, verse)
-            },
-            onDismiss = { activeReadingDay = null }
-        )
-    }
-
-    // Modal de lectura para días de planes personalizados (con opción opcional de abrir en la Biblia completa)
-    liveCustomDay?.let { customDay ->
-        val passages = remember(customDay.passagesJson) {
-            CustomPlanGenerator.deserializeSegmentsFromJson(customDay.passagesJson)
-        }
-        val readingPlanDay = remember(customDay.dayNumber, customDay.passageSummary, passages) {
-            ReadingPlanDay(
-                dayNumber = customDay.dayNumber,
-                title = "Día ${customDay.dayNumber}: ${customDay.passageSummary}",
-                passagesSummary = customDay.passageSummary,
-                primaryBookId = customDay.primaryBookId,
-                primaryChapter = customDay.primaryChapter,
-                primaryVerse = 1,
-                passages = passages
-            )
-        }
-        val nextDayEntity = activeCustomPlans.find { it.plan.id == customDay.planId }?.days?.find { it.dayNumber == customDay.dayNumber + 1 }
-
-        ReadingPlanDayReaderModal(
-            day = readingPlanDay,
-            isCompleted = customDay.isCompleted,
-            planType = ReadingPlanType.TRADITIONAL,
-            onToggleCompleted = {
-                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                viewModel?.togglePlanDay(
-                    planId = customDay.planId,
-                    dayNumber = customDay.dayNumber,
-                    completed = !customDay.isCompleted,
-                    onPlanCompleted = {
-                        val p = activeCustomPlans.find { it.plan.id == customDay.planId }?.plan
-                        if (p != null) celebrationPlan = p
-                    }
-                )
-            },
-            onNextDay = if (nextDayEntity != null) {
-                {
-                    activeCustomReadingDayNumber = nextDayEntity.dayNumber
-                }
-            } else null,
-            onOpenInFullBible = { bookId, chapter, verse ->
-                activeCustomReadingPlanId = null
-                activeCustomReadingDayNumber = null
-                onDismiss()
-                onNavigateToReader(bookId, chapter, verse)
-            },
-            onDismiss = {
-                activeCustomReadingPlanId = null
-                activeCustomReadingDayNumber = null
-            }
         )
     }
 }

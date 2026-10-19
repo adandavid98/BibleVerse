@@ -161,6 +161,12 @@ class BibleReaderViewModel(
     }
 
     fun nextChapter() {
+        val planSession = _uiState.value.activePlanSession
+        if (planSession != null) {
+            nextPlanSegment()
+            return
+        }
+
         val currentBook = _uiState.value.currentBook ?: return
         val currentChapter = _uiState.value.currentChapter
         if (currentChapter < currentBook.chaptersCount) {
@@ -175,6 +181,12 @@ class BibleReaderViewModel(
     }
 
     fun previousChapter() {
+        val planSession = _uiState.value.activePlanSession
+        if (planSession != null) {
+            previousPlanSegment()
+            return
+        }
+
         val currentBook = _uiState.value.currentBook ?: return
         val currentChapter = _uiState.value.currentChapter
         if (currentChapter > 1) {
@@ -186,6 +198,94 @@ class BibleReaderViewModel(
                 selectBookAndChapter(prevBook, prevBook.chaptersCount)
             }
         }
+    }
+
+    fun startPlanReadingSession(
+        session: com.example.ui.reader.model.ReadingPlanSession,
+        startSegmentIndex: Int = session.currentSegmentIndex
+    ) {
+        val segmentIdx = startSegmentIndex.coerceIn(0, (session.totalSegments - 1).coerceAtLeast(0))
+        val currentSegment = session.segments.getOrNull(segmentIdx) ?: return
+        val targetBook = _uiState.value.books.firstOrNull { it.id == currentSegment.bookId }
+            ?: com.example.data.model.BibleBookEntity(
+                id = currentSegment.bookId,
+                name = currentSegment.bookName,
+                testament = if (currentSegment.bookId <= 39) "OT" else "NT",
+                chaptersCount = 150,
+                category = if (currentSegment.bookId <= 39) "Antiguo Testamento" else "Nuevo Testamento",
+                abbreviation = currentSegment.bookName.take(3),
+                orderIndex = currentSegment.bookId
+            )
+
+        val updatedSession = session.copy(currentSegmentIndex = segmentIdx)
+        _uiState.update {
+            it.copy(
+                activePlanSession = updatedSession,
+                currentBook = targetBook,
+                currentChapter = currentSegment.chapter,
+                selectedVerseNumbers = emptySet(),
+                targetScrollVerse = 1
+            )
+        }
+        loadChapter(targetBook, currentSegment.chapter, _uiState.value.preferences.bibleVersion)
+    }
+
+    fun markCurrentSegmentRead(
+        onSegmentMarked: ((session: com.example.ui.reader.model.ReadingPlanSession, nextIndex: Int) -> Unit)? = null
+    ) {
+        val currentSession = _uiState.value.activePlanSession ?: return
+        val currentIdx = currentSession.currentSegmentIndex
+        val updatedReadIndices = currentSession.readSegmentIndices + currentIdx
+        val updatedSession = currentSession.copy(readSegmentIndices = updatedReadIndices)
+        _uiState.update { it.copy(activePlanSession = updatedSession) }
+
+        onSegmentMarked?.invoke(updatedSession, currentIdx)
+    }
+
+    fun goToPlanSegment(segmentIndex: Int) {
+        val currentSession = _uiState.value.activePlanSession ?: return
+        val validIndex = segmentIndex.coerceIn(0, currentSession.totalSegments - 1)
+        val targetSegment = currentSession.segments.getOrNull(validIndex) ?: return
+        val targetBook = _uiState.value.books.firstOrNull { it.id == targetSegment.bookId }
+            ?: com.example.data.model.BibleBookEntity(
+                id = targetSegment.bookId,
+                name = targetSegment.bookName,
+                testament = if (targetSegment.bookId <= 39) "OT" else "NT",
+                chaptersCount = 150,
+                category = if (targetSegment.bookId <= 39) "Antiguo Testamento" else "Nuevo Testamento",
+                abbreviation = targetSegment.bookName.take(3),
+                orderIndex = targetSegment.bookId
+            )
+
+        val updatedSession = currentSession.copy(currentSegmentIndex = validIndex)
+        _uiState.update {
+            it.copy(
+                activePlanSession = updatedSession,
+                currentBook = targetBook,
+                currentChapter = targetSegment.chapter,
+                selectedVerseNumbers = emptySet(),
+                targetScrollVerse = 1
+            )
+        }
+        loadChapter(targetBook, targetSegment.chapter, _uiState.value.preferences.bibleVersion)
+    }
+
+    fun nextPlanSegment() {
+        val currentSession = _uiState.value.activePlanSession ?: return
+        if (currentSession.currentSegmentIndex < currentSession.totalSegments - 1) {
+            goToPlanSegment(currentSession.currentSegmentIndex + 1)
+        }
+    }
+
+    fun previousPlanSegment() {
+        val currentSession = _uiState.value.activePlanSession ?: return
+        if (currentSession.currentSegmentIndex > 0) {
+            goToPlanSegment(currentSession.currentSegmentIndex - 1)
+        }
+    }
+
+    fun exitPlanMode() {
+        _uiState.update { it.copy(activePlanSession = null) }
     }
 
     private fun loadChapter(book: BibleBookEntity, chapter: Int, version: String) {

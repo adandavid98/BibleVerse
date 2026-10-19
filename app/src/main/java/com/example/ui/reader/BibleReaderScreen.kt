@@ -65,14 +65,21 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @Composable
 fun BibleReaderScreen(
     viewModel: BibleReaderViewModel,
-    onBack: (() -> Unit)? = null
+    onBack: (() -> Unit)? = null,
+    onCompleteCustomPlanDay: ((planId: String, dayNumber: Int) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+    val readingPlanPreferences = remember { com.example.data.preferences.ReadingPlanPreferences(context) }
+    var showPlanSegmentsSheet by remember { mutableStateOf(false) }
 
-    // Clear active verse selection first if user presses back in Reader
-    BackHandler(enabled = uiState.selectedVerseNumbers.isNotEmpty()) {
-        viewModel.clearSelection()
+    // Clear active verse selection first if user presses back in Reader, or exit reading plan mode
+    BackHandler(enabled = uiState.selectedVerseNumbers.isNotEmpty() || uiState.activePlanSession != null) {
+        if (uiState.selectedVerseNumbers.isNotEmpty()) {
+            viewModel.clearSelection()
+        } else if (uiState.activePlanSession != null) {
+            viewModel.exitPlanMode()
+        }
     }
     val audioState by BibleAudioController.audioState.collectAsState()
     val listState = rememberLazyListState()
@@ -130,7 +137,7 @@ fun BibleReaderScreen(
             val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
             total > 0 && lastVisible >= total - 3
         }.distinctUntilChanged().collect { shouldLoadMore ->
-            if (shouldLoadMore && uiState.preferences.continuousScrollEnabled && !uiState.isLoadingMore && !uiState.isLoading) {
+            if (shouldLoadMore && uiState.preferences.continuousScrollEnabled && !uiState.isLoadingMore && !uiState.isLoading && uiState.activePlanSession == null) {
                 viewModel.loadNextChapterContinuous()
             }
         }
@@ -141,7 +148,7 @@ fun BibleReaderScreen(
         snapshotFlow {
             listState.layoutInfo.visibleItemsInfo.firstOrNull()?.index
         }.distinctUntilChanged().collect { firstIndex ->
-            if (firstIndex != null && uiState.preferences.continuousScrollEnabled && firstIndex in uiState.verses.indices) {
+            if (firstIndex != null && uiState.preferences.continuousScrollEnabled && uiState.activePlanSession == null && firstIndex in uiState.verses.indices) {
                 val visibleVerse = uiState.verses[firstIndex]
                 viewModel.updateVisibleBookAndChapter(visibleVerse.bookId, visibleVerse.chapter)
             }
@@ -194,34 +201,79 @@ fun BibleReaderScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Surface(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
-                            .clickable { viewModel.openBookChapterSelector() },
-                        color = themeAccent.copy(alpha = 0.12f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                    val planSession = uiState.activePlanSession
+                    if (planSession != null) {
+                        Surface(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .clickable { showPlanSegmentsSheet = true },
+                            color = themeAccent.copy(alpha = 0.12f)
                         ) {
-                            Text(
-                                text = "${uiState.currentBook?.name ?: "Biblia"} ${uiState.currentChapter}",
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = themeText
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Icon(
-                                Icons.Default.ArrowDropDown,
-                                contentDescription = null,
-                                tint = themeText,
-                                modifier = Modifier.size(20.dp)
-                            )
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "${planSession.planTitle} • Día ${planSession.dayNumber}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Medium,
+                                        color = themeSecondary,
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = "${planSession.currentSegment?.bookName ?: "Capítulo"} ${planSession.currentSegment?.chapter ?: ""} (${planSession.currentSegmentIndex + 1}/${planSession.totalSegments})",
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.titleSmall,
+                                            color = themeText
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Icon(
+                                            Icons.Default.ArrowDropDown,
+                                            contentDescription = "Ver capítulos del día",
+                                            tint = themeText,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        Surface(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .clickable { viewModel.openBookChapterSelector() },
+                            color = themeAccent.copy(alpha = 0.12f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "${uiState.currentBook?.name ?: "Biblia"} ${uiState.currentChapter}",
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = themeText
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(
+                                    Icons.Default.ArrowDropDown,
+                                    contentDescription = null,
+                                    tint = themeText,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
                     }
                 },
                 navigationIcon = {
-                    if (onBack != null) {
+                    if (uiState.activePlanSession != null) {
+                        IconButton(onClick = { viewModel.exitPlanMode() }) {
+                            Icon(Icons.Default.Close, contentDescription = "Salir del plan", tint = themeText)
+                        }
+                    } else if (onBack != null) {
                         IconButton(onClick = onBack) {
                             Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = themeText)
                         }
@@ -417,6 +469,48 @@ fun BibleReaderScreen(
                     contentPadding = PaddingValues(top = 12.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
+                    if (uiState.activePlanSession?.storyNarrative != null) {
+                        item {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 10.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(containerColor = themeAccent.copy(alpha = 0.1f)),
+                                border = BorderStroke(1.dp, themeAccent.copy(alpha = 0.3f))
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.AutoStories,
+                                            contentDescription = null,
+                                            tint = themeAccent,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Text(
+                                            text = "Relato Bíblico / Devocional",
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                            color = themeAccent
+                                        )
+                                    }
+                                    Text(
+                                        text = uiState.activePlanSession!!.storyNarrative!!,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontFamily = selectedFontFamily,
+                                        color = themeText,
+                                        lineHeight = 22.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     itemsIndexed(
                         items = uiState.verses,
                         key = { _, v -> "${v.bookId}_${v.chapter}_${v.verseNumber}" }
@@ -538,6 +632,184 @@ fun BibleReaderScreen(
                         }
                     }
 
+                    if (uiState.activePlanSession != null) {
+                        val session = uiState.activePlanSession!!
+                        val isLastSegment = session.currentSegmentIndex >= session.totalSegments - 1
+                        val isCurrentSegmentRead = session.currentSegmentIndex in session.readSegmentIndices
+                        val willAllBeRead = (session.readSegmentIndices + session.currentSegmentIndex).size >= session.totalSegments
+
+                        item {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 14.dp),
+                                shape = RoundedCornerShape(18.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (willAllBeRead && isLastSegment) {
+                                        Color(0xFF16A34A).copy(alpha = 0.12f)
+                                    } else {
+                                        themeAccent.copy(alpha = 0.08f)
+                                    }
+                                ),
+                                border = BorderStroke(
+                                    1.5.dp,
+                                    if (willAllBeRead && isLastSegment) Color(0xFF16A34A) else themeAccent.copy(alpha = 0.4f)
+                                )
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column {
+                                            Text(
+                                                text = session.planTitle.uppercase(),
+                                                style = MaterialTheme.typography.labelSmall.copy(
+                                                    fontWeight = FontWeight.Black,
+                                                    letterSpacing = 1.sp
+                                                ),
+                                                color = themeSecondary
+                                            )
+                                            Text(
+                                                text = "Día ${session.dayNumber} • Capítulo ${session.currentSegmentIndex + 1} de ${session.totalSegments}",
+                                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                                color = themeText
+                                            )
+                                        }
+
+                                        Surface(
+                                            shape = RoundedCornerShape(10.dp),
+                                            color = if (willAllBeRead && isLastSegment) Color(0xFF16A34A).copy(alpha = 0.2f) else themeAccent.copy(alpha = 0.2f)
+                                        ) {
+                                            Text(
+                                                text = "${(session.readSegmentIndices + session.currentSegmentIndex).size}/${session.totalSegments}",
+                                                fontWeight = FontWeight.Black,
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = if (willAllBeRead && isLastSegment) Color(0xFF16A34A) else themeAccent,
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                            )
+                                        }
+                                    }
+
+                                    // Segments row
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        session.segments.forEachIndexed { idx, seg ->
+                                            val isSegRead = idx in session.readSegmentIndices || (idx == session.currentSegmentIndex && isCurrentSegmentRead)
+                                            val isSegCurrent = idx == session.currentSegmentIndex
+                                            Surface(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .height(34.dp)
+                                                    .clip(RoundedCornerShape(8.dp))
+                                                    .clickable { viewModel.goToPlanSegment(idx) },
+                                                shape = RoundedCornerShape(8.dp),
+                                                color = when {
+                                                    isSegCurrent -> themeAccent
+                                                    isSegRead -> Color(0xFF16A34A).copy(alpha = 0.25f)
+                                                    else -> themeSecondary.copy(alpha = 0.12f)
+                                                }
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                                                    ) {
+                                                        if (isSegRead && !isSegCurrent) {
+                                                            Icon(
+                                                                Icons.Default.Check,
+                                                                contentDescription = null,
+                                                                modifier = Modifier.size(13.dp),
+                                                                tint = Color(0xFF16A34A)
+                                                            )
+                                                        }
+                                                        Text(
+                                                            text = "${seg.bookName.take(3)} ${seg.chapter}",
+                                                            fontSize = 11.sp,
+                                                            fontWeight = if (isSegCurrent) FontWeight.Bold else FontWeight.Normal,
+                                                            color = if (isSegCurrent) themeBg else themeText,
+                                                            maxLines = 1
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (!isLastSegment) {
+                                        val nextSegment = session.segments.getOrNull(session.currentSegmentIndex + 1)
+                                        Button(
+                                            onClick = {
+                                                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                                readingPlanPreferences.setDayReadSegment(session.planId, session.dayNumber, session.currentSegmentIndex)
+                                                viewModel.markCurrentSegmentRead { _, _ ->
+                                                    viewModel.nextPlanSegment()
+                                                }
+                                            },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = ButtonDefaults.buttonColors(containerColor = themeAccent)
+                                        ) {
+                                            Text(
+                                                text = "Completar y continuar a ${nextSegment?.bookName ?: "Capítulo"} ${nextSegment?.chapter ?: ""}",
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 13.sp,
+                                                color = themeBg
+                                            )
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Icon(Icons.Default.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp), tint = themeBg)
+                                        }
+                                    } else {
+                                        Button(
+                                            onClick = {
+                                                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                                readingPlanPreferences.setDayReadSegment(session.planId, session.dayNumber, session.currentSegmentIndex)
+                                                viewModel.markCurrentSegmentRead()
+
+                                                if (session.isCustomPlan) {
+                                                    readingPlanPreferences.setDayCompleted(session.dayNumber, true)
+                                                    onCompleteCustomPlanDay?.invoke(session.planId, session.dayNumber)
+                                                } else {
+                                                    val planType = runCatching { com.example.data.bible.ReadingPlanType.valueOf(session.planId) }.getOrNull()
+                                                        ?: com.example.data.bible.ReadingPlanType.TRADITIONAL
+                                                    readingPlanPreferences.setDayCompleted(session.dayNumber, true, planType)
+                                                }
+
+                                                Toast.makeText(
+                                                    context,
+                                                    "¡Felicitaciones! Has completado las lecturas del Día ${session.dayNumber} 🎉",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+
+                                                viewModel.exitPlanMode()
+                                            },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF16A34A))
+                                        ) {
+                                            Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.White)
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = "¡Completar Día ${session.dayNumber}! ✔",
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 14.sp,
+                                                color = Color.White
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     if (uiState.isLoadingMore) {
                         item {
                             Box(
@@ -635,6 +907,10 @@ fun BibleReaderScreen(
                         targetValue = if (uiState.isReaderBarsVisible) 88.dp else 12.dp,
                         label = "chapter_nav_bottom_padding"
                     )
+                    val session = uiState.activePlanSession
+                    val canGoPrevious = if (session != null) session.currentSegmentIndex > 0 else true
+                    val canGoNext = if (session != null) session.currentSegmentIndex < session.totalSegments - 1 else true
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -649,30 +925,36 @@ fun BibleReaderScreen(
                                 .size(46.dp)
                                 .clip(CircleShape)
                                 .shadow(6.dp, CircleShape)
-                                .clickable {
+                                .clickable(enabled = canGoPrevious) {
                                     haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                                     viewModel.previousChapter()
                                 },
                             shape = CircleShape,
                             color = themeBg,
-                            border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.3f))
+                            border = BorderStroke(1.dp, themeSecondary.copy(alpha = if (canGoPrevious) 0.3f else 0.12f))
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     Icons.Default.ArrowBack,
                                     contentDescription = "Capítulo anterior",
-                                    tint = themeText,
+                                    tint = if (canGoPrevious) themeText else themeSecondary.copy(alpha = 0.35f),
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
 
-                        // Center: Current Book & Chapter pill (Click opens selector modal)
+                        // Center: Current Book & Chapter pill (Click opens selector modal or day segments)
                         Surface(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(24.dp))
                                 .shadow(8.dp, RoundedCornerShape(24.dp))
-                                .clickable { viewModel.openBookChapterSelector() },
+                                .clickable {
+                                    if (session != null) {
+                                        showPlanSegmentsSheet = true
+                                    } else {
+                                        viewModel.openBookChapterSelector()
+                                    }
+                                },
                             shape = RoundedCornerShape(24.dp),
                             color = themeBg,
                             border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.35f))
@@ -697,7 +979,11 @@ fun BibleReaderScreen(
                                     )
                                 }
                                 Text(
-                                    text = "${(uiState.currentBook?.name ?: "LIBRO").uppercase()} ${uiState.currentChapter}",
+                                    text = if (session != null) {
+                                        "${(session.currentSegment?.bookName ?: "LIBRO").uppercase()} ${session.currentSegment?.chapter} (${session.currentSegmentIndex + 1}/${session.totalSegments})"
+                                    } else {
+                                        "${(uiState.currentBook?.name ?: "LIBRO").uppercase()} ${uiState.currentChapter}"
+                                    },
                                     fontWeight = FontWeight.Black,
                                     letterSpacing = 1.5.sp,
                                     fontSize = 13.sp,
@@ -712,19 +998,19 @@ fun BibleReaderScreen(
                                 .size(46.dp)
                                 .clip(CircleShape)
                                 .shadow(6.dp, CircleShape)
-                                .clickable {
+                                .clickable(enabled = canGoNext) {
                                     haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                                     viewModel.nextChapter()
                                 },
                             shape = CircleShape,
                             color = themeBg,
-                            border = BorderStroke(1.dp, themeSecondary.copy(alpha = 0.3f))
+                            border = BorderStroke(1.dp, themeSecondary.copy(alpha = if (canGoNext) 0.3f else 0.12f))
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     Icons.Default.ArrowForward,
                                     contentDescription = "Capítulo siguiente",
-                                    tint = themeText,
+                                    tint = if (canGoNext) themeText else themeSecondary.copy(alpha = 0.35f),
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -831,6 +1117,118 @@ fun BibleReaderScreen(
             },
             onDismiss = { showVersionSelectorModal = false }
         )
+    }
+
+    // Modal Sheet: Plan Segments Selector
+    if (showPlanSegmentsSheet && uiState.activePlanSession != null) {
+        val session = uiState.activePlanSession!!
+        ModalBottomSheet(
+            onDismissRequest = { showPlanSegmentsSheet = false },
+            containerColor = themeBg
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = session.planTitle,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = themeSecondary
+                        )
+                        Text(
+                            text = session.dayTitle,
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = themeText
+                        )
+                    }
+                    IconButton(onClick = { showPlanSegmentsSheet = false }) {
+                        Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = themeText)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = "${session.readSegmentIndices.size} de ${session.totalSegments} capítulos leídos",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = themeSecondary
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                session.segments.forEachIndexed { idx, seg ->
+                    val isRead = idx in session.readSegmentIndices
+                    val isCurrent = idx == session.currentSegmentIndex
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .clickable {
+                                showPlanSegmentsSheet = false
+                                viewModel.goToPlanSegment(idx)
+                            },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isCurrent) themeAccent.copy(alpha = 0.15f) else themeBg
+                        ),
+                        border = BorderStroke(
+                            1.dp,
+                            if (isCurrent) themeAccent else themeSecondary.copy(alpha = 0.25f)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 14.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .clip(CircleShape)
+                                        .background(if (isRead) Color(0xFF16A34A).copy(alpha = 0.15f) else themeSecondary.copy(alpha = 0.12f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (isRead) {
+                                        Icon(
+                                            Icons.Default.Check,
+                                            contentDescription = null,
+                                            tint = Color(0xFF16A34A),
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    } else {
+                                        Text("${idx + 1}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = themeSecondary)
+                                    }
+                                }
+                                Text(
+                                    text = "${seg.bookName} ${seg.chapter}",
+                                    fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
+                                    color = themeText
+                                )
+                            }
+                            if (isCurrent) {
+                                Text("Leyendo", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = themeAccent)
+                            } else if (isRead) {
+                                Text("Leído", fontSize = 12.sp, color = Color(0xFF16A34A))
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(28.dp))
+            }
+        }
     }
 }
 

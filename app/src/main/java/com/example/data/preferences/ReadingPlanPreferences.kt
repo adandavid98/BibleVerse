@@ -144,6 +144,32 @@ class ReadingPlanPreferences(context: Context) {
         _progressFlow.value = loadProgress()
     }
 
+    // Granular progress per day (segments/chapters read within a day)
+    fun getDayReadSegments(planKey: String, dayNumber: Int): Set<Int> {
+        val raw = prefs.getStringSet("key_read_segs_${planKey}_$dayNumber", emptySet()) ?: emptySet()
+        return raw.mapNotNull { it.toIntOrNull() }.toSet()
+    }
+
+    fun setDayReadSegment(planKey: String, dayNumber: Int, segmentIndex: Int) {
+        val current = getDayReadSegments(planKey, dayNumber).toMutableSet()
+        current.add(segmentIndex)
+        prefs.edit()
+            .putStringSet("key_read_segs_${planKey}_$dayNumber", current.map { it.toString() }.toSet())
+            .putInt("key_last_seg_${planKey}_$dayNumber", segmentIndex)
+            .apply()
+    }
+
+    fun getLastReadSegment(planKey: String, dayNumber: Int): Int {
+        return prefs.getInt("key_last_seg_${planKey}_$dayNumber", 0)
+    }
+
+    fun clearDayReadSegments(planKey: String, dayNumber: Int) {
+        prefs.edit()
+            .remove("key_read_segs_${planKey}_$dayNumber")
+            .remove("key_last_seg_${planKey}_$dayNumber")
+            .apply()
+    }
+
     companion object {
         private const val KEY_PLAN_TYPE = "key_active_plan_type"
         private const val KEY_COMPLETED_DAYS = "key_completed_days"

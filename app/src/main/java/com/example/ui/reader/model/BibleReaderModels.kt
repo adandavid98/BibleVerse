@@ -54,6 +54,23 @@ object HighlightPalette {
     )
 }
 
+data class ReadingPlanSession(
+    val planId: String,
+    val planTitle: String,
+    val dayNumber: Int,
+    val dayTitle: String,
+    val segments: List<com.example.data.bible.PlanPassageSegment>,
+    val currentSegmentIndex: Int = 0,
+    val readSegmentIndices: Set<Int> = emptySet(),
+    val isCustomPlan: Boolean = false,
+    val storyNarrative: String? = null
+) {
+    val totalSegments: Int get() = segments.size
+    val currentSegment: com.example.data.bible.PlanPassageSegment? get() = segments.getOrNull(currentSegmentIndex)
+    val isAllSegmentsRead: Boolean get() = totalSegments > 0 && readSegmentIndices.size >= totalSegments
+    val progressPercentage: Float get() = if (totalSegments > 0) (readSegmentIndices.size.toFloat() / totalSegments.toFloat()).coerceIn(0f, 1f) else 0f
+}
+
 data class BibleReaderUiState(
     val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
@@ -74,5 +91,6 @@ data class BibleReaderUiState(
     val targetScrollVerse: Int? = null,
     val transientHighlightedVerses: Set<Int> = emptySet(),
     val userMessage: String? = null,
-    val isReaderBarsVisible: Boolean = true
+    val isReaderBarsVisible: Boolean = true,
+    val activePlanSession: ReadingPlanSession? = null
 )
