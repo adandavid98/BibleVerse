@@ -1,8 +1,10 @@
 package com.example.ui.reader.components
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.ContextWrapper
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,11 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.example.data.bible.BibleCrossReferencesCatalog
 import com.example.data.bible.CrossReferenceItem
 import com.example.data.bible.OfflineBibleManager
@@ -47,6 +52,23 @@ fun CrossReferencesBottomSheet(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
+    val density = LocalDensity.current
+
+    val navBarBottomDp = remember(context, density) {
+        val activity = generateSequence(context) { if (it is ContextWrapper) it.baseContext else null }
+            .filterIsInstance<Activity>()
+            .firstOrNull()
+        val insets = activity?.window?.decorView?.let { decor ->
+            ViewCompat.getRootWindowInsets(decor)?.getInsets(WindowInsetsCompat.Type.navigationBars())
+        }
+        val bottomPx = insets?.bottom ?: 0
+        if (bottomPx > 0) {
+            with(density) { bottomPx.toDp() }
+        } else {
+            36.dp
+        }
+    }
+
     val references = remember(bookId, chapter, verse, customReferences) {
         customReferences ?: BibleCrossReferencesCatalog.getReferences(context, bookId, chapter, verse)
     }
@@ -112,8 +134,12 @@ fun CrossReferencesBottomSheet(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .navigationBarsPadding()
-                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                        .padding(
+                            start = 20.dp,
+                            end = 20.dp,
+                            top = 8.dp,
+                            bottom = maxOf(navBarBottomDp, 28.dp) + 8.dp
+                        )
                 ) {
             // Header
             Row(
@@ -182,7 +208,7 @@ fun CrossReferencesBottomSheet(
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(14.dp),
-                    contentPadding = PaddingValues(bottom = 20.dp)
+                    contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
                     items(references) { ref ->
                         val fullVerseText = verseTexts[ref.targetCitation] ?: ref.note

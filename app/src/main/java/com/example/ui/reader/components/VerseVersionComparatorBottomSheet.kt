@@ -1,8 +1,10 @@
 package com.example.ui.reader.components
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.ContextWrapper
 import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
@@ -35,11 +37,14 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.example.data.bible.BibleCatalog
 import com.example.data.bible.BibleVersion
 import com.example.data.bible.BollsBibleApiService
@@ -68,7 +73,23 @@ fun VerseVersionComparatorBottomSheet(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
+    val density = LocalDensity.current
     val scope = rememberCoroutineScope()
+
+    val navBarBottomDp = remember(context, density) {
+        val activity = generateSequence(context) { if (it is ContextWrapper) it.baseContext else null }
+            .filterIsInstance<Activity>()
+            .firstOrNull()
+        val insets = activity?.window?.decorView?.let { decor ->
+            ViewCompat.getRootWindowInsets(decor)?.getInsets(WindowInsetsCompat.Type.navigationBars())
+        }
+        val bottomPx = insets?.bottom ?: 0
+        if (bottomPx > 0) {
+            with(density) { bottomPx.toDp() }
+        } else {
+            36.dp
+        }
+    }
 
     val downloadStates by OfflineBibleDownloadManager.downloadStates.collectAsState()
 
@@ -174,8 +195,12 @@ fun VerseVersionComparatorBottomSheet(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .navigationBarsPadding()
-                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                        .padding(
+                            start = 20.dp,
+                            end = 20.dp,
+                            top = 8.dp,
+                            bottom = maxOf(navBarBottomDp, 28.dp) + 8.dp
+                        )
                 ) {
             // Header
             Row(
@@ -338,7 +363,7 @@ fun VerseVersionComparatorBottomSheet(
                     onClick = { showAddVersionDialog = true },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 4.dp),
+                        .padding(top = 8.dp),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.primary
