@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.activity.compose.BackHandler
 import com.example.data.preferences.ReaderFontFamily
 import com.example.data.preferences.ReaderThemeMode
 import com.example.domain.model.ReaderVerseUiModel
@@ -68,6 +69,11 @@ fun BibleReaderScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+
+    // Clear active verse selection first if user presses back in Reader
+    BackHandler(enabled = uiState.selectedVerseNumbers.isNotEmpty()) {
+        viewModel.clearSelection()
+    }
     val audioState by BibleAudioController.audioState.collectAsState()
     val listState = rememberLazyListState()
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current

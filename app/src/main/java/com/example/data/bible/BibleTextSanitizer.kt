@@ -14,13 +14,18 @@ object BibleTextSanitizer {
     // Spacing before punctuation: "Dios , dijo" -> "Dios, dijo"
     private val PUNCTUATION_SPACING_REGEX = Regex("\\s+([.,;:!?])")
 
+    // Editorial Psalm and Book division headers embedded into verse 1 (e.g. NTV in Bolls: "Salmo 4 Respóndeme...", "LIBRO PRIMERO (Salmos 1-41) Salmo 1...")
+    private val PSALM_HEADER_PREFIX_REGEX = Regex(
+        "(?i)^(?:LIBRO\\s+(?:PRIMERO|SEGUNDO|TERCERO|CUARTO|QUINTO|I|II|III|IV|V)\\s*\\([^)]*\\)\\s*)?Salmos?\\s+\\d+[.:]?\\s*"
+    )
+
     // Multiple consecutive whitespace characters
     private val MULTI_SPACE_REGEX = Regex("\\s{2,}")
 
     /**
-     * Sanitizes raw biblical verse text across all translations (especially NBLA, TLA, DHH, PDT).
+     * Sanitizes raw biblical verse text across all translations (especially NBLA, TLA, DHH, PDT, NTV).
      * Eliminates stray bullets, footnotes, HTML fragments, invisible unicode artifacts,
-     * while normalizing spacing, quotes, and punctuation.
+     * editorial Psalm prefixes, while normalizing spacing, quotes, and punctuation.
      */
     fun sanitize(raw: String?): String {
         if (raw.isNullOrBlank()) return ""
@@ -56,6 +61,9 @@ object BibleTextSanitizer {
         if (text.length >= 2 && text.startsWith("'") && text.endsWith("'")) {
             text = text.substring(1, text.length - 1).trim()
         }
+
+        // 9. Strip editorial Psalm and book division headers prepended to verse text (e.g. NTV Salmos)
+        text = text.replace(PSALM_HEADER_PREFIX_REGEX, "").trim()
 
         return text
     }

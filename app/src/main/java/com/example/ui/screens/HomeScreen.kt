@@ -99,8 +99,8 @@ fun HomeScreen(
     val isGeneratingContext by viewModel.isGeneratingContext.collectAsStateWithLifecycle()
     val readerUiState by readerViewModel.uiState.collectAsStateWithLifecycle()
 
-    // Smooth Android back button handling: Return from Settings to home
-    BackHandler(enabled = selectedTab == 4) {
+    // Smooth Android back gesture handling: Return from any module (Reader, Search, Favorites, Settings) to Verses lobby
+    BackHandler(enabled = selectedTab != 0) {
         selectedTab = 0
     }
 
