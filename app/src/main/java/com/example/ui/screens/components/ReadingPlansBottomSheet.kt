@@ -1103,7 +1103,7 @@ private fun ActivePlanCard(
 private fun CompletedPlanCard(
     planWithDays: CustomPlanWithDays,
     onRestart: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: (() -> Unit)? = null
 ) {
     val completedDateStr = remember(planWithDays.plan.completedAt) {
         val date = Date(planWithDays.plan.completedAt ?: System.currentTimeMillis())
@@ -1113,12 +1113,12 @@ private fun CompletedPlanCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -1127,11 +1127,11 @@ private fun CompletedPlanCard(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(46.dp)
+                            .size(36.dp)
                             .clip(CircleShape)
                             .background(Color(0xFFFEF08A)),
                         contentAlignment = Alignment.Center
@@ -1140,13 +1140,13 @@ private fun CompletedPlanCard(
                             Icons.Default.EmojiEvents,
                             contentDescription = null,
                             tint = Color(0xFFD97706),
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                     Column {
                         Text(
                             text = planWithDays.plan.title,
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
@@ -1158,7 +1158,7 @@ private fun CompletedPlanCard(
                 }
 
                 Surface(
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(6.dp),
                     color = Color(0xFFD1FAE5)
                 ) {
                     Text(
@@ -1166,14 +1166,14 @@ private fun CompletedPlanCard(
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.labelSmall,
                         color = Color(0xFF047857),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
                     )
                 }
             }
 
             Text(
                 text = "Cumpliste con éxito todos los ${planWithDays.totalDays} días de lectura.",
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -1182,18 +1182,12 @@ private fun CompletedPlanCard(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Eliminar", color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
-                }
-                Spacer(modifier = Modifier.width(8.dp))
                 Button(
                     onClick = onRestart,
-                    shape = RoundedCornerShape(10.dp),
-                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
                 ) {
-                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(15.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Volver a leer", fontSize = 12.sp)
                 }

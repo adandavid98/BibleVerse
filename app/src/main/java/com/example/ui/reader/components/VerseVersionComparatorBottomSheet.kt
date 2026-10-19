@@ -161,7 +161,7 @@ fun VerseVersionComparatorBottomSheet(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.85f)
+                    .fillMaxHeight(0.93f)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
