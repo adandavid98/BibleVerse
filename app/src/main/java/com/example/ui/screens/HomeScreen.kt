@@ -87,6 +87,7 @@ fun HomeScreen(
     val versesListState = rememberLazyListState()
     var showReadingPlans by remember { mutableStateOf(false) }
     var readingPlansInitialTab by remember { mutableIntStateOf(0) }
+    var returnToPlansOnExit by remember { mutableStateOf(false) }
 
     val showUpdateDialog by viewModel.showUpdateDialog.collectAsStateWithLifecycle()
     val updateInfo by viewModel.updateInfo.collectAsStateWithLifecycle()
@@ -99,9 +100,15 @@ fun HomeScreen(
     val isGeneratingContext by viewModel.isGeneratingContext.collectAsStateWithLifecycle()
     val readerUiState by readerViewModel.uiState.collectAsStateWithLifecycle()
 
-    // Smooth Android back gesture handling: Return from any module (Reader, Search, Favorites, Settings) to Verses lobby
+    // Smooth Android back gesture handling: Return to reading plans if reading a plan, or to Verses lobby
     BackHandler(enabled = selectedTab != 0) {
-        selectedTab = 0
+        if (selectedTab == 1 && returnToPlansOnExit) {
+            readerViewModel.exitPlanMode()
+            showReadingPlans = true
+            returnToPlansOnExit = false
+        } else {
+            selectedTab = 0
+        }
     }
 
     // Notify user of sync messages
@@ -309,6 +316,12 @@ fun HomeScreen(
                             dayNumber = dayNumber,
                             completed = true
                         )
+                    },
+                    onExitPlan = {
+                        if (returnToPlansOnExit) {
+                            showReadingPlans = true
+                            returnToPlansOnExit = false
+                        }
                     }
                 )
                 2 -> SearchTab(
@@ -445,6 +458,8 @@ fun HomeScreen(
                 selectedTab = 1
             },
             onStartPlanSession = { session ->
+                returnToPlansOnExit = true
+                readingPlansInitialTab = if (session.isCustomPlan) 0 else 1
                 readerViewModel.startPlanReadingSession(session)
                 selectedTab = 1
                 showReadingPlans = false

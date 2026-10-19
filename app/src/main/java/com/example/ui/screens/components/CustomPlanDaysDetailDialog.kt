@@ -168,7 +168,7 @@ fun CustomPlanDaysDetailDialog(
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(bottom = 32.dp)
+                    contentPadding = PaddingValues(top = 4.dp, bottom = 80.dp)
                 ) {
                     items(planWithDays.days.sortedBy { it.dayNumber }, key = { it.id }) { day ->
                         val isCurrentDay = day.dayNumber == nextDayNumber
@@ -285,6 +285,9 @@ fun CustomPlanDaysDetailDialog(
                                 }
                             }
                         }
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(32.dp))
                     }
                 }
             }

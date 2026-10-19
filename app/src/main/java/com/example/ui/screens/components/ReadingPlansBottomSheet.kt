@@ -130,6 +130,7 @@ fun ReadingPlansBottomSheet(
         }
     }
     var celebrationPlan by remember { mutableStateOf<CustomReadingPlanEntity?>(null) }
+    var activeReadingDay by remember { mutableStateOf<ReadingPlanDay?>(null) }
 
     // Pre-defined catalog state
     val currentDays = remember(progress.activePlanType) {
@@ -346,7 +347,7 @@ fun ReadingPlansBottomSheet(
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
                                 verticalArrangement = Arrangement.spacedBy(14.dp),
-                                contentPadding = PaddingValues(bottom = 20.dp)
+                                contentPadding = PaddingValues(top = 4.dp, bottom = 80.dp)
                             ) {
                                 items(activeCustomPlans, key = { it.plan.id }) { planWithDays ->
                                     ActivePlanCard(
@@ -373,6 +374,9 @@ fun ReadingPlansBottomSheet(
                                             viewModel?.restartCustomPlan(planWithDays.plan.id)
                                         }
                                     )
+                                }
+                                item {
+                                    Spacer(modifier = Modifier.height(32.dp))
                                 }
                             }
                         }
@@ -629,7 +633,7 @@ fun ReadingPlansBottomSheet(
                                     state = currentListState,
                                     modifier = Modifier.weight(1f),
                                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    contentPadding = PaddingValues(bottom = 20.dp)
+                                    contentPadding = PaddingValues(top = 4.dp, bottom = 80.dp)
                                 ) {
                                     items(filteredCatalogDays, key = { "${progress.activePlanType.name}_${it.dayNumber}" }) { day ->
                                         val isCompleted = progress.completedDays.contains(day.dayNumber)
@@ -642,7 +646,11 @@ fun ReadingPlansBottomSheet(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clickable {
-                                                    launchCatalogDay(day)
+                                                    if (isStoriesPlan) {
+                                                        activeReadingDay = day
+                                                    } else {
+                                                        launchCatalogDay(day)
+                                                    }
                                                 },
                                             shape = RoundedCornerShape(14.dp),
                                             border = if (isCurrentDay && !isCompleted) {
@@ -731,7 +739,11 @@ fun ReadingPlansBottomSheet(
                                                 // Read arrow button
                                                 IconButton(
                                                     onClick = {
-                                                        launchCatalogDay(day)
+                                                        if (isStoriesPlan) {
+                                                            activeReadingDay = day
+                                                        } else {
+                                                            launchCatalogDay(day)
+                                                        }
                                                     },
                                                     modifier = Modifier.size(36.dp)
                                                 ) {
@@ -744,6 +756,9 @@ fun ReadingPlansBottomSheet(
                                                 }
                                             }
                                         }
+                                    }
+                                    item {
+                                        Spacer(modifier = Modifier.height(32.dp))
                                     }
                                 }
                             }
@@ -803,7 +818,7 @@ fun ReadingPlansBottomSheet(
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
                                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                                contentPadding = PaddingValues(bottom = 20.dp)
+                                contentPadding = PaddingValues(top = 4.dp, bottom = 80.dp)
                             ) {
                                 items(completedCustomPlans, key = { it.plan.id }) { planWithDays ->
                                     CompletedPlanCard(
@@ -816,6 +831,9 @@ fun ReadingPlansBottomSheet(
                                             viewModel?.deleteCustomPlan(planWithDays.plan.id)
                                         }
                                     )
+                                }
+                                item {
+                                    Spacer(modifier = Modifier.height(32.dp))
                                 }
                             }
                         }
@@ -889,6 +907,32 @@ fun ReadingPlansBottomSheet(
             planTitle = plan.title,
             totalDays = plan.totalDays,
             onDismiss = { celebrationPlan = null }
+        )
+    }
+
+    // Modal: Visor devocional para Historias Bíblicas (relato, contexto histórico y enseñanza)
+    activeReadingDay?.let { day ->
+        ReadingPlanDayReaderModal(
+            day = day,
+            isCompleted = progress.completedDays.contains(day.dayNumber),
+            planType = progress.activePlanType,
+            onToggleCompleted = { dayNum ->
+                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                preferences.toggleDayCompleted(dayNum)
+            },
+            onNextDay = {
+                val nextDayNum = day.dayNumber + 1
+                val nextDay = currentDays.find { it.dayNumber == nextDayNum }
+                if (nextDay != null) {
+                    activeReadingDay = nextDay
+                    preferences.setLastReadDay(progress.activePlanType, nextDayNum)
+                }
+            },
+            onOpenInFullBible = { _, _, _ ->
+                activeReadingDay = null
+                launchCatalogDay(day)
+            },
+            onDismiss = { activeReadingDay = null }
         )
     }
 }

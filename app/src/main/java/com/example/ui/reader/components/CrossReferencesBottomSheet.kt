@@ -208,7 +208,7 @@ fun CrossReferencesBottomSheet(
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(14.dp),
-                    contentPadding = PaddingValues(bottom = 16.dp)
+                    contentPadding = PaddingValues(top = 4.dp, bottom = 48.dp)
                 ) {
                     items(references) { ref ->
                         val fullVerseText = verseTexts[ref.targetCitation] ?: ref.note
@@ -303,6 +303,9 @@ fun CrossReferencesBottomSheet(
                                 }
                             }
                         }
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
             }

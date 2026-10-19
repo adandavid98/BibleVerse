@@ -66,7 +66,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 fun BibleReaderScreen(
     viewModel: BibleReaderViewModel,
     onBack: (() -> Unit)? = null,
-    onCompleteCustomPlanDay: ((planId: String, dayNumber: Int) -> Unit)? = null
+    onCompleteCustomPlanDay: ((planId: String, dayNumber: Int) -> Unit)? = null,
+    onExitPlan: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
@@ -79,6 +80,7 @@ fun BibleReaderScreen(
             viewModel.clearSelection()
         } else if (uiState.activePlanSession != null) {
             viewModel.exitPlanMode()
+            onExitPlan?.invoke()
         }
     }
     val audioState by BibleAudioController.audioState.collectAsState()
@@ -270,7 +272,10 @@ fun BibleReaderScreen(
                 },
                 navigationIcon = {
                     if (uiState.activePlanSession != null) {
-                        IconButton(onClick = { viewModel.exitPlanMode() }) {
+                        IconButton(onClick = {
+                            viewModel.exitPlanMode()
+                            onExitPlan?.invoke()
+                        }) {
                             Icon(Icons.Default.Close, contentDescription = "Salir del plan", tint = themeText)
                         }
                     } else if (onBack != null) {
@@ -790,6 +795,7 @@ fun BibleReaderScreen(
                                                 ).show()
 
                                                 viewModel.exitPlanMode()
+                                                onExitPlan?.invoke()
                                             },
                                             modifier = Modifier.fillMaxWidth(),
                                             shape = RoundedCornerShape(12.dp),

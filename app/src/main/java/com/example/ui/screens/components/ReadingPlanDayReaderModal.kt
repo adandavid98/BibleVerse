@@ -401,85 +401,104 @@ fun ReadingPlanDayReaderModal(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
                             )
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .then(if (isStoriesPlan) Modifier.clickable { isVersesExpanded = !isVersesExpanded } else Modifier)
-                                    .padding(horizontal = 14.dp, vertical = 12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
                                 Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.weight(1f)
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .then(if (isStoriesPlan) Modifier.clickable { isVersesExpanded = !isVersesExpanded } else Modifier)
+                                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(
-                                        Icons.Default.MenuBook,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Column {
-                                        Text(
-                                            text = if (isStoriesPlan) "Texto Bíblico de Referencia" else "Pasajes Bíblicos",
-                                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                        Text(
-                                            text = "${day.passagesSummary} ($selectedVersion)",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Surface(
-                                        onClick = { showVersionSelector = true },
-                                        shape = RoundedCornerShape(16.dp),
-                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                                        modifier = Modifier.padding(end = 2.dp)
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                        ) {
-                                            Text(
-                                                text = selectedVersion,
-                                                fontSize = 12.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colorScheme.primary
-                                            )
-                                            Icon(
-                                                Icons.Default.ArrowDropDown,
-                                                contentDescription = "Seleccionar versión",
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                        }
-                                    }
-                                    IconButton(
-                                        onClick = {
-                                            onOpenInFullBible(day.primaryBookId, day.primaryChapter, day.primaryVerse)
-                                            onDismiss()
-                                        }
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.weight(1f)
                                     ) {
                                         Icon(
-                                            Icons.Default.OpenInNew,
-                                            contentDescription = "Abrir en la Biblia",
+                                            Icons.Default.MenuBook,
+                                            contentDescription = null,
                                             tint = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.size(20.dp)
                                         )
-                                    }
-                                    if (isStoriesPlan) {
-                                        IconButton(onClick = { isVersesExpanded = !isVersesExpanded }) {
-                                            Icon(
-                                                if (isVersesExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                                contentDescription = if (isVersesExpanded) "Colapsar" else "Expandir",
-                                                tint = MaterialTheme.colorScheme.primary
+                                        Column {
+                                            Text(
+                                                text = if (isStoriesPlan) "Texto Bíblico de Referencia" else "Pasajes Bíblicos",
+                                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = "${day.passagesSummary} ($selectedVersion)",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
+                                    }
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Surface(
+                                            onClick = { showVersionSelector = true },
+                                            shape = RoundedCornerShape(16.dp),
+                                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                            modifier = Modifier.padding(end = 2.dp)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                            ) {
+                                                Text(
+                                                    text = selectedVersion,
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                                Icon(
+                                                    Icons.Default.ArrowDropDown,
+                                                    contentDescription = "Seleccionar versión",
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
+                                        }
+                                        IconButton(
+                                            onClick = {
+                                                onOpenInFullBible(day.primaryBookId, day.primaryChapter, day.primaryVerse)
+                                                onDismiss()
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Default.OpenInNew,
+                                                contentDescription = "Abrir en la Biblia",
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                        if (isStoriesPlan) {
+                                            IconButton(onClick = { isVersesExpanded = !isVersesExpanded }) {
+                                                Icon(
+                                                    if (isVersesExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                                    contentDescription = if (isVersesExpanded) "Colapsar" else "Expandir",
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (isStoriesPlan) {
+                                    FilledTonalButton(
+                                        onClick = {
+                                            onDismiss()
+                                            onOpenInFullBible(day.primaryBookId, day.primaryChapter, day.primaryVerse)
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = 14.dp, end = 14.dp, bottom = 12.dp),
+                                        shape = RoundedCornerShape(10.dp)
+                                    ) {
+                                        Icon(Icons.Default.AutoStories, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text("Leer pasajes delimitados en la Biblia", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -660,18 +679,25 @@ fun ReadingPlanDayReaderModal(
                                     }
                                 }
 
-                                // Open in full reader link
+                                // Open in reader link
                                 TextButton(
                                     onClick = {
                                         onDismiss()
                                         onOpenInFullBible(day.primaryBookId, day.primaryChapter, day.primaryVerse)
                                     }
                                 ) {
-                                    Text(
-                                        "Abrir en la Biblia completa",
-                                        fontSize = 12.sp,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Icon(Icons.Default.AutoStories, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                                        Text(
+                                            "Leer pasajes de referencia en la Biblia",
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
                                 }
                             }
                         }
