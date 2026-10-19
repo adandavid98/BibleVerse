@@ -498,7 +498,7 @@ fun ReadingPlanDayReaderModal(
                                     ) {
                                         Icon(Icons.Default.AutoStories, contentDescription = null, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(6.dp))
-                                        Text("Leer pasajes delimitados en la Biblia", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                        Text("Leer en la Biblia", fontSize = 13.sp, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -676,27 +676,6 @@ fun ReadingPlanDayReaderModal(
                                             )
                                             Icon(Icons.Default.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp))
                                         }
-                                    }
-                                }
-
-                                // Open in reader link
-                                TextButton(
-                                    onClick = {
-                                        onDismiss()
-                                        onOpenInFullBible(day.primaryBookId, day.primaryChapter, day.primaryVerse)
-                                    }
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Icon(Icons.Default.AutoStories, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
-                                        Text(
-                                            "Leer pasajes de referencia en la Biblia",
-                                            fontSize = 13.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
                                     }
                                 }
                             }
