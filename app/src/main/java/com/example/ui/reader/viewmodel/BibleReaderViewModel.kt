@@ -561,6 +561,97 @@ class BibleReaderViewModel(
         }
     }
 
+    fun explainSelectedVerses() {
+        val selected = getSelectedVerses()
+        if (selected.isEmpty()) return
+
+        val bookName = _uiState.value.currentBook?.name ?: selected.first().bookName
+        val chapter = _uiState.value.currentChapter
+        val version = _uiState.value.preferences.bibleVersion
+        val citation = formatVerseQuotationUseCase.formatCitationOnly(selected, version)
+        val sortedVerseNumbers = selected.map { it.verseNumber }
+        val rangeStr = if (sortedVerseNumbers.size == 1) {
+            sortedVerseNumbers.first().toString()
+        } else {
+            "${sortedVerseNumbers.first()}-${sortedVerseNumbers.last()}"
+        }
+        val combinedText = if (selected.size == 1) {
+            com.example.data.bible.OfflineBibleManager.cleanVerseText(selected.first().text)
+        } else {
+            selected.joinToString(" ") { "(${it.verseNumber}) ${com.example.data.bible.OfflineBibleManager.cleanVerseText(it.text)}" }
+        }
+
+        _uiState.update {
+            it.copy(
+                isExplainModalOpen = true,
+                isExplaining = true,
+                explainCitation = citation,
+                explainContent = "",
+                explainSource = ""
+            )
+        }
+
+        viewModelScope.launch {
+            try {
+                val result = com.example.data.bible.GeminiVerseContextService.explainVerses(
+                    book = bookName,
+                    chapter = chapter,
+                    verseRange = rangeStr,
+                    verseText = combinedText,
+                    bibleVersion = version
+                )
+                when (result) {
+                    is com.example.data.bible.ContextGenerationResult.Success -> {
+                        val sourceLabel = when (result.source) {
+                            com.example.data.bible.ContextSource.AI_GEMINI -> "Inteligencia Artificial"
+                            else -> "Contexto Canónico"
+                        }
+                        _uiState.update {
+                            it.copy(
+                                isExplaining = false,
+                                explainContent = result.contextText,
+                                explainSource = sourceLabel
+                            )
+                        }
+                    }
+                    is com.example.data.bible.ContextGenerationResult.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                isExplaining = false,
+                                explainContent = result.fallbackContext.ifBlank { result.message },
+                                explainSource = "Contexto Canónico"
+                            )
+                        }
+                    }
+                }
+            } catch (_: Exception) {
+                val fallback = com.example.data.bible.BibleContextEngine.getDeepTheologicalExegesis(
+                    bookName = bookName,
+                    chapter = chapter,
+                    verse = rangeStr,
+                    verseText = combinedText,
+                    bibleVersion = version
+                )
+                _uiState.update {
+                    it.copy(
+                        isExplaining = false,
+                        explainContent = fallback,
+                        explainSource = "Contexto Canónico"
+                    )
+                }
+            }
+        }
+    }
+
+    fun closeExplainModal() {
+        _uiState.update {
+            it.copy(
+                isExplainModalOpen = false,
+                isExplaining = false
+            )
+        }
+    }
+
     fun closeCrossReferences() {
         _uiState.update {
             it.copy(

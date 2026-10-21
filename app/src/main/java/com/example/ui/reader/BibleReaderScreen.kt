@@ -841,6 +841,9 @@ fun BibleReaderScreen(
                                 viewModel.openCrossReferences(firstSelected)
                             }
                         },
+                        onExplain = {
+                            viewModel.explainSelectedVerses()
+                        },
                         onClearSelection = {
                             viewModel.clearSelection()
                         }
@@ -1043,6 +1046,17 @@ fun BibleReaderScreen(
                 viewModel.navigateToVerse(targetBId, targetChap, startV, endV)
             },
             onDismiss = { viewModel.closeCrossReferences() }
+        )
+    }
+
+    // Bottom Sheet: Explain Verses
+    if (uiState.isExplainModalOpen) {
+        com.example.ui.reader.components.ExplainVerseBottomSheet(
+            citation = uiState.explainCitation,
+            content = uiState.explainContent,
+            source = uiState.explainSource,
+            isLoading = uiState.isExplaining,
+            onDismiss = { viewModel.closeExplainModal() }
         )
     }
     val offlineStates by com.example.data.bible.OfflineBibleDownloadManager.downloadStates.collectAsState()

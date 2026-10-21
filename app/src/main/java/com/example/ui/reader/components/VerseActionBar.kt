@@ -35,6 +35,7 @@ fun VerseActionBar(
     onShareText: () -> Unit,
     onShareCard: () -> Unit,
     onCrossReferences: () -> Unit = {},
+    onExplain: () -> Unit = {},
     onClearSelection: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -161,6 +162,12 @@ fun VerseActionBar(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    ActionPill(
+                        icon = Icons.Default.Lightbulb,
+                        label = "Explicar",
+                        onClick = onExplain
+                    )
+
                     ActionPill(
                         icon = Icons.Default.CompareArrows,
                         label = "Comparar",

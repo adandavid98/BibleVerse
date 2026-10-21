@@ -193,4 +193,144 @@ object GeminiVerseContextService {
             source = ContextSource.LOCAL_ENGINE
         )
     }
+
+    /**
+     * Generates a concise two-paragraph explanation for one or multiple verses:
+     * Paragraph 1: Historical and literary context (who wrote/spoke, historical setting and narrative situation).
+     * Paragraph 2: Core spiritual/theological meaning and practical illumination for understanding today.
+     * Works seamlessly for 1 verse or any range of verses, with automatic offline fallback.
+     */
+    suspend fun explainVerses(
+        book: String,
+        chapter: Int,
+        verseRange: String,
+        verseText: String,
+        bibleVersion: String = "RVR1960",
+        forceLocalOnly: Boolean = false
+    ): ContextGenerationResult = withContext(Dispatchers.IO) {
+        val reference = "$book $chapter:$verseRange".trim()
+        val resolvedApiKey = getEffectiveApiKey()
+        val isKeyConfigured = resolvedApiKey.isNotBlank()
+
+        if (forceLocalOnly || !isKeyConfigured) {
+            val localContext = BibleContextEngine.getDeepTheologicalExegesis(
+                bookName = book,
+                chapter = chapter,
+                verse = verseRange,
+                verseText = verseText,
+                bibleVersion = bibleVersion
+            )
+            return@withContext ContextGenerationResult.Success(
+                contextText = localContext,
+                source = ContextSource.LOCAL_ENGINE
+            )
+        }
+
+        val prompt = buildString {
+            append("Eres un pedagogo y erudito bíblico. Explica de forma clara, directa, accesible y edificante el siguiente pasaje bíblico para arrojar luz y facilitar su comprensión:\n\n")
+            append("Cita Bíblica: $reference\n")
+            append("Versión de traducción: $bibleVersion\n")
+            if (verseText.isNotBlank()) {
+                append("Texto bíblico:\n\"$verseText\"\n\n")
+            } else {
+                append("\n")
+            }
+            append("Instrucciones obligatorias de formato:\n")
+            append("- Escribe exactamente DOS párrafos breves en español.\n")
+            append("- NO uses encabezados, NO uses títulos en negrita, NO uses listas ni viñetas markdown. Solo texto fluido.\n")
+            append("- Primer párrafo (Contexto y situación): Explica de forma concisa quién habla o escribe, a quién se dirige, en qué momento histórico/cultural y qué está ocurriendo en el pasaje.\n")
+            append("- Segundo párrafo (Significado y aplicación): Explica el significado esencial del pasaje, aclarando posibles dudas o términos difíciles, y qué principio espiritual enseña para la vida de hoy.\n")
+            append("- Mantén un tono respetuoso, neutro, edificante e interdenominacional.")
+        }
+
+        val requestJson = JSONObject().apply {
+            val contentsArray = JSONArray().apply {
+                val contentObj = JSONObject().apply {
+                    val partsArray = JSONArray().apply {
+                        put(JSONObject().apply { put("text", prompt) })
+                    }
+                    put("parts", partsArray)
+                }
+                put(contentObj)
+            }
+            put("contents", contentsArray)
+
+            val configObj = JSONObject().apply {
+                put("temperature", 0.3)
+                put("maxOutputTokens", 1200)
+            }
+            put("generationConfig", configObj)
+        }
+
+        val requestBodyString = requestJson.toString()
+
+        for (modelName in FREE_TIER_MODELS) {
+            try {
+                val requestBody = requestBodyString.toRequestBody("application/json; charset=utf-8".toMediaType())
+                val url = "$BASE_URL/$modelName:generateContent?key=$resolvedApiKey"
+
+                val httpRequest = Request.Builder()
+                    .url(url)
+                    .addHeader("x-goog-api-key", resolvedApiKey)
+                    .post(requestBody)
+                    .build()
+
+                val response = client.newCall(httpRequest).execute()
+                val responseBody = response.body?.string()
+
+                if (response.isSuccessful && !responseBody.isNullOrBlank()) {
+                    val jsonResponse = JSONObject(responseBody)
+                    val candidates = jsonResponse.optJSONArray("candidates")
+                    if (candidates != null && candidates.length() > 0) {
+                        val firstCandidate = candidates.getJSONObject(0)
+                        val content = firstCandidate.optJSONObject("content")
+                        val parts = content?.optJSONArray("parts")
+                        if (parts != null && parts.length() > 0) {
+                            val textBuilder = StringBuilder()
+                            for (i in 0 until parts.length()) {
+                                val part = parts.optJSONObject(i) ?: continue
+                                val isThought = part.optBoolean("thought", false)
+                                if (!isThought) {
+                                    val partText = part.optString("text", "")
+                                    if (partText.isNotBlank()) {
+                                        textBuilder.append(partText)
+                                    }
+                                }
+                            }
+                            val rawText = if (textBuilder.length > 0) textBuilder.toString() else parts.getJSONObject(0).optString("text", "")
+                            val cleaned = rawText
+                                .replace(Regex("^#+\\s*", RegexOption.MULTILINE), "")
+                                .replace("**", "")
+                                .trim()
+
+                            if (cleaned.isNotBlank()) {
+                                Log.i(TAG, "Explanation generated successfully using model: $modelName")
+                                return@withContext ContextGenerationResult.Success(
+                                    contextText = cleaned,
+                                    source = ContextSource.AI_GEMINI
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    Log.w(TAG, "Model $modelName responded with HTTP ${response.code}: $responseBody. Trying next fallback...")
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Exception calling model $modelName: ${e.message}. Trying next fallback...")
+            }
+        }
+
+        Log.i(TAG, "All AI models exhausted or offline. Applying rich local canonical exegesis engine.")
+        val localFallback = BibleContextEngine.getDeepTheologicalExegesis(
+            bookName = book,
+            chapter = chapter,
+            verse = verseRange,
+            verseText = verseText,
+            bibleVersion = bibleVersion
+        )
+        ContextGenerationResult.Success(
+            contextText = localFallback,
+            source = ContextSource.LOCAL_ENGINE
+        )
+    }
 }

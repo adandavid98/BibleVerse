@@ -93,5 +93,10 @@ data class BibleReaderUiState(
     val transientHighlightedVerses: Set<Int> = emptySet(),
     val userMessage: String? = null,
     val isReaderBarsVisible: Boolean = true,
-    val activePlanSession: ReadingPlanSession? = null
+    val activePlanSession: ReadingPlanSession? = null,
+    val isExplainModalOpen: Boolean = false,
+    val isExplaining: Boolean = false,
+    val explainCitation: String = "",
+    val explainContent: String = "",
+    val explainSource: String = ""
 )
