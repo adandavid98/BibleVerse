@@ -1,8 +1,10 @@
 package com.example.ui.reader.components
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -26,11 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 @Composable
 fun ExplainVerseBottomSheet(
@@ -41,8 +46,23 @@ fun ExplainVerseBottomSheet(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    val navBarsBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-    val safeBottomPadding = maxOf(navBarsBottom, 16.dp) + 10.dp
+    val density = LocalDensity.current
+
+    val navBarBottomDp = remember(context, density) {
+        val activity = generateSequence(context) { if (it is ContextWrapper) it.baseContext else null }
+            .filterIsInstance<Activity>()
+            .firstOrNull()
+        val insets = activity?.window?.decorView?.let { decor ->
+            ViewCompat.getRootWindowInsets(decor)?.getInsets(WindowInsetsCompat.Type.navigationBars())
+        }
+        val bottomPx = insets?.bottom ?: 0
+        if (bottomPx > 0) {
+            with(density) { bottomPx.toDp() }
+        } else {
+            36.dp
+        }
+    }
+    val safeBottomPadding = maxOf(navBarBottomDp, 32.dp) + 16.dp
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -238,9 +258,9 @@ fun ExplainVerseBottomSheet(
                         Card(
                             shape = RoundedCornerShape(18.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
                             ),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+                            border = BorderStroke(1.2.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.75f)),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
@@ -296,6 +316,9 @@ fun ExplainVerseBottomSheet(
                                         )
                                     }
                                 }
+
+                                // Padding at the end so text never touches the bottom card border
+                                Spacer(modifier = Modifier.height(28.dp))
                             }
                         }
                     }
