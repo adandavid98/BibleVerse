@@ -42,7 +42,7 @@ fun ExplainVerseBottomSheet(
 ) {
     val context = LocalContext.current
     val navBarsBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-    val safeBottomPadding = maxOf(navBarsBottom, 28.dp) + 14.dp
+    val safeBottomPadding = maxOf(navBarsBottom, 16.dp) + 10.dp
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -99,7 +99,7 @@ fun ExplainVerseBottomSheet(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Header Row: Icon, Title & Close Button
+                    // Header Row: Icon, Title & Action Icons (Copiar, Compartir, Cerrar)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -141,12 +141,59 @@ fun ExplainVerseBottomSheet(
                             }
                         }
 
-                        IconButton(onClick = onDismiss) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Cerrar",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        // Header Action Icons
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    if (content.isNotBlank()) {
+                                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                        val clip = ClipData.newPlainText("Explicación Bíblica", "$citation\n\n$content")
+                                        clipboard.setPrimaryClip(clip)
+                                        Toast.makeText(context, "Explicación copiada", Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                                enabled = content.isNotBlank()
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ContentCopy,
+                                    contentDescription = "Copiar explicación",
+                                    tint = if (content.isNotBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    if (content.isNotBlank()) {
+                                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                            type = "text/plain"
+                                            putExtra(Intent.EXTRA_SUBJECT, "Explicación: $citation")
+                                            putExtra(Intent.EXTRA_TEXT, "$citation\n\n$content\n\nCompartido desde BibleVerse")
+                                        }
+                                        context.startActivity(Intent.createChooser(shareIntent, "Compartir Explicación"))
+                                    }
+                                },
+                                enabled = content.isNotBlank()
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Share,
+                                    contentDescription = "Compartir explicación",
+                                    tint = if (content.isNotBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
+                            IconButton(onClick = onDismiss) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Cerrar",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
                         }
                     }
 
@@ -154,7 +201,7 @@ fun ExplainVerseBottomSheet(
                     Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Content Area
+                    // Content Area: Fluid Scrollable Card
                     if (isLoading && content.isBlank()) {
                         Box(
                             modifier = Modifier
@@ -188,151 +235,67 @@ fun ExplainVerseBottomSheet(
                             }
                         }
 
-                        Column(
+                        Card(
+                            shape = RoundedCornerShape(18.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                            ),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
-                                .verticalScroll(contentScrollState)
                         ) {
-                            Card(
-                                shape = RoundedCornerShape(18.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-                                ),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
-                                modifier = Modifier.fillMaxWidth()
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(contentScrollState)
+                                    .padding(18.dp)
                             ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp)
-                                ) {
-                                    if (source.isNotBlank()) {
-                                        Surface(
-                                            shape = RoundedCornerShape(8.dp),
-                                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
-                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
-                                            modifier = Modifier.padding(bottom = 12.dp)
-                                        ) {
-                                            Text(
-                                                text = "✨ $source",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                fontWeight = FontWeight.Bold,
-                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                                            )
-                                        }
-                                    }
-
-                                    // Render content progressively in cascade without layout jumps
-                                    Text(
-                                        text = content,
-                                        style = MaterialTheme.typography.bodyLarge.copy(
-                                            fontSize = 16.sp,
-                                            lineHeight = 25.sp
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-
-                                    if (isLoading) {
-                                        Spacer(modifier = Modifier.height(12.dp))
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                        ) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.size(14.dp),
-                                                strokeWidth = 2.dp,
-                                                color = MaterialTheme.colorScheme.primary
-                                            )
-                                            Text(
-                                                text = "Escribiendo en cascada...",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
+                                if (source.isNotBlank()) {
+                                    Surface(
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
+                                        modifier = Modifier.padding(bottom = 12.dp)
+                                    ) {
+                                        Text(
+                                            text = "✨ $source",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                        )
                                     }
                                 }
-                            }
 
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
-
-                        // Bottom Actions: Copiar & Compartir
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            OutlinedButton(
-                                onClick = {
-                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                    val clip = ClipData.newPlainText("Explicación Bíblica", "$citation\n\n$content")
-                                    clipboard.setPrimaryClip(clip)
-                                    Toast.makeText(context, "Explicación copiada al portapapeles", Toast.LENGTH_SHORT).show()
-                                },
-                                shape = RoundedCornerShape(14.dp),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.8f)),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f),
-                                    contentColor = MaterialTheme.colorScheme.onSurface
-                                ),
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(46.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ContentCopy,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
+                                // Fluid content rendering in cascade without layout jumps
                                 Text(
-                                    text = "Copiar",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    maxLines = 1
+                                    text = content,
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        fontSize = 16.sp,
+                                        lineHeight = 26.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
-                            }
 
-                            OutlinedButton(
-                                onClick = {
-                                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                        type = "text/plain"
-                                        putExtra(Intent.EXTRA_SUBJECT, "Explicación: $citation")
-                                        putExtra(Intent.EXTRA_TEXT, "$citation\n\n$content\n\nCompartido desde BibleVerse")
+                                if (isLoading) {
+                                    Spacer(modifier = Modifier.height(14.dp))
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(14.dp),
+                                            strokeWidth = 2.dp,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Text(
+                                            text = "Escribiendo en cascada...",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
-                                    context.startActivity(Intent.createChooser(shareIntent, "Compartir Explicación"))
-                                },
-                                shape = RoundedCornerShape(14.dp),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.8f)),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f),
-                                    contentColor = MaterialTheme.colorScheme.onSurface
-                                ),
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(46.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Share,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "Compartir",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    maxLines = 1
-                                )
+                                }
                             }
                         }
                     }
