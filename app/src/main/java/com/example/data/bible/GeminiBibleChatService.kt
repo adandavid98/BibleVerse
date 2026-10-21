@@ -129,11 +129,6 @@ Pautas esenciales:
             val configObj = JSONObject().apply {
                 put("temperature", 0.5)
                 put("maxOutputTokens", 4000)
-                if (modelName.contains("gemini-3-flash")) {
-                    put("thinkingConfig", JSONObject().apply {
-                        put("thinkingBudget", 0)
-                    })
-                }
             }
             put("generationConfig", configObj)
         }
@@ -146,7 +141,14 @@ Pautas esenciales:
         for (modelName in FREE_TIER_MODELS) {
             var modelEmittedChunk = false
             try {
-                val requestBody = requestBodyString.toRequestBody("application/json; charset=utf-8".toMediaType())
+                val modelRequestJson = JSONObject(requestBodyString).apply {
+                    if (modelName.contains("gemini-3-flash")) {
+                        optJSONObject("generationConfig")?.put("thinkingConfig", JSONObject().apply {
+                            put("thinkingBudget", 0)
+                        })
+                    }
+                }
+                val requestBody = modelRequestJson.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
                 val url = "$BASE_URL/$modelName:streamGenerateContent?alt=sse&key=$resolvedApiKey"
 
                 val httpRequest = Request.Builder()
