@@ -30,11 +30,13 @@ object GeminiVerseContextService {
     private const val TAG = "GeminiContextService"
     // Gemini free-tier models — prioritizing fast low-latency models for instant response
     val FREE_TIER_MODELS = listOf(
-        "gemini-3.1-flash-lite",
+        "gemini-3-flash-preview",
+        "gemini-3.1-flash-lite-preview",
+        "gemini-flash-latest",
         "gemini-flash-lite-latest",
+        "gemini-3.1-flash-lite",
+        "gemini-3.6-flash",
         "gemini-3.5-flash-lite",
-        "gemini-3.8-flash",
-        "gemini-3.7-flash",
         "gemini-3.5-flash"
     )
     private const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
@@ -231,48 +233,63 @@ object GeminiVerseContextService {
             )
         }
 
-        val prompt = buildString {
-            append("Eres un pedagogo y erudito bíblico. Explica de forma clara, directa, accesible y edificante el siguiente pasaje bíblico para arrojar luz y facilitar su comprensión:\n\n")
+        val systemInstruction = """
+Eres un erudito y pedagogo bíblico cristiano. Tu tarea es explicar pasajes de las Sagradas Escrituras de forma clara, edificante y directa.
+Instrucciones estrictas de formato y extensión:
+1. Escribe exactamente DOS párrafos breves en español.
+2. NO uses títulos, encabezados, asteriscos ni formato markdown. Solo prosa limpia y fluida.
+3. Primer párrafo (Contexto histórico y literario): explica quién escribe o habla, a quién va dirigido, contexto de la época y qué sucede en la escena.
+4. Segundo párrafo (Significado teológico y aplicación práctica): explica el sentido espiritual del pasaje, resolviendo términos difíciles y su aplicación viva para hoy.
+5. Mantén un tono respetuoso, pastoral, riguroso e interdenominacional.
+""".trimIndent()
+
+        val userMessage = buildString {
             append("Cita Bíblica: $reference\n")
-            append("Versión de traducción: $bibleVersion\n")
+            append("Versión: $bibleVersion\n")
             if (verseText.isNotBlank()) {
-                append("Texto bíblico:\n\"$verseText\"\n\n")
-            } else {
-                append("\n")
+                append("Texto: \"$verseText\"")
             }
-            append("Instrucciones obligatorias de formato:\n")
-            append("- Escribe exactamente DOS párrafos breves en español.\n")
-            append("- NO uses encabezados, NO uses títulos en negrita, NO uses listas ni viñetas markdown. Solo texto fluido.\n")
-            append("- Primer párrafo (Contexto y situación): Explica de forma concisa quién habla o escribe, a quién se dirige, en qué momento histórico/cultural y qué está ocurriendo en el pasaje.\n")
-            append("- Segundo párrafo (Significado y aplicación): Explica el significado esencial del pasaje, aclarando posibles dudas o términos difíciles, y qué principio espiritual enseña para la vida de hoy.\n")
-            append("- Mantén un tono respetuoso, neutro, edificante e interdenominacional.")
         }
 
-        val requestJson = JSONObject().apply {
-            val contentsArray = JSONArray().apply {
-                val contentObj = JSONObject().apply {
-                    val partsArray = JSONArray().apply {
-                        put(JSONObject().apply { put("text", prompt) })
-                    }
-                    put("parts", partsArray)
-                }
-                put(contentObj)
-            }
-            put("contents", contentsArray)
-
-            val configObj = JSONObject().apply {
-                put("temperature", 0.3)
-                put("maxOutputTokens", 1200)
-            }
-            put("generationConfig", configObj)
-        }
-
-        val requestBodyString = requestJson.toString()
         val fullAccumulatedText = StringBuilder()
 
         for (modelName in FREE_TIER_MODELS) {
             var modelEmittedChunk = false
             try {
+                val requestJson = JSONObject().apply {
+                    val contentsArray = JSONArray().apply {
+                        val contentObj = JSONObject().apply {
+                            put("role", "user")
+                            val partsArray = JSONArray().apply {
+                                put(JSONObject().apply { put("text", userMessage) })
+                            }
+                            put("parts", partsArray)
+                        }
+                        put(contentObj)
+                    }
+                    put("contents", contentsArray)
+
+                    val systemInstructionObj = JSONObject().apply {
+                        val partsArray = JSONArray().apply {
+                            put(JSONObject().apply { put("text", systemInstruction) })
+                        }
+                        put("parts", partsArray)
+                    }
+                    put("systemInstruction", systemInstructionObj)
+
+                    val configObj = JSONObject().apply {
+                        put("temperature", 0.3)
+                        put("maxOutputTokens", 500)
+                        if (modelName.contains("gemini-3-flash")) {
+                            put("thinkingConfig", JSONObject().apply {
+                                put("thinkingBudget", 0)
+                            })
+                        }
+                    }
+                    put("generationConfig", configObj)
+                }
+
+                val requestBodyString = requestJson.toString()
                 val requestBody = requestBodyString.toRequestBody("application/json; charset=utf-8".toMediaType())
                 val url = "$BASE_URL/$modelName:streamGenerateContent?alt=sse&key=$resolvedApiKey"
 

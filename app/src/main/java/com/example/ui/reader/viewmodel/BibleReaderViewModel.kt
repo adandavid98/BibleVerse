@@ -43,6 +43,7 @@ class BibleReaderViewModel(
     val uiState: StateFlow<BibleReaderUiState> = _uiState.asStateFlow()
 
     private var currentChapterVersesJob: Job? = null
+    private var explainJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -581,17 +582,57 @@ class BibleReaderViewModel(
             selected.joinToString(" ") { "(${it.verseNumber}) ${com.example.data.bible.OfflineBibleManager.cleanVerseText(it.text)}" }
         }
 
+        explainJob?.cancel()
+
         _uiState.update {
             it.copy(
                 isExplainModalOpen = true,
                 isExplaining = true,
                 explainCitation = citation,
                 explainContent = "",
-                explainSource = ""
+                explainSource = "Inteligencia Artificial"
             )
         }
 
-        viewModelScope.launch {
+        explainJob = viewModelScope.launch {
+            val fullTargetText = StringBuilder()
+            val displayedText = StringBuilder()
+            var isStreamFinished = false
+
+            // Progressive typewriter coroutine identical to Chatbot at ~60fps
+            val typewriterJob = launch {
+                while (!isStreamFinished || displayedText.length < fullTargetText.length) {
+                    val targetLen = synchronized(fullTargetText) { fullTargetText.length }
+                    if (displayedText.length < targetLen) {
+                        val remaining = targetLen - displayedText.length
+                        val step = when {
+                            remaining > 250 -> 10
+                            remaining > 120 -> 6
+                            remaining > 60 -> 4
+                            remaining > 20 -> 2
+                            else -> 1
+                        }
+                        val nextLen = (displayedText.length + step).coerceAtMost(targetLen)
+                        val chunkToAppend = synchronized(fullTargetText) {
+                            fullTargetText.substring(displayedText.length, nextLen)
+                        }
+                        displayedText.append(chunkToAppend)
+                        val currentText = displayedText.toString()
+
+                        _uiState.update {
+                            it.copy(
+                                isExplaining = false,
+                                explainContent = currentText,
+                                explainSource = "Inteligencia Artificial"
+                            )
+                        }
+                        kotlinx.coroutines.delay(16)
+                    } else {
+                        kotlinx.coroutines.delay(20)
+                    }
+                }
+            }
+
             try {
                 val result = com.example.data.bible.GeminiVerseContextService.explainVersesStream(
                     book = bookName,
@@ -600,25 +641,27 @@ class BibleReaderViewModel(
                     verseText = combinedText,
                     bibleVersion = version,
                     onChunk = { chunk ->
-                        _uiState.update { current ->
-                            current.copy(
-                                isExplaining = false,
-                                explainContent = current.explainContent + chunk,
-                                explainSource = "Inteligencia Artificial"
-                            )
+                        val cleanChunk = chunk.replace("*", "").replace("#", "")
+                        synchronized(fullTargetText) {
+                            fullTargetText.append(cleanChunk)
                         }
                     }
                 )
+
+                isStreamFinished = true
+                typewriterJob.join()
+
                 when (result) {
                     is com.example.data.bible.ContextGenerationResult.Success -> {
                         val sourceLabel = when (result.source) {
                             com.example.data.bible.ContextSource.AI_GEMINI -> "Inteligencia Artificial"
                             else -> "Contexto Canónico"
                         }
+                        val finalCleanText = synchronized(fullTargetText) { fullTargetText.toString().trim() }
                         _uiState.update {
                             it.copy(
                                 isExplaining = false,
-                                explainContent = result.contextText,
+                                explainContent = if (finalCleanText.isNotBlank()) finalCleanText else result.contextText,
                                 explainSource = sourceLabel
                             )
                         }
@@ -633,7 +676,9 @@ class BibleReaderViewModel(
                         }
                     }
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                isStreamFinished = true
+                typewriterJob.join()
                 val fallback = com.example.data.bible.BibleContextEngine.getDeepTheologicalExegesis(
                     bookName = bookName,
                     chapter = chapter,
@@ -653,6 +698,8 @@ class BibleReaderViewModel(
     }
 
     fun closeExplainModal() {
+        explainJob?.cancel()
+        explainJob = null
         _uiState.update {
             it.copy(
                 isExplainModalOpen = false,
