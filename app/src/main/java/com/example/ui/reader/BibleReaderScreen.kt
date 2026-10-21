@@ -467,8 +467,7 @@ fun BibleReaderScreen(
                                     onDragEnd = {
                                         if (horizontalDragOffset < -swipeThresholdPx) {
                                             haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                                            if (uiState.activePlanSession != null) {
-                                                val s = uiState.activePlanSession
+                                            uiState.activePlanSession?.let { s ->
                                                 readingPlanPreferences.setDayReadSegment(s.planKey, s.dayNumber, s.currentSegmentIndex)
                                             }
                                             viewModel.nextChapter()
@@ -950,8 +949,8 @@ fun BibleReaderScreen(
                                 .shadow(6.dp, CircleShape)
                                 .clickable(enabled = canGoNext) {
                                     haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                                    if (session != null) {
-                                        readingPlanPreferences.setDayReadSegment(session.planKey, session.dayNumber, session.currentSegmentIndex)
+                                    session?.let { s ->
+                                        readingPlanPreferences.setDayReadSegment(s.planKey, s.dayNumber, s.currentSegmentIndex)
                                     }
                                     viewModel.nextChapter()
                                 },

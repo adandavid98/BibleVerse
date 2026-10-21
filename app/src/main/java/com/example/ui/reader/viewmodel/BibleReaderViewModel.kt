@@ -259,7 +259,7 @@ class BibleReaderViewModel(
 
     fun goToPlanSegment(segmentIndex: Int, markCurrentRead: Boolean = false) {
         val currentSession = _uiState.value.activePlanSession ?: return
-        val validIndex = segmentIndex.coerceIn(0, currentSession.totalSegments - 1)
+        val validIndex = segmentIndex.coerceIn(0, (currentSession.totalSegments - 1).coerceAtLeast(0))
         val targetSegment = currentSession.segments.getOrNull(validIndex) ?: return
         val targetBook = _uiState.value.books.firstOrNull { it.id == targetSegment.bookId }
             ?: com.example.data.model.BibleBookEntity(
