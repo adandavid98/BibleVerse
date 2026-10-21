@@ -151,7 +151,7 @@ fun SearchTab(
             value = localQuery,
             onValueChange = { 
                 localQuery = it
-                viewModel.onSearchQueryChange(it)
+
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -164,7 +164,7 @@ fun SearchTab(
                 if (localQuery.isNotEmpty()) {
                     IconButton(onClick = { 
                         localQuery = ""
-                        viewModel.onSearchQueryChange("")
+
                     }) {
                         Icon(Icons.Filled.Clear, contentDescription = "Limpiar")
                     }

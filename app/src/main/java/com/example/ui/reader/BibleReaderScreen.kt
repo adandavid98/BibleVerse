@@ -92,6 +92,18 @@ fun BibleReaderScreen(
     val swipeThresholdPx = remember(density) { with(density) { 72.dp.toPx() } }
     var horizontalDragOffset by remember { mutableFloatStateOf(0f) }
 
+    // Automatically persist granular daily segment progress in real time as user navigates chapters
+    val activeSession = uiState.activePlanSession
+    LaunchedEffect(activeSession?.planKey, activeSession?.dayNumber, activeSession?.currentSegmentIndex) {
+        if (activeSession != null) {
+            readingPlanPreferences.setLastReadSegment(
+                activeSession.planKey,
+                activeSession.dayNumber,
+                activeSession.currentSegmentIndex
+            )
+        }
+    }
+
     // Ensure active chapter is loaded if screen appears empty
     LaunchedEffect(uiState.currentBook, uiState.currentChapter, uiState.verses.size) {
         if (uiState.verses.isEmpty() && !uiState.isLoading && uiState.currentBook != null) {
@@ -660,59 +672,12 @@ fun BibleReaderScreen(
                                         }
                                     }
 
-                                    // Segments row
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        session.segments.forEachIndexed { idx, seg ->
-                                            val isSegRead = idx in session.readSegmentIndices || (idx == session.currentSegmentIndex && isCurrentSegmentRead)
-                                            val isSegCurrent = idx == session.currentSegmentIndex
-                                            Surface(
-                                                modifier = Modifier
-                                                    .weight(1f)
-                                                    .height(34.dp)
-                                                    .clip(RoundedCornerShape(8.dp))
-                                                    .clickable { viewModel.goToPlanSegment(idx) },
-                                                shape = RoundedCornerShape(8.dp),
-                                                color = when {
-                                                    isSegCurrent -> themeAccent
-                                                    isSegRead -> Color(0xFF16A34A).copy(alpha = 0.25f)
-                                                    else -> themeSecondary.copy(alpha = 0.12f)
-                                                }
-                                            ) {
-                                                Box(contentAlignment = Alignment.Center) {
-                                                    Row(
-                                                        verticalAlignment = Alignment.CenterVertically,
-                                                        horizontalArrangement = Arrangement.spacedBy(3.dp)
-                                                    ) {
-                                                        if (isSegRead && !isSegCurrent) {
-                                                            Icon(
-                                                                Icons.Default.Check,
-                                                                contentDescription = null,
-                                                                modifier = Modifier.size(13.dp),
-                                                                tint = Color(0xFF16A34A)
-                                                            )
-                                                        }
-                                                        Text(
-                                                            text = "${seg.bookName.take(3)} ${seg.chapter}",
-                                                            fontSize = 11.sp,
-                                                            fontWeight = if (isSegCurrent) FontWeight.Bold else FontWeight.Normal,
-                                                            color = if (isSegCurrent) themeBg else themeText,
-                                                            maxLines = 1
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
                                     if (!isLastSegment) {
                                         val nextSegment = session.segments.getOrNull(session.currentSegmentIndex + 1)
                                         Button(
                                             onClick = {
                                                 haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                                                readingPlanPreferences.setDayReadSegment(session.planId, session.dayNumber, session.currentSegmentIndex)
+                                                readingPlanPreferences.setDayReadSegment(session.planKey, session.dayNumber, session.currentSegmentIndex)
                                                 viewModel.markCurrentSegmentRead { _, _ ->
                                                     viewModel.nextPlanSegment()
                                                 }
@@ -734,7 +699,7 @@ fun BibleReaderScreen(
                                         Button(
                                             onClick = {
                                                 haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                                                readingPlanPreferences.setDayReadSegment(session.planId, session.dayNumber, session.currentSegmentIndex)
+                                                readingPlanPreferences.setDayReadSegment(session.planKey, session.dayNumber, session.currentSegmentIndex)
                                                 viewModel.markCurrentSegmentRead()
 
                                                 if (session.isCustomPlan) {

@@ -66,6 +66,7 @@ data class ReadingPlanSession(
     val storyNarrative: String? = null
 ) {
     val totalSegments: Int get() = segments.size
+    val planKey: String get() = if (isCustomPlan && !planId.startsWith("CUSTOM_")) "CUSTOM_$planId" else planId
     val currentSegment: com.example.data.bible.PlanPassageSegment? get() = segments.getOrNull(currentSegmentIndex)
     val isAllSegmentsRead: Boolean get() = totalSegments > 0 && readSegmentIndices.size >= totalSegments
     val progressPercentage: Float get() = if (totalSegments > 0) (readSegmentIndices.size.toFloat() / totalSegments.toFloat()).coerceIn(0f, 1f) else 0f

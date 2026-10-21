@@ -159,6 +159,12 @@ class ReadingPlanPreferences(context: Context) {
             .apply()
     }
 
+    fun setLastReadSegment(planKey: String, dayNumber: Int, segmentIndex: Int) {
+        prefs.edit()
+            .putInt("key_last_seg_${planKey}_$dayNumber", segmentIndex)
+            .apply()
+    }
+
     fun getLastReadSegment(planKey: String, dayNumber: Int): Int {
         return prefs.getInt("key_last_seg_${planKey}_$dayNumber", 0)
     }

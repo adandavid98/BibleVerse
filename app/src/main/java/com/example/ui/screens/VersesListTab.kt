@@ -65,6 +65,17 @@ fun VersesListTab(
     val otCount = remember(uiState.verses) { uiState.verses.count { it.testament.contains("Antiguo", ignoreCase = true) } }
     val ntCount = remember(uiState.verses) { uiState.verses.count { it.testament.contains("Nuevo", ignoreCase = true) } }
 
+    val displayedVerses = remember(uiState.verses, uiState.selectedFilter) {
+        when (uiState.selectedFilter) {
+            VerseFilter.TODOS -> uiState.verses
+            VerseFilter.ANTIGUO -> uiState.verses.filter { it.testament.contains("Antiguo", ignoreCase = true) }
+            VerseFilter.NUEVO -> uiState.verses.filter { it.testament.contains("Nuevo", ignoreCase = true) }
+            VerseFilter.FAVORITOS -> uiState.verses.filter { it.isFavorite }
+            VerseFilter.CON_NOTAS -> uiState.verses.filter { it.notes.isNotBlank() }
+            VerseFilter.RESALTADOS -> uiState.verses.filter { it.highlightColor.isNotBlank() }
+        }
+    }
+
     LazyColumn(
         state = listState,
         modifier = Modifier
@@ -253,7 +264,7 @@ fun VersesListTab(
 
         // Verses Cards List
         items(
-            items = uiState.filteredVerses,
+            items = displayedVerses,
             key = { it.id }
         ) { verse ->
             VerseCard(
