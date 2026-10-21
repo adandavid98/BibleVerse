@@ -35,6 +35,7 @@ class BibleReaderViewModel(
     private val toggleHighlightUseCase: ToggleVerseHighlightUseCase,
     private val formatVerseQuotationUseCase: FormatVerseQuotationUseCase,
     private val preferencesRepository: ReaderPreferencesRepository,
+    private val readingPlanPreferences: com.example.data.preferences.ReadingPlanPreferences? = null,
     private val verseDao: VerseDao? = null,
     val readerDao: com.example.data.local.BibleReaderDao? = null
 ) : ViewModel() {
@@ -55,15 +56,24 @@ class BibleReaderViewModel(
             }.collectLatest { (books, prefs) ->
                 if (books.isEmpty()) return@collectLatest
 
-                val targetBook = books.firstOrNull { it.id == prefs.lastBookId } ?: books.first()
-                val targetChapter = prefs.lastChapter.coerceIn(1, targetBook.chaptersCount)
-                val targetVersion = prefs.bibleVersion
-
                 val current = _uiState.value
-                val needsReload = current.verses.isEmpty() ||
-                        current.currentBook?.id != targetBook.id ||
-                        current.currentChapter != targetChapter ||
-                        current.preferences.bibleVersion != targetVersion
+                val isInitial = current.currentBook == null
+
+                val targetBook = if (isInitial) {
+                    books.firstOrNull { it.id == prefs.lastBookId } ?: books.first()
+                } else {
+                    current.currentBook ?: books.first()
+                }
+
+                val targetChapter = if (isInitial) {
+                    prefs.lastChapter.coerceIn(1, targetBook.chaptersCount)
+                } else {
+                    current.currentChapter.coerceIn(1, targetBook.chaptersCount)
+                }
+
+                val targetVersion = prefs.bibleVersion
+                val versionChanged = current.preferences.bibleVersion != targetVersion
+                val needsReload = isInitial || current.verses.isEmpty() || versionChanged
 
                 _uiState.update {
                     it.copy(
@@ -228,6 +238,9 @@ class BibleReaderViewModel(
                 targetScrollVerse = 1
             )
         }
+        viewModelScope.launch {
+            preferencesRepository.updateLastPosition(targetBook.id, currentSegment.chapter, 1)
+        }
         loadChapter(targetBook, currentSegment.chapter, _uiState.value.preferences.bibleVersion)
     }
 
@@ -240,10 +253,11 @@ class BibleReaderViewModel(
         val updatedSession = currentSession.copy(readSegmentIndices = updatedReadIndices)
         _uiState.update { it.copy(activePlanSession = updatedSession) }
 
+        readingPlanPreferences?.setDayReadSegment(currentSession.planKey, currentSession.dayNumber, currentIdx)
         onSegmentMarked?.invoke(updatedSession, currentIdx)
     }
 
-    fun goToPlanSegment(segmentIndex: Int) {
+    fun goToPlanSegment(segmentIndex: Int, markCurrentRead: Boolean = false) {
         val currentSession = _uiState.value.activePlanSession ?: return
         val validIndex = segmentIndex.coerceIn(0, currentSession.totalSegments - 1)
         val targetSegment = currentSession.segments.getOrNull(validIndex) ?: return
@@ -258,7 +272,17 @@ class BibleReaderViewModel(
                 orderIndex = targetSegment.bookId
             )
 
-        val updatedSession = currentSession.copy(currentSegmentIndex = validIndex)
+        val updatedReadIndices = if (markCurrentRead) {
+            readingPlanPreferences?.setDayReadSegment(currentSession.planKey, currentSession.dayNumber, currentSession.currentSegmentIndex)
+            currentSession.readSegmentIndices + currentSession.currentSegmentIndex
+        } else {
+            currentSession.readSegmentIndices
+        }
+
+        val updatedSession = currentSession.copy(
+            currentSegmentIndex = validIndex,
+            readSegmentIndices = updatedReadIndices
+        )
         _uiState.update {
             it.copy(
                 activePlanSession = updatedSession,
@@ -268,20 +292,23 @@ class BibleReaderViewModel(
                 targetScrollVerse = 1
             )
         }
+        viewModelScope.launch {
+            preferencesRepository.updateLastPosition(targetBook.id, targetSegment.chapter, 1)
+        }
         loadChapter(targetBook, targetSegment.chapter, _uiState.value.preferences.bibleVersion)
     }
 
-    fun nextPlanSegment() {
+    fun nextPlanSegment(markCurrentRead: Boolean = true) {
         val currentSession = _uiState.value.activePlanSession ?: return
         if (currentSession.currentSegmentIndex < currentSession.totalSegments - 1) {
-            goToPlanSegment(currentSession.currentSegmentIndex + 1)
+            goToPlanSegment(currentSession.currentSegmentIndex + 1, markCurrentRead = markCurrentRead)
         }
     }
 
     fun previousPlanSegment() {
         val currentSession = _uiState.value.activePlanSession ?: return
         if (currentSession.currentSegmentIndex > 0) {
-            goToPlanSegment(currentSession.currentSegmentIndex - 1)
+            goToPlanSegment(currentSession.currentSegmentIndex - 1, markCurrentRead = false)
         }
     }
 
@@ -303,19 +330,9 @@ class BibleReaderViewModel(
             }
             getChapterVersesUseCase.ensureLoaded(book.id, chapter, version)
             getChapterVersesUseCase(book.id, chapter, version).collectLatest { versesList ->
-                val isContinuous = _uiState.value.preferences.continuousScrollEnabled
-                val currentVerses = _uiState.value.verses
-
-                val updatedVerses = if (isContinuous && currentVerses.any { it.bookId != book.id || it.chapter != chapter }) {
-                    val otherVerses = currentVerses.filterNot { it.bookId == book.id && it.chapter == chapter }
-                    (otherVerses + versesList).sortedWith(compareBy({ it.bookId }, { it.chapter }, { it.verseNumber }))
-                } else {
-                    versesList
-                }
-
                 _uiState.update {
                     it.copy(
-                        verses = updatedVerses,
+                        verses = versesList,
                         isLoading = false
                     )
                 }
@@ -737,11 +754,13 @@ class BibleReaderViewModel(
     }
 
     fun updateBibleVersion(version: String) {
+        val currentBook = _uiState.value.currentBook
+        val currentChapter = _uiState.value.currentChapter
         viewModelScope.launch {
             preferencesRepository.updateBibleVersion(version)
-            val currentBook = _uiState.value.currentBook
             if (currentBook != null) {
-                loadChapter(currentBook, _uiState.value.currentChapter, version)
+                preferencesRepository.updateLastPosition(currentBook.id, currentChapter, 1)
+                loadChapter(currentBook, currentChapter, version)
             }
         }
     }
@@ -835,6 +854,7 @@ class BibleReaderViewModel(
             val toggleHighlight = ToggleVerseHighlightUseCase(repo)
             val formatQuote = FormatVerseQuotationUseCase()
             val prefsRepo = ReaderPreferencesRepository(context)
+            val planPrefs = com.example.data.preferences.ReadingPlanPreferences(context.applicationContext)
 
             return BibleReaderViewModel(
                 getBibleBooksUseCase = getBooks,
@@ -842,6 +862,7 @@ class BibleReaderViewModel(
                 toggleHighlightUseCase = toggleHighlight,
                 formatVerseQuotationUseCase = formatQuote,
                 preferencesRepository = prefsRepo,
+                readingPlanPreferences = planPrefs,
                 verseDao = db.verseDao(),
                 readerDao = dao
             ) as T
