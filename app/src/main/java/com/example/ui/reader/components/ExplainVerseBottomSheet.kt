@@ -179,11 +179,20 @@ fun ExplainVerseBottomSheet(
                             }
                         }
                     } else {
+                        val contentScrollState = rememberScrollState()
+
+                        // Auto-scroll seamlessly as characters and words cascade in
+                        LaunchedEffect(content.length) {
+                            if (isLoading && content.isNotBlank()) {
+                                contentScrollState.animateScrollTo(contentScrollState.maxValue)
+                            }
+                        }
+
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
-                                .verticalScroll(rememberScrollState())
+                                .verticalScroll(contentScrollState)
                         ) {
                             Card(
                                 shape = RoundedCornerShape(18.dp),
@@ -215,32 +224,18 @@ fun ExplainVerseBottomSheet(
                                         }
                                     }
 
-                                    val paragraphs = content.split("\n\n").filter { it.isNotBlank() }
-                                    if (paragraphs.size > 1) {
-                                        paragraphs.forEachIndexed { idx, p ->
-                                            Text(
-                                                text = p.trim(),
-                                                style = MaterialTheme.typography.bodyLarge.copy(
-                                                    lineHeight = 25.sp
-                                                ),
-                                                color = MaterialTheme.colorScheme.onSurface
-                                            )
-                                            if (idx < paragraphs.size - 1) {
-                                                Spacer(modifier = Modifier.height(14.dp))
-                                            }
-                                        }
-                                    } else {
-                                        Text(
-                                            text = content.trim(),
-                                            style = MaterialTheme.typography.bodyLarge.copy(
-                                                lineHeight = 25.sp
-                                            ),
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                    }
+                                    // Render content progressively in cascade without layout jumps
+                                    Text(
+                                        text = content,
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontSize = 16.sp,
+                                            lineHeight = 25.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
 
                                     if (isLoading) {
-                                        Spacer(modifier = Modifier.height(10.dp))
+                                        Spacer(modifier = Modifier.height(12.dp))
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -251,7 +246,7 @@ fun ExplainVerseBottomSheet(
                                                 color = MaterialTheme.colorScheme.primary
                                             )
                                             Text(
-                                                text = "Escribiendo...",
+                                                text = "Escribiendo en cascada...",
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
