@@ -57,25 +57,21 @@ fun ReadingPlanDayReaderModal(
     val context = LocalContext.current
     val isStoriesPlan = planType == com.example.data.bible.ReadingPlanType.BIBLE_STORIES
 
-    val richStoryDetail = remember(day.dayNumber, isStoriesPlan) {
-        if (isStoriesPlan) {
-            com.example.data.bible.BibleStoriesPlanCatalog.getStoryDetail(context, day.dayNumber)
-        } else {
-            null
-        }
-    }
     val effectiveNarrative = if (isStoriesPlan) {
-        richStoryDetail?.narrative?.takeIf { it.isNotBlank() } ?: day.storyNarrative
+        day.storyNarrative.takeIf { it.isNotBlank() }
+            ?: com.example.data.bible.BibleStoriesPlanCatalog.getStoryDetail(context, day.dayNumber)?.narrative.orEmpty()
     } else {
         ""
     }
     val effectiveHistoricalContext = if (isStoriesPlan) {
-        richStoryDetail?.historicalContext?.takeIf { it.isNotBlank() } ?: day.historicalContext
+        day.historicalContext.takeIf { it.isNotBlank() }
+            ?: com.example.data.bible.BibleStoriesPlanCatalog.getStoryDetail(context, day.dayNumber)?.historicalContext.orEmpty()
     } else {
         ""
     }
     val effectiveSpiritualLesson = if (isStoriesPlan) {
-        richStoryDetail?.spiritualLesson?.takeIf { it.isNotBlank() } ?: day.spiritualLesson
+        day.spiritualLesson.takeIf { it.isNotBlank() }
+            ?: com.example.data.bible.BibleStoriesPlanCatalog.getStoryDetail(context, day.dayNumber)?.spiritualLesson.orEmpty()
     } else {
         ""
     }
