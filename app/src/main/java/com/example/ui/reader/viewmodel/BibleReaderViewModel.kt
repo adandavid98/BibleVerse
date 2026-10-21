@@ -593,12 +593,21 @@ class BibleReaderViewModel(
 
         viewModelScope.launch {
             try {
-                val result = com.example.data.bible.GeminiVerseContextService.explainVerses(
+                val result = com.example.data.bible.GeminiVerseContextService.explainVersesStream(
                     book = bookName,
                     chapter = chapter,
                     verseRange = rangeStr,
                     verseText = combinedText,
-                    bibleVersion = version
+                    bibleVersion = version,
+                    onChunk = { chunk ->
+                        _uiState.update { current ->
+                            current.copy(
+                                isExplaining = false,
+                                explainContent = current.explainContent + chunk,
+                                explainSource = "Inteligencia Artificial"
+                            )
+                        }
+                    }
                 )
                 when (result) {
                     is com.example.data.bible.ContextGenerationResult.Success -> {

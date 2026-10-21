@@ -1,12 +1,11 @@
 package com.example.ui.reader.components
 
-import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -27,14 +26,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 
 @Composable
 fun ExplainVerseBottomSheet(
@@ -45,22 +41,8 @@ fun ExplainVerseBottomSheet(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    val density = LocalDensity.current
-
-    val navBarBottomDp = remember(context, density) {
-        val activity = generateSequence(context) { if (it is ContextWrapper) it.baseContext else null }
-            .filterIsInstance<Activity>()
-            .firstOrNull()
-        val insets = activity?.window?.decorView?.let { decor ->
-            ViewCompat.getRootWindowInsets(decor)?.getInsets(WindowInsetsCompat.Type.navigationBars())
-        }
-        val bottomPx = insets?.bottom ?: 0
-        if (bottomPx > 0) {
-            with(density) { bottomPx.toDp() }
-        } else {
-            36.dp
-        }
-    }
+    val navBarsBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val safeBottomPadding = maxOf(navBarsBottom, 28.dp) + 14.dp
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -91,7 +73,8 @@ fun ExplainVerseBottomSheet(
                         indication = null,
                         onClick = {}
                     ),
-                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
                 color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 8.dp
             ) {
@@ -101,16 +84,16 @@ fun ExplainVerseBottomSheet(
                         .padding(
                             start = 20.dp,
                             end = 20.dp,
-                            top = 10.dp,
-                            bottom = maxOf(navBarBottomDp, 24.dp) + 8.dp
+                            top = 12.dp,
+                            bottom = safeBottomPadding
                         )
                 ) {
                     // Drag handle indicator
                     Box(
                         modifier = Modifier
-                            .size(width = 36.dp, height = 4.dp)
+                            .size(width = 38.dp, height = 4.dp)
                             .clip(RoundedCornerShape(2.dp))
-                            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
+                            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f))
                             .align(Alignment.CenterHorizontally)
                     )
 
@@ -124,13 +107,14 @@ fun ExplainVerseBottomSheet(
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
                             modifier = Modifier.weight(1f)
                         ) {
                             Surface(
                                 shape = CircleShape,
                                 color = Color(0xFFF59E0B).copy(alpha = 0.16f),
-                                modifier = Modifier.size(38.dp)
+                                border = BorderStroke(1.dp, Color(0xFFF59E0B).copy(alpha = 0.4f)),
+                                modifier = Modifier.size(40.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
@@ -171,7 +155,7 @@ fun ExplainVerseBottomSheet(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     // Content Area
-                    if (isLoading) {
+                    if (isLoading && content.isBlank()) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -183,7 +167,7 @@ fun ExplainVerseBottomSheet(
                                 verticalArrangement = Arrangement.spacedBy(14.dp)
                             ) {
                                 CircularProgressIndicator(
-                                    modifier = Modifier.size(36.dp),
+                                    modifier = Modifier.size(38.dp),
                                     strokeWidth = 3.dp,
                                     color = MaterialTheme.colorScheme.primary
                                 )
@@ -201,95 +185,183 @@ fun ExplainVerseBottomSheet(
                                 .weight(1f)
                                 .verticalScroll(rememberScrollState())
                         ) {
-                            if (source.isNotBlank()) {
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-                                    modifier = Modifier.padding(bottom = 12.dp)
+                            Card(
+                                shape = RoundedCornerShape(18.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                                ),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
                                 ) {
-                                    Text(
-                                        text = "✨ $source",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                                    )
+                                    if (source.isNotBlank()) {
+                                        Surface(
+                                            shape = RoundedCornerShape(8.dp),
+                                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
+                                            modifier = Modifier.padding(bottom = 12.dp)
+                                        ) {
+                                            Text(
+                                                text = "✨ $source",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                            )
+                                        }
+                                    }
+
+                                    val paragraphs = content.split("\n\n").filter { it.isNotBlank() }
+                                    if (paragraphs.size > 1) {
+                                        paragraphs.forEachIndexed { idx, p ->
+                                            Text(
+                                                text = p.trim(),
+                                                style = MaterialTheme.typography.bodyLarge.copy(
+                                                    lineHeight = 25.sp
+                                                ),
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            if (idx < paragraphs.size - 1) {
+                                                Spacer(modifier = Modifier.height(14.dp))
+                                            }
+                                        }
+                                    } else {
+                                        Text(
+                                            text = content.trim(),
+                                            style = MaterialTheme.typography.bodyLarge.copy(
+                                                lineHeight = 25.sp
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+
+                                    if (isLoading) {
+                                        Spacer(modifier = Modifier.height(10.dp))
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(14.dp),
+                                                strokeWidth = 2.dp,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                            Text(
+                                                text = "Escribiendo...",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
                                 }
                             }
 
-                            val paragraphs = content.split("\n\n").filter { it.isNotBlank() }
-                            if (paragraphs.size > 1) {
-                                paragraphs.forEachIndexed { idx, p ->
-                                    Text(
-                                        text = p.trim(),
-                                        style = MaterialTheme.typography.bodyLarge.copy(
-                                            lineHeight = 24.sp
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    if (idx < paragraphs.size - 1) {
-                                        Spacer(modifier = Modifier.height(14.dp))
-                                    }
-                                }
-                            } else {
-                                Text(
-                                    text = content.trim(),
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        lineHeight = 24.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
                             Spacer(modifier = Modifier.height(16.dp))
                         }
 
-                        // Bottom Actions: Copiar, Compartir, Entendido
+                        // Bottom Actions Container: Copiar & Compartir row, then Entendido row
                         Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
 
-                        Row(
+                        Column(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            OutlinedButton(
-                                onClick = {
-                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                    val clip = ClipData.newPlainText("Explicación Bíblica", "$citation\n\n$content")
-                                    clipboard.setPrimaryClip(clip)
-                                    Toast.makeText(context, "Explicación copiada al portapapeles", Toast.LENGTH_SHORT).show()
-                                },
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.weight(1f)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Copiar", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            }
+                                OutlinedButton(
+                                    onClick = {
+                                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                        val clip = ClipData.newPlainText("Explicación Bíblica", "$citation\n\n$content")
+                                        clipboard.setPrimaryClip(clip)
+                                        Toast.makeText(context, "Explicación copiada al portapapeles", Toast.LENGTH_SHORT).show()
+                                    },
+                                    shape = RoundedCornerShape(14.dp),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.8f)),
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f),
+                                        contentColor = MaterialTheme.colorScheme.onSurface
+                                    ),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(44.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.ContentCopy,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "Copiar",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1
+                                    )
+                                }
 
-                            OutlinedButton(
-                                onClick = {
-                                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                        type = "text/plain"
-                                        putExtra(Intent.EXTRA_SUBJECT, "Explicación: $citation")
-                                        putExtra(Intent.EXTRA_TEXT, "$citation\n\n$content\n\nCompartido desde BibleVerse")
-                                    }
-                                    context.startActivity(Intent.createChooser(shareIntent, "Compartir Explicación"))
-                                },
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Compartir", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                OutlinedButton(
+                                    onClick = {
+                                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                            type = "text/plain"
+                                            putExtra(Intent.EXTRA_SUBJECT, "Explicación: $citation")
+                                            putExtra(Intent.EXTRA_TEXT, "$citation\n\n$content\n\nCompartido desde BibleVerse")
+                                        }
+                                        context.startActivity(Intent.createChooser(shareIntent, "Compartir Explicación"))
+                                    },
+                                    shape = RoundedCornerShape(14.dp),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.8f)),
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f),
+                                        contentColor = MaterialTheme.colorScheme.onSurface
+                                    ),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(44.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Share,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "Compartir",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1
+                                    )
+                                }
                             }
 
                             Button(
                                 onClick = onDismiss,
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.weight(1f)
+                                shape = RoundedCornerShape(14.dp),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(46.dp)
                             ) {
-                                Text("Entendido", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Text(
+                                    text = "Entendido",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
                     }
