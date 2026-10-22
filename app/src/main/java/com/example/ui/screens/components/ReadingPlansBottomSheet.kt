@@ -151,7 +151,9 @@ fun ReadingPlansBottomSheet(
     LaunchedEffect(progress.activePlanType) {
         val targetDay = preferences.getLastReadDay(progress.activePlanType)
         val targetIndex = (targetDay - 1).coerceIn(0, (currentDays.size - 1).coerceAtLeast(0))
-        currentListState.scrollToItem(targetIndex)
+        if (currentListState.firstVisibleItemIndex != targetIndex) {
+            currentListState.scrollToItem(targetIndex)
+        }
     }
 
     var searchQuery by remember { mutableStateOf("") }
@@ -761,6 +763,8 @@ fun ReadingPlansBottomSheet(
                                         Card(
                                             modifier = Modifier
                                                 .fillMaxWidth()
+                                                .wrapContentHeight()
+                                                .heightIn(min = 56.dp, max = 80.dp)
                                                 .clickable {
                                                     if (isStoriesPlan) {
                                                         activeReadingDay = day
@@ -785,7 +789,8 @@ fun ReadingPlansBottomSheet(
                                             Row(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .padding(12.dp),
+                                                    .wrapContentHeight()
+                                                    .padding(horizontal = 12.dp, vertical = 8.dp),
                                                 verticalAlignment = Alignment.CenterVertically,
                                                 horizontalArrangement = Arrangement.SpaceBetween
                                             ) {
@@ -805,13 +810,21 @@ fun ReadingPlansBottomSheet(
                                                 Column(
                                                     modifier = Modifier
                                                         .weight(1f)
-                                                        .padding(horizontal = 8.dp)
+                                                        .wrapContentHeight()
+                                                        .padding(horizontal = 8.dp),
+                                                    verticalArrangement = Arrangement.Center
                                                 ) {
-                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
                                                         Text(
                                                             text = day.title,
                                                             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                                            color = if (isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface
+                                                            color = if (isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface,
+                                                            maxLines = 1,
+                                                            overflow = TextOverflow.Ellipsis,
+                                                            modifier = Modifier.weight(1f, fill = false)
                                                         )
                                                         if (isCurrentDay && !isCompleted) {
                                                             Spacer(modifier = Modifier.width(6.dp))
@@ -848,7 +861,9 @@ fun ReadingPlansBottomSheet(
                                                     Text(
                                                         text = day.passagesSummary,
                                                         style = MaterialTheme.typography.bodySmall,
-                                                        color = if (isCompleted) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f) else MaterialTheme.colorScheme.primary
+                                                        color = if (isCompleted) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f) else MaterialTheme.colorScheme.primary,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis
                                                     )
                                                 }
 
@@ -1187,6 +1202,8 @@ private fun ActivePlanCard(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .wrapContentHeight()
+                        .heightIn(min = 56.dp, max = 80.dp)
                         .clickable { onReadDay(nextDay) },
                     shape = RoundedCornerShape(14.dp),
                     border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
@@ -1197,7 +1214,8 @@ private fun ActivePlanCard(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(12.dp),
+                            .wrapContentHeight()
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -1214,14 +1232,22 @@ private fun ActivePlanCard(
                         Column(
                             modifier = Modifier
                                 .weight(1f)
-                                .padding(horizontal = 8.dp)
+                                .wrapContentHeight()
+                                .padding(horizontal = 8.dp),
+                            verticalArrangement = Arrangement.Center
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
                                 Text(
                                     text = "Lectura de Hoy: Día ${nextDay.dayNumber}",
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.primary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Surface(

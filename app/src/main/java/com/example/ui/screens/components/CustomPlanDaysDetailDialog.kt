@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -182,6 +183,8 @@ fun CustomPlanDaysDetailDialog(
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .wrapContentHeight()
+                                .heightIn(min = 56.dp, max = 80.dp)
                                 .clickable {
                                     launchPlanDay(day)
                                 },
@@ -202,7 +205,8 @@ fun CustomPlanDaysDetailDialog(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(12.dp),
+                                    .wrapContentHeight()
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
@@ -222,13 +226,21 @@ fun CustomPlanDaysDetailDialog(
                                 Column(
                                     modifier = Modifier
                                         .weight(1f)
-                                        .padding(horizontal = 8.dp)
+                                        .wrapContentHeight()
+                                        .padding(horizontal = 8.dp),
+                                    verticalArrangement = Arrangement.Center
                                 ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
                                         Text(
                                             text = "Día ${day.dayNumber}",
                                             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                            color = if (day.isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface
+                                            color = if (day.isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.weight(1f, fill = false)
                                         )
                                         if (isCurrentDay && !day.isCompleted) {
                                             Spacer(modifier = Modifier.width(6.dp))
@@ -265,7 +277,9 @@ fun CustomPlanDaysDetailDialog(
                                     Text(
                                         text = day.passageSummary,
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = if (day.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f) else MaterialTheme.colorScheme.primary
+                                        color = if (day.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f) else MaterialTheme.colorScheme.primary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
 
