@@ -10,17 +10,17 @@ import org.junit.Test
 class BibleReadingPlanTest {
 
     @Test
-    fun testBibleStoriesPlanHas749Stories() {
+    fun testBibleStoriesPlanHas365Stories() {
         val plan = BibleReadingPlanCatalog.getPlan(ReadingPlanType.BIBLE_STORIES)
-        assertEquals(749, plan.size)
-        assertEquals(749, ReadingPlanType.BIBLE_STORIES.totalDays)
+        assertEquals(365, plan.size)
+        assertEquals(365, ReadingPlanType.BIBLE_STORIES.totalDays)
     }
 
     @Test
     fun testBibleStoriesPlanIntegrityAndContiguity() {
         val plan = BibleReadingPlanCatalog.getPlan(ReadingPlanType.BIBLE_STORIES)
 
-        for (i in 0 until 749) {
+        for (i in 0 until 365) {
             val day = plan[i]
             val expectedStoryNumber = i + 1
 

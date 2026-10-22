@@ -394,7 +394,7 @@ fun ReadingPlansBottomSheet(
                                 val catalogOptions = listOf(
                                     Triple(ReadingPlanType.TRADITIONAL, "Clásico", "365 días"),
                                     Triple(ReadingPlanType.CHRONOLOGICAL, "Cronológico", "365 días"),
-                                    Triple(ReadingPlanType.BIBLE_STORIES, "Historias", "749 relatos")
+                                    Triple(ReadingPlanType.BIBLE_STORIES, "Historias", "365 relatos")
                                 )
 
                                 catalogOptions.forEach { (type, title, subtitle) ->
@@ -676,7 +676,7 @@ fun ReadingPlansBottomSheet(
                                 }
                             }
 
-                            // Search Bar para Historias (749 historias)
+                            // Search Bar para Historias (365 historias)
                             if (isStoriesPlan) {
                                 Spacer(modifier = Modifier.height(10.dp))
                                 OutlinedTextField(
@@ -686,7 +686,7 @@ fun ReadingPlansBottomSheet(
                                     shape = RoundedCornerShape(12.dp),
                                     placeholder = {
                                         Text(
-                                            "Buscar en 749 historias por título o palabra...",
+                                            "Buscar en 365 historias por título o palabra...",
                                             fontSize = 13.sp
                                         )
                                     },

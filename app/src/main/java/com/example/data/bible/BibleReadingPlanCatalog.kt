@@ -40,8 +40,8 @@ enum class ReadingPlanType(
     BIBLE_STORIES(
         id = "BIBLE_STORIES",
         title = "Historias Bíblicas",
-        description = "749 historias y acontecimientos bíblicos de Génesis a Apocalipsis, con búsqueda y lectura de pasajes.",
-        totalDays = 749
+        description = "365 grandes historias y relatos bíblicos de Génesis a Apocalipsis, únicos y fieles a las Escrituras.",
+        totalDays = 365
     )
 }
 
