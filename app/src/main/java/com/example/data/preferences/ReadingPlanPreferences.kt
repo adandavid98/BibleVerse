@@ -51,7 +51,7 @@ class ReadingPlanPreferences(context: Context) {
 
         val allPlans = ReadingPlanType.values().associateWith { type ->
             val completedSetString = prefs.getStringSet(KEY_COMPLETED_DAYS + "_" + type.name, emptySet()) ?: emptySet()
-            val completedDays = completedSetString.mapNotNull { it.toIntOrNull() }.toSet()
+            val completedDays = completedSetString.mapNotNull { it.toIntOrNull() }.filter { it in 1..type.totalDays }.toSet()
             val defaultDay = (1..type.totalDays).firstOrNull { !completedDays.contains(it) } ?: 1
             val lastReadDay = prefs.getInt(KEY_LAST_READ_DAY + "_" + type.name, defaultDay).coerceIn(1, type.totalDays)
             SinglePlanProgress(
@@ -72,7 +72,7 @@ class ReadingPlanPreferences(context: Context) {
         if (current != null) return current.currentDay
 
         val completedSetString = prefs.getStringSet(KEY_COMPLETED_DAYS + "_" + type.name, emptySet()) ?: emptySet()
-        val completedDays = completedSetString.mapNotNull { it.toIntOrNull() }.toSet()
+        val completedDays = completedSetString.mapNotNull { it.toIntOrNull() }.filter { it in 1..type.totalDays }.toSet()
         val defaultDay = (1..type.totalDays).firstOrNull { !completedDays.contains(it) } ?: 1
         return prefs.getInt(KEY_LAST_READ_DAY + "_" + type.name, defaultDay).coerceIn(1, type.totalDays)
     }
