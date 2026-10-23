@@ -47,9 +47,20 @@ class VerseRepository(private val verseDao: VerseDao) {
     suspend fun checkAndSeedInitialData() {
         withContext(Dispatchers.IO) {
             deduplicateVerses()
-            val count = verseDao.getCount()
-            if (count == 0) {
+            val existing = verseDao.getAllVersesDirect()
+            if (existing.isEmpty()) {
                 verseDao.insertVerses(InitialVersesData.verses)
+            } else {
+                val existingRefs = existing.map {
+                    it.reference.trim().lowercase().replace("\\s+".toRegex(), " ")
+                }.toSet()
+                val missing = InitialVersesData.verses.filter {
+                    val ref = it.reference.trim().lowercase().replace("\\s+".toRegex(), " ")
+                    ref !in existingRefs
+                }
+                if (missing.isNotEmpty()) {
+                    verseDao.insertVerses(missing)
+                }
             }
         }
     }
