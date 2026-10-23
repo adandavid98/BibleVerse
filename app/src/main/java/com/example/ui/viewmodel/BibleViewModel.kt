@@ -167,14 +167,14 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
             NotificationHelper.scheduleDailyReminder(application, _reminderHour.value, _reminderMinute.value)
         }
 
-        // Check for updates periodically in background while app is alive (every 20 minutes)
+        // Check for updates periodically in background while app is alive (every 2.5 minutes)
         viewModelScope.launch {
             delay(3500)
             while (isActive) {
                 if (AppUpdateManager.isAutoCheckEnabled(application)) {
                     checkForUpdates(silent = true)
                 }
-                delay(20 * 60 * 1000L)
+                delay(2 * 60 * 1000L + 30 * 1000L)
             }
         }
     }
@@ -790,8 +790,8 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onAppResumed() {
         val now = System.currentTimeMillis()
-        // If at least 10 minutes have passed since last check, verify again on resume
-        if (now - lastUpdateCheckTimestamp > 10 * 60 * 1000L) {
+        // If at least 45 seconds have passed since last check, verify again on resume
+        if (now - lastUpdateCheckTimestamp > 45 * 1000L) {
             val app = getApplication<Application>()
             if (AppUpdateManager.isAutoCheckEnabled(app)) {
                 checkForUpdates(silent = true)
