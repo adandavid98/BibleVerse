@@ -85,4 +85,19 @@ class ReadingPlanPreferencesTest {
         assertFalse(chronoPlan.completedDays.contains(1))
         assertFalse(chronoPlan.completedDays.contains(2))
     }
+
+    @Test
+    fun testBibleStoriesPlan_readingOutOfOrder_advancesToNextStory() {
+        preferences.setPlanType(ReadingPlanType.BIBLE_STORIES)
+        // User reads stories out of order (Elías: 153, 154, 155, 156) without reading Genesis (1)
+        preferences.toggleDayCompleted(153)
+        preferences.toggleDayCompleted(154)
+        preferences.toggleDayCompleted(155)
+        preferences.toggleDayCompleted(156)
+
+        // Must point to 157 (Acab vence a Ben-hadad), NOT back to Day 1 (Genesis)
+        assertEquals(157, preferences.getLastReadDay(ReadingPlanType.BIBLE_STORIES))
+        assertEquals(157, preferences.progressFlow.value.currentDay)
+        assertEquals(157, preferences.progressFlow.value.nextPendingDay)
+    }
 }

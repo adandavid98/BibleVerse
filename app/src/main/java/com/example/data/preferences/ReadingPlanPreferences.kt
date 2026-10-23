@@ -15,7 +15,11 @@ data class SinglePlanProgress(
     val totalDays: Int get() = planType.totalDays
     val totalCompleted: Int get() = completedDays.size
     val progressPercentage: Float get() = (completedDays.size.toFloat() / totalDays.toFloat().coerceAtLeast(1f)).coerceIn(0f, 1f)
-    val nextPendingDay: Int get() = (1..totalDays).firstOrNull { !completedDays.contains(it) } ?: totalDays
+    val nextPendingDay: Int get() = if (planType == ReadingPlanType.BIBLE_STORIES) {
+        lastReadDay.coerceIn(1, totalDays)
+    } else {
+        (1..totalDays).firstOrNull { !completedDays.contains(it) } ?: totalDays
+    }
     val currentDay: Int get() = lastReadDay.coerceIn(1, totalDays)
 }
 
@@ -52,8 +56,20 @@ class ReadingPlanPreferences(context: Context) {
         val allPlans = ReadingPlanType.values().associateWith { type ->
             val completedSetString = prefs.getStringSet(KEY_COMPLETED_DAYS + "_" + type.name, emptySet()) ?: emptySet()
             val completedDays = completedSetString.mapNotNull { it.toIntOrNull() }.filter { it in 1..type.totalDays }.toSet()
-            val defaultDay = (1..type.totalDays).firstOrNull { !completedDays.contains(it) } ?: 1
-            val lastReadDay = prefs.getInt(KEY_LAST_READ_DAY + "_" + type.name, defaultDay).coerceIn(1, type.totalDays)
+            val defaultDay = if (type == ReadingPlanType.BIBLE_STORIES) {
+                val maxCompleted = completedDays.maxOrNull()
+                if (maxCompleted != null) (maxCompleted + 1).coerceAtMost(type.totalDays) else 1
+            } else {
+                (1..type.totalDays).firstOrNull { !completedDays.contains(it) } ?: 1
+            }
+            var lastReadDay = prefs.getInt(KEY_LAST_READ_DAY + "_" + type.name, defaultDay).coerceIn(1, type.totalDays)
+            if (type == ReadingPlanType.BIBLE_STORIES && completedDays.isNotEmpty()) {
+                val maxCompleted = completedDays.maxOrNull() ?: 1
+                if (lastReadDay == 1 && maxCompleted > 1) {
+                    lastReadDay = (maxCompleted + 1).coerceAtMost(type.totalDays)
+                    prefs.edit().putInt(KEY_LAST_READ_DAY + "_" + type.name, lastReadDay).apply()
+                }
+            }
             SinglePlanProgress(
                 planType = type,
                 completedDays = completedDays,
@@ -73,8 +89,20 @@ class ReadingPlanPreferences(context: Context) {
 
         val completedSetString = prefs.getStringSet(KEY_COMPLETED_DAYS + "_" + type.name, emptySet()) ?: emptySet()
         val completedDays = completedSetString.mapNotNull { it.toIntOrNull() }.filter { it in 1..type.totalDays }.toSet()
-        val defaultDay = (1..type.totalDays).firstOrNull { !completedDays.contains(it) } ?: 1
-        return prefs.getInt(KEY_LAST_READ_DAY + "_" + type.name, defaultDay).coerceIn(1, type.totalDays)
+        val defaultDay = if (type == ReadingPlanType.BIBLE_STORIES) {
+            val maxCompleted = completedDays.maxOrNull()
+            if (maxCompleted != null) (maxCompleted + 1).coerceAtMost(type.totalDays) else 1
+        } else {
+            (1..type.totalDays).firstOrNull { !completedDays.contains(it) } ?: 1
+        }
+        var last = prefs.getInt(KEY_LAST_READ_DAY + "_" + type.name, defaultDay).coerceIn(1, type.totalDays)
+        if (type == ReadingPlanType.BIBLE_STORIES && completedDays.isNotEmpty()) {
+            val maxCompleted = completedDays.maxOrNull() ?: 1
+            if (last == 1 && maxCompleted > 1) {
+                last = (maxCompleted + 1).coerceAtMost(type.totalDays)
+            }
+        }
+        return last
     }
 
     fun setLastReadDay(type: ReadingPlanType, dayNumber: Int) {
@@ -103,9 +131,15 @@ class ReadingPlanPreferences(context: Context) {
         val setString = updatedCompleted.map { it.toString() }.toSet()
         val editor = prefs.edit().putStringSet(KEY_COMPLETED_DAYS + "_" + targetType.name, setString)
 
-        if (isNowCompleted && dayNumber == targetPlan.lastReadDay) {
-            val nextDay = (1..targetType.totalDays).firstOrNull { !updatedCompleted.contains(it) && it > dayNumber }
-                ?: (dayNumber + 1).coerceAtMost(targetType.totalDays)
+        if (isNowCompleted) {
+            val nextDay = if (targetType == ReadingPlanType.BIBLE_STORIES) {
+                (dayNumber + 1).coerceAtMost(targetType.totalDays)
+            } else if (dayNumber == targetPlan.lastReadDay) {
+                (1..targetType.totalDays).firstOrNull { !updatedCompleted.contains(it) && it > dayNumber }
+                    ?: (dayNumber + 1).coerceAtMost(targetType.totalDays)
+            } else {
+                targetPlan.lastReadDay
+            }
             editor.putInt(KEY_LAST_READ_DAY + "_" + targetType.name, nextDay)
         }
         editor.apply()
@@ -126,9 +160,15 @@ class ReadingPlanPreferences(context: Context) {
         val setString = updatedCompleted.map { it.toString() }.toSet()
         val editor = prefs.edit().putStringSet(KEY_COMPLETED_DAYS + "_" + targetType.name, setString)
 
-        if (completed && dayNumber == targetPlan.lastReadDay) {
-            val nextDay = (1..targetType.totalDays).firstOrNull { !updatedCompleted.contains(it) && it > dayNumber }
-                ?: (dayNumber + 1).coerceAtMost(targetType.totalDays)
+        if (completed) {
+            val nextDay = if (targetType == ReadingPlanType.BIBLE_STORIES) {
+                (dayNumber + 1).coerceAtMost(targetType.totalDays)
+            } else if (dayNumber == targetPlan.lastReadDay) {
+                (1..targetType.totalDays).firstOrNull { !updatedCompleted.contains(it) && it > dayNumber }
+                    ?: (dayNumber + 1).coerceAtMost(targetType.totalDays)
+            } else {
+                targetPlan.lastReadDay
+            }
             editor.putInt(KEY_LAST_READ_DAY + "_" + targetType.name, nextDay)
         }
         editor.apply()

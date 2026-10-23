@@ -148,14 +148,6 @@ fun ReadingPlansBottomSheet(
         ReadingPlanType.BIBLE_STORIES -> storiesListState
     }
 
-    LaunchedEffect(progress.activePlanType) {
-        val targetDay = preferences.getLastReadDay(progress.activePlanType)
-        val targetIndex = (targetDay - 1).coerceIn(0, (currentDays.size - 1).coerceAtLeast(0))
-        if (currentListState.firstVisibleItemIndex != targetIndex) {
-            currentListState.scrollToItem(targetIndex)
-        }
-    }
-
     var searchQuery by remember { mutableStateOf("") }
     val isStoriesPlan = progress.activePlanType == ReadingPlanType.BIBLE_STORIES
 
@@ -168,6 +160,21 @@ fun ReadingPlansBottomSheet(
                 val titleClean = BibleTextSanitizer.removeAccents(day.title).lowercase()
                 val summaryClean = BibleTextSanitizer.removeAccents(day.passagesSummary).lowercase()
                 titleClean.contains(queryClean) || summaryClean.contains(queryClean)
+            }
+        }
+    }
+
+    LaunchedEffect(progress.activePlanType) {
+        val targetDay = preferences.getLastReadDay(progress.activePlanType)
+        if (searchQuery.isBlank()) {
+            val targetIndex = (targetDay - 1).coerceIn(0, (currentDays.size - 1).coerceAtLeast(0))
+            if (currentListState.firstVisibleItemIndex != targetIndex) {
+                currentListState.scrollToItem(targetIndex)
+            }
+        } else {
+            val indexInFiltered = filteredCatalogDays.indexOfFirst { it.dayNumber == targetDay }
+            if (indexInFiltered >= 0 && currentListState.firstVisibleItemIndex != indexInFiltered) {
+                currentListState.scrollToItem(indexInFiltered)
             }
         }
     }
@@ -767,6 +774,7 @@ fun ReadingPlansBottomSheet(
                                                 .heightIn(min = 56.dp, max = 80.dp)
                                                 .clickable {
                                                     if (isStoriesPlan) {
+                                                        preferences.setLastReadDay(ReadingPlanType.BIBLE_STORIES, day.dayNumber)
                                                         activeReadingDay = day
                                                     } else {
                                                         launchCatalogDay(day)
@@ -833,7 +841,7 @@ fun ReadingPlansBottomSheet(
                                                                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                                                             ) {
                                                                 Text(
-                                                                    text = "Actual",
+                                                                    text = if (isStoriesPlan) "Siguiente" else "Actual",
                                                                     fontSize = 10.sp,
                                                                     fontWeight = FontWeight.Bold,
                                                                     color = MaterialTheme.colorScheme.primary,
@@ -871,6 +879,7 @@ fun ReadingPlansBottomSheet(
                                                 IconButton(
                                                     onClick = {
                                                         if (isStoriesPlan) {
+                                                            preferences.setLastReadDay(ReadingPlanType.BIBLE_STORIES, day.dayNumber)
                                                             activeReadingDay = day
                                                         } else {
                                                             launchCatalogDay(day)
