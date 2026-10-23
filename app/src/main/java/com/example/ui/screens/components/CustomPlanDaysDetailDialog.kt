@@ -173,12 +173,6 @@ fun CustomPlanDaysDetailDialog(
                 ) {
                     items(planWithDays.days.sortedBy { it.dayNumber }, key = { it.id }) { day ->
                         val isCurrentDay = day.dayNumber == nextDayNumber
-                        val planKey = "CUSTOM_${day.planId}"
-                        val readSegments = preferences.getDayReadSegments(planKey, day.dayNumber)
-                        val passagesCount = remember(day.passagesJson) {
-                            CustomPlanGenerator.deserializeSegmentsFromJson(day.passagesJson).size.coerceAtLeast(1)
-                        }
-                        val isPartial = !day.isCompleted && readSegments.isNotEmpty()
 
                         Card(
                             modifier = Modifier
@@ -257,21 +251,7 @@ fun CustomPlanDaysDetailDialog(
                                                 )
                                             }
                                         }
-                                        if (isPartial) {
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Surface(
-                                                shape = RoundedCornerShape(6.dp),
-                                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                                            ) {
-                                                Text(
-                                                    text = "${readSegments.size}/$passagesCount caps",
-                                                    fontSize = 10.sp,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                                )
-                                            }
-                                        }
+
                                     }
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(

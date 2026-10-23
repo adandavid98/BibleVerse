@@ -763,9 +763,6 @@ fun ReadingPlansBottomSheet(
                                     items(filteredCatalogDays, key = { "${progress.activePlanType.name}_${it.dayNumber}" }) { day ->
                                         val isCompleted = progress.completedDays.contains(day.dayNumber)
                                         val isCurrentDay = day.dayNumber == preferences.getLastReadDay(progress.activePlanType)
-                                        val readSegments = preferences.getDayReadSegments(progress.activePlanType.name, day.dayNumber)
-                                        val totalSegments = day.passages.size.coerceAtLeast(1)
-                                        val isPartial = !isCompleted && readSegments.isNotEmpty()
 
                                         Card(
                                             modifier = Modifier
@@ -849,21 +846,7 @@ fun ReadingPlansBottomSheet(
                                                                 )
                                                             }
                                                         }
-                                                        if (isPartial) {
-                                                            Spacer(modifier = Modifier.width(6.dp))
-                                                            Surface(
-                                                                shape = RoundedCornerShape(6.dp),
-                                                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                                                            ) {
-                                                                Text(
-                                                                    text = "${readSegments.size}/$totalSegments caps",
-                                                                    fontSize = 10.sp,
-                                                                    fontWeight = FontWeight.Bold,
-                                                                    color = MaterialTheme.colorScheme.primary,
-                                                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                                                )
-                                                            }
-                                                        }
+
                                                     }
                                                     Spacer(modifier = Modifier.height(2.dp))
                                                     Text(
