@@ -44,7 +44,6 @@ import com.example.data.bible.CustomPlanGenerator
 import com.example.data.preferences.ReadingPlanPreferences
 import com.example.ui.viewmodel.BibleViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -58,7 +57,6 @@ fun ReadingPlansBottomSheet(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
     val preferences = remember { ReadingPlanPreferences(context) }
     val progress by preferences.progressFlow.collectAsState()
@@ -87,6 +85,7 @@ fun ReadingPlansBottomSheet(
             isCustomPlan = false,
             storyNarrative = null
         )
+        preferences.activatePlan(planType)
         preferences.setLastReadDay(planType, day.dayNumber)
         onDismiss()
         onStartPlanSession(session)
@@ -123,6 +122,10 @@ fun ReadingPlansBottomSheet(
     // Custom Plans state from Room Database
     val activeCustomPlans by (viewModel?.activeCustomPlans ?: remember { MutableStateFlow(emptyList()) }).collectAsState()
     val completedCustomPlans by (viewModel?.completedCustomPlans ?: remember { MutableStateFlow(emptyList()) }).collectAsState()
+
+    // Total count of all active plans (Catalog active plans + Custom active plans)
+    val activeCatalogPlansList = remember(progress.activePlanTypes) { progress.activePlanTypes.toList() }
+    val totalActivePlansCount = activeCatalogPlansList.size + activeCustomPlans.size
 
     // Navigation state: null = Lobby de planes (YouVersion style); Non-null = Ventana completa de detalle de plan
     var detailedCatalogPlanType by remember { mutableStateOf<ReadingPlanType?>(null) }
@@ -189,8 +192,9 @@ fun ReadingPlansBottomSheet(
                         initialFirstVisibleItemIndex = (preferences.getLastReadDay(viewingPlanType) - 1).coerceAtLeast(0)
                     )
 
-                    val isPlanActive = progress.activePlanType == viewingPlanType
-                    val completedCount = if (isPlanActive) progress.totalCompleted else 0
+                    val isPlanActive = progress.isPlanActive(viewingPlanType)
+                    val viewingPlanProgress = progress.getPlanProgress(viewingPlanType)
+                    val completedCount = viewingPlanProgress.totalCompleted
                     val totalDays = planDays.size.coerceAtLeast(1)
                     val percent = (completedCount.toFloat() / totalDays).coerceIn(0f, 1f)
 
@@ -222,7 +226,11 @@ fun ReadingPlansBottomSheet(
                                     overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
-                                    text = if (isPlanActive) "Plan activo • Día ${preferences.getLastReadDay(viewingPlanType)} de $totalDays" else "${viewingPlanType.description} • $totalDays días",
+                                    text = if (isPlanActive) {
+                                        "Plan activo • Día ${preferences.getLastReadDay(viewingPlanType)} de $totalDays ($completedCount completados)"
+                                    } else {
+                                        "${viewingPlanType.description} • $totalDays días"
+                                    },
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.primary,
                                     maxLines = 1,
@@ -231,23 +239,40 @@ fun ReadingPlansBottomSheet(
                             }
                         }
 
-                        if (!isPlanActive) {
-                            FilledTonalButton(
-                                onClick = {
-                                    preferences.setPlanType(viewingPlanType)
-                                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                                },
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Text("Activar", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            }
-                        } else {
-                            IconButton(
-                                onClick = { showResetCatalogConfirmDialog = viewingPlanType },
-                                modifier = Modifier.size(36.dp)
-                            ) {
-                                Icon(Icons.Default.Refresh, contentDescription = "Reiniciar plan", tint = MaterialTheme.colorScheme.error)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            if (!isPlanActive) {
+                                FilledTonalButton(
+                                    onClick = {
+                                        preferences.activatePlan(viewingPlanType)
+                                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                    },
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                    shape = RoundedCornerShape(10.dp)
+                                ) {
+                                    Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(14.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Activar", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                }
+                            } else {
+                                OutlinedButton(
+                                    onClick = {
+                                        preferences.deactivatePlan(viewingPlanType)
+                                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                    },
+                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                                    shape = RoundedCornerShape(10.dp)
+                                ) {
+                                    Text("Activo ✓", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                }
+                                IconButton(
+                                    onClick = { showResetCatalogConfirmDialog = viewingPlanType },
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    Icon(Icons.Default.Refresh, contentDescription = "Reiniciar plan", tint = MaterialTheme.colorScheme.error)
+                                }
                             }
                         }
                     }
@@ -316,7 +341,7 @@ fun ReadingPlansBottomSheet(
                             contentPadding = PaddingValues(top = 4.dp, bottom = 80.dp)
                         ) {
                             items(filteredCatalogDays, key = { "${viewingPlanType.name}_${it.dayNumber}" }) { day ->
-                                val isCompleted = if (isPlanActive) progress.completedDays.contains(day.dayNumber) else false
+                                val isCompleted = viewingPlanProgress.completedDays.contains(day.dayNumber)
                                 val isCurrentDay = isPlanActive && (day.dayNumber == preferences.getLastReadDay(viewingPlanType))
                                 val readSegments = preferences.getDayReadSegments(viewingPlanType.name, day.dayNumber)
                                 val totalSegments = day.passages.size.coerceAtLeast(1)
@@ -329,6 +354,7 @@ fun ReadingPlansBottomSheet(
                                         .heightIn(min = 56.dp, max = 80.dp)
                                         .clickable {
                                             if (isStoriesPlan) {
+                                                preferences.activatePlan(ReadingPlanType.BIBLE_STORIES)
                                                 preferences.setLastReadDay(ReadingPlanType.BIBLE_STORIES, day.dayNumber)
                                                 activeReadingDay = day
                                             } else {
@@ -361,10 +387,7 @@ fun ReadingPlansBottomSheet(
                                             checked = isCompleted,
                                             onCheckedChange = {
                                                 haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                                                if (!isPlanActive) {
-                                                    preferences.setPlanType(viewingPlanType)
-                                                }
-                                                preferences.toggleDayCompleted(day.dayNumber)
+                                                preferences.toggleDayCompleted(day.dayNumber, viewingPlanType)
                                             },
                                             colors = CheckboxDefaults.colors(
                                                 checkedColor = MaterialTheme.colorScheme.primary
@@ -434,6 +457,7 @@ fun ReadingPlansBottomSheet(
                                         IconButton(
                                             onClick = {
                                                 if (isStoriesPlan) {
+                                                    preferences.activatePlan(ReadingPlanType.BIBLE_STORIES)
                                                     preferences.setLastReadDay(ReadingPlanType.BIBLE_STORIES, day.dayNumber)
                                                     activeReadingDay = day
                                                 } else {
@@ -581,7 +605,7 @@ fun ReadingPlansBottomSheet(
                     ) {
                         val filterLabels = listOf(
                             0 to "Todos",
-                            1 to "Mis Planes ${if (activeCustomPlans.isNotEmpty()) "(${activeCustomPlans.size})" else ""}",
+                            1 to "Mis Planes ${if (totalActivePlansCount > 0) "($totalActivePlansCount)" else ""}",
                             2 to "Catálogo",
                             3 to "Historial ${if (completedCustomPlans.isNotEmpty()) "(${completedCustomPlans.size})" else ""}"
                         )
@@ -613,7 +637,7 @@ fun ReadingPlansBottomSheet(
                         if (selectedLobbyFilter == 0 || selectedLobbyFilter == 1) {
                             item {
                                 Text(
-                                    text = "MI PLAN ACTUAL",
+                                    text = if (totalActivePlansCount > 1) "MIS PLANES ACTIVOS ($totalActivePlansCount)" else "MI PLAN ACTUAL",
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontWeight = FontWeight.ExtraBold,
                                         letterSpacing = 1.2.sp
@@ -622,23 +646,55 @@ fun ReadingPlansBottomSheet(
                                 )
                             }
 
-                            // Banner del Plan Activo Canónico
-                            val activeCoverRes = when (progress.activePlanType) {
-                                ReadingPlanType.TRADITIONAL -> R.drawable.plan_cover_classic
-                                ReadingPlanType.CHRONOLOGICAL -> R.drawable.plan_cover_chronological
-                                ReadingPlanType.BIBLE_STORIES -> R.drawable.plan_cover_stories
+                            if (totalActivePlansCount == 0) {
+                                item {
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(16.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                                        )
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Text(
+                                                text = "No tienes planes activos en este momento",
+                                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(
+                                                text = "Explora el catálogo abajo y presiona 'Activar' en los planes que desees seguir, o crea un plan personalizado.",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                            )
+                                        }
+                                    }
+                                }
                             }
 
-                            item {
+                            // Banners de TODOS los Planes Canónicos Activos
+                            items(activeCatalogPlansList, key = { "ACTIVE_CATALOG_${it.name}" }) { planType ->
+                                val singleProg = progress.getPlanProgress(planType)
+                                val activeCoverRes = when (planType) {
+                                    ReadingPlanType.TRADITIONAL -> R.drawable.plan_cover_classic
+                                    ReadingPlanType.CHRONOLOGICAL -> R.drawable.plan_cover_chronological
+                                    ReadingPlanType.BIBLE_STORIES -> R.drawable.plan_cover_stories
+                                }
                                 ReadingPlanBannerCard(
-                                    title = progress.activePlanType.title,
-                                    subtitle = "Día ${preferences.getLastReadDay(progress.activePlanType)} de ${progress.totalDays} • ${progress.activePlanType.description}",
+                                    title = planType.title,
+                                    subtitle = "Día ${preferences.getLastReadDay(planType)} de ${singleProg.totalDays} • ${singleProg.totalCompleted} completados",
                                     coverDrawableRes = activeCoverRes,
                                     badgeText = "ACTIVO",
-                                    progressPercentage = progress.progressPercentage,
-                                    progressText = "${(progress.progressPercentage * 100).toInt()}%",
+                                    progressPercentage = singleProg.progressPercentage,
+                                    progressText = "${(singleProg.progressPercentage * 100).toInt()}%",
                                     onClick = {
-                                        detailedCatalogPlanType = progress.activePlanType
+                                        detailedCatalogPlanType = planType
                                     }
                                 )
                             }
@@ -679,11 +735,15 @@ fun ReadingPlansBottomSheet(
 
                             // 1. Plan Clásico
                             item {
+                                val isActive = progress.isPlanActive(ReadingPlanType.TRADITIONAL)
+                                val prog = progress.getPlanProgress(ReadingPlanType.TRADITIONAL)
                                 ReadingPlanBannerCard(
                                     title = "Plan Clásico",
                                     subtitle = "Génesis a Apocalipsis en 365 días",
                                     coverDrawableRes = R.drawable.plan_cover_classic,
-                                    badgeText = if (progress.activePlanType == ReadingPlanType.TRADITIONAL) "EN CURSO" else null,
+                                    badgeText = if (isActive) "EN CURSO" else null,
+                                    progressPercentage = if (isActive) prog.progressPercentage else null,
+                                    progressText = if (isActive) "${(prog.progressPercentage * 100).toInt()}%" else null,
                                     onClick = {
                                         detailedCatalogPlanType = ReadingPlanType.TRADITIONAL
                                     }
@@ -692,11 +752,15 @@ fun ReadingPlansBottomSheet(
 
                             // 2. Plan Cronológico
                             item {
+                                val isActive = progress.isPlanActive(ReadingPlanType.CHRONOLOGICAL)
+                                val prog = progress.getPlanProgress(ReadingPlanType.CHRONOLOGICAL)
                                 ReadingPlanBannerCard(
                                     title = "Plan Cronológico",
                                     subtitle = "Los eventos en su orden histórico • 365 días",
                                     coverDrawableRes = R.drawable.plan_cover_chronological,
-                                    badgeText = if (progress.activePlanType == ReadingPlanType.CHRONOLOGICAL) "EN CURSO" else null,
+                                    badgeText = if (isActive) "EN CURSO" else null,
+                                    progressPercentage = if (isActive) prog.progressPercentage else null,
+                                    progressText = if (isActive) "${(prog.progressPercentage * 100).toInt()}%" else null,
                                     onClick = {
                                         detailedCatalogPlanType = ReadingPlanType.CHRONOLOGICAL
                                     }
@@ -705,11 +769,15 @@ fun ReadingPlansBottomSheet(
 
                             // 3. Historias de la Biblia
                             item {
+                                val isActive = progress.isPlanActive(ReadingPlanType.BIBLE_STORIES)
+                                val prog = progress.getPlanProgress(ReadingPlanType.BIBLE_STORIES)
                                 ReadingPlanBannerCard(
                                     title = "Historias de la Biblia",
                                     subtitle = "365 relatos canónicos únicos y destacados",
                                     coverDrawableRes = R.drawable.plan_cover_stories,
-                                    badgeText = if (progress.activePlanType == ReadingPlanType.BIBLE_STORIES) "EN CURSO" else null,
+                                    badgeText = if (isActive) "EN CURSO" else null,
+                                    progressPercentage = if (isActive) prog.progressPercentage else null,
+                                    progressText = if (isActive) "${(prog.progressPercentage * 100).toInt()}%" else null,
                                     onClick = {
                                         detailedCatalogPlanType = ReadingPlanType.BIBLE_STORIES
                                     }
@@ -766,27 +834,27 @@ fun ReadingPlansBottomSheet(
 
     // Modal para historias con texto narrativo
     activeReadingDay?.let { day ->
+        val modalPlanType = detailedCatalogPlanType ?: ReadingPlanType.BIBLE_STORIES
         ReadingPlanDayReaderModal(
             day = day,
-            isCompleted = progress.completedDays.contains(day.dayNumber),
-            planType = detailedCatalogPlanType ?: progress.activePlanType,
+            isCompleted = progress.getPlanProgress(modalPlanType).completedDays.contains(day.dayNumber),
+            planType = modalPlanType,
             onToggleCompleted = { dayNum ->
                 haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                preferences.toggleDayCompleted(dayNum)
+                preferences.toggleDayCompleted(dayNum, modalPlanType)
             },
             onNextDay = {
-                val targetType = detailedCatalogPlanType ?: progress.activePlanType
-                val daysList = BibleReadingPlanCatalog.getPlan(targetType)
+                val daysList = BibleReadingPlanCatalog.getPlan(modalPlanType)
                 val nextDayNum = day.dayNumber + 1
                 val nextDay = daysList.find { it.dayNumber == nextDayNum }
                 if (nextDay != null) {
                     activeReadingDay = nextDay
-                    preferences.setLastReadDay(targetType, nextDayNum)
+                    preferences.setLastReadDay(modalPlanType, nextDayNum)
                 }
             },
             onOpenInFullBible = { _, _, _ ->
                 activeReadingDay = null
-                launchCatalogDay(day, detailedCatalogPlanType ?: progress.activePlanType)
+                launchCatalogDay(day, modalPlanType)
             },
             onDismiss = { activeReadingDay = null }
         )

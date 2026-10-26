@@ -25,8 +25,14 @@ data class SinglePlanProgress(
 
 data class ReadingPlanProgress(
     val activePlanType: ReadingPlanType = ReadingPlanType.TRADITIONAL,
+    val activePlanTypes: Set<ReadingPlanType> = setOf(ReadingPlanType.TRADITIONAL),
     val plans: Map<ReadingPlanType, SinglePlanProgress> = emptyMap()
 ) {
+    fun isPlanActive(type: ReadingPlanType): Boolean = activePlanTypes.contains(type)
+
+    fun getPlanProgress(type: ReadingPlanType): SinglePlanProgress =
+        plans[type] ?: SinglePlanProgress(type)
+
     val currentPlan: SinglePlanProgress
         get() = plans[activePlanType] ?: SinglePlanProgress(activePlanType)
 
@@ -77,8 +83,28 @@ class ReadingPlanPreferences(context: Context) {
             )
         }
 
+        val storedActiveSet = prefs.getStringSet(KEY_ACTIVE_PLAN_TYPES, null)
+        val activePlanTypes: Set<ReadingPlanType> = if (storedActiveSet != null) {
+            storedActiveSet.mapNotNull { name ->
+                try { ReadingPlanType.valueOf(name) } catch (_: Exception) { null }
+            }.toSet()
+        } else {
+            val initialSet = mutableSetOf(activePlanType)
+            allPlans.forEach { (type, progress) ->
+                if (progress.completedDays.isNotEmpty() || prefs.contains(KEY_LAST_READ_DAY + "_" + type.name)) {
+                    initialSet.add(type)
+                }
+            }
+            prefs.edit().putStringSet(KEY_ACTIVE_PLAN_TYPES, initialSet.map { it.name }.toSet()).apply()
+            initialSet
+        }
+
+        // Preserve canonical enum order for consistent UI display
+        val orderedActiveTypes = ReadingPlanType.values().filter { activePlanTypes.contains(it) }.toSet()
+
         return ReadingPlanProgress(
-            activePlanType = activePlanType,
+            activePlanType = orderedActiveTypes.firstOrNull { it == activePlanType } ?: orderedActiveTypes.firstOrNull() ?: activePlanType,
+            activePlanTypes = orderedActiveTypes,
             plans = allPlans
         )
     }
@@ -112,7 +138,23 @@ class ReadingPlanPreferences(context: Context) {
     }
 
     fun setPlanType(type: ReadingPlanType) {
-        prefs.edit().putString(KEY_PLAN_TYPE, type.name).apply()
+        activatePlan(type)
+    }
+
+    fun activatePlan(type: ReadingPlanType) {
+        val currentSet = (_progressFlow.value.activePlanTypes.map { it.name } + type.name).toSet()
+        prefs.edit()
+            .putString(KEY_PLAN_TYPE, type.name)
+            .putStringSet(KEY_ACTIVE_PLAN_TYPES, currentSet)
+            .apply()
+        _progressFlow.value = loadProgress()
+    }
+
+    fun deactivatePlan(type: ReadingPlanType) {
+        val currentSet = (_progressFlow.value.activePlanTypes - type).map { it.name }.toSet()
+        prefs.edit()
+            .putStringSet(KEY_ACTIVE_PLAN_TYPES, currentSet)
+            .apply()
         _progressFlow.value = loadProgress()
     }
 
@@ -129,7 +171,10 @@ class ReadingPlanPreferences(context: Context) {
         }
 
         val setString = updatedCompleted.map { it.toString() }.toSet()
-        val editor = prefs.edit().putStringSet(KEY_COMPLETED_DAYS + "_" + targetType.name, setString)
+        val updatedActiveSet = (currentProgress.activePlanTypes.map { it.name } + targetType.name).toSet()
+        val editor = prefs.edit()
+            .putStringSet(KEY_COMPLETED_DAYS + "_" + targetType.name, setString)
+            .putStringSet(KEY_ACTIVE_PLAN_TYPES, updatedActiveSet)
 
         if (isNowCompleted) {
             val nextDay = if (targetType == ReadingPlanType.BIBLE_STORIES) {
@@ -158,7 +203,14 @@ class ReadingPlanPreferences(context: Context) {
         }
 
         val setString = updatedCompleted.map { it.toString() }.toSet()
-        val editor = prefs.edit().putStringSet(KEY_COMPLETED_DAYS + "_" + targetType.name, setString)
+        val updatedActiveSet = if (completed) {
+            (currentProgress.activePlanTypes.map { it.name } + targetType.name).toSet()
+        } else {
+            currentProgress.activePlanTypes.map { it.name }.toSet()
+        }
+        val editor = prefs.edit()
+            .putStringSet(KEY_COMPLETED_DAYS + "_" + targetType.name, setString)
+            .putStringSet(KEY_ACTIVE_PLAN_TYPES, updatedActiveSet)
 
         if (completed) {
             val nextDay = if (targetType == ReadingPlanType.BIBLE_STORIES) {
@@ -218,6 +270,7 @@ class ReadingPlanPreferences(context: Context) {
 
     companion object {
         private const val KEY_PLAN_TYPE = "key_active_plan_type"
+        private const val KEY_ACTIVE_PLAN_TYPES = "key_active_plan_types_set"
         private const val KEY_COMPLETED_DAYS = "key_completed_days"
         private const val KEY_LAST_READ_DAY = "key_last_read_day"
     }
