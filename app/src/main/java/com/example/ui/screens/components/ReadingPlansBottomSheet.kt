@@ -190,7 +190,7 @@ fun ReadingPlansBottomSheet(
                     )
 
                     val isPlanActive = progress.activePlanType == viewingPlanType
-                    val completedCount = if (isPlanActive) progress.completedDaysCount else 0
+                    val completedCount = if (isPlanActive) progress.totalCompleted else 0
                     val totalDays = planDays.size.coerceAtLeast(1)
                     val percent = (completedCount.toFloat() / totalDays).coerceIn(0f, 1f)
 
@@ -515,10 +515,10 @@ fun ReadingPlansBottomSheet(
                                 CompletedPlanCard(
                                     planWithDays = planWithDays,
                                     onRestart = {
-                                        viewModel?.restartPlan(planWithDays.plan.id)
+                                        viewModel?.restartCustomPlan(planWithDays.plan.id)
                                     },
                                     onDelete = {
-                                        viewModel?.deletePlan(planWithDays.plan.id)
+                                        viewModel?.deleteCustomPlan(planWithDays.plan.id)
                                     }
                                 )
                             }
@@ -766,26 +766,37 @@ fun ReadingPlansBottomSheet(
 
     // Modal para historias con texto narrativo
     activeReadingDay?.let { day ->
-        com.example.ui.screens.components.StoryReaderModal(
+        ReadingPlanDayReaderModal(
             day = day,
-            onDismiss = { activeReadingDay = null },
-            onReadScriptures = {
+            isCompleted = progress.completedDays.contains(day.dayNumber),
+            planType = detailedCatalogPlanType ?: progress.activePlanType,
+            onToggleCompleted = { dayNum ->
+                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                preferences.toggleDayCompleted(dayNum)
+            },
+            onNextDay = {
+                val targetType = detailedCatalogPlanType ?: progress.activePlanType
+                val daysList = BibleReadingPlanCatalog.getPlan(targetType)
+                val nextDayNum = day.dayNumber + 1
+                val nextDay = daysList.find { it.dayNumber == nextDayNum }
+                if (nextDay != null) {
+                    activeReadingDay = nextDay
+                    preferences.setLastReadDay(targetType, nextDayNum)
+                }
+            },
+            onOpenInFullBible = { _, _, _ ->
                 activeReadingDay = null
                 launchCatalogDay(day, detailedCatalogPlanType ?: progress.activePlanType)
-            }
+            },
+            onDismiss = { activeReadingDay = null }
         )
     }
 
     // Detalle de Plan Personalizado
     selectedPlanForDetail?.let { planWithDays ->
-        com.example.ui.screens.components.CustomPlanDaysDetailDialog(
+        CustomPlanDaysDetailDialog(
             planWithDays = planWithDays,
-            nextDayNumber = planWithDays.nextUncompletedDayNumber ?: 1,
             onDismiss = { selectedPlanIdForDetail = null },
-            onReadDay = { dayEntity ->
-                selectedPlanIdForDetail = null
-                launchCustomDay(planWithDays, dayEntity)
-            },
             onToggleDay = { dayNumber, completed ->
                 haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                 viewModel?.togglePlanDay(
@@ -793,39 +804,57 @@ fun ReadingPlansBottomSheet(
                     dayNumber = dayNumber,
                     completed = completed,
                     onPlanCompleted = {
+                        selectedPlanIdForDetail = null
                         celebrationPlan = planWithDays.plan
                     }
                 )
+            },
+            onNavigateToReader = { bId, ch, v ->
+                selectedPlanIdForDetail = null
+                onDismiss()
+                onNavigateToReader(bId, ch, v)
+            },
+            onStartPlanSession = { session ->
+                selectedPlanIdForDetail = null
+                onDismiss()
+                onStartPlanSession(session)
+            },
+            onDeletePlan = {
+                viewModel?.deleteCustomPlan(planWithDays.plan.id)
+                selectedPlanIdForDetail = null
+            },
+            onRestartPlan = {
+                viewModel?.restartCustomPlan(planWithDays.plan.id)
             }
         )
     }
 
     // Modal de Creación de Plan
     if (showCreatePlanDialog) {
-        com.example.ui.screens.components.CreateCustomPlanDialog(
+        CreateCustomPlanDialog(
             onDismiss = { showCreatePlanDialog = false },
-            onCreatePlan = { title, selectedBooks, durationDays, chaptersPerDay ->
+            onCreatePlan = { title, description, bookIds, mode, targetDays, chaptersPerDay ->
                 viewModel?.createCustomPlan(
                     title = title,
-                    selectedBookIds = selectedBooks.map { it.id },
-                    targetDurationDays = durationDays,
-                    chaptersPerDay = chaptersPerDay
+                    description = description,
+                    selectedBookIds = bookIds,
+                    mode = mode,
+                    targetDays = targetDays,
+                    chaptersPerDay = chaptersPerDay,
+                    onSuccess = {
+                        showCreatePlanDialog = false
+                    }
                 )
-                showCreatePlanDialog = false
             }
         )
     }
 
     // Celebración de Plan Completado
     celebrationPlan?.let { plan ->
-        com.example.ui.screens.components.PlanCelebrationDialog(
+        PlanCompletedCelebrationDialog(
             planTitle = plan.title,
-            totalDays = plan.targetDays,
-            onDismiss = { celebrationPlan = null },
-            onRestart = {
-                viewModel?.restartPlan(plan.id)
-                celebrationPlan = null
-            }
+            totalDays = plan.totalDays,
+            onDismiss = { celebrationPlan = null }
         )
     }
 
@@ -838,7 +867,7 @@ fun ReadingPlansBottomSheet(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        preferences.resetPlan(planType)
+                        preferences.resetPlanProgress(planType)
                         showResetCatalogConfirmDialog = null
                     }
                 ) {
