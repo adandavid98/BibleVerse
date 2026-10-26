@@ -222,7 +222,7 @@ fun ReadingPlansBottomSheet(
                                     overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
-                                    text = if (isPlanActive) "Plan activo • Día ${preferences.getLastReadDay(viewingPlanType)} de $totalDays" else "${viewingPlanType.subtitle} • $totalDays días",
+                                    text = if (isPlanActive) "Plan activo • Día ${preferences.getLastReadDay(viewingPlanType)} de $totalDays" else "${viewingPlanType.description} • $totalDays días",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.primary,
                                     maxLines = 1,
@@ -632,7 +632,7 @@ fun ReadingPlansBottomSheet(
                             item {
                                 ReadingPlanBannerCard(
                                     title = progress.activePlanType.title,
-                                    subtitle = "Día ${preferences.getLastReadDay(progress.activePlanType)} de ${progress.totalDays} • ${progress.activePlanType.subtitle}",
+                                    subtitle = "Día ${preferences.getLastReadDay(progress.activePlanType)} de ${progress.totalDays} • ${progress.activePlanType.description}",
                                     coverDrawableRes = activeCoverRes,
                                     badgeText = "ACTIVO",
                                     progressPercentage = progress.progressPercentage,
