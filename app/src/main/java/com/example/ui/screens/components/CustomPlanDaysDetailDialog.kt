@@ -2,7 +2,11 @@ package com.example.ui.screens.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -73,6 +77,10 @@ fun CustomPlanDaysDetailDialog(
         onStartPlanSession(session)
     }
 
+    val density = LocalDensity.current
+    val swipeThresholdPx = remember(density) { with(density) { 72.dp.toPx() } }
+    var horizontalDragOffset by remember { mutableFloatStateOf(0f) }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -82,6 +90,8 @@ fun CustomPlanDaysDetailDialog(
             decorFitsSystemWindows = false
         )
     ) {
+        BackHandler { onDismiss() }
+
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
@@ -92,6 +102,21 @@ fun CustomPlanDaysDetailDialog(
                     .statusBarsPadding()
                     .navigationBarsPadding()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .pointerInput(Unit) {
+                        detectHorizontalDragGestures(
+                            onDragStart = { horizontalDragOffset = 0f },
+                            onDragEnd = {
+                                if (kotlin.math.abs(horizontalDragOffset) > swipeThresholdPx) {
+                                    onDismiss()
+                                }
+                                horizontalDragOffset = 0f
+                            },
+                            onDragCancel = { horizontalDragOffset = 0f },
+                            onHorizontalDrag = { _, dragAmount ->
+                                horizontalDragOffset += dragAmount
+                            }
+                        )
+                    }
             ) {
                 // Header
                 Row(

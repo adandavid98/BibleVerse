@@ -4,7 +4,11 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -146,8 +150,20 @@ fun ReadingPlansBottomSheet(
     var activeReadingDay by remember { mutableStateOf<ReadingPlanDay?>(null) }
     var showResetCatalogConfirmDialog by remember { mutableStateOf<ReadingPlanType?>(null) }
 
+    val density = LocalDensity.current
+    val swipeThresholdPx = remember(density) { with(density) { 72.dp.toPx() } }
+    var horizontalDragOffset by remember { mutableFloatStateOf(0f) }
+
     Dialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            if (detailedCatalogPlanType != null) {
+                detailedCatalogPlanType = null
+            } else if (showHistoryView) {
+                showHistoryView = false
+            } else {
+                onDismiss()
+            }
+        },
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
             dismissOnBackPress = true,
@@ -155,6 +171,14 @@ fun ReadingPlansBottomSheet(
             decorFitsSystemWindows = false
         )
     ) {
+        BackHandler(enabled = detailedCatalogPlanType != null || showHistoryView) {
+            if (detailedCatalogPlanType != null) {
+                detailedCatalogPlanType = null
+            } else if (showHistoryView) {
+                showHistoryView = false
+            }
+        }
+
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
@@ -165,6 +189,27 @@ fun ReadingPlansBottomSheet(
                     .statusBarsPadding()
                     .navigationBarsPadding()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .pointerInput(detailedCatalogPlanType != null, showHistoryView) {
+                        if (detailedCatalogPlanType != null || showHistoryView) {
+                            detectHorizontalDragGestures(
+                                onDragStart = { horizontalDragOffset = 0f },
+                                onDragEnd = {
+                                    if (kotlin.math.abs(horizontalDragOffset) > swipeThresholdPx) {
+                                        if (detailedCatalogPlanType != null) {
+                                            detailedCatalogPlanType = null
+                                        } else if (showHistoryView) {
+                                            showHistoryView = false
+                                        }
+                                    }
+                                    horizontalDragOffset = 0f
+                                },
+                                onDragCancel = { horizontalDragOffset = 0f },
+                                onHorizontalDrag = { _, dragAmount ->
+                                    horizontalDragOffset += dragAmount
+                                }
+                            )
+                        }
+                    }
             ) {
                 // =========================================================================
                 // CASO 1: VENTANA COMPLETA DE DESGLOSE DE DÍAS (CATÁLOGO CANÓNICO)
