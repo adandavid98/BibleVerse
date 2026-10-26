@@ -255,7 +255,8 @@ fun VersesListTab(
                         ) {
                             Surface(
                                 shape = RoundedCornerShape(6.dp),
-                                color = Color(0xFFFF5252)
+                                color = Color(0xFF2B4C6F),
+                                border = BorderStroke(1.dp, Color(0xFF7FAAD4).copy(alpha = 0.45f))
                             ) {
                                 Text(
                                     text = "PLANES DE LECTURA",

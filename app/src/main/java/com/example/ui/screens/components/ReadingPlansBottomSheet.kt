@@ -331,7 +331,7 @@ fun ReadingPlansBottomSheet(
                             .fillMaxWidth()
                             .height(6.dp)
                             .clip(RoundedCornerShape(3.dp)),
-                        color = Color(0xFFFF5252),
+                        color = Color(0xFF7FAAD4),
                         trackColor = MaterialTheme.colorScheme.surfaceVariant
                     )
 
@@ -1059,7 +1059,8 @@ fun ReadingPlanBannerCard(
                     if (badgeText != null) {
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = Color(0xFFFF5252) // Acento coral vibrante estilo YouVersion
+                            color = Color(0xFF2B4C6F),
+                            border = BorderStroke(1.dp, Color(0xFF7FAAD4).copy(alpha = 0.45f))
                         ) {
                             Text(
                                 text = badgeText.uppercase(),
@@ -1103,7 +1104,7 @@ fun ReadingPlanBannerCard(
                                     .weight(1f)
                                     .height(5.dp)
                                     .clip(RoundedCornerShape(3.dp)),
-                                color = Color(0xFFFF5252),
+                                color = Color(0xFF7FAAD4),
                                 trackColor = Color.White.copy(alpha = 0.25f)
                             )
                             if (progressText != null) {
