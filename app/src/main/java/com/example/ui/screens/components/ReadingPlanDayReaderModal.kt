@@ -185,10 +185,14 @@ fun ReadingPlanDayReaderModal(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = day.title,
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1
+                                style = MaterialTheme.typography.titleSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                    lineHeight = 20.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface
                             )
+                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = day.passagesSummary,
                                 style = MaterialTheme.typography.bodySmall,
@@ -266,6 +270,16 @@ fun ReadingPlanDayReaderModal(
                                     .padding(bottom = 6.dp),
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
+                                Text(
+                                    text = day.title,
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        fontWeight = FontWeight.ExtraBold,
+                                        fontSize = 20.sp,
+                                        lineHeight = 26.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -275,11 +289,11 @@ fun ReadingPlanDayReaderModal(
                                         if (isStoriesPlan) Icons.Default.AutoStories else Icons.Default.MenuBook,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(20.dp)
+                                        modifier = Modifier.size(18.dp)
                                     )
                                     Text(
                                         text = if (isStoriesPlan) "El Relato Bíblico" else "Devocional y Estudio",
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
@@ -500,7 +514,7 @@ fun ReadingPlanDayReaderModal(
                                 ) {
                                     Icon(Icons.Default.AutoStories, contentDescription = null, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text("Leer en la Biblia (${day.passagesSummary})", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                    Text("Leer en la Biblia", fontSize = 13.sp, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }

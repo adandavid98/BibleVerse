@@ -58,7 +58,7 @@ enum class ReadingPlanType(
         description = "Un capítulo diario con principios prácticos para decisiones, negocios y vida recta.",
         totalDays = 31,
         categoryName = "Inmersión Bíblica",
-        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+        coverDrawableRes = com.example.R.drawable.plan_cover_proverbs
     ),
     JESUS_30(
         id = "JESUS_30",
@@ -66,7 +66,7 @@ enum class ReadingPlanType(
         description = "El ministerio terrenal, discursos cumbre y milagros del Salvador en los Evangelios.",
         totalDays = 30,
         categoryName = "Inmersión Bíblica",
-        coverDrawableRes = com.example.R.drawable.plan_cover_stories
+        coverDrawableRes = com.example.R.drawable.plan_cover_jesus30
     ),
 
     // 2. Doctrina y Teología Bíblica
@@ -76,7 +76,7 @@ enum class ReadingPlanType(
         description = "Daniel, Mateo 24, epístolas y recorrido exegético integral por Apocalipsis.",
         totalDays = 30,
         categoryName = "Doctrina y Teología Bíblica",
-        coverDrawableRes = com.example.R.drawable.plan_cover_chronological
+        coverDrawableRes = com.example.R.drawable.plan_cover_eschatology
     ),
     ROMANS(
         id = "ROMANS",
@@ -84,7 +84,7 @@ enum class ReadingPlanType(
         description = "Soteriología profunda, justificación por fe y vida victoriosa en el Espíritu.",
         totalDays = 30,
         categoryName = "Doctrina y Teología Bíblica",
-        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+        coverDrawableRes = com.example.R.drawable.plan_cover_romans
     ),
     TRINITY(
         id = "TRINITY",
@@ -92,7 +92,7 @@ enum class ReadingPlanType(
         description = "Padre, Hijo y Espíritu Santo en las Escrituras y en el plan redentor.",
         totalDays = 7,
         categoryName = "Doctrina y Teología Bíblica",
-        coverDrawableRes = com.example.R.drawable.plan_cover_stories
+        coverDrawableRes = com.example.R.drawable.plan_cover_trinity
     ),
     FAITH_WORKS(
         id = "FAITH_WORKS",
@@ -100,7 +100,7 @@ enum class ReadingPlanType(
         description = "La perfecta armonía entre Pablo y Santiago: justificados para buenas obras.",
         totalDays = 7,
         categoryName = "Doctrina y Teología Bíblica",
-        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+        coverDrawableRes = com.example.R.drawable.plan_cover_faith_works
     ),
     ETERNAL_LIFE(
         id = "ETERNAL_LIFE",
@@ -108,7 +108,7 @@ enum class ReadingPlanType(
         description = "Conocer íntimamente a Dios, la seguridad de salvación y la gloria venidera.",
         totalDays = 7,
         categoryName = "Doctrina y Teología Bíblica",
-        coverDrawableRes = com.example.R.drawable.plan_cover_chronological
+        coverDrawableRes = com.example.R.drawable.plan_cover_eternal_life
     ),
     PNEUMATOLOGY(
         id = "PNEUMATOLOGY",
@@ -116,7 +116,7 @@ enum class ReadingPlanType(
         description = "La Persona, obra, frutos y dones del Espíritu a través del canon bíblico.",
         totalDays = 15,
         categoryName = "Doctrina y Teología Bíblica",
-        coverDrawableRes = com.example.R.drawable.plan_cover_stories
+        coverDrawableRes = com.example.R.drawable.plan_cover_pneumatology
     ),
     TABERNACLE_HEBREWS(
         id = "TABERNACLE_HEBREWS",
@@ -124,7 +124,7 @@ enum class ReadingPlanType(
         description = "Tipología del Tabernáculo, utensilios sagrados y el Sumo Sacerdocio en Hebreos.",
         totalDays = 15,
         categoryName = "Doctrina y Teología Bíblica",
-        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+        coverDrawableRes = com.example.R.drawable.plan_cover_tabernacle
     ),
     COVENANTS(
         id = "COVENANTS",
@@ -132,7 +132,7 @@ enum class ReadingPlanType(
         description = "Historia de la salvación desde Adán hasta el Nuevo Pacto sellado en la Cruz.",
         totalDays = 15,
         categoryName = "Doctrina y Teología Bíblica",
-        coverDrawableRes = com.example.R.drawable.plan_cover_chronological
+        coverDrawableRes = com.example.R.drawable.plan_cover_covenants
     ),
 
     // 3. Vida Cristiana y Crecimiento
@@ -142,7 +142,7 @@ enum class ReadingPlanType(
         description = "Nacidos de nuevo, despojarse del viejo hombre y caminar en luz y comunión.",
         totalDays = 5,
         categoryName = "Vida Cristiana y Crecimiento",
-        coverDrawableRes = com.example.R.drawable.plan_cover_stories
+        coverDrawableRes = com.example.R.drawable.plan_cover_new_life
     ),
     GODS_WILL(
         id = "GODS_WILL",
@@ -150,7 +150,7 @@ enum class ReadingPlanType(
         description = "Cómo discernir su guía buena, agradable y perfecta para decisiones clave.",
         totalDays = 7,
         categoryName = "Vida Cristiana y Crecimiento",
-        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+        coverDrawableRes = com.example.R.drawable.plan_cover_gods_will
     ),
     NAMES_OF_GOD(
         id = "NAMES_OF_GOD",
@@ -158,7 +158,7 @@ enum class ReadingPlanType(
         description = "Elohim, Yahweh-Jireh, Yahweh-Rafa, Yahweh-Shalom, El-Roi y Emanuel.",
         totalDays = 7,
         categoryName = "Vida Cristiana y Crecimiento",
-        coverDrawableRes = com.example.R.drawable.plan_cover_chronological
+        coverDrawableRes = com.example.R.drawable.plan_cover_names_of_god
     ),
     ARMOR_OF_GOD(
         id = "ARMOR_OF_GOD",
@@ -166,7 +166,7 @@ enum class ReadingPlanType(
         description = "Firmeza, discernimiento y victoria espiritual según Efesios 6.",
         totalDays = 7,
         categoryName = "Vida Cristiana y Crecimiento",
-        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+        coverDrawableRes = com.example.R.drawable.plan_cover_armor_of_god
     ),
     GOD_SAYS_YOU_ARE(
         id = "GOD_SAYS_YOU_ARE",
@@ -174,7 +174,7 @@ enum class ReadingPlanType(
         description = "Identidad inquebrantable, hijos amados por adopción y embajadores del Reino.",
         totalDays = 5,
         categoryName = "Vida Cristiana y Crecimiento",
-        coverDrawableRes = com.example.R.drawable.plan_cover_stories
+        coverDrawableRes = com.example.R.drawable.plan_cover_god_says_you_are
     ),
     CALLING_PURPOSE(
         id = "CALLING_PURPOSE",
@@ -182,7 +182,7 @@ enum class ReadingPlanType(
         description = "Dones espirituales, vencer excusas y consagración activa al servicio de Dios.",
         totalDays = 7,
         categoryName = "Vida Cristiana y Crecimiento",
-        coverDrawableRes = com.example.R.drawable.plan_cover_chronological
+        coverDrawableRes = com.example.R.drawable.plan_cover_calling_purpose
     ),
 
     // 4. Ansiedad, Duelo y Paz Interior
@@ -192,7 +192,7 @@ enum class ReadingPlanType(
         description = "Desarmar la preocupación, descansar en el Buen Pastor y soltar las cargas.",
         totalDays = 5,
         categoryName = "Ansiedad, Duelo y Paz Interior",
-        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+        coverDrawableRes = com.example.R.drawable.plan_cover_peace_anxiety
     ),
     SOUL_REST(
         id = "SOUL_REST",
@@ -200,7 +200,7 @@ enum class ReadingPlanType(
         description = "Renovar fuerzas como las águilas y reposar en la suficiencia de la gracia.",
         totalDays = 7,
         categoryName = "Ansiedad, Duelo y Paz Interior",
-        coverDrawableRes = com.example.R.drawable.plan_cover_stories
+        coverDrawableRes = com.example.R.drawable.plan_cover_soul_rest
     ),
     AFFLICTION_HOPE(
         id = "AFFLICTION_HOPE",
@@ -208,7 +208,7 @@ enum class ReadingPlanType(
         description = "Consuelo en el dolor, salmos de lamento sincero y redención de las heridas.",
         totalDays = 15,
         categoryName = "Ansiedad, Duelo y Paz Interior",
-        coverDrawableRes = com.example.R.drawable.plan_cover_chronological
+        coverDrawableRes = com.example.R.drawable.plan_cover_affliction_hope
     ),
 
     // 5. Relaciones y Familia
@@ -218,7 +218,7 @@ enum class ReadingPlanType(
         description = "Pacto original, comunicación que edifica, 1 Corintios 13 y el cordón de tres dobleces.",
         totalDays = 7,
         categoryName = "Relaciones y Familia",
-        coverDrawableRes = com.example.R.drawable.plan_cover_stories
+        coverDrawableRes = com.example.R.drawable.plan_cover_enduring_love
     ),
     POWER_OF_FORGIVENESS(
         id = "POWER_OF_FORGIVENESS",
@@ -226,7 +226,7 @@ enum class ReadingPlanType(
         description = "Sanar rencores familiares, entregar el juicio a Dios y vivir sin deudas del pasado.",
         totalDays = 5,
         categoryName = "Relaciones y Familia",
-        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+        coverDrawableRes = com.example.R.drawable.plan_cover_forgiveness
     ),
 
     // 6. Sabiduría, Finanzas y Liderazgo
@@ -236,7 +236,7 @@ enum class ReadingPlanType(
         description = "Administración diligente, salir de la trampa de deudas y generosidad alegre.",
         totalDays = 7,
         categoryName = "Sabiduría, Finanzas y Liderazgo",
-        coverDrawableRes = com.example.R.drawable.plan_cover_chronological
+        coverDrawableRes = com.example.R.drawable.plan_cover_stewardship
     ),
     NEHEMIAH(
         id = "NEHEMIAH",
@@ -244,7 +244,7 @@ enum class ReadingPlanType(
         description = "Reconstrucción, integridad ante la oposición y avivamiento comunitario.",
         totalDays = 15,
         categoryName = "Sabiduría, Finanzas y Liderazgo",
-        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+        coverDrawableRes = com.example.R.drawable.plan_cover_nehemiah
     )
 }
 

@@ -334,10 +334,11 @@ fun ReadingPlansBottomSheet(
                             Column {
                                 Text(
                                     text = viewingPlanType.title,
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        lineHeight = 20.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
                                     text = if (isPlanActive) {
@@ -346,9 +347,7 @@ fun ReadingPlansBottomSheet(
                                         "${viewingPlanType.description} • $totalDays días"
                                     },
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
@@ -462,7 +461,7 @@ fun ReadingPlansBottomSheet(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .wrapContentHeight()
-                                        .heightIn(min = 56.dp, max = 80.dp)
+                                        .heightIn(min = 64.dp)
                                         .clickable {
                                             if (isDevotionalModalPlan || day.storyNarrative.isNotBlank()) {
                                                 preferences.activatePlan(viewingPlanType)
@@ -509,45 +508,39 @@ fun ReadingPlansBottomSheet(
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .wrapContentHeight()
-                                                .padding(horizontal = 8.dp),
+                                                .padding(horizontal = 8.dp, vertical = 2.dp),
                                             verticalArrangement = Arrangement.Center
                                         ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier.fillMaxWidth()
-                                            ) {
-                                                Text(
-                                                    text = day.title,
-                                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                                    color = if (isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis,
-                                                    modifier = Modifier.weight(1f, fill = false)
-                                                )
-                                                if (isCurrentDay && !isCompleted) {
-                                                    Spacer(modifier = Modifier.width(6.dp))
-                                                    Surface(
-                                                        shape = RoundedCornerShape(6.dp),
-                                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                                                    ) {
-                                                        Text(
-                                                            text = if (isStoriesPlan) "Siguiente" else "Actual",
-                                                            fontSize = 10.sp,
-                                                            fontWeight = FontWeight.Bold,
-                                                            color = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                                        )
-                                                    }
+                                            if (isCurrentDay && !isCompleted) {
+                                                Surface(
+                                                    shape = RoundedCornerShape(6.dp),
+                                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                                    modifier = Modifier.padding(bottom = 4.dp)
+                                                ) {
+                                                    Text(
+                                                        text = if (isStoriesPlan) "Siguiente" else "Actual",
+                                                        fontSize = 10.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                    )
                                                 }
-
                                             }
-                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Text(
+                                                text = day.title,
+                                                style = MaterialTheme.typography.titleSmall.copy(
+                                                    fontWeight = FontWeight.Bold,
+                                                    lineHeight = 19.sp
+                                                ),
+                                                color = if (isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface,
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                            Spacer(modifier = Modifier.height(3.dp))
                                             Text(
                                                 text = day.passagesSummary,
-                                                style = MaterialTheme.typography.bodySmall,
+                                                style = MaterialTheme.typography.bodySmall.copy(lineHeight = 17.sp),
                                                 color = if (isCompleted) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f) else MaterialTheme.colorScheme.primary,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
+                                                modifier = Modifier.fillMaxWidth()
                                             )
                                         }
 
@@ -1315,22 +1308,18 @@ fun ReadingPlanGridCard(
                     text = title,
                     style = MaterialTheme.typography.titleSmall.copy(
                         fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp,
-                        lineHeight = 15.sp
+                        fontSize = 12.5.sp,
+                        lineHeight = 16.sp
                     ),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Spacer(modifier = Modifier.height(3.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall.copy(
-                        fontSize = 10.sp,
-                        lineHeight = 13.sp
+                        fontSize = 10.5.sp,
+                        lineHeight = 14.sp
                     ),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
