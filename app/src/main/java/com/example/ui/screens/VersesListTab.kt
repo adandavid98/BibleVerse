@@ -49,6 +49,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -216,7 +217,7 @@ fun VersesListTab(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(96.dp)
+                    .height(84.dp)
                     .clip(RoundedCornerShape(18.dp))
                     .clickable { onOpenReadingPlans() },
                 shape = RoundedCornerShape(18.dp),
@@ -250,32 +251,23 @@ fun VersesListTab(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 12.dp),
                             verticalArrangement = Arrangement.Center
                         ) {
-                            Surface(
-                                shape = RoundedCornerShape(6.dp),
-                                color = Color(0xFF2B4C6F),
-                                border = BorderStroke(1.dp, Color(0xFF7FAAD4).copy(alpha = 0.45f))
-                            ) {
-                                Text(
-                                    text = "PLANES DE LECTURA",
-                                    fontSize = 9.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = Color.White,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(3.dp))
                             Text(
                                 text = "Planes y Devocionales",
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 color = Color.White
                             )
+                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "365 días • Clásico, Cronológico e Historias",
+                                text = "Clásico, Cronológico e Historias",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = Color.White.copy(alpha = 0.85f)
+                                color = Color.White.copy(alpha = 0.85f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                         FilledTonalButton(
