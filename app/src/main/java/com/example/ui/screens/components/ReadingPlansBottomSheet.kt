@@ -131,6 +131,73 @@ fun ReadingPlansBottomSheet(
     val activeCatalogPlansList = remember(progress.activePlanTypes) { progress.activePlanTypes.toList() }
     val totalActivePlansCount = activeCatalogPlansList.size + activeCustomPlans.size
 
+        val thematicSections = remember {
+            listOf(
+                Triple(
+                    "Doctrina y Teología Bíblica",
+                    Icons.Default.MenuBook,
+                    listOf(
+                        ReadingPlanType.ESCHATOLOGY,
+                        ReadingPlanType.ROMANS,
+                        ReadingPlanType.TRINITY,
+                        ReadingPlanType.FAITH_WORKS,
+                        ReadingPlanType.ETERNAL_LIFE,
+                        ReadingPlanType.PNEUMATOLOGY,
+                        ReadingPlanType.TABERNACLE_HEBREWS,
+                        ReadingPlanType.COVENANTS
+                    )
+                ),
+                Triple(
+                    "Vida Cristiana y Crecimiento",
+                    Icons.Default.Star,
+                    listOf(
+                        ReadingPlanType.NEW_LIFE_CHRIST,
+                        ReadingPlanType.GODS_WILL,
+                        ReadingPlanType.NAMES_OF_GOD,
+                        ReadingPlanType.ARMOR_OF_GOD,
+                        ReadingPlanType.GOD_SAYS_YOU_ARE,
+                        ReadingPlanType.CALLING_PURPOSE
+                    )
+                ),
+                Triple(
+                    "Ansiedad, Duelo y Paz Interior",
+                    Icons.Default.Favorite,
+                    listOf(
+                        ReadingPlanType.PEACE_ANXIETY,
+                        ReadingPlanType.SOUL_REST,
+                        ReadingPlanType.AFFLICTION_HOPE
+                    )
+                ),
+                Triple(
+                    "Relaciones y Familia",
+                    Icons.Default.Person,
+                    listOf(
+                        ReadingPlanType.ENDURING_LOVE,
+                        ReadingPlanType.POWER_OF_FORGIVENESS
+                    )
+                ),
+                Triple(
+                    "Sabiduría, Finanzas y Liderazgo",
+                    Icons.Default.Lightbulb,
+                    listOf(
+                        ReadingPlanType.STEWARDSHIP,
+                        ReadingPlanType.NEHEMIAH
+                    )
+                ),
+                Triple(
+                    "Inmersión Bíblica y Canónica",
+                    Icons.Default.MenuBook,
+                    listOf(
+                        ReadingPlanType.TRADITIONAL,
+                        ReadingPlanType.CHRONOLOGICAL,
+                        ReadingPlanType.BIBLE_STORIES,
+                        ReadingPlanType.PROVERBS_31,
+                        ReadingPlanType.JESUS_30
+                    )
+                )
+            )
+        }
+
     // Navigation state: null = Lobby de planes (YouVersion style); Non-null = Ventana completa de detalle de plan
     var detailedCatalogPlanType by remember { mutableStateOf<ReadingPlanType?>(null) }
     var showHistoryView by remember { mutableStateOf(false) }
@@ -745,73 +812,6 @@ fun ReadingPlansBottomSheet(
                         // SECCIÓN 2: CATÁLOGO DE PLANES DISPONIBLES (GRID TEMÁTICO DE 2 TARJETAS)
                         // -------------------------------------------------------------
                         if (selectedLobbyFilter == 0 || selectedLobbyFilter == 2) {
-                            val thematicSections = remember {
-                                listOf(
-                                    Triple(
-                                        "Doctrina y Teología Bíblica",
-                                        Icons.Default.MenuBook,
-                                        listOf(
-                                            ReadingPlanType.ESCHATOLOGY,
-                                            ReadingPlanType.ROMANS,
-                                            ReadingPlanType.TRINITY,
-                                            ReadingPlanType.FAITH_WORKS,
-                                            ReadingPlanType.ETERNAL_LIFE,
-                                            ReadingPlanType.PNEUMATOLOGY,
-                                            ReadingPlanType.TABERNACLE_HEBREWS,
-                                            ReadingPlanType.COVENANTS
-                                        )
-                                    ),
-                                    Triple(
-                                        "Vida Cristiana y Crecimiento",
-                                        Icons.Default.Star,
-                                        listOf(
-                                            ReadingPlanType.NEW_LIFE_CHRIST,
-                                            ReadingPlanType.GODS_WILL,
-                                            ReadingPlanType.NAMES_OF_GOD,
-                                            ReadingPlanType.ARMOR_OF_GOD,
-                                            ReadingPlanType.GOD_SAYS_YOU_ARE,
-                                            ReadingPlanType.CALLING_PURPOSE
-                                        )
-                                    ),
-                                    Triple(
-                                        "Ansiedad, Duelo y Paz Interior",
-                                        Icons.Default.Favorite,
-                                        listOf(
-                                            ReadingPlanType.PEACE_ANXIETY,
-                                            ReadingPlanType.SOUL_REST,
-                                            ReadingPlanType.AFFLICTION_HOPE
-                                        )
-                                    ),
-                                    Triple(
-                                        "Relaciones y Familia",
-                                        Icons.Default.Person,
-                                        listOf(
-                                            ReadingPlanType.ENDURING_LOVE,
-                                            ReadingPlanType.POWER_OF_FORGIVENESS
-                                        )
-                                    ),
-                                    Triple(
-                                        "Sabiduría, Finanzas y Liderazgo",
-                                        Icons.Default.Lightbulb,
-                                        listOf(
-                                            ReadingPlanType.STEWARDSHIP,
-                                            ReadingPlanType.NEHEMIAH
-                                        )
-                                    ),
-                                    Triple(
-                                        "Inmersión Bíblica y Canónica",
-                                        Icons.Default.MenuBook,
-                                        listOf(
-                                            ReadingPlanType.TRADITIONAL,
-                                            ReadingPlanType.CHRONOLOGICAL,
-                                            ReadingPlanType.BIBLE_STORIES,
-                                            ReadingPlanType.PROVERBS_31,
-                                            ReadingPlanType.JESUS_30
-                                        )
-                                    )
-                                )
-                            }
-
                             item {
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
