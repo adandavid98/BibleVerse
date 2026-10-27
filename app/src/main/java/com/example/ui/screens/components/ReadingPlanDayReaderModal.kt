@@ -253,81 +253,78 @@ fun ReadingPlanDayReaderModal(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                        .padding(horizontal = 20.dp),
+                        .padding(horizontal = 16.dp),
                     contentPadding = PaddingValues(vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    // 1. Historia Narrada (si está disponible)
+                    // 1. Historia Narrada / Devocional (Texto abierto de extremo a extremo como la Biblia)
                     if (effectiveNarrative.isNotBlank()) {
                         item(key = "story_narrative_${day.dayNumber}") {
-                            Card(
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(bottom = 6.dp),
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
-                                )
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Column(
-                                    modifier = Modifier.padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.padding(bottom = 4.dp)
                                 ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.AutoStories,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Text(
-                                            text = "El Relato Bíblico",
-                                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                    val paragraphs = remember(effectiveNarrative) {
-                                        effectiveNarrative
-                                            .replace("\\n", "\n")
-                                            .split("\n\n")
-                                            .map { it.trim() }
-                                            .filter { it.isNotBlank() }
-                                    }
-                                    paragraphs.forEach { paragraph ->
-                                        Text(
-                                            text = paragraph,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            fontSize = fontSizeSp.sp,
-                                            lineHeight = (fontSizeSp * 1.55f).sp,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                    }
+                                    Icon(
+                                        if (isStoriesPlan) Icons.Default.AutoStories else Icons.Default.MenuBook,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Text(
+                                        text = if (isStoriesPlan) "El Relato Bíblico" else "Devocional y Estudio",
+                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                val paragraphs = remember(effectiveNarrative) {
+                                    effectiveNarrative
+                                        .replace("\\n", "\n")
+                                        .split("\n\n")
+                                        .map { it.trim() }
+                                        .filter { it.isNotBlank() }
+                                }
+                                paragraphs.forEach { paragraph ->
+                                    Text(
+                                        text = paragraph,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontSize = fontSizeSp.sp,
+                                        lineHeight = (fontSizeSp * 1.58f).sp,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 8.dp)
+                                    )
                                 }
                             }
                         }
                     }
 
-                    // 2. Contexto Histórico-Cultural y Enseñanza
+                    // 2. Clave Doctrinal y Pregunta de Reflexión
                     if (effectiveHistoricalContext.isNotBlank() || effectiveSpiritualLesson.isNotBlank()) {
                         item(key = "story_insights_${day.dayNumber}") {
-                            Card(
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = 6.dp),
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                )
+                                    .padding(vertical = 4.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Column(
-                                    modifier = Modifier.padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    if (effectiveHistoricalContext.isNotBlank()) {
-                                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                if (effectiveHistoricalContext.isNotBlank()) {
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.padding(14.dp),
+                                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
                                             Row(
                                                 verticalAlignment = Alignment.CenterVertically,
                                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -339,7 +336,7 @@ fun ReadingPlanDayReaderModal(
                                                     modifier = Modifier.size(18.dp)
                                                 )
                                                 Text(
-                                                    text = "Contexto Histórico y Cultural",
+                                                    text = if (isStoriesPlan) "Contexto Histórico y Cultural" else "Pregunta de Reflexión",
                                                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                                     color = MaterialTheme.colorScheme.primary
                                                 )
@@ -347,18 +344,24 @@ fun ReadingPlanDayReaderModal(
                                             Text(
                                                 text = effectiveHistoricalContext,
                                                 style = MaterialTheme.typography.bodyMedium,
-                                                fontSize = (fontSizeSp - 1f).sp,
-                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.88f),
-                                                lineHeight = ((fontSizeSp - 1f) * 1.5f).sp
+                                                fontSize = (fontSizeSp - 0.5f).sp,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                lineHeight = ((fontSizeSp - 0.5f) * 1.5f).sp
                                             )
                                         }
                                     }
+                                }
 
-                                    if (effectiveSpiritualLesson.isNotBlank()) {
-                                        if (effectiveHistoricalContext.isNotBlank()) {
-                                            Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                                        }
-                                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                if (effectiveSpiritualLesson.isNotBlank()) {
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.padding(14.dp),
+                                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
                                             Row(
                                                 verticalAlignment = Alignment.CenterVertically,
                                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -366,21 +369,21 @@ fun ReadingPlanDayReaderModal(
                                                 Icon(
                                                     Icons.Default.Lightbulb,
                                                     contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.secondary,
+                                                    tint = MaterialTheme.colorScheme.primary,
                                                     modifier = Modifier.size(18.dp)
                                                 )
                                                 Text(
-                                                    text = "Enseñanza para Memorizar",
+                                                    text = if (isStoriesPlan) "Enseñanza para Memorizar" else "Clave Doctrinal y Espiritual",
                                                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                                    color = MaterialTheme.colorScheme.secondary
+                                                    color = MaterialTheme.colorScheme.primary
                                                 )
                                             }
                                             Text(
                                                 text = effectiveSpiritualLesson,
                                                 style = MaterialTheme.typography.bodyMedium,
-                                                fontSize = (fontSizeSp - 1f).sp,
-                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.88f),
-                                                lineHeight = ((fontSizeSp - 1f) * 1.5f).sp
+                                                fontSize = (fontSizeSp - 0.5f).sp,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                lineHeight = ((fontSizeSp - 0.5f) * 1.5f).sp
                                             )
                                         }
                                     }
@@ -389,7 +392,7 @@ fun ReadingPlanDayReaderModal(
                         }
                     }
 
-                    // 3. Encabezado de Texto Bíblico de Referencia
+                    // 3. Encabezado de Texto Bíblico de Referencia con opción Leer en la Biblia
                     item(key = "reference_header_${day.dayNumber}") {
                         Card(
                             modifier = Modifier
@@ -484,21 +487,20 @@ fun ReadingPlanDayReaderModal(
                                     }
                                 }
 
-                                if (isStoriesPlan) {
-                                    FilledTonalButton(
-                                        onClick = {
-                                            onDismiss()
-                                            onOpenInFullBible(day.primaryBookId, day.primaryChapter, day.primaryVerse)
-                                        },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(start = 14.dp, end = 14.dp, bottom = 12.dp),
-                                        shape = RoundedCornerShape(10.dp)
-                                    ) {
-                                        Icon(Icons.Default.AutoStories, contentDescription = null, modifier = Modifier.size(16.dp))
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Text("Leer en la Biblia", fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                                    }
+                                // Botón prominente "Leer en la Biblia" para TODOS los planes
+                                FilledTonalButton(
+                                    onClick = {
+                                        onDismiss()
+                                        onOpenInFullBible(day.primaryBookId, day.primaryChapter, day.primaryVerse)
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 14.dp, end = 14.dp, bottom = 12.dp),
+                                    shape = RoundedCornerShape(10.dp)
+                                ) {
+                                    Icon(Icons.Default.AutoStories, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("Leer en la Biblia (${day.passagesSummary})", fontSize = 13.sp, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
