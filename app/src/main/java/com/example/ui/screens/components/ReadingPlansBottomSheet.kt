@@ -272,7 +272,7 @@ fun ReadingPlansBottomSheet(
                                 )
                                 Text(
                                     text = if (isPlanActive) {
-                                        "Plan activo • Día ${preferences.getLastReadDay(viewingPlanType)} de $totalDays ($completedCount completados)"
+                                        "Plan activo • Día ${preferences.getLastReadDay(viewingPlanType)} de $totalDays"
                                     } else {
                                         "${viewingPlanType.description} • $totalDays días"
                                     },
@@ -388,9 +388,6 @@ fun ReadingPlansBottomSheet(
                             items(filteredCatalogDays, key = { "${viewingPlanType.name}_${it.dayNumber}" }) { day ->
                                 val isCompleted = viewingPlanProgress.completedDays.contains(day.dayNumber)
                                 val isCurrentDay = isPlanActive && (day.dayNumber == preferences.getLastReadDay(viewingPlanType))
-                                val readSegments = preferences.getDayReadSegments(viewingPlanType.name, day.dayNumber)
-                                val totalSegments = day.passages.size.coerceAtLeast(1)
-                                val isPartial = !isCompleted && readSegments.isNotEmpty()
 
                                 Card(
                                     modifier = Modifier
@@ -473,21 +470,7 @@ fun ReadingPlansBottomSheet(
                                                         )
                                                     }
                                                 }
-                                                if (isPartial) {
-                                                    Spacer(modifier = Modifier.width(6.dp))
-                                                    Surface(
-                                                        shape = RoundedCornerShape(6.dp),
-                                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                                                    ) {
-                                                        Text(
-                                                            text = "${readSegments.size}/$totalSegments caps",
-                                                            fontSize = 10.sp,
-                                                            fontWeight = FontWeight.Bold,
-                                                            color = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                                        )
-                                                    }
-                                                }
+
                                             }
                                             Spacer(modifier = Modifier.height(2.dp))
                                             Text(
