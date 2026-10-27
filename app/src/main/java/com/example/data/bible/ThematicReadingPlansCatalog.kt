@@ -6,13 +6,6 @@ package com.example.data.bible
  */
 object ThematicReadingPlansCatalog {
 
-    private data class PlanDayMeta(
-        val bookId: Int,
-        val bookName: String,
-        val chapter: Int,
-        val subTitle: String
-    )
-
     private fun p(bookId: Int, bookName: String, chapter: Int) = PlanPassageSegment(bookId, bookName, chapter)
 
     private fun buildRichDevotional(
@@ -27,20 +20,20 @@ object ThematicReadingPlansCatalog {
         val cleanTheme = title.substringAfter(": ").trim()
 
         val theologicalParagraph = when (dayNum % 4) {
-            1 -> "Al profundizar en el contexto de $summary, descubrimos cómo las Escrituras revelan de manera progresiva y armoniosa el carácter inmutable de Dios respecto a «$cleanTheme». No estamos ante principios morales aislados ni ante filosofías humanas pasajeras, sino frente a la revelación viva del Creador. Como bien sintetiza la enseñanza central de esta jornada: $lesson Cuando miramos este pasaje a la luz de la obra redentora de Jesucristo, comprendemos que toda promesa divina encuentra en Él su sí y su amén definitivo."
-            2 -> "Desde una perspectiva teológica e histórica, la lectura de $summary nos confronta con la distancia infinita entre la sabiduría del mundo y la sabiduría del Reino de los Cielos. El estudio de «$cleanTheme» demuestra que Dios no improvisa en la historia de la redención ni en el trato personal con sus hijos. La verdad medular que sostiene este texto es clara y contundente: $lesson Esta realidad doctrinal actúa como un ancla firme para el alma cuando las circunstancias externas parecen contradecir las promesas del Señor."
-            3 -> "Examinar con detenimiento $summary nos invita a contemplar la riqueza inagotable de la gracia soberana en torno a «$cleanTheme». Cada versículo de esta porción bíblica fue inspirado por el Espíritu Santo para derribar nuestra autosuficiencia y llevarnos a una dependencia genuina del Padre. Aquí resplandece una verdad espiritual innegociable: $lesson Al abrazar esta doctrina con fe viva, nuestra mente es renovada y nuestros afectos son alineados con el corazón mismo de Dios."
-            else -> "La unidad orgánica de toda la Biblia brilla con fuerza al estudiar $summary bajo el prisma de «$cleanTheme». Lo que el texto sagrado expone aquí trasciende la época en que fue escrito y penetra directamente en las necesidades más hondas del corazón humano contemporáneo. El fundamento teológico de esta lectura nos recuerda que: $lesson En Cristo Jesús, esta verdad deja de ser un concepto abstracto para convertirse en una realidad transformadora y palpable."
+            1 -> "Al profundizar en el contexto bíblico de $summary, contemplamos cómo las Escrituras revelan de manera progresiva y armoniosa el carácter inmutable de Dios en torno a «$cleanTheme». No nos encontramos ante máximas de sabiduría meramente humana ni ante consejos pasajeros, sino frente a la revelación eterna del Creador. Cuando examinamos este pasaje a la luz de la persona y la obra redentora de Jesucristo, comprendemos que toda promesa divina halla en Él su cumplimiento perfecto y su firmeza inconmovible."
+            2 -> "Desde una perspectiva teológica e histórica, la lectura detenida de $summary nos confronta con la diferencia radical entre los criterios del mundo y los principios del Reino de los Cielos. El desarrollo bíblico de «$cleanTheme» demuestra que Dios gobierna la historia de la salvación y el cuidado personal de Sus hijos con sabiduría soberana. Esta verdad doctrinal actúa como un ancla segura para el alma cuando las circunstancias externas intentan sacudir nuestra fe."
+            3 -> "Examinar con reverencia $summary nos invita a admirar la riqueza inagotable de la gracia de Dios manifestada en «$cleanTheme». Cada versículo de esta porción sagrada fue inspirado por el Espíritu Santo para derribar nuestra autosuficiencia, alumbrar nuestro entendimiento y conducirnos a una comunión viva con el Padre. Al abrazar esta enseñanza con fe sincera, nuestra mente es renovada y nuestros afectos son alineados con la verdad del Evangelio."
+            else -> "La unidad orgánica de toda la Escritura resplandece con claridad al estudiar $summary bajo el enfoque de «$cleanTheme». Lo que el texto bíblico proclama aquí trasciende el momento histórico en que fue escrito y responde directamente a los anhelos y luchas más profundos del corazón humano. En Cristo Jesús, esta enseñanza deja de ser una teoría distante para convertirse en poder espiritual que transforma nuestro carácter día tras día."
         }
 
         val pastoralParagraph = when (dayNum % 3) {
-            1 -> "Llevando esta palabra al terreno práctico de nuestra vida diaria, es indispensable permitir que el texto bíblico examine nuestras intenciones, prioridades y reacciones cotidianas. No basta con asentir intelectualmente a la verdad de $summary; el verdadero crecimiento espiritual ocurre cuando la Palabra encarna en nuestras decisiones concretas en el hogar, el trabajo y la comunidad de fe. Por ello, hoy el Espíritu nos invita a detenernos y considerar con honestidad delante del Señor: $reflection"
-            2 -> "En el caminar cristiano cotidiano, esta enseñanza sobre «$cleanTheme» tiene implicaciones directas y profundas. A menudo corremos el riesgo de leer pasajes como $summary de forma apresurada, sin dejar que su luz disipe nuestras dudas, temores o áreas de tibieza espiritual. Hoy es un día propicio para abrir el corazón sin reservas, meditar pausadamente en los versículos de referencia y responder con humildad a la pregunta que esta lectura nos plantea: $reflection"
-            else -> "Para que esta semilla de la Palabra dé fruto abundante y perdurable en nosotros, necesitamos recibirla con mansedumbre y disposición de obediencia. La lectura pausada de $summary nos equipa para enfrentar las pruebas y desafíos del presente con una visión celestial renovada. Mientras recorres hoy los versículos bíblicos de referencia, deja que esta verdad repose en tu interior y examina tu caminar a la luz de esta reflexión: $reflection"
+            1 -> "Al llevar esta enseñanza al terreno práctico de nuestra jornada, es fundamental permitir que la Palabra de Dios examine nuestras motivaciones, actitudes y prioridades. No basta con un conocimiento intelectual de $summary; la verdadera madurez espiritual florece cuando la verdad bíblica gobierna nuestras palabras en el hogar, nuestra integridad en el trabajo y nuestro amor fraternal en la iglesia."
+            2 -> "En nuestro caminar cristiano diario, esta verdad sobre «$cleanTheme» nos llama a una respuesta de fe activa y obediencia humilde. A menudo corremos el peligro de leer pasajes como $summary por simple rutina, sin detenernos a escuchar la voz del Buen Pastor corrigiendo nuestro rumbo y consolando nuestras cargas. Hoy es una oportunidad preciosa para abrir el corazón sin reservas y dejar que Su gracia moldee cada área de nuestra vida."
+            else -> "Para que la semilla de esta Palabra dé fruto abundante y perdurable, necesitamos recibirla con un corazón manso y dispuesto. La meditación pausada en $summary nos equipa con discernimiento, paz e integridad para enfrentar los desafíos del día con una perspectiva eterna. Permite que los versículos de referencia que leerás a continuación renueven tus fuerzas y afirmen tus pasos en el camino del Señor."
         }
 
         val fourthParagraph = if (dayNum % 2 == 1) {
-            "\n\nDedica unos instantes adicionales a leer con atención los pasajes bíblicos de referencia incluidos aquí abajo ($summary). Subraya en tu corazón aquellas palabras que más resuenen con tu temporada actual y permite que la voz viva de Dios afirme tus pasos a lo largo de toda esta jornada."
+            "\n\nTe invitamos ahora a leer con calma los versículos bíblicos de referencia incluidos más abajo ($summary), meditando en la clave doctrinal y respondiendo en tu interior a la pregunta de reflexión de este día."
         } else {
             ""
         }
@@ -205,438 +198,841 @@ object ThematicReadingPlansCatalog {
     }
 
     // --- ESCATOLOGÍA BÍBLICA: PROFECÍAS Y APOCALIPSIS (30 Días) ---
-    val eschatologyPlan: List<ReadingPlanDay> by lazy {
-        (1..30).map { dayNum ->
-            when (dayNum) {
-                1 -> d(1, "Día 1: El Propósito Pastoral de la Profecía", "2 Pedro 1:19-21; Amós 3:7", 61, 1, listOf(p(61, "2 Pedro", 1), p(30, "Amós", 3)),
+        val eschatologyPlan: List<ReadingPlanDay> by lazy {
+        listOf(
+            d(1, "Día 1: El Propósito Pastoral de la Profecía", "2 Pedro 1:19-21; Amós 3:7", 61, 1, listOf(p(61, "2 Pedro", 1), p(30, "Amós", 3)),
                     "La profecía bíblica no fue dada para satisfacer curiosidades vanas ni para construir calendarios de especulación, sino para ser una antorcha que alumbra en lugar oscuro. Su meta es afirmar nuestra esperanza, santificar nuestra conducta diaria y darnos convicción de que la historia humana avanza bajo el control soberano de Dios.",
                     "La palabra profética es segura y digna de toda confianza; nos prepara para vivir despiertos y sobrios.",
-                    "¿Buscas en la profecía alimentar la vanagloria del conocimiento o santificar tu caminar cotidiano?")
-                2 -> d(2, "Día 2: Daniel 2: La Estatua y los Imperios", "Daniel 2:31-45", 27, 2, listOf(p(27, "Daniel", 2)),
+                    "¿Buscas en la profecía alimentar la vanagloria del conocimiento o santificar tu caminar cotidiano?"),
+            d(2, "Día 2: Daniel 2: La Estatua y los Imperios", "Daniel 2:31-45", 27, 2, listOf(p(27, "Daniel", 2)),
                     "En el sueño de Nabucodonosor, Dios bosquejó la sucesión de los grandes imperios mundiales: Babilonia (oro), Medo-Persia (plata), Grecia (bronce) y Roma (hierro). Pero la visión culmina con una piedra cortada no con mano humana que hiere la estatua y se convierte en un monte que llena toda la tierra: el Reino mesiánico.",
                     "Los reinos de este mundo son transitorios; solo el Reino establecido por Cristo permanecerá para siempre.",
-                    "¿En qué reino tienes puestas tus esperanzas: en la estabilidad de los gobiernos humanos o en el Reino inamovible de Cristo?")
-                3 -> d(3, "Día 3: Daniel 7: Las Cuatro Bestias y el Anciano de Días", "Daniel 7:1-14, 21-27", 27, 7, listOf(p(27, "Daniel", 7)),
+                    "¿En qué reino tienes puestas tus esperanzas: en la estabilidad de los gobiernos humanos o en el Reino inamovible de Cristo?"),
+            d(3, "Día 3: Daniel 7: Las Cuatro Bestias y el Anciano de Días", "Daniel 7:1-14, 21-27", 27, 7, listOf(p(27, "Daniel", 7)),
                     "Daniel contempla los poderes mundiales como bestias feroces que surgen del mar agitado. Pero en medio del caos terrenal, se levanta el tribunal celestial: el Anciano de Días toma asiento con vestiduras blancas como la nieve y entrega el señorío, la gloria y el reino al Hijo del Hombre.",
                     "Detrás de la arrogancia de los imperios humanos, el trono de Dios juzga y garantiza la victoria de sus santos.",
-                    "¿Te infunden temor las noticias del mundo o te afirma saber que el tribunal celestial tiene la última palabra?")
-                4 -> d(4, "Día 4: Daniel 9: Las Setenta Semanas Proféticas", "Daniel 9:20-27", 27, 9, listOf(p(27, "Daniel", 9)),
+                    "¿Te infunden temor las noticias del mundo o te afirma saber que el tribunal celestial tiene la última palabra?"),
+            d(4, "Día 4: Daniel 9: Las Setenta Semanas Proféticas", "Daniel 9:20-27", 27, 9, listOf(p(27, "Daniel", 9)),
                     "La profecía de las setenta semanas entregada por el ángel Gabriel marca con asombrosa precisión el reloj redentor para Israel y Jerusalén: la reconstrucción de la ciudad, la llegada y muerte del Mesías Príncipe para expiar la iniquidad y sellar la justicia perdurable, y la semana final de consumación.",
                     "Dios gobierna el tiempo con exactitud matemática; la muerte expiatoria del Mesías es el centro neurálgico de toda la profecía.",
-                    "¿Descansas en que Dios tiene contados los días de tu vida con la misma fidelidad con que trazó las eras proféticas?")
-                5 -> d(5, "Día 5: El Día de Jehová en los Profetas", "Joel 2:1-13, 28-32; Sofonías 1", 29, 2, listOf(p(29, "Joel", 2), p(36, "Sofonías", 1)),
+                    "¿Descansas en que Dios tiene contados los días de tu vida con la misma fidelidad con que trazó las eras proféticas?"),
+            d(5, "Día 5: El Día de Jehová en los Profetas", "Joel 2:1-13, 28-32; Sofonías 1", 29, 2, listOf(p(29, "Joel", 2), p(36, "Sofonías", 1)),
                     "Los profetas del Antiguo Testamento proclamaron el 'Día de Jehová' como un día de juicio severo sobre la soberbia y la idolatría de las naciones, pero también de derramamiento glorioso del Espíritu y salvación para todo aquel que invocare el nombre del Señor.",
                     "El juicio divino revela la santidad inflexible de Dios; su gracia ofrece refugio seguro antes de aquel día grande.",
-                    "¿Has acudido al refugio de la gracia de Dios con un corazón quebrantado y sincero?")
-                6 -> d(6, "Día 6: El Valle de los Huesos Secos", "Ezequiel 37:1-14", 26, 37, listOf(p(26, "Ezequiel", 37)),
+                    "¿Has acudido al refugio de la gracia de Dios con un corazón quebrantado y sincero?"),
+            d(6, "Día 6: El Valle de los Huesos Secos", "Ezequiel 37:1-14", 26, 37, listOf(p(26, "Ezequiel", 37)),
                     "El profeta Ezequiel es llevado a un valle lleno de huesos secos en extremo: una imagen desgarradora de un pueblo sin esperanza. Pero cuando la Palabra de Dios es proclamada y el Viento del Espíritu sopla de los cuatro puntos cardinales, los huesos cobran vida y se levantan como un ejército formidable.",
                     "No hay situación nacional, espiritual o personal tan muerta que el Espíritu de Dios no pueda resucitar.",
-                    "¿Hay algún área de tu vida que parece un valle de huesos secos donde necesitas clamar por el soplo del Espíritu?")
-                7 -> d(7, "Día 7: La Promesa de la Nueva Creación en Isaías", "Isaías 65:17-25", 23, 65, listOf(p(23, "Isaías", 65)),
+                    "¿Hay algún área de tu vida que parece un valle de huesos secos donde necesitas clamar por el soplo del Espíritu?"),
+            d(7, "Día 7: La Promesa de la Nueva Creación en Isaías", "Isaías 65:17-25", 23, 65, listOf(p(23, "Isaías", 65)),
                     "Isaías mira hacia el horizonte de la eternidad y proclama: 'Porque he aquí que yo crearé nuevos cielos y nueva tierra; y de lo primero no habrá memoria ni más vendrá al pensamiento'. Una creación liberada de la maldición del pecado donde el lobo y el cordero pacerán juntos.",
                     "El propósito redentor de Dios no se limita a salvar almas individuales, sino a redimir y renovar todo el orden creado.",
-                    "¿Cómo te llena de consuelo saber que todo el sufrimiento del tiempo presente será borrado en la renovación final?")
-                8 -> d(8, "Día 8: El Discurso del Monte de los Olivos I", "Mateo 24:1-14", 40, 24, listOf(p(40, "Mateo", 24)),
+                    "¿Cómo te llena de consuelo saber que todo el sufrimiento del tiempo presente será borrado en la renovación final?"),
+            d(8, "Día 8: El Discurso del Monte de los Olivos I", "Mateo 24:1-14", 40, 24, listOf(p(40, "Mateo", 24)),
                     "Sentado en el Monte de los Olivos, Jesús advierte a sus discípulos sobre los dolores de parto: falsos cristos, guerras, terremotos y pestes. Sin embargo, enfatiza que 'aún no es el fin' y que el Evangelio del Reino será predicado en todo el mundo para testimonio a todas las naciones.",
                     "Las crisis mundiales son señales premonitorias; la prioridad de la Iglesia es la proclamación incansable del Evangelio.",
-                    "¿Estás involucrado activamente en hacer que el Evangelio llegue a quienes aún no conocen a Cristo?")
-                9 -> d(9, "Día 9: El Discurso del Monte de los Olivos II", "Mateo 24:15-31", 40, 24, listOf(p(40, "Mateo", 24)),
+                    "¿Estás involucrado activamente en hacer que el Evangelio llegue a quienes aún no conocen a Cristo?"),
+            d(9, "Día 9: El Discurso del Monte de los Olivos II", "Mateo 24:15-31", 40, 24, listOf(p(40, "Mateo", 24)),
                     "Jesús expone la Gran Tribulación venidera y la abominación desoladora predicha por Daniel. Advierte contra los falsos profetas y aclara que su venida no será secreta en un rincón, sino tan visible y pública como el relámpago que sale del oriente y se muestra hasta el occidente.",
                     "La Segunda Venida de Cristo será un acontecimiento cósmico y glorioso, inconfundible e indiscutible para todo ojo humano.",
-                    "¿Mantienes tu corazón anclado en la certeza del regreso visible del Rey de Reyes?")
-                10 -> d(10, "Día 10: Parábolas de Vigilancia: Vírgenes y Talentos", "Mateo 25:1-30", 40, 25, listOf(p(40, "Mateo", 25)),
+                    "¿Mantienes tu corazón anclado en la certeza del regreso visible del Rey de Reyes?"),
+            d(10, "Día 10: Parábolas de Vigilancia: Vírgenes y Talentos", "Mateo 25:1-30", 40, 25, listOf(p(40, "Mateo", 25)),
                     "La respuesta a la profecía no es el letargo sino la vigilancia activa. Las cinco vírgenes prudentes tenían aceite en sus lámparas mientras el novio tardaba; los mayordomos diligentes multiplicaron los talentos encomendados. Esperar a Cristo exige fidelidad y preparación espiritual continua.",
                     "La fidelidad diaria y la diligencia en el servicio son las marcas auténticas de quien espera con ansias al Novio.",
-                    "¿Hay suficiente 'aceite' de comunión con Dios en tu vida espiritual para perseverar en la noche?")
-                11 -> d(11, "Día 11: La Esperanza del Arrebatamiento", "1 Tesalonicenses 4:13-18", 52, 4, listOf(p(52, "1 Tesalonicenses", 4)),
+                    "¿Hay suficiente 'aceite' de comunión con Dios en tu vida espiritual para perseverar en la noche?"),
+            d(11, "Día 11: La Esperanza del Arrebatamiento", "1 Tesalonicenses 4:13-18", 52, 4, listOf(p(52, "1 Tesalonicenses", 4)),
                     "Pablo escribe para consolar a los creyentes respecto a los que duermen: el Señor mismo descenderá del cielo con voz de mando, con voz de arcángel y con trompeta de Dios; los muertos en Cristo resucitarán primero, y los vivos seremos transformados para recibir al Señor en el aire.",
                     "La muerte física no nos separará de Cristo; la resurrección y el reencuentro celestial son el consuelo supremo de la fe.",
-                    "¿Consuelas y alientas a otros con la gloriosa verdad del reencuentro en la presencia del Señor?")
-                12 -> d(12, "Día 12: El Misterio de la Iniquidad y el Anticristo", "2 Tesalonicenses 2:1-12", 53, 2, listOf(p(53, "2 Tesalonicenses", 2)),
+                    "¿Consuelas y alientas a otros con la gloriosa verdad del reencuentro en la presencia del Señor?"),
+            d(12, "Día 12: El Misterio de la Iniquidad y el Anticristo", "2 Tesalonicenses 2:1-12", 53, 2, listOf(p(53, "2 Tesalonicenses", 2)),
                     "Pablo desenmascara la estrategia del adversario antes del Día del Señor: la apostasía y la manifestación del 'hombre de pecado', quien se opondrá a todo lo que se llama Dios. No obstante, su destino está sellado: el Señor lo destruirá con el soplo de su boca y con el resplandor de su venida.",
                     "El mal tiene un límite impuesto por Dios; la verdad triunfará de manera fulminante sobre todo engaño satánico.",
-                    "¿Te mantienes firme en la verdad de la Palabra para no ser arrastrado por corrientes de engaño cultural?")
-                13 -> d(13, "Día 13: El Día del Señor como Ladrón en la Noche", "2 Pedro 3:1-13", 61, 3, listOf(p(61, "2 Pedro", 3)),
+                    "¿Te mantienes firme en la verdad de la Palabra para no ser arrastrado por corrientes de engaño cultural?"),
+            d(13, "Día 13: El Día del Señor como Ladrón en la Noche", "2 Pedro 3:1-13", 61, 3, listOf(p(61, "2 Pedro", 3)),
                     "Frente a los burladores que preguntan '¿dónde está la promesa de su advenimiento?', Pedro recuerda que para Dios un día es como mil años. El Señor no retarda su promesa según algunos la tienen por tardanza, sino que es paciente para con nosotros, no queriendo que ninguno perezca.",
                     "La aparente tardanza de Cristo no es descuido sino paciencia misericordiosa para que los pecadores se arrepientan.",
-                    "¿Vives cada jornada con la sobriedad y pureza de quien sabe que el Señor puede llamar a la puerta en cualquier instante?")
-                14 -> d(14, "Día 14: El Juicio de las Naciones", "Mateo 25:31-46", 40, 25, listOf(p(40, "Mateo", 25)),
+                    "¿Vives cada jornada con la sobriedad y pureza de quien sabe que el Señor puede llamar a la puerta en cualquier instante?"),
+            d(14, "Día 14: El Juicio de las Naciones", "Mateo 25:31-46", 40, 25, listOf(p(40, "Mateo", 25)),
                     "Cuando el Hijo del Hombre venga en su gloria con todos los santos ángeles, se sentará en su trono glorioso y separará a las naciones como el pastor aparta las ovejas de los cabritos. El criterio revelador: cómo tratamos a los hermanos más pequeños de Cristo.",
                     "El amor práctico hacia los necesitados y perseguidos por causa de Cristo es la evidencia indiscutible de un corazón regenerado.",
-                    "¿Refleja tu trato a los vulnerables el reconocimiento del rostro de Jesús en ellos?")
-                15 -> d(15, "Día 15: Apocalipsis 1: La Visión de Cristo Exaltado", "Apocalipsis 1:1-20", 66, 1, listOf(p(66, "Apocalipsis", 1)),
+                    "¿Refleja tu trato a los vulnerables el reconocimiento del rostro de Jesús en ellos?"),
+            d(15, "Día 15: Apocalipsis 1: La Visión de Cristo Exaltado", "Apocalipsis 1:1-20", 66, 1, listOf(p(66, "Apocalipsis", 1)),
                     "Juan en la isla de Patmos contempla a Jesús no ya como el siervo humilde del camino a la cruz, sino como el Señor soberano: ojos como llama de fuego, voz como estruendo de muchas aguas y en su mano derecha las siete estrellas. Él tiene las llaves de la muerte y del Hades.",
                     "Jesucristo resucitado reina con autoridad absoluta sobre la vida, la muerte y el destino de su Iglesia.",
-                    "¿Cae tu alma postrada en adoración reverente ante la majestad insuperable de Jesucristo?")
-                16 -> d(16, "Día 16: Éfeso y Esmirna: El Primer Amor y la Persecución", "Apocalipsis 2:1-11", 66, 2, listOf(p(66, "Apocalipsis", 2)),
+                    "¿Cae tu alma postrada en adoración reverente ante la majestad insuperable de Jesucristo?"),
+            d(16, "Día 16: Éfeso y Esmirna: El Primer Amor y la Persecución", "Apocalipsis 2:1-11", 66, 2, listOf(p(66, "Apocalipsis", 2)),
                     "Éfeso poseía doctrina pura y arduo trabajo, pero había dejado su primer amor. Esmirna, en medio de extrema pobreza y tribulación, es declarada espiritualmente rica y llamada a ser fiel hasta la muerte para recibir la corona de la vida. Dos espejos vitales para la Iglesia de hoy.",
                     "La ortodoxia sin pasión por Cristo es esterilidad; la fidelidad en la prueba produce riquezas imperecederas.",
-                    "¿Arde tu corazón con el mismo fervor del primer amor con que conociste al Salvador?")
-                17 -> d(17, "Día 17: Pérgamo y Tiatira: Pureza Doctrinal y Ética", "Apocalipsis 2:12-29", 66, 2, listOf(p(66, "Apocalipsis", 2)),
+                    "¿Arde tu corazón con el mismo fervor del primer amor con que conociste al Salvador?"),
+            d(17, "Día 17: Pérgamo y Tiatira: Pureza Doctrinal y Ética", "Apocalipsis 2:12-29", 66, 2, listOf(p(66, "Apocalipsis", 2)),
                     "Pérgamo moraba donde está el trono de Satanás y toleraba la doctrina de Balaam; Tiatira toleraba la inmoralidad y la idolatría bajo el pretexto de revelación. El Señor de los ojos de fuego exige pureza moral y doctrinal inflexible a su pueblo.",
                     "La tolerancia con el pecado y el compromiso con el mundo carcomen el testimonio de la comunidad de fe.",
-                    "¿Has permitido compromisos morales o justificaciones en tu vida que contradicen la santidad de Dios?")
-                18 -> d(18, "Día 18: Sardis y Filadelfia: Salir de la Muerte a la Puerta Abierta", "Apocalipsis 3:1-13", 66, 3, listOf(p(66, "Apocalipsis", 3)),
+                    "¿Has permitido compromisos morales o justificaciones en tu vida que contradicen la santidad de Dios?"),
+            d(18, "Día 18: Sardis y Filadelfia: Salir de la Muerte a la Puerta Abierta", "Apocalipsis 3:1-13", 66, 3, listOf(p(66, "Apocalipsis", 3)),
                     "Sardis tenía nombre de que vivía, pero estaba muerta: una advertencia fulminante contra el cristianismo de fachada. Filadelfia, aunque tenía pocas fuerzas, guardó la palabra y no negó el nombre de Cristo; por eso el Señor le abrió una puerta que nadie puede cerrar.",
                     "Dios no busca apariencias religiosas de éxito terrenal, sino fidelidad humilde y dependencia constante de su gracia.",
-                    "¿Prefieres la aprobación humana de las apariencias o la puerta abierta de la bendición que solo Cristo otorga?")
-                19 -> d(19, "Día 19: Laodicea: El Peligro Letal de la Tibieza", "Apocalipsis 3:14-22", 66, 3, listOf(p(66, "Apocalipsis", 3)),
+                    "¿Prefieres la aprobación humana de las apariencias o la puerta abierta de la bendición que solo Cristo otorga?"),
+            d(19, "Día 19: Laodicea: El Peligro Letal de la Tibieza", "Apocalipsis 3:14-22", 66, 3, listOf(p(66, "Apocalipsis", 3)),
                     "Laodicea se creía rica y saciada sin necesidad de nada, pero a los ojos de Cristo era desventurada, miserable, pobre, ciega y desnuda. Jesús le ofrece comprar de Él oro refinado en fuego y se coloca a la puerta llamando con amor: 'Si alguno oye mi voz y abre la puerta, entraré a él'.",
                     "La autosuficiencia y la tibieza espiritual provocan rechazo en Dios; la verdadera riqueza se halla solo en Cristo.",
-                    "¿Le has abierto de par en par la puerta de tu vida cotidiana a Jesús o lo tienes esperando en el umbral?")
-                20 -> d(20, "Día 20: La Sala del Trono Celestial", "Apocalipsis 4:1-11", 66, 4, listOf(p(66, "Apocalipsis", 4)),
+                    "¿Le has abierto de par en par la puerta de tu vida cotidiana a Jesús o lo tienes esperando en el umbral?"),
+            d(20, "Día 20: La Sala del Trono Celestial", "Apocalipsis 4:1-11", 66, 4, listOf(p(66, "Apocalipsis", 4)),
                     "Antes de desatar los juicios sobre la tierra, Juan es arrebatado al cielo para ver que hay un Trono firme e inconmovible. Alrededor del Trono, los cuatro seres vivientes y los veinticuatro ancianos rinden coronas y proclaman día y noche: 'Santo, Santo, Santo es el Señor Dios Todopoderoso'.",
                     "El universo entero está gobernado desde el Trono de Dios; la adoración incesante es la respuesta debida a su majestad.",
-                    "¿Rindes tus logros y 'coronas' personales ante el Trono reconociendo que todo le pertenece a Dios?")
-                21 -> d(21, "Día 21: El León que es Cordero: El Único Digno", "Apocalipsis 5:1-14", 66, 5, listOf(p(66, "Apocalipsis", 5)),
+                    "¿Rindes tus logros y 'coronas' personales ante el Trono reconociendo que todo le pertenece a Dios?"),
+            d(21, "Día 21: El León que es Cordero: El Único Digno", "Apocalipsis 5:1-14", 66, 5, listOf(p(66, "Apocalipsis", 5)),
                     "Juan llora desconsoladamente porque nadie en el cielo ni en la tierra es hallado digno de abrir el libro sellado con siete sellos. Pero un anciano le dice: 'No llores. He aquí que el León de la tribu de Judá ha vencido'. Y Juan mira y ve en medio del trono un Cordero como inmolado.",
                     "Solo Jesucristo tiene la autoridad de desatar la historia humana porque venció derramando su sangre en la cruz.",
-                    "¿Reconoces al Cordero inmolado como el único que puede dar sentido y redención a las crisis de tu vida?")
-                22 -> d(22, "Día 22: La Apertura de los Sellos", "Apocalipsis 6:1-17; 7:9-17", 66, 6, listOf(p(66, "Apocalipsis", 6), p(66, "Apocalipsis", 7)),
+                    "¿Reconoces al Cordero inmolado como el único que puede dar sentido y redención a las crisis de tu vida?"),
+            d(22, "Día 22: La Apertura de los Sellos", "Apocalipsis 6:1-17; 7:9-17", 66, 6, listOf(p(66, "Apocalipsis", 6), p(66, "Apocalipsis", 7)),
                     "El Cordero abre los primeros sellos y cabalgan los cuatro jinetes: conquista engañosa, guerra, hambre y muerte. Los reyes de la tierra claman a los montes que los oculten de la ira del Cordero. No obstante, el capítulo 7 presenta a una multitud incontable de toda nación lavada en la sangre del Cordero.",
                     "El juicio divino desenmascara la vanidad humana, pero la misericordia redime a un pueblo que nadie puede contar.",
-                    "¿Está tu esperanza anclada en la sangre del Cordero que te libra de la ira venidera?")
-                23 -> d(23, "Día 23: Las Trompetas del Juicio", "Apocalipsis 8:1-13; 9:1-21", 66, 8, listOf(p(66, "Apocalipsis", 8), p(66, "Apocalipsis", 9)),
+                    "¿Está tu esperanza anclada en la sangre del Cordero que te libra de la ira venidera?"),
+            d(23, "Día 23: Las Trompetas del Juicio", "Apocalipsis 8:1-13; 9:1-21", 66, 8, listOf(p(66, "Apocalipsis", 8), p(66, "Apocalipsis", 9)),
                     "Tras un silencio solemne en el cielo, siete ángeles reciben trompetas. Los juicios caen sobre la vegetación, los mares, los ríos y los astros, y luego se abren las tinieblas del abismo. Son advertencias enérgicas llamando a los moradores de la tierra a volverse al Dios vivo.",
                     "Los juicios preliminares son toques de trompeta de misericordia para advertir al rebelde antes del fin irrevocable.",
-                    "¿Prestas atención a las advertencias oportunas de la Palabra de Dios antes de que las consecuencias sean irreversibles?")
-                24 -> d(24, "Día 24: Los Dos Testigos y la Séptima Trompeta", "Apocalipsis 11:1-19; 12:7-12", 66, 11, listOf(p(66, "Apocalipsis", 11), p(66, "Apocalipsis", 12)),
+                    "¿Prestas atención a las advertencias oportunas de la Palabra de Dios antes de que las consecuencias sean irreversibles?"),
+            d(24, "Día 24: Los Dos Testigos y la Séptima Trompeta", "Apocalipsis 11:1-19; 12:7-12", 66, 11, listOf(p(66, "Apocalipsis", 11), p(66, "Apocalipsis", 12)),
                     "En medio de la mayor oscuridad, Dios levanta a sus dos testigos con poder profético. Aunque el mundo celebra su muerte temporal, el aliento de vida de Dios entra en ellos y son resucitados. Suena la séptima trompeta y se proclama: 'Los reinos del mundo han venido a ser de nuestro Señor y de su Cristo'.",
                     "El testimonio fiel es indestructible hasta que la misión encomendada por Dios haya sido cumplida plenamente.",
-                    "¿Perseveras como testigo valiente de la verdad aunque la corriente cultural celebre la mentira?")
-                25 -> d(25, "Día 25: Las Bestias de Apocalipsis 13", "Apocalipsis 13:1-18; 14:6-12", 66, 13, listOf(p(66, "Apocalipsis", 13), p(66, "Apocalipsis", 14)),
+                    "¿Perseveras como testigo valiente de la verdad aunque la corriente cultural celebre la mentira?"),
+            d(25, "Día 25: Las Bestias de Apocalipsis 13", "Apocalipsis 13:1-18; 14:6-12", 66, 13, listOf(p(66, "Apocalipsis", 13), p(66, "Apocalipsis", 14)),
                     "Surge la bestia del mar (el poder político global anticristiano) y la bestia de la tierra (el falso profeta religioso que exige adoración y la marca del engaño). Frente al totalitarismo satánico, se proclama el Evangelio eterno y se declara la bienaventuranza de los que guardan los mandamientos de Dios.",
                     "El sistema mundano intentará coaccionar nuestra lealtad; la paciencia de los santos radica en no transigir con el engaño.",
-                    "¿En quién está sellada tu lealtad: en las promesas seductoras del mundo o en el Señor Jesucristo?")
-                26 -> d(26, "Día 26: Las Copas de la Ira y la Caída de Babilonia", "Apocalipsis 16:1-19; 18:1-10", 66, 16, listOf(p(66, "Apocalipsis", 16), p(66, "Apocalipsis", 18)),
+                    "¿En quién está sellada tu lealtad: en las promesas seductoras del mundo o en el Señor Jesucristo?"),
+            d(26, "Día 26: Las Copas de la Ira y la Caída de Babilonia", "Apocalipsis 16:1-19; 18:1-10", 66, 16, listOf(p(66, "Apocalipsis", 16), p(66, "Apocalipsis", 18)),
                     "Las siete copas derraman la consumación de la ira de Dios sobre el imperio de la bestia. Babilonia la grande, símbolo de la seducción económica, moral y religiosa corrompida, cae en una sola hora. Se oye una voz del cielo: 'Salid de ella, pueblo mío, para que no seáis partícipes de sus pecados'.",
                     "La justicia de Dios no fallará; los imperios levantados sobre la avaricia y la corrupción serán desmantelados por completo.",
-                    "¿Mantienes tu corazón limpio de las influencias y seducciones mundanas que Dios juzgará?")
-                27 -> d(27, "Día 27: El Jinete del Caballo Blanco y Armagedón", "Apocalipsis 19:1-21", 66, 19, listOf(p(66, "Apocalipsis", 19)),
+                    "¿Mantienes tu corazón limpio de las influencias y seducciones mundanas que Dios juzgará?"),
+            d(27, "Día 27: El Jinete del Caballo Blanco y Armagedón", "Apocalipsis 19:1-21", 66, 19, listOf(p(66, "Apocalipsis", 19)),
                     "¡Aleluya! El cielo se abre y aparece Cristo montado en un caballo blanco: llamado Fiel y Verdadero, con ojos como llama de fuego y un manto teñido en sangre. De su boca sale una espada aguda para herir a las naciones. La bestia y el falso profeta son capturados y arrojados vivos al lago de fuego.",
                     "La victoria militar y espiritual de Cristo en su regreso es absoluta, instantánea y definitiva; el Rey reina supremo.",
-                    "¿Esperas con gozo triunfal el día en que Jesucristo pondrá fin a toda tiranía e injusticia en la tierra?")
-                28 -> d(28, "Día 28: El Milenio y el Gran Trono Blanco", "Apocalipsis 20:1-15", 66, 20, listOf(p(66, "Apocalipsis", 20)),
+                    "¿Esperas con gozo triunfal el día en que Jesucristo pondrá fin a toda tiranía e injusticia en la tierra?"),
+            d(28, "Día 28: El Milenio y el Gran Trono Blanco", "Apocalipsis 20:1-15", 66, 20, listOf(p(66, "Apocalipsis", 20)),
                     "Satanás es atado por mil años mientras Cristo reina con sus santos. Tras su rebelión final y derrota definitiva, Juan contempla el Gran Trono Blanco: la tierra y el cielo huyeron de delante de Él, los libros fueron abiertos y todo aquel que no fue hallado inscrito en el Libro de la Vida fue lanzado al lago de fuego.",
                     "El juicio final es la garantía de que ninguna maldad quedará impune; el Libro de la Vida es nuestro único boleto de salvación.",
-                    "¿Tienes la certeza inconmovible de que tu nombre está inscrito en el Libro de la Vida del Cordero?")
-                29 -> d(29, "Día 29: El Cielo Nuevo y la Nueva Tierra", "Apocalipsis 21:1-27", 66, 21, listOf(p(66, "Apocalipsis", 21)),
+                    "¿Tienes la certeza inconmovible de que tu nombre está inscrito en el Libro de la Vida del Cordero?"),
+            d(29, "Día 29: El Cielo Nuevo y la Nueva Tierra", "Apocalipsis 21:1-27", 66, 21, listOf(p(66, "Apocalipsis", 21)),
                     "Juan ve descender la santa ciudad, la Nueva Jerusalén, dispuesta como una esposa ataviada para su marido. El tabernáculo de Dios está con los hombres: Él morará con ellos, enjugará toda lágrima y no habrá más muerte. Las puertas de perla nunca se cerrarán y la gloria de Dios la iluminará.",
                     "El destino glorioso del creyente es habitar en una comunión perfecta, pura y gozosa con Dios en la Creación restaurada.",
-                    "¿Cómo influye la belleza prometida de la Nueva Jerusalén en tu paciencia ante las aflicciones presentes?")
-                else -> d(30, "Día 30: El Río de la Vida: 'Ciertamente Vengo en Breve'", "Apocalipsis 22:1-21", 66, 22, listOf(p(66, "Apocalipsis", 22)),
+                    "¿Cómo influye la belleza prometida de la Nueva Jerusalén en tu paciencia ante las aflicciones presentes?"),
+            d(30, "Día 30: El Río de la Vida: 'Ciertamente Vengo en Breve'", "Apocalipsis 22:1-21", 66, 22, listOf(p(66, "Apocalipsis", 22)),
                     "En el corazón de la ciudad fluye el río limpio de agua de vida, claro como el cristal, saliendo del trono de Dios y del Cordero. Ya no habrá maldición. El canon sagrado concluye con la promesa más conmovedora de Jesús: 'Ciertamente vengo en breve', y la respuesta unánime de la Iglesia: 'Amén; sí, ven, Señor Jesús'.",
                     "La esperanza escatológica culmina en la presencia eterna del Señor; el clamor del creyente debe ser: ¡Maranata!",
                     "¿Late tu corazón hoy con el mismo anhelo ardiente de la Iglesia primitiva: '¡Sí, ven, Señor Jesús!'?")
-            }
-        }
+        )
     }
 
     // --- ROMANOS: FUNDAMENTOS DE LA GRACIA (30 Días) ---
-    val romansPlan: List<ReadingPlanDay> by lazy {
-        (1..30).map { dayNum ->
-            val ch = ((dayNum - 1) / 2) + 1
-            val isFirstHalf = dayNum % 2 != 0
-            val chapterTheme = when (ch) {
-                1 -> if (isFirstHalf) "El Poder del Evangelio y la Justicia de Dios" else "La Revelación en la Creación y el Corazón Humano"
-                2 -> if (isFirstHalf) "El Juicio Justo e Imparcial de Dios" else "La Verdadera Circuncisión del Corazón"
-                3 -> if (isFirstHalf) "No Hay Justo ni Aun Uno" else "Justificados Gratuitamente por Su Gracia"
-                4 -> if (isFirstHalf) "Abraham Justificado por la Fe" else "La Promesa Firme para Todos los Creyentes"
-                5 -> if (isFirstHalf) "Paz para con Dios y Esperanza en la Prueba" else "El Don de Cristo Supera la Caída de Adán"
-                6 -> if (isFirstHalf) "Muertos al Pecado, Vivos para Dios" else "Siervos de la Justicia y la Dádiva de Vida Eterna"
-                7 -> if (isFirstHalf) "Libres de la Ley para Pertenecer a Cristo" else "La Lucha Interior y la Victoria en Jesucristo"
-                8 -> if (isFirstHalf) "Ninguna Condenación y la Vida en el Espíritu" else "Más que Vencedores: Nada nos Separará de Su Amor"
-                9 -> if (isFirstHalf) "La Soberanía de Dios y las Promesas a Israel" else "El Alfarero Soberano y los Vasos de Misericordia"
-                10 -> if (isFirstHalf) "La Justicia que es por la Fe en Cristo" else "La Fe Viene por el Oír la Palabra de Dios"
-                11 -> if (isFirstHalf) "El Remanente Escogido por Gracia" else "El Olivo Silvestre y la Profundidad de la Sabiduría Divina"
-                12 -> if (isFirstHalf) "Sacrificio Vivo y Renovación de la Mente" else "El Amor Sincero y Vencer el Mal con el Bien"
-                13 -> if (isFirstHalf) "El Ciudadano Cristiano y el Respeto al Orden" else "El Amor como Cumplimiento de la Ley y Vestirse de Cristo"
-                14 -> if (isFirstHalf) "Recibir al Débil en la Fe sin Juzgar" else "Seguir lo que Contribuye a la Paz y la Mutua Edificación"
-                15 -> if (isFirstHalf) "Edificar al Prójimo según el Ejemplo de Cristo" else "El Ministerio Apostólico y la Unidad de la Iglesia"
-                else -> if (isFirstHalf) "Comunión Fraterna y Saludos de Amor en el Cuerpo" else "Doxología Final: Al Único y Sabio Dios sea la Gloria"
-            }
-            d(
-                num = dayNum,
-                title = "Día $dayNum: Romanos $ch - $chapterTheme",
-                summary = "Romanos $ch",
-                pBId = 45,
-                pC = ch,
-                passages = listOf(p(45, "Romanos", ch)),
-                narrative = "En el capítulo $ch de la epístola a los Romanos, el apóstol Pablo desarrolla con rigor magistral el tema de «$chapterTheme». Cada argumento bíblico desmantela el orgullo de la justicia propia humana y exalta la obra redentora, suficiente y soberana de nuestro Señor Jesucristo.",
-                lesson = "En Romanos $ch aprendemos que $chapterTheme descansa íntegramente en la gracia inmerecida de Dios y en la justicia perfecta de Cristo.",
-                reflection = "¿Cómo transforma la enseñanza de Romanos $ch sobre «$chapterTheme» tu manera de acercarte a Dios y tratar a tu prójimo hoy?"
-            )
-        }
+        val romansPlan: List<ReadingPlanDay> by lazy {
+        listOf(
+            d(1, "Día 1: El Poder del Evangelio y la Justicia de Dios", "Romanos 1:1-17", 45, 1, listOf(p(45, "Romanos", 1)),
+                "Pablo inaugura su epístola magistral proclamando que no se avergüenza del Evangelio, porque no es un simple consejo moral ni una filosofía humana, sino potencia de Dios (dynamis) para dar salvación a todo aquel que cree; porque en él se revela la justicia de Dios por fe y para fe: 'Mas el justo por la fe vivirá'.",
+                "El Evangelio es el poder salvador mismo de Dios en acción, revelando una justicia perfecta que se recibe por la fe.",
+                "¿Vives y compartes el Evangelio con la plena convicción de que tiene el poder de Dios para transformar cualquier corazón?"),
+            d(2, "Día 2: La Revelación en la Creación y el Corazón Humano", "Romanos 1:18-32", 45, 1, listOf(p(45, "Romanos", 1)),
+                "Las cosas invisibles de Dios, Su eterno poder y deidad, se hacen claramente visibles desde la creación del mundo, de modo que el ser humano no tiene excusa. La raíz de toda decadencia espiritual consiste en cambiar la gloria del Dios incorruptible por ídolos creados y dejar de darle gracias.",
+                "La ingratitud y la idolatría oscurecen el corazón humano, mostrándonos cuán desesperadamente necesitamos la gracia redentora.",
+                "¿Cultivas un corazón agradecido que da la gloria a Dios en todo, o has permitido que cosas creadas ocupen Su trono?"),
+            d(3, "Día 3: El Juicio Justo e Imparcial de Dios", "Romanos 2:1-16", 45, 2, listOf(p(45, "Romanos", 2)),
+                "Pablo advierte a quienes juzgan a otros mientras practican lo mismo, recordándonos que el juicio de Dios es según verdad y sin acepción de personas. No debemos menospreciar las riquezas de Su benignidad, paciencia y longanimidad, ignorando que Su benignidad nos guía al arrepentimiento.",
+                "La paciencia de Dios hacia nuestras faltas nunca es complicidad con el pecado, sino una oportunidad misericordiosa para arrepentirnos.",
+                "¿Te lleva la bondad y paciencia de Dios a un arrepentimiento sincero o a una peligrosa confianza superficial?"),
+            d(4, "Día 4: La Verdadera Circuncisión del Corazón", "Romanos 2:17-29", 45, 2, listOf(p(45, "Romanos", 2)),
+                "El apóstol confronta el formalismo religioso que se jacta de poseer la Ley y enseñar a otros, pero deshonra a Dios con una vida incoherente. No es verdadero creyente el que lo es solo exteriormente, sino aquel cuya transformación es interior: la circuncisión del corazón, en espíritu, cuya alabanza viene de Dios.",
+                "A Dios no le impresionan las etiquetas religiosas externas, sino un corazón quebrantado y transformado por el Espíritu Santo.",
+                "¿Existe coherencia entre la fe que profesas con tus labios y tu conducta en la intimidad del hogar?"),
+            d(5, "Día 5: No Hay Justo ni Aun Uno", "Romanos 3:1-20", 45, 3, listOf(p(45, "Romanos", 3)),
+                "Aquí concluye el veredicto universal de la Escritura sobre la condición humana sin Cristo: tanto judíos como gentiles están bajo pecado; 'no hay justo, ni aun uno'. Ya que por las obras de la ley ningún ser humano será justificado delante de Él; porque por medio de la ley es el conocimiento del pecado.",
+                "La Ley actúa como un espejo fiel que diagnostica nuestra culpa y cierra toda boca para que acudamos únicamente a la gracia de Cristo.",
+                "¿Has renunciado por completo a justificarte por tus propios méritos para descansar solo en la misericordia de Dios?"),
+            d(6, "Día 6: Justificados Gratuitamente por Su Gracia", "Romanos 3:21-31", 45, 3, listOf(p(45, "Romanos", 3)),
+                "Este es el centro radiante de la carta a los Romanos: 'Pero ahora, aparte de la ley, se ha manifestado la justicia de Dios... por cuanto todos pecaron, y están destituidos de la gloria de Dios, siendo justificados gratuitamente por su gracia, mediante la redención que es en Cristo Jesús', a quien Dios puso como propiciación por Su sangre.",
+                "En la cruz de Cristo, Dios demostró ser a la vez perfectamente Justo y el que justifica gratuitamente al que es de la fe de Jesús.",
+                "¿Cómo cambia tu paz interior saber que tu justificación ante Dios es un regalo gratuito comprado con la sangre de Cristo?"),
+            d(7, "Día 7: Abraham Justificado por la Fe", "Romanos 4:1-12", 45, 4, listOf(p(45, "Romanos", 4)),
+                "Para demostrar que la salvación siempre ha sido por gracia mediante la fe, Pablo presenta a Abraham: 'Creyó Abraham a Dios, y le fue contado por justicia'. Esto ocurrió antes de que Abraham fuera circuncidado, y se une al cántico de David: 'Bienaventurados aquellos cuyas iniquidades son perdonadas'.",
+                "Desde el Antiguo Testamento, la única vía para ser declarado justo delante de Dios ha sido creer en Su promesa.",
+                "¿Descansas hoy en la bienaventuranza de aquel a quien el Señor no inculpa de pecado por medio de Cristo?"),
+            d(8, "Día 8: La Promesa Firme para Todos los Creyentes", "Romanos 4:13-25", 45, 4, listOf(p(45, "Romanos", 4)),
+                "Abraham creyó en esperanza contra esperanza, sin debilitarse en la fe, plenamente convencido de que Dios era también poderoso para hacer todo lo que había prometido. Esa misma justicia nos es atribuida hoy a nosotros los que creemos en Aquel que levantó de los muertos a Jesús, Señor nuestro.",
+                "La fe verdadera no niega las dificultades reales, pero confía en el Dios que da vida a los muertos y llama las cosas que no son como si fuesen.",
+                "¿En qué promesa de Dios necesitas hoy creer 'en esperanza contra esperanza', confiando en Su poder absoluto?"),
+            d(9, "Día 9: Paz para con Dios y Esperanza en la Prueba", "Romanos 5:1-11", 45, 5, listOf(p(45, "Romanos", 5)),
+                "Justificados, pues, por la fe, tenemos paz para con Dios por medio de nuestro Señor Jesucristo. Y aun nos gloriamos en las tribulaciones, sabiendo que la tribulación produce paciencia, la paciencia prueba y la prueba esperanza; porque Dios muestra Su amor para con nosotros, en que siendo aún pecadores, Cristo murió por nosotros.",
+                "Nuestra paz con Dios es un hecho objetivo sellado por la muerte de Cristo cuando aún éramos débiles y pecadores.",
+                "¿Permites que el amor de Dios derramado en tu corazón por el Espíritu Santo sostenga tu esperanza en medio de la prueba?"),
+            d(10, "Día 10: El Don de Cristo Supera la Caída de Adán", "Romanos 5:12-21", 45, 5, listOf(p(45, "Romanos", 5)),
+                "Pablo traza el paralelo entre los dos representantes de la humanidad: así como por la desobediencia de un hombre (Adán) entró el pecado y reinó la muerte, mucho más por la obediencia de uno solo (Jesucristo) los que reciben la abundancia de la gracia y del don de la justicia reinarán en vida. Cuando el pecado abundó, sobreabundó la gracia.",
+                "La gracia sobreabundante de Jesucristo es infinitamente más poderosa para salvar y dar vida que el pecado para destruir.",
+                "¿Vives bajo la mentalidad de derrota del viejo Adán o reinando en vida por la gracia sobreabundante de Jesucristo?"),
+            d(11, "Día 11: Muertos al Pecado, Vivos para Dios", "Romanos 6:1-14", 45, 6, listOf(p(45, "Romanos", 6)),
+                "¿Perseveraremos en el pecado para que la gracia abunde? ¡En ninguna manera! Hemos sido bautizados en la muerte de Cristo para que, como Cristo resucitó de los muertos por la gloria del Padre, así también nosotros andemos en vida nueva. Nuestro viejo hombre fue crucificado juntamente con Él para que ya no sirvamos al pecado.",
+                "La gracia que nos justifica también nos une a la muerte y resurrección de Cristo para romper el dominio del pecado.",
+                "¿Te consideras hoy a ti mismo muerto al pecado pero vivo para Dios en Cristo Jesús, Señor nuestro?"),
+            d(12, "Día 12: Siervos de la Justicia y la Dádiva de Vida Eterna", "Romanos 6:15-23", 45, 6, listOf(p(45, "Romanos", 6)),
+                "Habiendo sido libertados del pecado, hemos venido a ser siervos de la justicia, presentando nuestros miembros para santificación. El capítulo cierra con el contraste eterno: 'Porque la paga del pecado es muerte, mas la dádiva de Dios es vida eterna en Cristo Jesús Señor nuestro'.",
+                "El pecado siempre paga con muerte espiritual, mientras que Dios nos regala gratuitamente vida eterna y libertad para servirle.",
+                "¿A quién estás entregando hoy tus pensamientos, palabras y acciones como instrumentos de justicia?"),
+            d(13, "Día 13: Libres de la Ley para Pertenecer a Cristo", "Romanos 7:1-13", 45, 7, listOf(p(45, "Romanos", 7)),
+                "Así como la muerte disuelve el vínculo legal del matrimonio, nosotros hemos muerto a la condenación de la ley mediante el cuerpo de Cristo para pertenecer al que resucitó de los muertos, a fin de que llevemos fruto para Dios. Ahora servimos en novedad de espíritu, y no en vejez de letra.",
+                "La Ley es santa, justa y buena, pero solo la unión viva con el Cristo resucitado produce fruto de santidad en nosotros.",
+                "¿Sirves al Señor movido por el amor de pertenecer a Cristo o por el miedo legalista a la letra?"),
+            d(14, "Día 14: La Lucha Interior y la Victoria en Jesucristo", "Romanos 7:14-25", 45, 7, listOf(p(45, "Romanos", 7)),
+                "Con profunda honestidad pastoral, Pablo describe la batalla contra los remanentes del pecado que aún moran en nuestra carne: 'Porque no hago el bien que quiero, sino el mal que no quiero'. Pero ese clamor no termina en desesperación, sino en gratitud: '¡Miserable de mí! ¿quién me librará de este cuerpo de muerte? ¡Gracias doy a Dios, por Jesucristo Señor nuestro!'.",
+                "Reconocer nuestra incapacidad en la carne nos lleva a depender cada día de la victoria libertadora de Jesucristo.",
+                "¿Corres de inmediato a los pies de Jesucristo, tu Libertador, cuando sientes el peso de tu propia debilidad espiritual?"),
+            d(15, "Día 15: Ninguna Condenación y la Vida en el Espíritu", "Romanos 8:1-17", 45, 8, listOf(p(45, "Romanos", 8)),
+                "Llegamos a la cumbre del Himalaya bíblico: 'Ahora, pues, ninguna condenación hay para los que están en Cristo Jesús... Porque la ley del Espíritu de vida en Cristo Jesús me ha librado de la ley del pecado y de la muerte'. No hemos recibido espíritu de servidumbre, sino el Espíritu de adopción por el cual clamamos: ¡Abba, Padre!",
+                "En Cristo no pesa ninguna sentencia de condenación contra nosotros: somos hijos adoptados, guiados y habitados por el Espíritu Santo.",
+                "¿Rechazas toda voz de condenación del pasado recordando que el Espíritu mismo da testimonio de que eres hijo de Dios?"),
+            d(16, "Día 16: Más que Vencedores: Nada nos Separará de Su Amor", "Romanos 8:18-39", 45, 8, listOf(p(45, "Romanos", 8)),
+                "Las aflicciones del tiempo presente no son comparables con la gloria venidera. El Espíritu nos ayuda en nuestra debilidad intercediendo por nosotros, sabemos que a los que aman a Dios todas las cosas les ayudan a bien, y concluimos con el himno invencible: ni la muerte ni la vida ni ninguna cosa creada podrá separarnos del amor de Dios que es en Cristo Jesús.",
+                "Somos más que vencedores porque el amor eterno de Dios nos sostiene desde la elección hasta la glorificación final.",
+                "¿Qué temor o incertidumbre del presente se disipa hoy al recordar que nada podrá separarte jamás del amor de Cristo?"),
+            d(17, "Día 17: La Soberanía de Dios y las Promesas a Israel", "Romanos 9:1-18", 45, 9, listOf(p(45, "Romanos", 9)),
+                "Con gran tristeza e incesante dolor en su corazón por sus hermanos según la carne, Pablo demuestra que la Palabra de Dios no ha fallado. La promesa redentora descansa en el propósito de Dios conforme a la elección: 'No depende del que quiere, ni del que corre, sino de Dios que tiene misericordia'.",
+                "La salvación es obra de la misericordia soberana de Dios, y Sus promesas jamás fracasan a través de la historia.",
+                "¿Sientes en tu corazón la misma carga compasiva de Pablo para interceder por la salvación de tus familiares y conocidos?"),
+            d(18, "Día 18: El Alfarero Soberano y los Vasos de Misericordia", "Romanos 9:19-33", 45, 9, listOf(p(45, "Romanos", 9)),
+                "¿Quién eres tú, oh hombre, para que alterques con Dios? Como el Alfarero soberano sobre el barro, Dios soportó con mucha paciencia los vasos de ira para hacer notorias las riquezas de Su gloria sobre los vasos de misericordia que Él preparó de antemano, llamándonos tanto de entre los judíos como de entre los gentiles.",
+                "Adorar la soberanía del Alfarero divino quebranta nuestra arrogancia y nos llena de asombro por ser vasos de Su misericordia.",
+                "¿Te rindes hoy como barro dócil en las manos del Alfarero sabiendo que todo lo que Él hace es santo y justo?"),
+            d(19, "Día 19: La Justicia que es por la Fe en Cristo", "Romanos 10:1-13", 45, 10, listOf(p(45, "Romanos", 10)),
+                "Porque el fin de la ley es Cristo, para justicia a todo aquel que cree. La palabra de fe está cerca de ti, en tu boca y en tu corazón: 'Que si confesares con tu boca que Jesús es el Señor, y creyeres en tu corazón que Dios le levantó de los muertos, serás salvo... porque todo aquel que invocare el nombre del Señor, será salvo'.",
+                "Cristo es la meta y el cumplimiento de toda la Ley; Su salvación está al alcance de todo aquel que le invoca con fe sincera.",
+                "¿Confiesas a Jesús como Señor soberano con tus labios mientras crees de todo corazón en el poder de Su resurrección?"),
+            d(20, "Día 20: La Fe Viene por el Oír la Palabra de Dios", "Romanos 10:14-21", 45, 10, listOf(p(45, "Romanos", 10)),
+                "¿Cómo, pues, invocarán a aquel en el cual no han creído? ¿Y cómo creerán en aquel de quien no han oído? ¿Y cómo oirán sin haber quien les predique? '¡Cuán hermosos son los pies de los que anuncian la paz, de los que anuncian buenas nuevas!'. Así que la fe es por el oír, y el oír, por la palabra de Dios.",
+                "Dios ha unido Su soberanía al llamado misionero: la fe salvadora despierta cuando la Palabra de Cristo es proclamada y escuchada.",
+                "¿Estás disponiendo tus pies y tus palabras para llevar las buenas nuevas de paz a alguien que aún no ha oído?"),
+            d(21, "Día 21: El Remanente Escogido por Gracia", "Romanos 11:1-15", 45, 11, listOf(p(45, "Romanos", 11)),
+                "¿Ha desechado Dios a Su pueblo? ¡En ninguna manera! Así como en los días de Elías Dios se reservó siete mil hombres que no doblaron la rodilla ante Baal, también en este tiempo ha quedado un remanente escogido por gracia. Y si por gracia, ya no es por obras; de otra manera la gracia ya no es gracia.",
+                "En las épocas de mayor enfriamiento espiritual, Dios siempre preserva con fidelidad un remanente sostenido por Su pura gracia.",
+                "¿Te anima saber que nunca estás solo en tu fidelidad a Dios, sino que formas parte de un pueblo guardado por Su gracia?"),
+            d(22, "Día 22: El Olivo Silvestre y la Sabiduría Divina", "Romanos 11:16-36", 45, 11, listOf(p(45, "Romanos", 11)),
+                "Pablo exhorta a los creyentes gentiles injertados en el buen olivo a no jactarse ni ensoberbecerse, sino a caminar en humildad reverente. Al contemplar el plan redentor completo de Dios, el apóstol prorrumpe en la gran doxología: '¡Oh profundidad de las riquezas de la sabiduría y de la ciencia de Dios! Porque de él, y por él, y para él, son todas las cosas'.",
+                "La verdadera teología siempre termina en doxología: humildad profunda y adoración maravillada ante la sabiduría insondable de Dios.",
+                "¿Concluye tu estudio de la Palabra con un corazón humilde que exclama que de Él, por Él y para Él son todas las cosas?"),
+            d(23, "Día 23: Sacrificio Vivo y Renovación de la Mente", "Romanos 12:1-8", 45, 12, listOf(p(45, "Romanos", 12)),
+                "Después de once capítulos de doctrina gloriosa, Pablo coloca el gran 'Así que': 'Os ruego por las misericordias de Dios, que presentéis vuestros cuerpos en sacrificio vivo, santo, agradable a Dios, que es vuestro culto racional. No os conforméis a este siglo, sino transformaos por medio de la renovación de vuestro entendimiento'.",
+                "La respuesta adecuada a las misericordias de Dios es entregar nuestra vida entera como adoración diaria y usar nuestros dones con humildad.",
+                "¿De qué moldes del mundo necesitas desligar tu mente hoy para ser transformado por la Palabra de Dios?"),
+            d(24, "Día 24: El Amor Sincero y Vencer el Mal con el Bien", "Romanos 12:9-21", 45, 12, listOf(p(45, "Romanos", 12)),
+                "El amor sea sin fingimiento; aborreced lo malo, seguid lo bueno. Amaos los unos a los otros con amor fraternal; en cuanto a honra, prefiriéndoos los unos a los otros. Bendecid a los que os persiguen; gozaos con los que se gozan; llorad con los que lloran. No seas vencido de lo malo, sino vence con el bien el mal.",
+                "El Evangelio vivido en comunidad se traduce en un amor sin hipocresía que responde a la hostilidad venciendo el mal con el bien.",
+                "¿En qué relación difícil te llama el Señor hoy a no pagar mal por mal, sino a vencer el mal con un gesto de bien?"),
+            d(25, "Día 25: El Ciudadano Cristiano y el Respeto al Orden", "Romanos 13:1-7", 45, 13, listOf(p(45, "Romanos", 13)),
+                "El creyente cuya ciudadanía está en los cielos debe ser al mismo tiempo el ciudadano más íntegro en la tierra: respetando el orden civil por causa de la conciencia, haciendo el bien y pagando a todos lo que se les debe: al que tributo, tributo; al que respeto, respeto; al que honra, honra.",
+                "Honrar la ley y actuar con rectitud cívica adorna la doctrina de nuestro Salvador ante la sociedad.",
+                "¿Da tu conducta como ciudadano, vecino y trabajador un testimonio irreprensible del nombre de Cristo?"),
+            d(26, "Día 26: El Amor como Cumplimiento de la Ley y Vestirse de Cristo", "Romanos 13:8-14", 45, 13, listOf(p(45, "Romanos", 13)),
+                "No debáis a nadie nada, sino el amaros unos a otros; porque el que ama al prójimo, ha cumplido la ley. Y esto, conociendo el tiempo, que es ya hora de levantarnos del sueño; porque la noche está avanzada, y se acerca el día. Desechemos, pues, las obras de las tinieblas, y vistámonos las armas de la luz: vestíos del Señor Jesucristo.",
+                "Vivir despiertos a la luz del regreso de Cristo significa amar al prójimo y vestirnos cada mañana del carácter de Jesús.",
+                "¿Te has vestido hoy intencionalmente del Señor Jesucristo sin proveer para los deseos de la carne?"),
+            d(27, "Día 27: Recibir al Débil en la Fe sin Juzgar", "Romanos 14:1-12", 45, 14, listOf(p(45, "Romanos", 14)),
+                "En cuestiones secundarias y de conciencia, Pablo exhorta a recibir al débil en la fe sin contender sobre opiniones: el que tiene más libertad no menosprecie al escrupuloso, y el escrupuloso no juzgue al otro, porque Dios le ha recibido. Pues ninguno de nosotros vive para sí, sino que para el Señor vivimos.",
+                "En lo esencial del Evangelio debe haber unidad; en lo secundario de conciencia, libertad; y en todas las cosas, caridad fraternal.",
+                "¿Evitas juzgar o menospreciar a otros creyentes en asuntos secundarios recordando que cada uno dará cuenta a su propio Señor?"),
+            d(28, "Día 28: Seguir lo que Contribuye a la Paz y la Edificación", "Romanos 14:13-23", 45, 14, listOf(p(45, "Romanos", 14)),
+                "Decidid no poner tropiezo u ocasión de caer al hermano, porque si por tu libertad tu hermano es contristado, ya no andas conforme al amor. 'Porque el reino de Dios no es comida ni bebida, sino justicia, paz y gozo en el Espíritu Santo. Así que, sigamos lo que contribuye a la paz y a la mutua edificación'.",
+                "La verdadera madurez espiritual está dispuesta a ceder sus propios derechos con tal de edificar y cuidar la fe del hermano.",
+                "¿Priorizas en tu iglesia y familia aquello que contribuye a la paz, la justicia y la mutua edificación en el Espíritu?"),
+            d(29, "Día 29: Edificar al Prójimo según el Ejemplo de Cristo", "Romanos 15:1-33", 45, 15, listOf(p(45, "Romanos", 15)),
+                "Así que, los que somos fuertes debemos soportar las flaquezas de los débiles, y no agradarnos a nosotros mismos, porque ni aun Cristo se agradó a sí mismo. Todo lo que fue escrito en las Escrituras antes fue escrito para nuestra enseñanza, a fin de que por la paciencia y la consolación de las Escrituras tengamos esperanza.",
+                "Recibirnos unos a otros como Cristo nos recibió glorifica a Dios y nos llena de todo gozo y paz en el creer.",
+                "¿Acoges a tus hermanos con la misma paciencia y generosidad con que Cristo te recibió a ti para la gloria de Dios?"),
+            d(30, "Día 30: Comunión Fraterna y Doxología al Único Sabio Dios", "Romanos 16:1-27", 45, 16, listOf(p(45, "Romanos", 16)),
+                "El capítulo final de Romanos nos regala un cuadro entrañable de la Iglesia primitiva: hombres y mujeres como Febe, Priscila, Aquila y tantos colaboradores que arriesgaron sus vidas por el Evangelio. Tras exhortar a guardarse de quienes causan divisiones, Pablo cierra con la doxología suprema: 'Al único y sabio Dios, sea gloria mediante Jesucristo para siempre. Amén'.",
+                "La obra del Reino nunca es labor de un llanero solitario, sino de una familia unida en la verdad para la gloria del único y sabio Dios.",
+                "¿Honras, agradeces y cuidas la unidad con los hermanos que sirven fielmente a tu lado en la obra del Señor?")
+        )
     }
 
     // --- 30 DÍAS CON JESÚS (30 Días) ---
     val jesus30Plan: List<ReadingPlanDay> by lazy {
-        (1..30).map { dayNum ->
-            val meta = when (dayNum) {
-                1 -> PlanDayMeta(40, "Mateo", 5, "Las Bienaventuranzas y el Carácter del Reino")
-                2 -> PlanDayMeta(40, "Mateo", 6, "La Oración Secreta y la Confianza en el Padre")
-                3 -> PlanDayMeta(40, "Mateo", 7, "Cimiento sobre la Roca y Frutos Verdaderos")
-                4 -> PlanDayMeta(40, "Mateo", 8, "Autoridad de Jesús sobre la Enfermedad y el Mar")
-                5 -> PlanDayMeta(40, "Mateo", 9, "El Médico de las Almas y la Compasión por las Multitudes")
-                6 -> PlanDayMeta(40, "Mateo", 11, "Descanso para los Cansados en el Yugo de Cristo")
-                7 -> PlanDayMeta(40, "Mateo", 13, "Las Parábolas del Sembrador y el Tesoro Escondido")
-                8 -> PlanDayMeta(41, "Marcos", 1, "El Inicio del Ministerio y el Llamado de los Discípulos")
-                9 -> PlanDayMeta(41, "Marcos", 2, "Perdón de Pecados y Señor del Día de Reposo")
-                10 -> PlanDayMeta(41, "Marcos", 4, "Jesús Calma la Tempestad con Su Voz")
-                11 -> PlanDayMeta(41, "Marcos", 5, "Poder Restaurador ante Casos Imposibles")
-                12 -> PlanDayMeta(41, "Marcos", 6, "El Buen Pastor que Multiplicó los Panes")
-                13 -> PlanDayMeta(41, "Marcos", 8, "Tomar la Cruz y Seguir al Mesías")
-                14 -> PlanDayMeta(41, "Marcos", 10, "El Hijo del Hombre Vino para Servir y Dar Su Vida")
-                15 -> PlanDayMeta(42, "Lucas", 4, "Ungido para Dar Buenas Nuevas a los Quebrantados")
-                16 -> PlanDayMeta(42, "Lucas", 7, "Perdón Abundante y Amor Agradecido")
-                17 -> PlanDayMeta(42, "Lucas", 10, "El Buen Samaritano y Elegir la Buena Parte a Sus Pies")
-                18 -> PlanDayMeta(42, "Lucas", 15, "El Abrazo del Padre al Hijo Pródigo")
-                19 -> PlanDayMeta(42, "Lucas", 18, "Perseverancia en la Oración y Humildad de Corazón")
-                20 -> PlanDayMeta(42, "Lucas", 19, "Salvación en Casa de Zaqueo: Buscar lo que se Había Perdido")
-                21 -> PlanDayMeta(42, "Lucas", 24, "El Camino a Emaús y los Corazones que Arden")
-                22 -> PlanDayMeta(43, "Juan", 1, "El Verbo Hecho Carne Lleno de Gracia y de Verdad")
-                23 -> PlanDayMeta(43, "Juan", 3, "Nacer de Nuevo y el Amor Infinito de Dios")
-                24 -> PlanDayMeta(43, "Juan", 4, "El Agua Viva y la Adoración en Espíritu y en Verdad")
-                25 -> PlanDayMeta(43, "Juan", 10, "El Buen Pastor que Da Su Vida por las Ovejas")
-                26 -> PlanDayMeta(43, "Juan", 11, "Yo Soy la Resurrección y la Vida")
-                27 -> PlanDayMeta(43, "Juan", 13, "El Lavatorio de los Pies y el Mandamiento Nuevo")
-                28 -> PlanDayMeta(43, "Juan", 15, "Permanecer en la Vid Verdadera para Llevar Fruto")
-                29 -> PlanDayMeta(43, "Juan", 19, "Consumado Es: El Sacrificio Supremo en el Calvario")
-                else -> PlanDayMeta(43, "Juan", 20, "La Tumba Vacía y el Encuentro con el Cristo Resucitado")
-            }
-            d(
-                num = dayNum,
-                title = "Día $dayNum: ${meta.subTitle}",
-                summary = "${meta.bookName} ${meta.chapter}",
-                pBId = meta.bookId,
-                pC = meta.chapter,
-                passages = listOf(p(meta.bookId, meta.bookName, meta.chapter)),
-                narrative = "Al recorrer ${meta.bookName} ${meta.chapter}, contemplamos a Jesucristo revelando «${meta.subTitle}». En cada palabra y en cada gesto del Maestro vemos la plenitud de la gracia y de la verdad acercándose al ser humano quebrantado para restaurarlo, perdonarlo y llamarlo a una vida nueva.",
-                lesson = "En ${meta.bookName} ${meta.chapter}, Jesús se manifiesta como el Salvador soberano y compasivo cuyo poder transforma toda realidad humana.",
-                reflection = "¿Qué actitud o palabra de Jesús en ${meta.bookName} ${meta.chapter} necesitas abrazar e imitar hoy en tu vida diaria?"
-            )
-        }
+        listOf(
+            d(1, "Día 1: Las Bienaventuranzas y el Carácter del Reino", "Mateo 5", 40, 5, listOf(p(40, "Mateo", 5)),
+                "Jesús sube al monte, se sienta como el Legislador supremo y proclama las Bienaventuranzas. El Reino de los Cielos invierte la escala de valores del mundo: los bienaventurados no son los soberbios ni los autosuficientes, sino los pobres en espíritu, los mansos y los que tienen hambre y sed de justicia.",
+                "El Sermón del Monte describe el carácter interior de quien ha nacido de nuevo y brilla como sal de la tierra y luz del mundo.",
+                "¿Cuál de las Bienaventuranzas de Mateo 5 refleja hoy tu mayor necesidad de crecer a la imagen de Jesús?"),
+            d(2, "Día 2: La Oración Secreta y la Confianza en el Padre", "Mateo 6", 40, 6, listOf(p(40, "Mateo", 6)),
+                "Jesús nos libra de la hipocresía religiosa que busca el aplauso de los hombres y nos invita a entrar en nuestro aposento secreto, donde nuestro Padre que ve en lo secreto nos recompensa. Allí aprendemos a orar el Padre Nuestro y a vencer el afán mirando las aves del cielo y los lirios del campo.",
+                "Buscar primeramente el Reino de Dios y Su justicia desarma la ansiedad y alinea el corazón con la provisión del Padre.",
+                "¿Practicas tu vida de oración y generosidad para ser visto por los hombres o para agradar al Padre en lo secreto?"),
+            d(3, "Día 3: Cimiento sobre la Roca y Frutos Verdaderos", "Mateo 7", 40, 7, listOf(p(40, "Mateo", 7)),
+                "El Maestro concluye el Sermón del Monte llamándonos a una decisión radical: entrar por la puerta estrecha y edificar nuestra casa sobre la roca. No basta con oír Sus palabras ni con decir 'Señor, Señor'; la fe genuina se demuestra haciendo la voluntad del Padre cuando golpean los ríos y los vientos.",
+                "Oír las palabras de Jesús y ponerlas en práctica es el único cimiento capaz de resistir las tormentas de la vida.",
+                "¿En qué área específica estás siendo hoy solo un oidor de la Palabra y necesitas pasar a la obediencia práctica?"),
+            d(4, "Día 4: Autoridad de Jesús sobre la Enfermedad y el Mar", "Mateo 8", 40, 8, listOf(p(40, "Mateo", 8)),
+                "Al descender del monte, Jesús respalda Su enseñanza con poder soberano: limpia al leproso con un toque de compasión, sana al siervo del centurión con una sola palabra a distancia y reprende a los vientos y al mar embravecido hasta producir una gran bonanza.",
+                "No hay enfermedad tan impura ni tormenta tan violenta que escape a la voz de mando del Hijo de Dios.",
+                "¿Confías en la autoridad de una sola palabra de Jesús como lo hizo el centurión en medio de tu necesidad?"),
+            d(5, "Día 5: El Médico de las Almas y la Compasión por las Multitudes", "Mateo 9", 40, 9, listOf(p(40, "Mateo", 9)),
+                "Ante el paralítico, Jesús va primero a la raíz más profunda: 'Ten ánimo, hijo; tus pecados te son perdonados'. Luego llama a Mateo del banco de los tributos, recuerda que los sanos no tienen necesidad de médico sino los enfermos, y siente entrañable compasión por las multitudes desamparadas.",
+                "Jesús no vino a llamar a quienes se creen justos, sino a perdonar, sanar y pastorear a pecadores quebrantados.",
+                "¿Miramos a las personas necesitadas con el desdén de los fariseos o con las entrañas de compasión de Jesús?"),
+            d(6, "Día 6: Descanso para los Cansados en el Yugo de Cristo", "Mateo 11", 40, 11, listOf(p(40, "Mateo", 11)),
+                "En medio de una generación incrédula y cargada de exigencias legalistas, Jesús abre Sus brazos y proclama la invitación más tierna de los Evangelios: 'Venid a mí todos los que estáis trabajados y cargados, y yo os haré descansar. Llevad mi yugo sobre vosotros y aprended de mí, que soy manso y humilde de corazón'.",
+                "El verdadero descanso del alma no es la ausencia de servicio, sino caminar unidos al yugo manso y humilde de Jesús.",
+                "¿Qué carga pesada necesitas depositar hoy a los pies de Jesús para recibir Su descanso?"),
+            d(7, "Día 7: Las Parábolas del Sembrador y el Tesoro Escondido", "Mateo 13", 40, 13, listOf(p(40, "Mateo", 13)),
+                "A través de las parábolas del Reino, Jesús revela cómo la misma semilla de la Palabra cae en cuatro tipos de corazón: junto al camino, en pedregales, entre espinos y en buena tierra que da fruto a ciento por uno. El Reino de los Cielos es el tesoro escondido y la perla de gran precio por la cual vale la pena dejarlo todo.",
+                "La diferencia en el fruto espiritual radica en la disposición del corazón que oye, entiende y atesora la Palabra.",
+                "¿Qué espinos de afán o engaño de las riquezas necesitas arrancar hoy para que la Palabra dé fruto al ciento por uno en ti?"),
+            d(8, "Día 8: El Inicio del Ministerio y el Llamado de los Discípulos", "Marcos 1", 41, 1, listOf(p(41, "Marcos", 1)),
+                "El Evangelio de Marcos presenta a Jesús como el Siervo en acción inmediata: bautizado en el Jordán, victorioso en el desierto y proclamando que el tiempo se ha cumplido. Junto al mar de Galilea llama a pescadores sencillos —Simón, Andrés, Jacobo y Juan— y aun antes del amanecer se retira a un lugar desierto para orar.",
+                "El secreto de la autoridad pública de Jesús estaba en Su comunión íntima con el Padre de madrugada.",
+                "¿Priorizas tu tiempo a solas con Dios en oración antes de enfrentar las demandas y actividades del día?"),
+            d(9, "Día 9: Perdón de Pecados y Señor del Día de Reposo", "Marcos 2", 41, 2, listOf(p(41, "Marcos", 2)),
+                "Cuatro amigos abren el techo para bajar a un paralítico ante Jesús. Viendo la fe de ellos, el Señor demuestra Su deidad perdonando pecados en la tierra y proclamando que el Hijo del Hombre es Señor aun del día de reposo. El vino nuevo de Su gracia no cabe en los odres viejos del legalismo.",
+                "Jesús coloca la misericordia y la redención del ser humano por encima de las tradiciones religiosas rígidas.",
+                "¿Eres como aquellos cuatro amigos que llevan con fe y perseverancia a otros a los pies de Jesús?"),
+            d(10, "Día 10: Jesús Calma la Tempestad con Su Voz", "Marcos 4", 41, 4, listOf(p(41, "Marcos", 4)),
+                "Al cruzar el mar de Galilea al anochecer, se levanta una gran tempestad de viento que anega la barca. Los discípulos claman aterrados, y Jesús, levantándose, reprende al viento y dice al mar: 'Calla, enmudece'. Y se hizo grande bonanza. Luego les pregunta: '¿Por qué estáis así amedrentados? ¿Cómo no tenéis fe?'.",
+                "La presencia de Jesús en nuestra barca no evita que surjan tormentas, pero garantiza que jamás naufragaremos.",
+                "¿En qué tormenta actual necesitas escuchar hoy la voz de Jesús diciendo a tu corazón: 'Calla, enmudece'?"),
+            d(11, "Día 11: Poder Restaurador ante Casos Imposibles", "Marcos 5", 41, 5, listOf(p(41, "Marcos", 5)),
+                "Marcos 5 reúne tres casos humanamente desahuciados: un hombre atormentado en Gadara que nadie podía sujetar, una mujer con doce años de flujo de sangre que había gastado todo en médicos, y la hija de Jairo que acababa de morir. Para Jesús no existen casos perdidos: 'No temas, cree solamente'.",
+                "Donde terminan todos los recursos humanos comienza la manifestación gloriosa del poder restaurador de Cristo.",
+                "¿Te acercas a Jesús con la fe perseverante que toca Su manto aun cuando todo parece perdido?"),
+            d(12, "Día 12: El Buen Pastor que Multiplicó los Panes", "Marcos 6", 41, 6, listOf(p(41, "Marcos", 6)),
+                "Con apenas cinco panes y dos peces puestos en Sus manos y bendecidos mirando al cielo, Jesús alimenta a cinco mil hombres hasta saciarlos y recoger doce cestas llenas. Esa misma noche, viendo a Sus discípulos fatigados remando contra el viento, viene a ellos andando sobre el mar y les dice: '¡Tened ánimo; yo soy, no temáis!'.",
+                "Lo poco que ponemos en las manos de Jesús se multiplica para bendecir a multitudes más allá de nuestra escasez.",
+                "¿Qué 'cinco panes y dos peces' de tus recursos o capacidades puedes entregar hoy en las manos de Jesús?"),
+            d(13, "Día 13: Tomar la Cruz y Seguir al Mesías", "Marcos 8", 41, 8, listOf(p(41, "Marcos", 8)),
+                "Tras la confesión de Pedro en Cesarea de Filipo ('Tú eres el Cristo'), Jesús revela el camino del Calvario y establece la condición del verdadero discipulado: 'Si alguno quiere venir en pos de mí, niéguese a sí mismo, y tome su cruz, y sígame. Porque ¿qué aprovechará al hombre si ganare todo el mundo, y perdiere su alma?'.",
+                "Seguir a Cristo implica morir al egoísmo propio para hallar la verdadera vida eterna en Él.",
+                "¿Qué significa de manera práctica para ti hoy negarte a ti mismo y tomar tu cruz para seguir a Jesús?"),
+            d(14, "Día 14: El Hijo del Hombre Vino para Servir y Dar Su Vida", "Marcos 10", 41, 10, listOf(p(41, "Marcos", 10)),
+                "Mientras los discípulos discutían sobre puestos de grandeza, Jesús definió la verdadera autoridad espiritual: 'El que quiera hacerse grande entre vosotros será vuestro servidor... Porque el Hijo del Hombre no vino para ser servido, sino para servir, y para dar su vida en rescate por muchos'.",
+                "La grandeza en el Reino de Dios nunca se mide por cuántos nos sirven, sino por a cuántos servimos con amor sacrificial.",
+                "¿De qué forma concreta puedes servir hoy con humildad a quienes están en tu casa o lugar de trabajo?"),
+            d(15, "Día 15: Ungido para Dar Buenas Nuevas a los Quebrantados", "Lucas 4", 42, 4, listOf(p(42, "Lucas", 4)),
+                "Después de vencer las tres tentaciones del diablo en el desierto con la espada de la Escritura ('Escrito está'), Jesús regresa en el poder del Espíritu a Galilea y anuncia en Nazaret el año agradable del Señor: libertad a los cautivos, vista a los ciegos y consuelo a los oprimidos.",
+                "Jesús venció donde Adán cayó y vino a romper toda cadena de opresión espiritual con Su Palabra.",
+                "¿Enfrentas las tentaciones diarias apoyándote firmemente en el 'Escrito está' de la Palabra de Dios?"),
+            d(16, "Día 16: Perdón Abundante y Amor Agradecido", "Lucas 7", 42, 7, listOf(p(42, "Lucas", 7)),
+                "En casa de Simón el fariseo, una mujer pecadora riega los pies de Jesús con sus lágrimas, los enjuga con sus cabellos y los unge con perfume. Jesús declara una ley espiritual profunda: 'Sus muchos pecados le son perdonados, porque amó mucho; mas aquel a quien se le perdona poco, poco ama'.",
+                "La medida de nuestro amor y gratitud hacia Cristo es directamente proporcional a nuestra conciencia de cuánto nos ha perdonado.",
+                "¿Qué tan fresca está hoy en tu memoria la gratitud por la inmensa deuda de pecado que Jesús te perdonó?"),
+            d(17, "Día 17: El Buen Samaritano y Elegir la Buena Parte a Sus Pies", "Lucas 10", 42, 10, listOf(p(42, "Lucas", 10)),
+                "Lucas 10 une de manera magistral el servicio compasivo y la adoración íntima: la parábola del Buen Samaritano nos enseña a detenernos para vendar las heridas del prójimo caído, mientras que la escena en casa de Marta y María nos recuerda que sentarse a los pies de Jesús para oír Su palabra es la 'buena parte' que no nos será quitada.",
+                "El servicio cristiano verdadero nace de haber estado primero sentados a los pies de Jesús escuchando Su voz.",
+                "¿Estás tan afanado y turbado con muchas cosas como Marta que has descuidado sentarte a los pies de Jesús como María?"),
+            d(18, "Día 18: El Abrazo del Padre al Hijo Pródigo", "Lucas 15", 42, 15, listOf(p(42, "Lucas", 15)),
+                "Frente a la murmuración de los religiosos, Jesús narra tres parábolas sublimes sobre el gozo del cielo cuando un pecador se arrepiente: la oveja perdida, la moneda perdida y el hijo pródigo. Cuando el hijo aún estaba lejos, su padre fue movido a misericordia, corrió, se echó sobre su cuello y le besó.",
+                "Dios no espera al pecador arrepentido con el ceño fruncido, sino con los brazos abiertos de un Padre compasivo.",
+                "¿Conoces la ternura del abrazo restaurador del Padre o guardas el resentimiento frío del hermano mayor?"),
+            d(19, "Día 19: Perseverancia en la Oración y Humildad de Corazón", "Lucas 18", 42, 18, listOf(p(42, "Lucas", 18)),
+                "Sobre la necesidad de orar siempre y no desmayar, Jesús presenta a la viuda perseverante y luego contrasta a dos hombres en el templo: el fariseo que oraba consigo mismo jactándose de sus méritos, y el publicano que, golpeándose el pecho, decía: 'Dios, sé propicio a mí, pecador'. Este descendió a su casa justificado.",
+                "Dios resiste la jactancia del orgulloso, pero justifica y exalta al corazón que se acerca a Él con humildad quebrantada.",
+                "¿Oras con perseverancia humilde reconociendo tu total necesidad de la misericordia divina?"),
+            d(20, "Día 20: Salvación en Casa de Zaqueo: Buscar lo que se Había Perdido", "Lucas 19", 42, 19, listOf(p(42, "Lucas", 19)),
+                "En Jericó, Zaqueo, jefe de los publicanos, sube a un árbol sicómoro para ver a Jesús. El Señor alza la vista, lo llama por su nombre y se hospeda en su casa. El encuentro con la gracia de Cristo produce en Zaqueo un arrepentimiento genuino con restitución generosa: 'Hoy ha venido la salvación a esta casa'.",
+                "Porque el Hijo del Hombre vino a buscar y a salvar lo que se había perdido, ningún corazón está fuera del alcance de Su gracia.",
+                "¿De qué maneras tangibles se nota en tus decisiones diarias que Jesús ha entrado a morar en tu casa?"),
+            d(21, "Día 21: El Camino a Emaús y los Corazones que Arden", "Lucas 24", 42, 24, listOf(p(42, "Lucas", 24)),
+                "En el día de la resurrección, Jesús resucitado se acerca a dos discípulos entristecidos que caminaban hacia Emaús y, comenzando desde Moisés y siguiendo por todos los profetas, les declaraba en todas las Escrituras lo que de Él decían. Al partir el pan sus ojos fueron abiertos y exclamaron: '¿No ardía nuestro corazón en nosotros?'.",
+                "Cristo resucitado es la llave maestra de toda la Biblia; cuando Él nos abre las Escrituras, el corazón vuelve a arder de esperanza.",
+                "¿Pides a Jesús cada vez que lees la Biblia que abra tu entendimiento para que tu corazón arda con Su presencia?"),
+            d(22, "Día 22: El Verbo Hecho Carne Lleno de Gracia y de Verdad", "Juan 1", 43, 1, listOf(p(43, "Juan", 1)),
+                "En el principio era el Verbo, y el Verbo era con Dios, y el Verbo era Dios. Y aquel Verbo fue hecho carne, y habitó entre nosotros (literalmente, 'puso Su tabernáculo entre nosotros'), lleno de gracia y de verdad. Juan el Bautista lo señala ante el mundo: '¡He aquí el Cordero de Dios, que quita el pecado del mundo!'.",
+                "En Jesucristo, el Dios eterno e invisible se hizo cercano y visible, trayendo gracia sobre gracia a todos los que le reciben.",
+                "¿Adoras a Jesús reconociendo en Él tanto Su majestad eterna de Creador como Su ternura de Cordero redentor?"),
+            d(23, "Día 23: Nacer de Nuevo y el Amor Infinito de Dios", "Juan 3", 43, 3, listOf(p(43, "Juan", 3)),
+                "En Su diálogo nocturno con Nicodemo, maestro de Israel, Jesús revela que la entrada al Reino de Dios requiere nacer de nuevo del Espíritu, y pronuncia la cumbre del Evangelio: 'Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna'.",
+                "La salvación nace del amor inmensurable del Padre al entregar a Su Hijo para que tengamos vida eterna por la fe.",
+                "¿Vives con la gratitud diaria de saber que Dios no envió a Su Hijo para condenarte, sino para salvarte?"),
+            d(24, "Día 24: El Agua Viva y la Adoración en Espíritu y en Verdad", "Juan 4", 43, 4, listOf(p(43, "Juan", 4)),
+                "Cansado del camino, Jesús se sienta junto al pozo de Jacob al mediodía para salir al encuentro de una mujer samaritana marginada. Sin condenarla pero mostrándole toda su verdad, le ofrece el agua que salta para vida eterna y revela que el Padre busca adoradores que le adoren en espíritu y en verdad.",
+                "Jesús derriba toda barrera social y ofrece un manantial interior que sacia para siempre la sed del alma.",
+                "¿Tu adoración a Dios brota en espíritu y en verdad desde un corazón saciado por el agua viva de Cristo?"),
+            d(25, "Día 25: El Buen Pastor que Da Su Vida por las Ovejas", "Juan 10", 43, 10, listOf(p(43, "Juan", 10)),
+                "Yo soy el buen pastor; el buen pastor su vida da por las ovejas. A diferencia del asalariado que huye cuando viene el lobo, Jesús conoce a Sus ovejas por nombre, las llama, va delante de ellas, les da vida en abundancia y promete que nadie las arrebatará jamás de Su mano ni de la mano del Padre.",
+                "Nuestras vidas están eternamente seguras bajo el cuidado amoroso y omnipotente del Buen Pastor que dio Su vida por nosotros.",
+                "¿Reconoces y sigues la voz del Buen Pastor por encima del ruido de los extraños en este mundo?"),
+            d(26, "Día 26: Yo Soy la Resurrección y la Vida", "Juan 11", 43, 11, listOf(p(43, "Juan", 11)),
+                "Frente al sepulcro de su amigo Lázaro en Betania, Jesús llora conmovido compartiendo nuestro dolor humano, y proclama a Marta: 'Yo soy la resurrección y la vida; el que cree en mí, aunque esté muerto, vivirá'. Con voz de trueno clama: '¡Lázaro, ven fuera!', demostrando Su señorío absoluto sobre la muerte.",
+                "Jesús llora con nosotros en nuestras pérdidas y al mismo tiempo tiene el poder soberano para vencer a la muerte.",
+                "¿Crees de todo corazón la pregunta que Jesús le hizo a Marta: '¿Crees esto?', aun frente a las situaciones más difíciles?"),
+            d(27, "Día 27: El Lavatorio de los Pies y el Mandamiento Nuevo", "Juan 13", 43, 13, listOf(p(43, "Juan", 13)),
+                "Sabiendo Jesús que el Padre le había dado todas las cosas en las manos, se levantó de la cena, se ciñó una toalla y lavó los pies polvorientos de sus discípulos. Luego les entregó el distintivo de la Iglesia: 'Un mandamiento nuevo os doy: Que os améis unos a otros; como yo os he amado, que también os améis unos a otros'.",
+                "La marca inconfundible de los verdaderos discípulos de Jesús ante el mundo es el amor humilde que se inclina a servir.",
+                "¿A quién te está llamando el Señor a 'lavar los pies' hoy mediante un acto de humildad, perdón o servicio?"),
+            d(28, "Día 28: Permanecer en la Vid Verdadera para Llevar Fruto", "Juan 15", 43, 15, listOf(p(43, "Juan", 15)),
+                "En camino al Getsemaní, Jesús nos entrega el secreto de la vida espiritual fructífera: 'Yo soy la vid, vosotros los pámpanos; el que permanece en mí, y yo en él, éste lleva mucho fruto; porque separados de mí nada podéis hacer'. El Padre limpia todo pámpano que lleva fruto para que lleve más fruto y Su gozo sea cumplido en nosotros.",
+                "El fruto espiritual no se produce por esfuerzo aislado, sino permaneciendo en comunión constante con Cristo y Su Palabra.",
+                "¿Permanece tu corazón vitalmente conectado con Jesús a lo largo del día a través de la oración y la obediencia?"),
+            d(29, "Día 29: Consumado Es: El Sacrificio Supremo en el Calvario", "Juan 19", 43, 19, listOf(p(43, "Juan", 19)),
+                "En el Gólgota contemplamos el amor eterno llevado hasta el extremo: el Rey coronado de espinas, entregado como el Cordero de Dios. Antes de inclinar la cabeza y entregar el espíritu, Jesús pronuncia una sola palabra triunfal en griego (Tetélestai): '¡Consumado es!' — la deuda ha sido pagada íntegramente.",
+                "En la cruz del Calvario, Jesús canceló para siempre el acta de nuestra deuda; nada falta por pagar para nuestra redención.",
+                "¿Descansas con gratitud reverente en el '¡Consumado es!' de la cruz de Cristo?"),
+            d(30, "Día 30: La Tumba Vacía y el Encuentro con el Cristo Resucitado", "Juan 20", 43, 20, listOf(p(43, "Juan", 20)),
+                "El primer día de la semana, el sepulcro está vacío. Jesús resucitado llama a María Magdalena por su nombre, se presenta en medio de los discípulos diciendo 'Paz a vosotros', muestra Sus manos y Su costado a Tomás quien exclama: '¡Señor mío, y Dios mío!', y declara bienaventurados a los que sin haber visto creyeron.",
+                "La resurrección corporal de Jesucristo es el sello de nuestra fe, la fuente de nuestra paz y la garantía de nuestra vida eterna.",
+                "¿Haces tuya hoy la confesión de adoración rendida de Tomás ante el Resucitado: '¡Señor mío, y Dios mío!'?")
+        )
     }
 
     // --- 31 DÍAS EN PROVERBIOS (31 Días) ---
-    val proverbs31Plan: List<ReadingPlanDay> by lazy {
-        (1..31).map { dayNum ->
-            val provTheme = when (dayNum) {
-                1 -> "El Principio de la Sabiduría es el Temor de Jehová"
-                2 -> "Buscar la Sabiduría como a Tesoros Escondidos"
-                3 -> "Fíate de Jehová de Todo tu Corazón"
-                4 -> "Sobre Toda Cosa Guardada, Guarda tu Corazón"
-                5 -> "Pureza, Fidelidad Conyugal y Huir de la Tentación"
-                6 -> "Diligencia frente a la Pereza y Lo que Dios Aborrece"
-                7 -> "Guardar los Mandamientos como a la Niña de tus Ojos"
-                8 -> "El Clamor Eterno de la Sabiduría Divina"
-                9 -> "El Banquete de la Sabiduría frente a la Necedad"
-                10 -> "El Contraste entre la Integridad del Justo y el Camino Impío"
-                11 -> "Balanza Justa, Humildad y Generosidad que Prospera"
-                12 -> "Amor a la Corrección y Palabras que Sanan"
-                13 -> "Esperanza Cumplida y Caminar con los Sabios"
-                14 -> "Edificar la Casa con Sabiduría y Temor Reverente"
-                15 -> "La Blanda Respuesta Quita la Ira"
-                16 -> "Encomendar a Jehová las Obras y Someter los Planes"
-                17 -> "El Amigo que Ama en Todo Tiempo y el Corazón Alegre"
-                18 -> "Torre Fuerte es el Nombre de Jehová y el Poder de la Lengua"
-                19 -> "Integridad en la Pobreza, Paciencia y Bondad hacia el Necesitado"
-                20 -> "Rectitud en los Negocios y Consejos Profundos del Corazón"
-                21 -> "El Corazón del Rey en la Mano de Jehová y la Justicia"
-                22 -> "El Buen Nombre, la Crianza Piadosa y la Prudencia Financiera"
-                23 -> "Dominio Propio y No Envidiar la Prosperidad del Pecador"
-                24 -> "Siete Veces Cae el Justo y Vuelve a Levantarse"
-                25 -> "Dominio del Espíritu como Ciudad Amurallada"
-                26 -> "Discernimiento ante la Necedad, el Chisme y la Pereza"
-                27 -> "Hierro con Hierro se Aguza: El Valor de la Amistad Fiel"
-                28 -> "El que Confiesa y se Aparta Alcanzará Misericordia"
-                29 -> "Humildad que Recibe Honra y Confiar en Jehová sin Temor"
-                30 -> "La Oración de Agur: Pureza de Palabra y Contentamiento"
-                else -> "Sabiduría en el Liderazgo y el Carácter Virtuoso que Teme a Dios"
-            }
-            d(
-                num = dayNum,
-                title = "Día $dayNum: Proverbios $dayNum - $provTheme",
-                summary = "Proverbios $dayNum",
-                pBId = 20,
-                pC = dayNum,
-                passages = listOf(p(20, "Proverbios", dayNum)),
-                narrative = "El capítulo $dayNum de Proverbios aterriza la fe al terreno concreto de «$provTheme». La sabiduría bíblica no es mera acumulación de datos intelectuales, sino la habilidad espiritual de aplicar la verdad de Dios a nuestras palabras, finanzas, relaciones familiares y decisiones diarias.",
-                lesson = "La sabiduría de Proverbios $dayNum enseña que el temor reverente del Señor produce rectitud, prudencia y paz duradera.",
-                reflection = "¿Qué principio práctico de Proverbios $dayNum sobre «$provTheme» necesitas aplicar hoy mismo en tu conducta o palabras?"
-            )
-        }
+        val proverbs31Plan: List<ReadingPlanDay> by lazy {
+        listOf(
+            d(1, "Día 1: Proverbios 1 - El Principio de la Sabiduría es el Temor de Jehová", "Proverbios 1", 20, 1, listOf(p(20, "Proverbios", 1)),
+                "Proverbios abre estableciendo la brújula de toda la vida: 'El principio de la sabiduría es el temor de Jehová; los insensatos desprecian la sabiduría y la enseñanza'. Escuchar la instrucción paterna y rechazar las invitaciones a la codicia protege nuestros pasos desde el inicio.",
+                "Toda verdadera sabiduría comienza con una reverencia humilde y amorosa ante la autoridad de Dios.",
+                "¿En qué decisión actual necesitas demostrar que el temor reverente de Jehová es el principio de tu sabiduría?"),
+            d(2, "Día 2: Proverbios 2 - Buscar la Sabiduría como a Tesoros Escondidos", "Proverbios 2", 20, 2, listOf(p(20, "Proverbios", 2)),
+                "Si clamares a la inteligencia y la buscares como a la plata y como a tesoros escondidos, entonces entenderás el temor de Jehová y hallarás el conocimiento de Dios; porque Jehová da la sabiduría, y de Su boca viene el conocimiento y la inteligencia.",
+                "Dios concede discernimiento y protección moral a quienes buscan Su Palabra con anhelo diligente.",
+                "¿Buscas hoy la sabiduría de la Palabra de Dios con el mismo empeño con que alguien busca tesoros escondidos?"),
+            d(3, "Día 3: Proverbios 3 - Fíate de Jehová de Todo tu Corazón", "Proverbios 3", 20, 3, listOf(p(20, "Proverbios", 3)),
+                "Fíate de Jehová de todo tu corazón, y no te apoyes en tu propia prudencia. Reconócelo en todos tus caminos, y él enderezará tus veredas. No seas sabio en tu propia opinión; teme a Jehová, y apártate del mal, y honra a Dios con tus bienes y primicias.",
+                "Confiar plenamente en el Señor por encima de nuestro propio entendimiento garantiza dirección segura y paz.",
+                "¿En qué área de tu vida necesitas dejar de apoyarte en tu propia prudencia y fiarte de Jehová de todo tu corazón?"),
+            d(4, "Día 4: Proverbios 4 - Sobre Toda Cosa Guardada, Guarda tu Corazón", "Proverbios 4", 20, 4, listOf(p(20, "Proverbios", 4)),
+                "El camino de los justos es como la luz de la aurora, que va en aumento hasta que el día es perfecto. En el centro de este capítulo resuena el mandato vital: 'Sobre toda cosa guardada, guarda tu corazón; porque de él mana la vida'.",
+                "Custodiar los afectos y pensamientos del corazón es decisivo, porque de allí brotan todas nuestras decisiones.",
+                "¿Qué pensamientos, lecturas o afectos necesitas filtrar hoy para guardar tu corazón, sabiendo que de él mana la vida?"),
+            d(5, "Día 5: Proverbios 5 - Pureza, Fidelidad Conyugal y Huir de la Tentación", "Proverbios 5", 20, 5, listOf(p(20, "Proverbios", 5)),
+                "Con realismo pastoral, Proverbios 5 advierte contra los labios lisonjeros de la inmoralidad cuyos pasos conducen a la amargura, y exhorta a beber el agua de la propia cisterna y regocijarse con la esposa de la juventud bajo la mirada omnisciente de Dios.",
+                "Los caminos del hombre están ante los ojos de Jehová; la pureza y la fidelidad conyugal son fuente de bendición.",
+                "¿De qué maneras prácticas estás protegiendo la pureza de tus ojos y la fidelidad de tu hogar bajo la mirada de Dios?"),
+            d(6, "Día 6: Proverbios 6 - Diligencia frente a la Pereza y Lo que Dios Aborrece", "Proverbios 6", 20, 6, listOf(p(20, "Proverbios", 6)),
+                "Este capítulo exhorta a librarse de fianzas imprudentes, aprender de la diligencia previsora de la hormiga y aborrecer las siete cosas que detesta Jehová: los ojos altivos, la lengua mentirosa, el corazón que maquina iniquidad y el que siembra discordia entre hermanos.",
+                "La diligencia en el trabajo y la integridad que promueve la paz honran el carácter santo de Dios.",
+                "¿Trabajas hoy con la diligencia previsora de la hormiga y guardas tus labios de sembrar discordia entre hermanos?"),
+            d(7, "Día 7: Proverbios 7 - Guardar los Mandamientos como a la Niña de tus Ojos", "Proverbios 7", 20, 7, listOf(p(20, "Proverbios", 7)),
+                "Guarda mis mandamientos y vivirás, y mi ley como las niñas de tus ojos; átalos a tus dedos, escríbelos en la tabla de tu corazón. La Palabra atesorada en el interior nos libra de caminar ingenuamente hacia las trampas de la seducción.",
+                "La victoria sobre la tentación se decide mucho antes de la prueba, atesorando la Palabra en el corazón.",
+                "¿Estás escribiendo los mandamientos de Dios en la tabla de tu corazón para estar firme antes de que llegue la tentación?"),
+            d(8, "Día 8: Proverbios 8 - El Clamor Eterno de la Sabiduría Divina", "Proverbios 8", 20, 8, listOf(p(20, "Proverbios", 8)),
+                "La Sabiduría clama en las plazas y declara que su fruto es mejor que el oro fino, que aborrece la soberbia y la arrogancia, y que desde la eternidad estuvo junto a Jehová como arquitecta, apuntando proféticamente a Cristo, Sabiduría de Dios.",
+                "Hallar la sabiduría de Dios en Cristo es hallar la vida y alcanzar el favor eterno de Jehová.",
+                "¿Escuchas cada día la voz de Cristo, la Sabiduría eterna de Dios, por encima del clamor de este mundo?"),
+            d(9, "Día 9: Proverbios 9 - El Banquete de la Sabiduría frente a la Necedad", "Proverbios 9", 20, 9, listOf(p(20, "Proverbios", 9)),
+                "Dos mesas se extienden ante el caminante: el banquete de la Sabiduría que invita a los sencillos a dejar la insensatez y vivir, y el llamado engañoso de la necedad. El que corrige al escarnecedor se acarrea afrenta, pero da al sabio y será más sabio.",
+                "La señal inconfundible de un corazón sabio es que recibe la corrección con humildad y gratitud.",
+                "¿Cómo reaccionas cuando alguien te corrige con la verdad: con la defensa del orgulloso o con la gratitud del sabio?"),
+            d(10, "Día 10: Proverbios 10 - El Contraste entre la Integridad del Justo y el Camino Impío", "Proverbios 10", 20, 10, listOf(p(20, "Proverbios", 10)),
+                "Comienzan las máximas de Salomón contrastando dos estilos de vida: la mano diligente enriquece, el que anda en integridad anda confiado, el amor cubre todas las faltas y la bendición de Jehová es la que enriquece sin añadir tristeza con ella.",
+                "Caminar en integridad y refrenar los labios trae confianza serena y la bendición limpia de Dios.",
+                "¿Es tu caminar íntegro y tus palabras prudentes una fuente de confianza y bendición para quienes te rodean?"),
+            d(11, "Día 11: Proverbios 11 - Balanza Justa, Humildad y Generosidad que Prospera", "Proverbios 11", 20, 11, listOf(p(20, "Proverbios", 11)),
+                "El peso falso es abominación a Jehová, mas la pesa cabal le agrada. Cuando viene la soberbia viene también la deshonra, mas con los humildes está la sabiduría. Hay quienes reparten, y les es añadido más; el alma generosa será prosperada.",
+                "En la economía del Reino, la honestidad intachable y la generosidad desinteresada nunca quedan sin recompensa.",
+                "¿Practicas la honestidad cabal en tu trabajo y la generosidad alegre que Dios promete prosperar?"),
+            d(12, "Día 12: Proverbios 12 - Amor a la Corrección y Palabras que Sanan", "Proverbios 12", 20, 12, listOf(p(20, "Proverbios", 12)),
+                "El que ama la instrucción ama la sabiduría, mas el que aborrece la reprensión es ignorante. Hay hombres cuyas palabras son como golpes de espada; mas la lengua de los sabios es medicina. El labio veraz permanecerá para siempre.",
+                "Nuestras palabras tienen el poder de herir como espadas o de traer medicina y consuelo a quienes nos escuchan.",
+                "¿Usas hoy tu lengua para dar golpes que hieren o como medicina que trae sanidad y aliento a tu casa?"),
+            d(13, "Día 13: Proverbios 13 - Esperanza Cumplida y Caminar con los Sabios", "Proverbios 13", 20, 13, listOf(p(20, "Proverbios", 13)),
+                "El que guarda su boca guarda su alma. La luz de los justos se alegrará, y el principio de oro para nuestras amistades: 'El que anda con sabios, sabio será; mas el que se junta con necios será quebrantado'.",
+                "Elegir amistades piadosas y sabias moldea nuestro carácter y protege el futuro de nuestra familia.",
+                "¿Las amistades más cercanas que cultivas te impulsan a ser más sabio y piadoso en tu caminar con Dios?"),
+            d(14, "Día 14: Proverbios 14 - Edificar la Casa con Sabiduría y Temor Reverente", "Proverbios 14", 20, 14, listOf(p(20, "Proverbios", 14)),
+                "La mujer sabia edifica su casa, mas la necia con sus manos la derriba. Hay camino que al hombre le parece derecho, pero su fin es camino de muerte. En el temor de Jehová está la fuerte confianza, y esperanza tendrán sus hijos.",
+                "No debemos guiarnos por lo que simplemente nos parece correcto, sino edificar el hogar en el temor de Dios.",
+                "¿Estás edificando activamente tu hogar con paciencia y temor de Jehová o derribándolo con reacciones impulsivas?"),
+            d(15, "Día 15: Proverbios 15 - La Blanda Respuesta Quita la Ira", "Proverbios 15", 20, 15, listOf(p(20, "Proverbios", 15)),
+                "La blanda respuesta quita la ira; mas la palabra áspera hace subir el furor. Los ojos de Jehová están en todo lugar, mirando a los malos y a los buenos. Mejor es lo poco con el temor de Jehová, que el gran tesoro donde hay turbación.",
+                "Responder con mansedumbre desactiva los conflictos y preserva la paz del hogar mejor que cualquier riqueza.",
+                "¿Ante una tensión o desacuerdo hoy, elegirás dar la blanda respuesta que apaga la ira?"),
+            d(16, "Día 16: Proverbios 16 - Encomendar a Jehová las Obras y Someter los Planes", "Proverbios 16", 20, 16, listOf(p(20, "Proverbios", 16)),
+                "Encomienda a Jehová tus obras, y tus pensamientos serán afirmados. Antes del quebrantamiento es la soberbia, y antes de la caída la altivez de espíritu. El corazón del hombre piensa su camino, mas Jehová endereza sus pasos.",
+                "Planificar con diligencia mientras rendimos el timón a la soberanía de Dios nos guarda del orgullo y del fracaso.",
+                "¿Has encomendado hoy tus obras y proyectos en las manos del Señor para que Él afirme tus pensamientos y enderece tus pasos?"),
+            d(17, "Día 17: Proverbios 17 - El Amigo que Ama en Todo Tiempo y el Corazón Alegre", "Proverbios 17", 20, 17, listOf(p(20, "Proverbios", 17)),
+                "Mejor es un bocado seco, y en paz, que casa de contiendas llena de provisiones. En todo tiempo ama el amigo, y es como un hermano en tiempo de angustia. El corazón alegre constituye buen remedio; mas el espíritu triste seca los huesos.",
+                "La lealtad en la amistad durante la prueba y el gozo en el Señor son medicinas invaluables para el alma.",
+                "¿Eres para quienes te rodean ese amigo que ama en todo tiempo y un hermano fiel en el día de la angustia?"),
+            d(18, "Día 18: Proverbios 18 - Torre Fuerte es el Nombre de Jehová y el Poder de la Lengua", "Proverbios 18", 20, 18, listOf(p(20, "Proverbios", 18)),
+                "Torre fuerte es el nombre de Jehová; a él correrá el justo, y será levantado. Al que responde palabra antes de oír, le es fatuidad y oprobio. La muerte y la vida están en poder de la lengua, y el que la ama comerá de sus frutos.",
+                "Escuchar con paciencia antes de hablar y refugiarse en el nombre del Señor caracteriza al creyente maduro.",
+                "¿Corres primero a la Torre Fuerte del nombre de Jehová cuando surge un problema, y escuchas antes de responder?"),
+            d(19, "Día 19: Proverbios 19 - Integridad en la Pobreza, Paciencia y Bondad al Necesitado", "Proverbios 19", 20, 19, listOf(p(20, "Proverbios", 19)),
+                "La cordura del hombre detiene su furor, y su honra es pasar por alto la ofensa. A Jehová presta el que da al pobre, y el bien que ha hecho, se lo volverá a pagar. Muchos pensamientos hay en el corazón del hombre, mas el consejo de Jehová permanecerá.",
+                "Pasar por alto la ofensa con paciencia y socorrer al necesitado reflejan el corazón mismo de nuestro Padre.",
+                "¿Demuestras hoy la honra del hombre entendido pasando por alto la ofensa y tendiendo la mano al necesitado?"),
+            d(20, "Día 20: Proverbios 20 - Rectitud en los Negocios y Consejos Profundos del Corazón", "Proverbios 20", 20, 20, listOf(p(20, "Proverbios", 20)),
+                "Justo es el que anda en su integridad; ¡dichosos sus hijos después de él! Como aguas profundas es el consejo en el corazón del hombre; mas el hombre entendido lo alcanzará. No digas: 'Yo me vengaré'; espera a Jehová, y él te salvará.",
+                "El mayor legado que podemos dejar a las siguientes generaciones es una vida de integridad coherente.",
+                "¿Estás construyendo en lo privado un legado de integridad del cual tus hijos y tu familia puedan ser bendecidos?"),
+            d(21, "Día 21: Proverbios 21 - El Corazón del Rey en la Mano de Jehová y la Justicia", "Proverbios 21", 20, 21, listOf(p(20, "Proverbios", 21)),
+                "Como los repartimientos de las aguas, así está el corazón del rey en la mano de Jehová; a todo lo que quiere lo inclina. Hacer justicia y juicio es a Jehová más agradable que sacrificio. El caballo se alista para el día de la batalla, mas Jehová es el que da la victoria.",
+                "Dios gobierna soberanamente sobre toda autoridad humana y se deleita en la rectitud más que en el mero ritual.",
+                "¿Descansas en que el corazón de toda autoridad está en la mano de Jehová y que de Él viene la victoria?"),
+            d(22, "Día 22: Proverbios 22 - El Buen Nombre, la Crianza Piadosa y la Prudencia Financiera", "Proverbios 22", 20, 22, listOf(p(20, "Proverbios", 22)),
+                "De más estima es el buen nombre que las muchas riquezas, y la buena fama más que la plata y el oro. Instruye al niño en su camino, y aun cuando fuere viejo no se apartará de él. El que toma prestado es siervo del que presta.",
+                "Cuidar el testimonio íntegro, instruir a los hijos con amor y evitar las deudas edifican un futuro libre y firme.",
+                "¿Valoras más conservar un buen nombre íntegro delante de Dios que acumular ganancias pasajeras?"),
+            d(23, "Día 23: Proverbios 23 - Dominio Propio y No Envidiar la Prosperidad del Pecador", "Proverbios 23", 20, 23, listOf(p(20, "Proverbios", 23)),
+                "No tengas envidia de los hombres malos, ni desees estar con ellos; mas tenga tu corazón el temor de Jehová todo el tiempo, porque ciertamente hay fin, y tu esperanza no será cortada. Compra la verdad, y no la vendas.",
+                "La prosperidad sin Dios es un espejismo pasajero; quien persevera en el temor del Señor tiene un futuro seguro.",
+                "¿Mantienes tu corazón en el temor de Jehová todo el tiempo sin envidiar la aparente prosperidad de quienes viven sin Dios?"),
+            d(24, "Día 24: Proverbios 24 - Siete Veces Cae el Justo y Vuelve a Levantarse", "Proverbios 24", 20, 24, listOf(p(20, "Proverbios", 24)),
+                "Con sabiduría se edificará la casa, y con prudencia se afirmará; y con ciencia se llenarán las cámaras de todo bien preciado. Si fueres flojo en el día de trabajo, tu fuerza será reducida. Porque siete veces cae el justo, y vuelve a levantarse.",
+                "La marca del justo no es que jamás tropiece, sino que por la gracia de Dios siempre vuelve a levantarse.",
+                "¿Si has tropezado o sentido flaqueza en el día de la prueba, tomarás hoy la mano del Señor para volver a levantarte?"),
+            d(25, "Día 25: Proverbios 25 - Dominio del Espíritu como Ciudad Amurallada", "Proverbios 25", 20, 25, listOf(p(20, "Proverbios", 25)),
+                "Manzana de oro con figuras de plata es la palabra dicha como conviene. Si el que te aborrece tuviere hambre, dale de comer pan, y Jehová te recompensará. Como ciudad derribada y sin muro es el hombre cuyo espíritu no tiene rienda.",
+                "El dominio propio bajo el gobierno del Espíritu Santo es la muralla que protege todas las demás virtudes.",
+                "¿Gobierna el Espíritu Santo tu carácter con dominio propio como una ciudad amurallada y firme?"),
+            d(26, "Día 26: Proverbios 26 - Discernimiento ante la Necedad, el Chisme y la Pereza", "Proverbios 26", 20, 26, listOf(p(20, "Proverbios", 26)),
+                "Proverbios 26 nos enseña a discernir cuándo no entrar en pleitos ajenos ni responder al necio conforme a su necedad, y nos advierte que sin leña se apaga el fuego, y donde no hay chismoso, cesa la contienda.",
+                "Rechazar todo chisme y pleito estéril apaga el fuego de la división y mantiene limpia la comunión.",
+                "¿Sabes apartarte a tiempo de discusiones estériles y apagar el fuego del chisme con el silencio prudente?"),
+            d(27, "Día 27: Proverbios 27 - Hierro con Hierro se Aguza: El Valor de la Amistad Fiel", "Proverbios 27", 20, 27, listOf(p(20, "Proverbios", 27)),
+                "No te jactes del día de mañana; porque no sabes qué dará de sí el día. Fieles son las heridas del que ama; pero importunos los besos del que aborrece. Hierro con hierro se aguza; y así el hombre aguza el rostro de su amigo.",
+                "Un amigo verdadero nos dice la verdad con amor para ayudarnos a crecer, en lugar de adularnos.",
+                "¿Agradeces y valoras al amigo fiel que te dice la verdad con amor para aguzar tu carácter como el hierro aguza al hierro?"),
+            d(28, "Día 28: Proverbios 28 - El que Confiesa y se Aparta Alcanzará Misericordia", "Proverbios 28", 20, 28, listOf(p(20, "Proverbios", 28)),
+                "Huye el impío sin que nadie lo persiga; mas el justo está confiado como un león. El que encubre sus pecados no prosperará; mas el que los confiesa y se aparta alcanzará misericordia. Bienaventurado el hombre que siempre teme a Dios.",
+                "La libertad espiritual nunca se halla ocultando nuestras faltas, sino confesándolas y apartándonos de ellas.",
+                "¿Eliges hoy el camino de la libertad confesando y apartándote de toda falta para alcanzar la misericordia de Dios?"),
+            d(29, "Día 29: Proverbios 29 - Humildad que Recibe Honra y Confiar en Jehová sin Temor", "Proverbios 29", 20, 29, listOf(p(20, "Proverbios", 29)),
+                "La soberbia del hombre le abate; pero al humilde de espíritu sustenta la honra. El temor del hombre pondrá lazo; mas el que confía en Jehová será exaltado. Sin profecía (revelación de la Palabra) el pueblo se desenfrena.",
+                "Vencer el miedo al qué dirán confiando en el Señor nos permite vivir con libertad y fidelidad a Su Palabra.",
+                "¿Confías en Jehová por encima del temor al qué dirán de los hombres para vivir con humildad y firmeza?"),
+            d(30, "Día 30: Proverbios 30 - La Oración de Agur: Pureza de Palabra y Contentamiento", "Proverbios 30", 20, 30, listOf(p(20, "Proverbios", 30)),
+                "Toda palabra de Dios es limpia; él es escudo a los que en él esperan. Agur eleva una oración llena de equilibrio: 'Vanidad y palabra mentirosa aparta de mí; no me des pobreza ni riquezas; manténme del pan necesario'.",
+                "La Palabra de Dios es un escudo infalible, y el contentamiento piadoso nos guarda tanto de la soberbia como de la desesperación.",
+                "¿Haces tuya hoy la oración de Agur pidiendo a Dios pureza de verdad y contentamiento con el pan necesario?"),
+            d(31, "Día 31: Proverbios 31 - Sabiduría en el Liderazgo y el Carácter Virtuoso que Teme a Dios", "Proverbios 31", 20, 31, listOf(p(20, "Proverbios", 31)),
+                "El rey Lemuel recibe instrucción para abrir su boca por el mudo y defender la causa del pobre, y el libro culmina con el poema acróstico del carácter virtuoso, cuya cumbre declara: 'Engañosa es la gracia, y vana la hermosura; la mujer que teme a Jehová, ésa será alabada'.",
+                "La belleza y los logros externos pasan, pero una vida laboriosa, compasiva y temerosa de Jehová deja una huella eterna.",
+                "¿Cultivas el carácter virtuoso, compasivo y temeroso de Jehová cuya alabanza permanece más allá de las apariencias?")
+        )
     }
 
     // --- PNEUMATOLOGÍA: EL ESPÍRITU SANTO (15 Días) ---
     val pneumatologyPlan: List<ReadingPlanDay> by lazy {
-        (1..15).map { dayNum ->
-            val meta = when (dayNum) {
-                1 -> PlanDayMeta(1, "Génesis", 1, "El Espíritu en la Creación del Universo")
-                2 -> PlanDayMeta(2, "Éxodo", 31, "El Espíritu Capacitando para el Servicio")
-                3 -> PlanDayMeta(29, "Joel", 2, "La Promesa del Derramamiento Universal")
-                4 -> PlanDayMeta(42, "Lucas", 4, "Jesús Ungido por el Espíritu Santo")
-                5 -> PlanDayMeta(43, "Juan", 14, "El Consolador y Maestro de la Verdad")
-                6 -> PlanDayMeta(43, "Juan", 16, "Convicción de Pecado, Justicia y Juicio")
-                7 -> PlanDayMeta(44, "Hechos", 2, "El Fuego y Poder de Pentecostés")
-                8 -> PlanDayMeta(49, "Efesios", 1, "El Sello y Arras de Nuestra Herencia")
-                9 -> PlanDayMeta(43, "Juan", 3, "La Regeneración Sobrenatural")
-                10 -> PlanDayMeta(48, "Gálatas", 5, "Andar en el Espíritu vs. las Obras de la Carne")
-                11 -> PlanDayMeta(48, "Gálatas", 5, "El Fruto del Espíritu en el Creyente")
-                12 -> PlanDayMeta(46, "1 Corintios", 12, "Diversidad de Dones para Edificación")
-                13 -> PlanDayMeta(49, "Efesios", 4, "No Contristar al Espíritu Santo")
-                14 -> PlanDayMeta(45, "Romanos", 8, "La Intercesión del Espíritu en la Oración")
-                else -> PlanDayMeta(66, "Apocalipsis", 22, "El Espíritu y la Novia Dicen: ¡Ven!")
-            }
-            d(
-                num = dayNum,
-                title = "Día $dayNum: ${meta.subTitle}",
-                summary = "${meta.bookName} ${meta.chapter}",
-                pBId = meta.bookId,
-                pC = meta.chapter,
-                passages = listOf(p(meta.bookId, meta.bookName, meta.chapter)),
-                narrative = "En ${meta.bookName} ${meta.chapter} contemplamos la obra gloriosa de la tercera Persona de la Trinidad: «${meta.subTitle}». El Espíritu Santo no es una fuerza impersonal, sino Dios mismo obrando activamente para dar vida, iluminar la Palabra, santificar el carácter y glorificar a Jesucristo en nosotros.",
-                lesson = "La obra del Espíritu Santo en ${meta.bookName} ${meta.chapter} nos capacita para vivir en santidad, comunión y poder espiritual.",
-                reflection = "¿Cómo puedes rendir hoy tu voluntad a la obra del Espíritu Santo revelada en «${meta.subTitle}»?"
-            )
-        }
+        listOf(
+            d(1, "Día 1: El Espíritu en la Creación del Universo", "Génesis 1:1-5; Salmo 104:24-30", 1, 1, listOf(p(1, "Génesis", 1), p(19, "Salmos", 104)),
+                "Desde el primer versículo de la Biblia contemplamos al Espíritu de Dios moviéndose sobre la faz de las aguas para traer orden, vida y belleza donde había caos y vacío. El mismo Espíritu Creador que dio aliento al cosmos es quien recrea y ordena nuestro mundo interior.",
+                "El Espíritu Santo es el agente divino de la creación y el único capaz de traer orden y vida espiritual a nuestro caos.",
+                "¿Qué áreas de desorden o vacío en tu vida necesitas entregar hoy al poder creador del Espíritu Santo?"),
+            d(2, "Día 2: El Espíritu Capacitando para el Servicio", "Éxodo 31:1-11", 2, 31, listOf(p(2, "Éxodo", 31)),
+                "Dios llamó por nombre a Bezaleel y lo llenó del Espíritu de Dios en sabiduría, en inteligencia, en ciencia y en todo arte para edificar el Tabernáculo. El Espíritu no solo inspira a profetas; también capacita el talento, el trabajo manual y el intelecto para la gloria de Dios.",
+                "Toda habilidad y excelencia puesta al servicio de Dios proviene de la capacitación sobrenatural del Espíritu.",
+                "¿Reconoces y consagras tus talentos profesionales y cotidianos como dones dados por el Espíritu para servir?"),
+            d(3, "Día 3: La Promesa del Derramamiento Universal", "Joel 2:28-32", 29, 2, listOf(p(29, "Joel", 2)),
+                "En el Antiguo Testamento el Espíritu reposaba sobre reyes, sacerdotes y profetas selectos, pero a través de Joel Dios prometió un derramamiento sobre toda carne: hijos, hijas, ancianos, jóvenes y siervos. En Cristo, todo creyente tiene acceso directo a la plenitud del Espíritu.",
+                "En el Nuevo Pacto, ningún hijo de Dios es ciudadano de segunda clase: todos hemos recibido la promesa del Espíritu.",
+                "¿Vives con la conciencia agradecida de que el mismo Espíritu de los profetas habita hoy dentro de ti?"),
+            d(4, "Día 4: Jesús Ungido por el Espíritu Santo", "Lucas 4:14-21", 42, 4, listOf(p(42, "Lucas", 4)),
+                "En la sinagoga de Nazaret, Jesús abrió el rollo de Isaías y proclamó: 'El Espíritu del Señor está sobre mí, por cuanto me ha ungido para dar buenas nuevas a los pobres; me ha enviado a sanar a los quebrantados de corazón'. Todo el ministerio terrenal de Jesús fluyó en perfecta comunión con el Espíritu.",
+                "Si el propio Hijo de Dios desarrolló Su ministerio en dependencia del Espíritu Santo, cuánto más nosotros.",
+                "¿Intentas servir a Dios en tus propias fuerzas o dependes diariamente de la unción del Espíritu Santo?"),
+            d(5, "Día 5: El Consolador y Maestro de la Verdad", "Juan 14:15-26", 43, 14, listOf(p(43, "Juan", 14)),
+                "Antes de ir a la cruz, Jesús consoló a sus discípulos prometiendo que no los dejaría huérfanos: el Padre enviaría al Parákletos (Consolador, Abogado y Ayudador), el Espíritu de verdad, quien moraría EN nosotros para enseñarnos todas las cosas y recordarnos las palabras de Jesús.",
+                "El Espíritu Santo es la presencia personal de Dios morando en el creyente como Maestro y Consolador permanente.",
+                "¿Acudes al Espíritu Santo en oración antes de abrir tu Biblia para que Él ilumine tu entendimiento?"),
+            d(6, "Día 6: Convicción de Pecado, Justicia y Juicio", "Juan 16:5-15", 43, 16, listOf(p(43, "Juan", 16)),
+                "La conversión de un alma nunca es producto de la mera elocuencia humana; es obra exclusiva del Espíritu Santo, quien convence al mundo de pecado, de justicia y de juicio, y glorifica a Jesucristo tomando de lo Suyo para hacérnoslo saber.",
+                "El Espíritu Santo no trae condenación destructiva al creyente, sino convicción redentora que nos lleva a Cristo.",
+                "¿Qué tan rápido respondes con arrepentimiento humilde cuando el Espíritu Santo redarguye tu conciencia?"),
+            d(7, "Día 7: El Fuego y Poder de Pentecostés", "Hechos 2:1-21", 44, 2, listOf(p(44, "Hechos", 2)),
+                "En el día de Pentecostés, un viento recio y lenguas como de fuego transformaron a un grupo de discípulos temerosos en testigos intrépidos del Cristo resucitado. El poder del Espíritu no fue dado para el espectáculo, sino para testificar de las maravillas de Dios con denuedo.",
+                "La llenura del Espíritu Santo transforma la cobardía en valentía santa para proclamar el Evangelio.",
+                "¿Le pides al Espíritu Santo denuedo y amor para compartir tu fe sin temor al qué dirán?"),
+            d(8, "Día 8: El Sello y las Arras de Nuestra Herencia", "Efesios 1:11-14", 49, 1, listOf(p(49, "Efesios", 1)),
+                "Al creer en el Evangelio de nuestra salvación, fuimos sellados con el Espíritu Santo de la promesa, quien es las 'arras' (el anticipo y garantía legal irrevocable) de nuestra herencia hasta la redención de la posesión adquirida para alabanza de Su gloria.",
+                "El sello del Espíritu Santo certifica que pertenecemos a Dios de manera irrevocable y segura.",
+                "¿Cómo afirma tu seguridad de salvación saber que llevas el sello real del Espíritu Santo?"),
+            d(9, "Día 9: La Regeneración Sobrenatural", "Juan 3:1-15; Tito 3:4-7", 43, 3, listOf(p(43, "Juan", 3), p(56, "Tito", 3)),
+                "Jesús declaró a Nicodemo: 'El que no naciere de agua y del Espíritu, no puede entrar en el reino de Dios'. La religión reforma la conducta por fuera; solo el Espíritu Santo produce el nuevo nacimiento desde arriba, lavándonos y renovándonos interiormente.",
+                "Nacer de nuevo es un milagro soberano del Espíritu que implanta la vida misma de Dios en el alma.",
+                "¿Se evidencia en tus deseos y afectos internos el milagro del nuevo nacimiento por el Espíritu?"),
+            d(10, "Día 10: Andar en el Espíritu vs. las Obras de la Carne", "Gálatas 5:16-21; Romanos 8:5-13", 48, 5, listOf(p(48, "Gálatas", 5), p(45, "Romanos", 8)),
+                "Andad en el Espíritu, y no satisfagáis los deseos de la carne. La victoria sobre las pasiones desordenadas no se logra mediante fuerza de voluntad meramente humana, sino caminando paso a paso bajo la dirección del Espíritu y haciendo morir por el Espíritu las obras de la carne.",
+                "Caminar ocupados en las cosas del Espíritu desplaza y vence el poder seductor de los deseos carnales.",
+                "¿Con qué alimentas tu mente cada día: con estímulos que fortalecen la carne o que avivan al Espíritu?"),
+            d(11, "Día 11: El Fruto del Espíritu en el Creyente", "Gálatas 5:22-26; Juan 15:1-8", 48, 5, listOf(p(48, "Gálatas", 5), p(43, "Juan", 15)),
+                "Mas el fruto del Espíritu es amor, gozo, paz, paciencia, benignidad, bondad, fe, mansedumbre, templanza. Pablo habla de 'fruto' en singular porque las nueve virtudes forman un solo racimo indivisible: el carácter mismo de Jesucristo reproducido en quien permanece en la Vid.",
+                "La verdadera madurez espiritual se mide por el fruto del carácter de Cristo, no solo por el activismo externo.",
+                "¿Cuál de las facetas del fruto del Espíritu necesitas que Dios cultive con mayor urgencia en tu trato diario?"),
+            d(12, "Día 12: Diversidad de Dones para Edificación", "1 Corintios 12:1-14", 46, 12, listOf(p(46, "1 Corintios", 12)),
+                "Ahora bien, hay diversidad de dones, pero el Espíritu es el mismo. A cada creyente le es dada la manifestación del Espíritu para provecho común. En el Cuerpo de Cristo nadie sobra y nadie es autosuficiente; nos necesitamos mutuamente para edificar la Iglesia.",
+                "El Espíritu Santo reparte dones soberanamente para el servicio humilde y la edificación mutua del Cuerpo.",
+                "¿Estás poniendo los dones que el Espíritu te dio al servicio activo de tu comunidad de fe?"),
+            d(13, "Día 13: No Contristar al Espíritu Santo", "Efesios 4:25-32", 49, 4, listOf(p(49, "Efesios", 4)),
+                "Y no contristéis al Espíritu Santo de Dios, con el cual fuisteis sellados para el día de la redención. Solo se puede entristecer a una Persona que nos ama. La mentira, el enojo retenido, las palabras corrompidas y la amargura apagan la comunión dulce del Espíritu en nuestro interior.",
+                "La santidad en nuestras palabras y el perdón pronto mantienen despejada nuestra comunión con el Espíritu.",
+                "¿Hay algún resentimiento o actitud en tu corazón que esté contristando hoy al Espíritu Santo?"),
+            d(14, "Día 14: La Intercesión del Espíritu en la Oración", "Romanos 8:26-27", 45, 8, listOf(p(45, "Romanos", 8)),
+                "Y de igual manera el Espíritu nos ayuda en nuestra debilidad; pues qué hemos de pedir como conviene, no lo sabemos, pero el Espíritu mismo intercede por nosotros con gemidos indecibles. Cuando el dolor nos deja sin palabras, el Espíritu traduce nuestras lágrimas ante el trono del Padre.",
+                "Incluso en nuestros momentos de mayor fragilidad y silencio, el Espíritu Santo ora por nosotros conforme a la voluntad de Dios.",
+                "¿Qué consuelo trae a tu alma saber que el Espíritu Santo intercede por ti cuando no sabes ni cómo orar?"),
+            d(15, "Día 15: El Espíritu y la Esposa Dicen: ¡Ven!", "Apocalipsis 22:12-21", 66, 22, listOf(p(66, "Apocalipsis", 22)),
+                "La Biblia concluye con un clamor conjunto: 'Y el Espíritu y la Esposa dicen: Ven. Y el que tiene sed, venga; y el que quiera, tome del agua de la vida gratuitamente'. El Espíritu Santo despierta en la Iglesia el anhelo ardiente por el regreso glorioso de nuestro Esposo celestial.",
+                "La obra culminante del Espíritu en la historia es preparar a la Iglesia para las bodas del Cordero.",
+                "¿Une hoy tu corazón su voz al clamor del Espíritu anhelando el regreso de Jesucristo?")
+        )
     }
 
     // --- CRISTO EN EL TABERNÁCULO Y HEBREOS (15 Días) ---
     val tabernaclePlan: List<ReadingPlanDay> by lazy {
-        (1..15).map { dayNum ->
-            val meta = when (dayNum) {
-                1 -> PlanDayMeta(58, "Hebreos", 1, "Cristo Superior a los Ángeles")
-                2 -> PlanDayMeta(2, "Éxodo", 27, "El Altar de Bronce: La Expiación Sustitutoria")
-                3 -> PlanDayMeta(2, "Éxodo", 30, "El Lavacro: Purificación Continua")
-                4 -> PlanDayMeta(2, "Éxodo", 25, "La Mesa del Pan: Jesús el Pan de Vida")
-                5 -> PlanDayMeta(2, "Éxodo", 25, "El Candelabro: Cristo la Luz del Mundo")
-                6 -> PlanDayMeta(2, "Éxodo", 30, "El Altar de Incienso: Intercesión Sacerdotal")
-                7 -> PlanDayMeta(2, "Éxodo", 26, "El Velo Rasgado: Acceso Libre al Trono")
-                8 -> PlanDayMeta(2, "Éxodo", 25, "El Arca y el Propiciatorio de Gracia")
-                9 -> PlanDayMeta(58, "Hebreos", 7, "El Sacerdocio Eterno según Melquisedec")
-                10 -> PlanDayMeta(3, "Levítico", 16, "El Gran Día de la Expiación (Yom Kipur)")
-                11 -> PlanDayMeta(2, "Éxodo", 12, "El Cordero Pascual Inmaculado")
-                12 -> PlanDayMeta(2, "Éxodo", 17, "La Roca Herida que Dio Agua Viva")
-                13 -> PlanDayMeta(4, "Números", 21, "La Serpiente de Bronce en el Desierto")
-                14 -> PlanDayMeta(58, "Hebreos", 8, "Mediador de un Mejor Pacto")
-                else -> PlanDayMeta(58, "Hebreos", 10, "El Sacrificio Perfecto y Definitivo")
-            }
-            d(
-                num = dayNum,
-                title = "Día $dayNum: ${meta.subTitle}",
-                summary = "${meta.bookName} ${meta.chapter}",
-                pBId = meta.bookId,
-                pC = meta.chapter,
-                passages = listOf(p(meta.bookId, meta.bookName, meta.chapter)),
-                narrative = "El pasaje de ${meta.bookName} ${meta.chapter} nos abre una ventana extraordinaria a la tipología bíblica: «${meta.subTitle}». Cada elemento del santuario antiguo fue diseñado por Dios como una figura profética que anunciaba la persona, el sacerdocio y el sacrificio perfecto de Jesucristo.",
-                lesson = "A través de «${meta.subTitle}», vemos que Jesucristo es el cumplimiento definitivo que nos abre el camino directo a la presencia del Padre.",
-                reflection = "¿De qué manera contemplar a Cristo en «${meta.subTitle}» profundiza tu gratitud y reverencia en la oración hoy?"
-            )
-        }
+        listOf(
+            d(1, "Día 1: Cristo Superior a los Ángeles y Profetas", "Hebreos 1:1-14", 58, 1, listOf(p(58, "Hebreos", 1)),
+                "Dios, habiendo hablado muchas veces y de muchas maneras en otro tiempo a los padres por los profetas, en estos postreros días nos ha hablado por el Hijo, quien es el resplandor de Su gloria y la imagen misma de Su sustancia. Toda sombra del Antiguo Testamento apunta hacia Él.",
+                "Jesucristo es la revelación final, suprema y perfecta del Padre; todo el Antiguo Testamento converge en Su persona.",
+                "¿Escuchas y atesoras la voz del Hijo con la reverencia debida al heredero de todo el universo?"),
+            d(2, "Día 2: El Altar de Bronce: La Expiación Sustitutoria", "Éxodo 27:1-8; Hebreos 13:10-15", 2, 27, listOf(p(2, "Éxodo", 27), p(58, "Hebreos", 13)),
+                "Lo primero que encontraba el israelita al entrar al atrio del Tabernáculo era el Altar de Bronce donde se ofrecía el sacrificio por el pecado. No hay comunión con el Dios tres veces santo sin derramamiento de sangre; ese altar prefiguraba la cruz del Calvario donde Cristo se ofreció por nosotros.",
+                "La cruz de Cristo es nuestro verdadero altar; Su sacrificio único abrió para siempre la puerta de la gracia.",
+                "¿Comienzas cada día acercándote a Dios descansando únicamente en los méritos de la cruz de Cristo?"),
+            d(3, "Día 3: El Lavacro de Bronce: Purificación Continua", "Éxodo 30:17-21; Tito 3:4-7", 2, 30, listOf(p(2, "Éxodo", 30), p(56, "Tito", 3)),
+                "Entre el altar de bronce y la tienda sagrada estaba la fuente de bronce con agua, donde los sacerdotes debían lavarse las manos y los pies antes de ministrar. Aunque ya hemos sido justificados en la cruz, necesitamos la limpieza diaria de la Palabra y la confesión para caminar en santidad.",
+                "Cristo nos lavó una vez para salvación y nos limpia cada día por el agua de Su Palabra para comunión.",
+                "¿Acudes diariamente a la Palabra y a la confesión sincera para limpiar tus pasos del polvo del mundo?"),
+            d(4, "Día 4: La Mesa del Pan: Jesús el Pan de Vida", "Éxodo 25:23-30; Juan 6:31-40", 2, 25, listOf(p(2, "Éxodo", 25), p(43, "Juan", 6)),
+                "Dentro del Lugar Santo, sobre una mesa de madera de acacia revestida de oro puro, reposaban permanentemente los doce panes de la proposición delante de Jehová. Siglos después, Jesús proclamó: 'Yo soy el pan de vida; el que a mí viene, nunca tendrá hambre'.",
+                "Jesucristo, verdadero Dios (oro) y verdadero hombre (madera incorruptible), es el alimento que sustenta a Su pueblo.",
+                "¿Buscas saciar el hambre de tu alma en las cosas pasajeras del mundo o en la comunión viva con Jesús?"),
+            d(5, "Día 5: El Candelabro de Oro: Cristo la Luz del Mundo", "Éxodo 25:31-40; Juan 8:12", 2, 25, listOf(p(2, "Éxodo", 25), p(43, "Juan", 8)),
+                "En el Lugar Santo no había ventanas; la única luz provenía del Candelabro de oro puro labrado a martillo y alimentado con aceite puro de olivas machacadas. Jesús es la Luz del mundo que resplandece en nuestras tinieblas, ungido con el aceite del Espíritu Santo.",
+                "Sin la luz de Cristo y del Espíritu Santo caminamos a ciegas; en Su luz vemos la luz verdadera.",
+                "¿Permites que la luz de Cristo alumbre cada rincón de tus decisiones y pensamientos?"),
+            d(6, "Día 6: El Altar de Incienso: Intercesión Sacerdotal", "Éxodo 30:1-10; Apocalipsis 8:3-4", 2, 30, listOf(p(2, "Éxodo", 30), p(66, "Apocalipsis", 8)),
+                "Justo delante del velo se alzaba el Altar de Oro del Incienso, donde de mañana y de tarde subía un perfume fragante perpetuo ante Dios. Ese incienso representa las oraciones de los santos unidas a la intercesión constante de nuestro Gran Sumo Sacerdote en el cielo.",
+                "Porque Jesús vive siempre para interceder por nosotros, nuestras oraciones suben como incienso agradable ante el Padre.",
+                "¿Mantienes encendido el altar de la oración de mañana y de tarde en tu vida diaria?"),
+            d(7, "Día 7: El Velo Rasgado: Acceso Libre al Trono", "Éxodo 26:31-35; Mateo 27:45-54", 2, 26, listOf(p(2, "Éxodo", 26), p(40, "Mateo", 27)),
+                "Un grueso velo bordado con querubines separaba el Lugar Santo del Lugar Santísimo; nadie podía cruzarlo bajo pena de muerte. Pero cuando Jesús clamó '¡Consumado es!' en la cruz, el velo del templo se rasgó en dos, de arriba abajo, por la mano misma de Dios.",
+                "Por la sangre de Jesucristo tenemos libertad para entrar confiadamente al Lugar Santísimo por un camino nuevo y vivo.",
+                "¿Te acercas hoy con plena confianza al trono de la gracia sabiendo que el velo ya fue rasgado por Cristo?"),
+            d(8, "Día 8: El Arca y el Propiciatorio de Gracia", "Éxodo 25:10-22; Romanos 3:21-26", 2, 25, listOf(p(2, "Éxodo", 25), p(45, "Romanos", 3)),
+                "Dentro del Arca del Pacto estaban las tablas de la Ley que nos condenaban; pero encima del Arca descansaba el Propiciatorio (Hilasterion) de oro puro rociado con sangre, donde la justicia y la misericordia se encontraban. Pablo declara que Dios puso a Cristo como nuestro Propiciatorio.",
+                "En Cristo la santa justicia de la Ley queda satisfecha y el trono de juicio se convierte para nosotros en trono de gracia.",
+                "¿Agradeces al Señor porque Su sangre cubrió para siempre la culpa de tus transgresiones?"),
+            d(9, "Día 9: El Sacerdocio Eterno según Melquisedec", "Hebreos 7:1-28", 58, 7, listOf(p(58, "Hebreos", 7)),
+                "Los sacerdotes levíticos morían y sus sacrificios debían repetirse sin cesar. Pero Jesucristo fue constituido Sumo Sacerdote para siempre según el orden de Melquisedec (Rey de Justicia y Rey de Paz), por el poder de una vida indestructible, pudiendo salvar perpetuamente a los que por Él se acercan a Dios.",
+                "Nuestro Sumo Sacerdote nunca muere ni es reemplazado; Su intercesión eterna garantiza nuestra salvación hasta el fin.",
+                "¿Descansas en la seguridad de tener a un Rey de Justicia y Paz abogando por ti a la diestra del Padre?"),
+            d(10, "Día 10: El Gran Día de la Expiación (Yom Kipur)", "Levítico 16:1-22; Hebreos 9:11-15", 3, 16, listOf(p(3, "Levítico", 16), p(58, "Hebreos", 9)),
+                "En Yom Kipur se usaban dos machos cabríos: uno moría para expiar el pecado con su sangre, y sobre el otro (Azazel) se confesaban las iniquidades para llevarlas lejos al desierto. Cristo cumplió ambas figuras: expió nuestra culpa ante Dios y alejó nuestros pecados tan lejos como está el oriente del occidente.",
+                "Cristo no solo pagó el castigo de nuestro pecado, sino que quitó de sobre nosotros el peso de la culpa.",
+                "¿Sigues cargando culpas que nuestro Cordero ya llevó lejos al desierto del olvido divino?"),
+            d(11, "Día 11: El Cordero Pascual Inmaculado", "Éxodo 12:1-14; 1 Corintios 5:7-8", 2, 12, listOf(p(2, "Éxodo", 12), p(46, "1 Corintios", 5)),
+                "En la noche de Egipto, el juicio pasó de largo sobre toda casa cuyos dinteles estaban rociados con la sangre de un cordero sin defecto. El apóstol Pablo proclama: 'Porque nuestra pascua, que es Cristo, ya fue sacrificada por nosotros'.",
+                "Estar refugiados bajo la sangre del Cordero Pascual nos libra eternamente del juicio condenatorio.",
+                "¿Celebras la vida cristiana con los panes sin levadura de sinceridad y de verdad?"),
+            d(12, "Día 12: La Roca Herida que Dio Agua Viva", "Éxodo 17:1-7; 1 Corintios 10:1-4", 2, 17, listOf(p(2, "Éxodo", 17), p(46, "1 Corintios", 10)),
+                "En el desierto árido de Refidim, Dios ordenó a Moisés golpear la peña de Horeb con la vara del juicio, y de la roca herida brotaron ríos de agua viva para saciar al pueblo sediento. Pablo nos revela el misterio: 'y la roca era Cristo', herido en la cruz para darnos el Espíritu.",
+                "Cristo fue herido por el golpe de nuestra rebelión para que de Su costado brotara el agua viva de la salvación.",
+                "¿Bebes cada día del agua viva que brota de la Roca que es Cristo en medio de tus desiertos?"),
+            d(13, "Día 13: La Serpiente de Bronce en el Desierto", "Números 21:4-9; Juan 3:14-16", 4, 21, listOf(p(4, "Números", 21), p(43, "Juan", 3)),
+                "Cuando el pueblo moría por la mordedura de las serpientes ardientes, Moisés levantó una serpiente de bronce sobre un asta: todo aquel que la miraba con fe vivía. Jesús explicó que así era necesario que el Hijo del Hombre fuese levantado en la cruz, para que todo aquel que en Él cree tenga vida eterna.",
+                "Una sola mirada de fe hacia el Cristo crucificado trae sanidad y vida eterna al pecador agonizante.",
+                "¿Fijas tus ojos con fe sencilla en Jesús levantado en la cruz cuando el veneno de la culpa intenta abatirte?"),
+            d(14, "Día 14: Mediador de un Mejor Pacto", "Hebreos 8:1-13", 58, 8, listOf(p(58, "Hebreos", 8)),
+                "Jesús es ministro del santuario verdadero que levantó el Señor y no el hombre, y mediador de un mejor pacto establecido sobre mejores promesas: Dios escribe Sus leyes en nuestra mente y corazón, y promete: 'nunca más me acordaré de sus pecados y transgresiones'.",
+                "El Nuevo Pacto en Cristo transforma la obediencia de una obligación externa de piedra a un deleite interno del corazón.",
+                "¿Obedeces a Dios por temor al castigo o por el amor que Su Espíritu ha escrito en tu corazón?"),
+            d(15, "Día 15: El Sacrificio Perfecto y Definitivo", "Hebreos 10:1-25", 58, 10, listOf(p(58, "Hebreos", 10)),
+                "Cristo, habiendo ofrecido una vez para siempre un solo sacrificio por los pecados, se ha sentado a la diestra de Dios; porque con una sola ofrenda hizo perfectos para siempre a los santificados. Acerquémonos, pues, con corazón sincero, en plena certidumbre de fe.",
+                "En el Tabernáculo del Antiguo Testamento nunca había sillas porque la obra nunca terminaba; Cristo se sentó porque la redención está consumada.",
+                "¿Descansas hoy en la obra terminada de Cristo y te congregas fielmente para estimular a otros al amor y a las buenas obras?")
+        )
     }
 
     // --- TEOLOGÍA DE LOS PACTOS (15 Días) ---
     val covenantsPlan: List<ReadingPlanDay> by lazy {
-        (1..15).map { dayNum ->
-            val meta = when (dayNum) {
-                1 -> PlanDayMeta(1, "Génesis", 1, "El Pacto de la Creación")
-                2 -> PlanDayMeta(1, "Génesis", 3, "El Protoevangelio: La Simiente Prometida")
-                3 -> PlanDayMeta(1, "Génesis", 9, "El Pacto con Noé y el Arco de Gracia")
-                4 -> PlanDayMeta(1, "Génesis", 12, "El Pacto Abrahámico: Llamado y Bendición")
-                5 -> PlanDayMeta(1, "Génesis", 15, "Ratificación Soberana del Pacto")
-                6 -> PlanDayMeta(1, "Génesis", 17, "La Señal del Pacto y la Circuncisión")
-                7 -> PlanDayMeta(2, "Éxodo", 19, "El Pacto del Sinaí: La Ley y la Santidad")
-                8 -> PlanDayMeta(48, "Gálatas", 3, "El Propósito de la Ley como Tutor")
-                9 -> PlanDayMeta(10, "2 Samuel", 7, "El Pacto Davídico: Trono y Dinastía Eterna")
-                10 -> PlanDayMeta(24, "Jeremías", 31, "La Promesa del Nuevo Pacto Interior")
-                11 -> PlanDayMeta(26, "Ezequiel", 36, "El Nuevo Corazón y el Espíritu Santo")
-                12 -> PlanDayMeta(42, "Lucas", 22, "La Cena del Señor: Sellado con Sangre")
-                13 -> PlanDayMeta(49, "Efesios", 2, "La Inclusión de los Gentiles en el Pacto")
-                14 -> PlanDayMeta(58, "Hebreos", 8, "La Superioridad Eterna del Nuevo Pacto")
-                else -> PlanDayMeta(66, "Apocalipsis", 21, "Consumación: 'Ellos Serán Mi Pueblo'")
-            }
-            d(
-                num = dayNum,
-                title = "Día $dayNum: ${meta.subTitle}",
-                summary = "${meta.bookName} ${meta.chapter}",
-                pBId = meta.bookId,
-                pC = meta.chapter,
-                passages = listOf(p(meta.bookId, meta.bookName, meta.chapter)),
-                narrative = "En ${meta.bookName} ${meta.chapter} contemplamos un eslabón decisivo de la historia de la redención: «${meta.subTitle}». Los pactos bíblicos constituyen la columna vertebral de las Escrituras y demuestran cómo Dios se ha comprometido soberanamente a redimir y habitar en medio de Su pueblo.",
-                lesson = "El estudio de «${meta.subTitle}» confirma que Dios es absolutamente fiel a Sus promesas y que todo pacto culmina en Cristo.",
-                reflection = "¿Cómo fortalece tu fe saber que tu relación con Dios descansa en un pacto eterno e inquebrantable sellado por Cristo?"
-            )
-        }
+        listOf(
+            d(1, "Día 1: El Pacto de la Creación", "Génesis 1; Génesis 2", 1, 1, listOf(p(1, "Génesis", 1), p(1, "Génesis", 2)),
+                "En el huerto del Edén, Dios estableció un orden de comunión, bendición y mayordomía con el ser humano creado a Su imagen y semejanza. El hombre fue colocado como virrey de la creación para labrarla, guardarla y vivir en obediencia amorosa a la Palabra de su Creador.",
+                "Fuimos creados por amor y para vivir en una relación de pacto, obediencia y comunión íntima con Dios.",
+                "¿Honras a Dios como tu Creador soberano en la forma en que administras tu vida y el mundo que te rodea?"),
+            d(2, "Día 2: El Protoevangelio: La Simiente Prometida", "Génesis 3", 1, 3, listOf(p(1, "Génesis", 3)),
+                "En el mismo escenario de la caída humana, antes de pronunciar las consecuencias del pecado, Dios proclamó el primer anuncio del Evangelio (Génesis 3:15): la Simiente de la mujer heriría a la serpiente en la cabeza, aunque la serpiente le heriría en el calcañar en la cruz.",
+                "Desde el día mismo de la caída en el Edén, Dios puso en marcha Su plan soberano de redención en Cristo.",
+                "¿Agradeces al Señor porque aun en nuestros mayores fracasos Su gracia sale a buscarnos y cubrirnos?"),
+            d(3, "Día 3: El Pacto con Noé y el Arco de Gracia", "Génesis 9", 1, 9, listOf(p(1, "Génesis", 9)),
+                "Tras el juicio del diluvio, Dios estableció un pacto perpetuo con Noé, sus descendientes y toda criatura viviente, colocando Su arco en las nubes como señal de que las aguas no volverían a destruir toda carne. Este pacto preserva el escenario de la tierra para que se cumpla la historia de la redención.",
+                "La paciencia de Dios que sostiene el orden natural de la creación tiene un propósito redentor: salvar a Su pueblo.",
+                "¿Ves en cada amanecer y en las estaciones del año un recordatorio de la fidelidad fiel de Dios a Su pacto?"),
+            d(4, "Día 4: El Pacto Abrahámico: Llamado y Bendición", "Génesis 12", 1, 12, listOf(p(1, "Génesis", 12)),
+                "Dios llamó a Abram de Ur de los caldeos con una promesa que cambiaría la historia mundial: 'Y haré de ti una nación grande, y te bendeciré... y serán benditas en ti todas las familias de la tierra'. Dios nos bendice nunca para que acumulemos egoístamente, sino para ser canal de bendición a las naciones.",
+                "En Cristo, la Simiente de Abraham, la promesa de bendición y justificación por la fe alcanza a todas las naciones.",
+                "¿Vives tu fe con una visión misionera de ser bendición para las familias y personas que te rodean?"),
+            d(5, "Día 5: Ratificación Soberana del Pacto", "Génesis 15", 1, 15, listOf(p(1, "Génesis", 15)),
+                "En Génesis 15, Abram creyó a Jehová y le fue contado por justicia. Para sellar el pacto, mientras Abram dormía, solo el horno humeante y la antorcha de fuego (la presencia misma de Dios) pasaron por entre los animales partidos: Dios asumió sobre Sí mismo toda la responsabilidad de cumplir el pacto.",
+                "La seguridad de nuestra salvación descansa en que Dios mismo juró por Sí mismo cumplir Su promesa redentora.",
+                "¿Descansas en que el pacto de gracia depende de la fidelidad inmutable de Dios y no de tu fragilidad?"),
+            d(6, "Día 6: La Señal del Pacto y el Dios Todopoderoso", "Génesis 17", 1, 17, listOf(p(1, "Génesis", 17)),
+                "Dios se revela a Abraham como El-Shaddai ('Yo soy el Dios Todopoderoso; anda delante de mí y sé perfecto'), transforma su nombre de Abram a Abraham (padre de muchedumbre de gentes) y establece la señal del pacto, que en el Nuevo Testamento apunta a la circuncisión del corazón por el Espíritu.",
+                "Entrar en pacto con el Dios Todopoderoso nos da una nueva identidad y nos llama a caminar en integridad delante de Él.",
+                "¿Caminas hoy consciente de la presencia de El-Shaddai en cada decisión privada y pública?"),
+            d(7, "Día 7: El Pacto del Sinaí: Un Reino de Sacerdotes", "Éxodo 19; Éxodo 20", 2, 19, listOf(p(2, "Éxodo", 19), p(2, "Éxodo", 20)),
+                "Nota el orden de la gracia en el Sinaí: Dios no dio primero los Diez Mandamientos para que Israel saliera de Egipto; primero los redimió con mano poderosa ('os tomé sobre alas de águilas, y os he traído a mí') y luego les dio Su Ley para que vivieran como un reino de sacerdotes y gente santa.",
+                "En la Biblia, la redención por gracia siempre precede al llamado a la obediencia y la santidad.",
+                "¿Obedeces los mandamientos de Dios como una respuesta de amor agradecido a quien ya te sacó de la esclavitud?"),
+            d(8, "Día 8: El Propósito de la Ley como Tutor hacia Cristo", "Gálatas 3", 48, 3, listOf(p(48, "Gálatas", 3)),
+                "Pablo explica magistralmente cómo encajan la Ley del Sinaí y la promesa dada a Abraham: la ley fue añadida a causa de las transgresiones y funcionó como un 'ayo' (tutor o pedagogo) para encerrarnos bajo conciencia de pecado y conducirnos de la mano hasta Jesucristo, a fin de que fuésemos justificados por la fe.",
+                "La Ley nos muestra nuestra necesidad de un Salvador; Cristo nos otorga la justicia y la bendición prometida a Abraham.",
+                "¿Agradeces a Dios porque ya no estás bajo la condenación de la ley, sino revestido de Cristo como hijo por la fe?"),
+            d(9, "Día 9: El Pacto Davídico: Trono y Dinastía Eterna", "2 Samuel 7", 10, 7, listOf(p(10, "2 Samuel", 7)),
+                "David deseaba edificar un templo para el Señor, pero Dios le respondió prometiendo edificarle a él una 'casa' (una dinastía real): 'Y será afirmada tu casa y tu reino para siempre delante de tu rostro, y tu trono será estable eternamente'. Esa promesa halla su cumplimiento eterno en Jesús, el Hijo de David.",
+                "Jesucristo es el Rey prometido del linaje de David cuyo Reino jamás será destruido ni tendrá fin.",
+                "¿Reina el Hijo de David hoy como Soberano indiscutible sobre el trono de tu corazón y tu hogar?"),
+            d(10, "Día 10: La Promesa del Nuevo Pacto Interior", "Jeremías 31", 24, 31, listOf(p(24, "Jeremías", 31)),
+                "En los días más oscuros del asedio de Jerusalén, el profeta Jeremías contempló el amanecer del Nuevo Pacto: 'Daré mi ley en su mente, y la escribiré en su corazón; y yo seré a ellos por Dios, y ellos me serán por pueblo... porque perdonaré la maldad de ellos, y no me acordaré más de su pecado'.",
+                "El Nuevo Pacto resuelve el problema más profundo del ser humano: perdona la culpa y transforma el corazón desde adentro.",
+                "¿Experimentas el gozo de tener la Palabra de Dios escrita en tu corazón y tus pecados perdonados para siempre?"),
+            d(11, "Día 11: El Nuevo Corazón y el Espíritu Santo", "Ezequiel 36", 26, 36, listOf(p(26, "Ezequiel", 36)),
+                "A través de Ezequiel, Dios detalla la cirugía espiritual del Nuevo Pacto: 'Esparciré sobre vosotros agua limpia, y seréis limpiados... Os daré corazón nuevo, y pondré espíritu nuevo dentro de vosotros; y quitaré de vuestra carne el corazón de piedra, y os daré un corazón de carne. Y pondré dentro de vosotros mi Espíritu'.",
+                "Dios no solo nos pide obedecer; nos da un corazón sensible de carne y Su propio Espíritu para capacitarnos a andar en Sus estatutos.",
+                "¿Le pides al Señor que mantenga tu corazón tierno y libre de toda dureza espiritual?"),
+            d(12, "Día 12: La Cena del Señor: El Nuevo Pacto en Su Sangre", "Lucas 22", 42, 22, listOf(p(42, "Lucas", 22)),
+                "En el aposento alto, la noche en que fue entregado, Jesús tomó la copa después de haber cenado y declaró: 'Esta copa es el nuevo pacto en mi sangre, que por vosotros se derrama'. Todas las promesas hechas a Adán, Noé, Abraham, Moisés, David y los profetas quedaron selladas con la sangre del Cordero.",
+                "Cada vez que participamos de la Cena del Señor proclamamos que el Nuevo Pacto fue comprado con la sangre preciosa de Cristo.",
+                "¿Con qué gratitud y reverencia examinas tu corazón al recordar el precio de la sangre del Nuevo Pacto?"),
+            d(13, "Día 13: La Inclusión de las Naciones en el Pacto", "Efesios 2", 49, 2, listOf(p(49, "Efesios", 2)),
+                "Antes estábamos sin Cristo, alejados de la ciudadanía de Israel y ajenos a los pactos de la promesa, sin esperanza y sin Dios en el mundo. Pero ahora en Cristo Jesús, los que en otro tiempo estábamos lejos hemos sido hechos cercanos por la sangre de Cristo, quien derribó la pared intermedia de separación.",
+                "En Cristo ya no somos extranjeros ni advenedizos, sino conciudadanos de los santos y miembros de la familia de Dios.",
+                "¿Valoras el privilegio inmenso de haber sido adoptado en la familia y en los pactos eternos de Dios?"),
+            d(14, "Día 14: La Superioridad Eterna del Nuevo Pacto", "Hebreos 8; Hebreos 9", 58, 8, listOf(p(58, "Hebreos", 8), p(58, "Hebreos", 9)),
+                "La carta a los Hebreos exalta a Jesús como Mediador de un mejor pacto, establecido sobre mejores promesas y ratificado mediante Su propia sangre eterna, la cual limpia nuestras conciencias de obras muertas para que sirvamos al Dios vivo con libertad y seguridad.",
+                "El Nuevo Pacto es eterno e inquebrantable porque su Fiador y Mediador vive para siempre a la diestra del Padre.",
+                "¿Sirves al Dios vivo con una conciencia limpia y libre de la carga de las obras muertas?"),
+            d(15, "Día 15: Consumación: 'Ellos Serán Mi Pueblo'", "Apocalipsis 21", 66, 21, listOf(p(66, "Apocalipsis", 21)),
+                "La meta de todos los pactos bíblicos alcanza su consumación eterna en Apocalipsis 21: 'He aquí el tabernáculo de Dios con los hombres, y él morará con ellos; y ellos serán su pueblo, y Dios mismo estará con ellos como su Dios'. El hilo dorado de la promesa termina en comunión eterna cara a cara.",
+                "Toda la historia de la salvación desemboca en la promesa suprema del pacto: habitar con nuestro Dios por toda la eternidad.",
+                "¿Cómo ilumina tu presente la certeza absoluta de que morarás para siempre con el Dios fiel a Su pacto?")
+        )
     }
 
     // --- LIDERAZGO CON NEHEMÍAS (15 Días) ---
     val nehemiahPlan: List<ReadingPlanDay> by lazy {
-        (1..15).map { dayNum ->
-            val ch = dayNum.coerceAtMost(13)
-            val nehTheme = when (dayNum) {
-                1 -> "Quebranto, Carga Espiritual e Intercesión"
-                2 -> "Valentía ante el Rey y Visión Estratégica"
-                3 -> "Trabajo en Equipo: Cada Familia Frente a su Puerta"
-                4 -> "Con una Mano en la Obra y otra en la Espada"
-                5 -> "Integridad Financiera, Justicia y Compasión por el Pueblo"
-                6 -> "Discernimiento y Firmeza ante las Trampas del Enemigo"
-                7 -> "Organización, Mayordomía y Cuidado de las Familias"
-                8 -> "Avivamiento Centrado en la Lectura y Comprensión de la Palabra"
-                9 -> "Confesión Humilde y Memoria de la Fidelidad de Dios"
-                10 -> "Renovación del Pacto y Compromiso Comunitario"
-                11 -> "Disposición Voluntaria para Habitar y Servir"
-                12 -> "Dedicación de los Muros con Gratitud y Alabanza"
-                13 -> "Celo por la Pureza Espiritual y Perseverancia Final"
-                14 -> "El Legado del Líder Siervo que Busca el Favor de Dios"
-                else -> "Restaurar los Muros Espirituales de Nuestra Generación"
-            }
-            d(
-                num = dayNum,
-                title = "Día $dayNum: Nehemías $ch - $nehTheme",
-                summary = "Nehemías $ch",
-                pBId = 16,
-                pC = ch,
-                passages = listOf(p(16, "Nehemías", ch)),
-                narrative = "Al estudiar Nehemías $ch bajo el enfoque de «$nehTheme», descubrimos cómo un hombre o mujer de Dios responde ante los tiempos de ruina y crisis. Nehemías no se quedó en la queja pasiva; combinó una vida de oración ferviente con planificación diligente, coraje frente a la oposición e integridad intachable.",
-                lesson = "En Nehemías $ch aprendemos que «$nehTheme» requiere depender de Dios en oración mientras trabajamos con excelencia y carácter.",
-                reflection = "¿Cómo puedes aplicar hoy el principio de «$nehTheme» en tu familia, trabajo o ministerio?"
-            )
-        }
+        listOf(
+            d(1, "Día 1: Nehemías 1 - Quebranto, Carga Espiritual e Intercesión", "Nehemías 1", 16, 1, listOf(p(16, "Nehemías", 1)),
+                "Al escuchar que los muros de Jerusalén estaban derribados y sus puertas quemadas a fuego, Nehemías se sentó, lloró e hizo duelo por días, ayunando y orando delante del Dios de los cielos. Todo gran liderazgo espiritual comienza con un corazón quebrantado que intercede antes de actuar.",
+                "El verdadero líder según Dios siente el dolor de su pueblo y lleva la carga al trono de la gracia antes de trazar planes.",
+                "¿Qué necesidad espiritual o familiar a tu alrededor te mueve hoy a doblar tus rodillas en intercesión ferviente?"),
+            d(2, "Día 2: Nehemías 2 - Valentía ante el Rey y Visión Estratégica", "Nehemías 2", 16, 2, listOf(p(16, "Nehemías", 2)),
+                "Cuando el rey Artajerjes le preguntó qué pedía, Nehemías elevó una oración relámpago al Dios de los cielos y habló con valentía y prudencia. Ya en Jerusalén, inspeccionó de noche los muros derribados antes de convocar al pueblo: 'Venid, y edifiquemos el muro de Jerusalén'.",
+                "La fe bíblica no está reñida con la planificación sabia: oramos como si todo dependiera de Dios y planificamos con diligencia.",
+                "¿Acompañas tus oraciones con pasos estratégicos concretos y valentía cuando Dios te abre una puerta?"),
+            d(3, "Día 3: Nehemías 3 - Trabajo en Equipo: Cada Familia Frente a su Puerta", "Nehemías 3", 16, 3, listOf(p(16, "Nehemías", 3)),
+                "El capítulo 3 de Nehemías es un monumento a la unidad: sacerdotes, plateros, perfumistas, gobernantes y familias enteras edificaron hombro a hombro, cada uno frente a su propia casa. Una obra colosal se vuelve alcanzable cuando cada creyente asume su tramo de responsabilidad.",
+                "En la obra del Señor no hay espectadores: la restauración ocurre cuando cada familia edifica el tramo que tiene enfrente.",
+                "¿Estás edificando activamente la porción del muro que corresponde a tu propio hogar y ministerio?"),
+            d(4, "Día 4: Nehemías 4 - Con una Mano en la Obra y otra en la Espada", "Nehemías 4", 16, 4, listOf(p(16, "Nehemías", 4)),
+                "Frente a las burlas y amenazas de Sanbalat y Tobías, Nehemías oró a Dios y puso guarda día y noche. Los edificadores trabajaban con una mano en la obra y en la otra tenían la espada, recordando: 'No les temáis; acordaos del Señor, grande y temible, y pelead por vuestros hermanos'.",
+                "Todo avance espiritual enfrentará oposición; la respuesta es edificar sin detenerse mientras velamos con las armas espirituales.",
+                "¿Te detienen las críticas externas o continúas edificando con una mano en el trabajo y otra en la Palabra?"),
+            d(5, "Día 5: Nehemías 5 - Integridad Financiera y Compasión por el Pueblo", "Nehemías 5", 16, 5, listOf(p(16, "Nehemías", 5)),
+                "Cuando surgió un clamor de los pobres oprimidos por la usura de sus propios hermanos, Nehemías confrontó la injusticia y dio ejemplo renunciando durante doce años a los privilegios económicos de gobernador, por temor de Dios. El líder piadoso sirve al pueblo, no se sirve de él.",
+                "La integridad financiera y la compasión por el necesitado son el sello innegociable de un liderazgo que teme a Dios.",
+                "¿Refleja tu manejo de recursos y autoridad un corazón generoso que busca aliviar la carga de los demás?"),
+            d(6, "Día 6: Nehemías 6 - Discernimiento ante las Trampas del Enemigo", "Nehemías 6", 16, 6, listOf(p(16, "Nehemías", 6)),
+                "Al ver que no podían detener la obra por la fuerza, los adversarios intentaron distraer a Nehemías invitándolo a una cumbre en el valle de Ono, y luego con calumnias e intimidación. La respuesta de Nehemías es inmortal: 'Yo hago una gran obra, y no puedo ir'.",
+                "El discernimiento espiritual nos libra de caer en distracciones que buscan apartarnos de la misión que Dios nos encomendó.",
+                "¿Sabes decir 'no' con firmeza a las distracciones que intentan sacarte del propósito prioritario de Dios?"),
+            d(7, "Día 7: Nehemías 7 - Organización, Mayordomía y Cuidado de las Familias", "Nehemías 7", 16, 7, listOf(p(16, "Nehemías", 7)),
+                "Una vez concluido el muro físico, Nehemías designó a hombres fieles y temerosos de Dios más que muchos (como Hananías) para custodiar las puertas, y organizó el registro genealógico de las familias. Terminar un proyecto requiere establecer estructuras sanas que lo preserven.",
+                "Dios busca personas fieles y temerosas de Él en lo secreto para confiarles el cuidado de Su casa.",
+                "¿Cultivas un carácter íntegro y confiable en las responsabilidades cotidianas que hoy tienes a cargo?"),
+            d(8, "Día 8: Nehemías 8 - Avivamiento Centrado en la Palabra de Dios", "Nehemías 8", 16, 8, listOf(p(16, "Nehemías", 8)),
+                "De nada servían muros fuertes si el corazón del pueblo seguía en ruinas. Esdras abrió el libro de la Ley desde el alba hasta el mediodía, poniendo el sentido para que entendiesen la lectura. Cuando el pueblo lloró conmovido, Nehemías proclamó: 'El gozo de Jehová es vuestra fuerza'.",
+                "La verdadera restauración espiritual nace cuando la Palabra de Dios es leída, explicada con claridad y obedecida con gozo.",
+                "¿Es el gozo del Señor y Su Palabra la fuente real de tu fortaleza en medio de tus responsabilidades?"),
+            d(9, "Día 9: Nehemías 9 - Confesión Humilde y Memoria de la Fidelidad Divina", "Nehemías 9", 16, 9, listOf(p(16, "Nehemías", 9)),
+                "La lectura de la Escritura produjo una de las oraciones penitenciales más largas y hermosas de la Biblia: el pueblo repasó la historia desde la creación y Abraham, contrastando su propia rebeldía con el carácter de Dios: 'Pero tú eres Dios que perdonas, clemente y piadoso'.",
+                "Recordar la historia de la fidelidad y paciencia de Dios quebranta nuestro orgullo y aviva nuestra gratitud.",
+                "¿Dedicas tiempo en tus oraciones a recordar las muchas veces que la misericordia de Dios te ha sostenido?"),
+            d(10, "Día 10: Nehemías 10 - Renovación del Pacto y Compromiso Comunitario", "Nehemías 10", 16, 10, listOf(p(16, "Nehemías", 10)),
+                "La emoción espiritual del capítulo 8 y el arrepentimiento del capítulo 9 se cristalizaron en el capítulo 10 en decisiones concretas firmadas por escrito: caminar en la Ley de Dios, cuidar la pureza de las familias y sostener con generosidad la Casa de nuestro Dios.",
+                "Un avivamiento genuino siempre pasa de las lágrimas de emoción a compromisos firmes de obediencia práctica.",
+                "¿Qué compromiso concreto de fidelidad familiar y espiritual te llama el Señor a sellar hoy?"),
+            d(11, "Día 11: Nehemías 11 - Disposición Voluntaria para Habitar y Servir", "Nehemías 11", 16, 11, listOf(p(16, "Nehemías", 11)),
+                "Jerusalén estaba amurallada pero aún tenía pocos habitantes, y vivir en la capital implicaba riesgos y sacrificios. El pueblo bendijo a todos los varones que voluntariamente se ofrecieron para morar en Jerusalén y asumir el servicio en los puestos difíciles.",
+                "El Reino de Dios avanza gracias a creyentes que se ofrecen voluntariamente donde hay mayor necesidad, no donde hay mayor comodidad.",
+                "¿Estás dispuesto a servir a Dios aun cuando implique salir de tu zona de confort personal?"),
+            d(12, "Día 12: Nehemías 12 - Dedicación de los Muros con Gratitud y Alabanza", "Nehemías 12", 16, 12, listOf(p(16, "Nehemías", 12)),
+                "En la dedicación del muro de Jerusalén, Nehemías organizó dos grandes coros que caminaron sobre las murallas dando gracias a Dios, de modo que el gozo de Jerusalén se oyó desde lejos. Aquellos mismos muros de los que el enemigo decía que una zorra los derribaría, ahora sostenían a un pueblo adorando.",
+                "Toda victoria lograda con la ayuda de Dios debe ser consagrada a Él con alabanza pública y gratitud.",
+                "¿Le das a Dios toda la gloria y el agradecimiento cuando ves terminada una etapa o meta en tu vida?"),
+            d(13, "Día 13: Nehemías 13 - Celo por la Pureza Espiritual y Perseverancia", "Nehemías 13", 16, 13, listOf(p(16, "Nehemías", 13)),
+                "Tras una ausencia temporal, Nehemías regresó y descubrió que el sacerdote Eliasib había cedido una cámara del Templo al enemigo Tobías y se había descuidado el día de reposo. Con celo santo, Nehemías limpió la Casa de Dios y clamó: '¡Acuérdate de mí, Dios mío, para bien!'.",
+                "La vigilancia espiritual nunca termina: debemos guardar el corazón para que el enemigo no ocupe cámaras dentro del templo de nuestra vida.",
+                "¿Has permitido que algún hábito mundano ocupe un espacio dentro de tu corazón que pertenece solo a Dios?"),
+            d(14, "Día 14: Esdras y Nehemías - Preparar el Corazón para la Ley de Jehová", "Esdras 7; Salmo 127", 15, 7, listOf(p(15, "Esdras", 7), p(19, "Salmos", 127)),
+                "Junto al liderazgo constructor de Nehemías brilló el ministerio de Esdras, quien 'había preparado su corazón para inquirir la ley de Jehová y para cumplirla, y para enseñar en Israel sus estatutos y decretos' (Esd 7:10), recordando que si Jehová no edificare la casa, en vano trabajan los que la edifican.",
+                "El orden bíblico del liderazgo eficaz es inalterable: primero buscar a Dios, luego vivir Su Palabra y finalmente enseñarla.",
+                "¿Preparas tu corazón para vivir primero en privado aquello que deseas enseñar o liderar en público?"),
+            d(15, "Día 15: Reparadores de Portillos en Nuestra Generación", "Isaías 58; 1 Corintios 3", 23, 58, listOf(p(23, "Isaías", 58), p(46, "1 Corintios", 3)),
+                "La promesa profética de Isaías 58 declara sobre quienes viven en piedad genuina: 'Y los tuyos edificarán las ruinas antiguas; los cimientos de generación y generación levantarás, y serás llamado reparador de portillos, restaurador de calzadas para habitar'. Hoy nosotros somos colaboradores de Dios edificando sobre la Roca que es Cristo.",
+                "Dios te ha colocado en este momento de la historia para ser un reparador de brechas y edificador de vidas en Cristo.",
+                "¿Cuál será el legado espiritual que dejarás edificado para las próximas generaciones sobre el fundamento de Jesucristo?")
+        )
     }
 
     // --- DE LA AFLICCIÓN A LA ESPERANZA (15 Días) ---
     val afflictionHopePlan: List<ReadingPlanDay> by lazy {
-        (1..15).map { dayNum ->
-            val meta = when (dayNum) {
-                1 -> PlanDayMeta(19, "Salmos", 34, "Cercano Está Jehová a los Quebrantados")
-                2 -> PlanDayMeta(19, "Salmos", 42, "¿Por Qué te Abates, Oh Alma Mía?")
-                3 -> PlanDayMeta(19, "Salmos", 77, "Clamé a Dios con mi Voz en el Día de Angustia")
-                4 -> PlanDayMeta(19, "Salmos", 88, "La Honestidad del Lamento en la Oscuridad")
-                5 -> PlanDayMeta(23, "Isaías", 53, "El Varón de Dolores que Cargó Nuestro Sufrimiento")
-                6 -> PlanDayMeta(47, "2 Corintios", 1, "El Dios de Toda Consolación")
-                7 -> PlanDayMeta(47, "2 Corintios", 4, "Tribulados en Todo, Mas no Desesperados")
-                8 -> PlanDayMeta(47, "2 Corintios", 12, "Bástate Mi Gracia: Poder en la Debilidad")
-                9 -> PlanDayMeta(1, "Génesis", 50, "Lo que Vosotros Pensasteis para Mal, Dios para Bien")
-                10 -> PlanDayMeta(19, "Salmos", 23, "Aunque Ande en Valle de Sombra de Muerte")
-                11 -> PlanDayMeta(45, "Romanos", 8, "Todas las Cosas Ayudan a Bien")
-                12 -> PlanDayMeta(19, "Salmos", 30, "Por la Noche Durará el Lloro, al Amanecer el Gozo")
-                13 -> PlanDayMeta(23, "Isaías", 43, "Cuando Pases por las Aguas, Yo Estaré Contigo")
-                14 -> PlanDayMeta(58, "Hebreos", 12, "La Disciplina Amorosa del Padre y sus Frutos")
-                else -> PlanDayMeta(66, "Apocalipsis", 21, "Él Enjugará Toda Lágrima de Sus Ojos")
-            }
-            d(
-                num = dayNum,
-                title = "Día $dayNum: ${meta.subTitle}",
-                summary = "${meta.bookName} ${meta.chapter}",
-                pBId = meta.bookId,
-                pC = meta.chapter,
-                passages = listOf(p(meta.bookId, meta.bookName, meta.chapter)),
-                narrative = "El pasaje consolador de ${meta.bookName} ${meta.chapter} nos sale al encuentro en medio de la prueba con la promesa: «${meta.subTitle}». El sufrimiento no es señal de abandono divino; en las manos del Redentor, el valle de lágrimas se transforma en el lugar donde conocemos la ternura y el poder sustentador del Padre.",
-                lesson = "La promesa de «${meta.subTitle}» en ${meta.bookName} ${meta.chapter} nos asegura que Dios camina con nosotros y redime cada aflicción.",
-                reflection = "¿Qué carga o dolor necesitas entregar hoy al Señor apoyándote en la verdad de «${meta.subTitle}»?"
-            )
-        }
+        listOf(
+            d(1, "Día 1: Cercano Está Jehová a los Quebrantados", "Salmo 34", 19, 34, listOf(p(19, "Salmos", 34)),
+                "En medio de la persecución y el temor, David descubrió una verdad que ha consolado a millones de creyentes a través de los siglos: 'Cercano está Jehová a los quebrantados de corazón; y salva a los contritos de espíritu. Muchas son las aflicciones del justo, pero de todas ellas le librará Jehová'.",
+                "El dolor no aleja a Dios de nuestro lado; por el contrario, atrae Su presencia más cercana y tierna hacia el corazón quebrantado.",
+                "¿Has buscado al Señor en tu quebranto sabiendo que Él oye tu clamor y te libra de todos tus temores?"),
+            d(2, "Día 2: ¿Por Qué te Abates, Oh Alma Mía?", "Salmo 42; Salmo 43", 19, 42, listOf(p(19, "Salmos", 42), p(19, "Salmos", 43)),
+                "Cuando las lágrimas fueron su pan de día y de noche, el salmista no se dejó arrastrar pasivamente por sus emociones negativas, sino que le predicó a su propia alma: '¿Por qué te abates, oh alma mía, y te turbas dentro de mí? Espera en Dios; porque aún he de alabarle, salvación mía y Dios mío'.",
+                "En los días de abatimiento espiritual, debemos dejar de escuchar solo a nuestra tristeza y empezar a hablarle a nuestra alma con las promesas de Dios.",
+                "¿Qué verdad del carácter de Dios necesitas recordarle hoy a tu propia alma frente al desánimo?"),
+            d(3, "Día 3: Clamé a Dios con mi Voz en el Día de Angustia", "Salmo 77", 19, 77, listOf(p(19, "Salmos", 77)),
+                "Asaf atravesó una noche tan honda que sus ojos no podían cerrarse y se preguntaba si Dios había olvidado el tener misericordia. El punto de giro llegó cuando decidió cambiar el enfoque: 'Me acordaré de las obras de JAH; sí, haré yo memoria de tus maravillas antiguas, y meditaré en todas tus obras'.",
+                "Cuando el presente parece oscuro e incomprensible, recordar las fidelidades pasadas de Dios devuelve la luz a nuestra fe.",
+                "¿Qué maravillas y respuestas pasadas de Dios en tu vida puedes traer hoy a la memoria para fortalecer tu esperanza?"),
+            d(4, "Día 4: La Honestidad del Lamento en la Oscuridad", "Salmo 88", 19, 88, listOf(p(19, "Salmos", 88)),
+                "El Salmo 88 es el salmo más sombrío del Salterio, pero comienza con una confesión extraordinaria de fe: 'Oh Jehová, Dios de mi salvación, día y noche clamo delante de ti'. El hecho de que este salmo esté en la Biblia demuestra que Dios acoge nuestro lamento sincero cuando aún no vemos la salida.",
+                "La fe verdadera no finge que no duele; lleva el dolor más crudo directamente a los pies del Dios de nuestra salvación.",
+                "¿Te permites derramar tu corazón con total honestidad delante de Dios en lugar de esconder tu dolor?"),
+            d(5, "Día 5: El Varón de Dolores que Cargó Nuestro Sufrimiento", "Isaías 53", 23, 53, listOf(p(23, "Isaías", 53)),
+                "Nuestro Dios no es un espectador inmune al sufrimiento humano. Siete siglos antes de la cruz, Isaías contempló al Mesías como 'varón de dolores, experimentado en quebranto... Ciertamente llevó él nuestras enfermedades, y sufrió nuestros dolores; y por su llaga fuimos nosotros curados'.",
+                "En Jesucristo tenemos a un Salvador que conoce por experiencia propia el rechazo, la agonía y el quebranto, y que redimió nuestro dolor en la cruz.",
+                "¿Cómo consuela tu corazón mirar las heridas de Jesús y saber que Él comprende cada una de tus lágrimas?"),
+            d(6, "Día 6: El Padre de Misericordias y Dios de Toda Consolación", "2 Corintios 1:1-11", 47, 1, listOf(p(47, "2 Corintios", 1)),
+                "Pablo bendice al Padre de misericordias y Dios de toda consolación, 'el cual nos consuela en todas nuestras tribulaciones, para que podamos también nosotros consolar a los que están en cualquier tribulación, por medio de la consolación con que nosotros somos consolados por Dios'.",
+                "Dios transforma nuestras cicatrices consoladas en un ministerio de compasión para sostener a otros que hoy sufren.",
+                "¿A quién alrededor tuyo podrías consolar esta semana con el mismo consuelo que tú has recibido de Dios?"),
+            d(7, "Día 7: Tribulados en Todo, Mas no Desesperados", "2 Corintios 4:7-18", 47, 4, listOf(p(47, "2 Corintios", 4)),
+                "Tenemos este tesoro en vasos de barro, para que la excelencia del poder sea de Dios, y no de nosotros: que estamos atribulados en todo, mas no estrechados; en apuros, mas no desesperados; derribados, pero no destruidos. Porque esta leve tribulación momentánea produce en nosotros un cada vez más excelente y eterno peso de gloria.",
+                "Nuestra fragilidad como vasos de barro no es un obstáculo, sino la vitrina donde resplandece el poder sustentador de Dios.",
+                "¿Miras tus pruebas presentes a la luz de las cosas que no se ven y del eterno peso de gloria venidero?"),
+            d(8, "Día 8: Bástate Mi Gracia: Poder en la Debilidad", "2 Corintios 12:1-10", 47, 12, listOf(p(47, "2 Corintios", 12)),
+                "Tres veces rogó Pablo al Señor que quitara de él aquel aguijón en su carne, y recibió una respuesta mejor que la liberación física: 'Bástate mi gracia; porque mi poder se perfecciona en la debilidad'. Por tanto, podemos gloriarnos en nuestras debilidades para que repose sobre nosotros el poder de Cristo.",
+                "Cuando nuestras fuerzas humanas llegan a cero, la gracia suficiente de Cristo despliega toda Su plenitud en nosotros.",
+                "¿Descansas en el 'Bástate mi gracia' del Señor en aquellas situaciones cuya respuesta aún espera?"),
+            d(9, "Día 9: Lo que Vosotros Pensasteis para Mal, Dios para Bien", "Génesis 50:15-26", 1, 50, listOf(p(1, "Génesis", 50)),
+                "Traicionado por sus hermanos, vendido como esclavo y encarcelado injustamente en Egipto, José pudo mirar hacia atrás sin rencor y declarar la cumbre de la providencia divina: 'Vosotros pensasteis mal contra mí, mas Dios lo encaminó a bien, para hacer lo que vemos hoy, para mantener en vida a mucho pueblo'.",
+                "Ni siquiera la maldad o las injusticias de otros pueden frustrar el plan soberano de Dios para bendecir y preservar tu vida.",
+                "¿Confías en que Dios es capaz de entretejer aun los capítulos más injustos de tu historia para un propósito de bien?"),
+            d(10, "Día 10: Aunque Ande en Valle de Sombra de Muerte", "Salmo 23", 19, 23, listOf(p(19, "Salmos", 23)),
+                "Nota cómo en la mitad del Salmo 23 David deja de hablar acerca del Pastor ('Él me pastoreará') para hablar directamente CON el Pastor en medio de la oscuridad: 'Aunque ande en valle de sombra de muerte, no temeré mal alguno, porque TÚ estarás conmigo; tu vara y tu cayado me infundirán aliento'.",
+                "En el valle de sombra de muerte la intimidad con el Buen Pastor se vuelve más cercana y personal que en los delicados pastos.",
+                "¿Sientes hoy el aliento de la vara y el cayado del Buen Pastor caminando paso a paso a tu lado?"),
+            d(11, "Día 11: Todas las Cosas Ayudan a Bien", "Romanos 8:18-39", 45, 8, listOf(p(45, "Romanos", 8)),
+                "Mientras la creación gime aguardando la redención final, nosotros tenemos la certeza inamovible de Romanos 8:28: 'Y sabemos que a los que aman a Dios, todas las cosas les ayudan a bien, esto es, a los que conforme a su propósito son llamados', para ser hechos conformes a la imagen de Su Hijo.",
+                "El 'bien' supremo hacia el cual Dios encamina todas las cosas en nuestra vida es esculpir en nosotros la imagen de Jesucristo.",
+                "¿Cómo está usando Dios tu temporada actual para formar en ti el carácter de Su Hijo amado?"),
+            d(12, "Día 12: Por la Noche Durará el Lloro, al Amanecer el Gozo", "Salmo 30", 19, 30, listOf(p(19, "Salmos", 30)),
+                "El llanto puede hospedarse como un peregrino durante la noche, pero no tiene permiso para quedarse a vivir para siempre: 'Por la tarde durará el lloro, y a la mañana vendrá la alegría. Has cambiado mi lamento en baile; desataste mi cilicio, y me ceñiste de alegría'.",
+                "Con Cristo, ninguna noche de aflicción es eterna; el amanecer de Su restauración y gozo está garantizado.",
+                "¿Esperas con fe el amanecer de la fidelidad de Dios aun cuando todavía parezca de noche?"),
+            d(13, "Día 13: Cuando Pases por las Aguas, Yo Estaré Contigo", "Isaías 43:1-7", 23, 43, listOf(p(23, "Isaías", 43)),
+                "Ahora, así dice Jehová, Creador tuyo y Formador tuyo: 'No temas, porque yo te redimí; te puse nombre, mío eres tú. Cuando pases por las aguas, yo estaré contigo; y si por los ríos, no te anegarán. Cuando pases por el fuego, no te quemarás, ni la llama arderá en ti'.",
+                "Porque le pertenecemos a Dios por creación y por redención, ni las aguas profundas ni el fuego de la prueba podrán destruirnos.",
+                "¿Escuchas hoy la voz del Señor diciéndote por tu nombre: 'No temas, porque yo te redimí, mío eres tú'?"),
+            d(14, "Día 14: La Disciplina Amorosa del Padre y sus Frutos", "Hebreos 12:1-13", 58, 12, listOf(p(58, "Hebreos", 12)),
+                "Puestos los ojos en Jesús, el autor y consumador de la fe, comprendemos que el Señor al que ama disciplina, como un padre amoroso que nos forma para que participemos de Su santidad. Aunque al presente ninguna disciplina parece ser causa de gozo sino de tristeza, después da fruto apacible de justicia.",
+                "Las pruebas permitidas por nuestro Padre celestial nunca son castigo vengativo, sino formación paterna para nuestro bien eterno.",
+                "¿Mantienes hoy tus ojos fijos en Jesús para no cansarte ni desmayar en tu ánimo durante la carrera de la fe?"),
+            d(15, "Día 15: Él Enjugará Toda Lágrima de Sus Ojos", "Apocalipsis 21:1-7", 66, 21, listOf(p(66, "Apocalipsis", 21)),
+                "El recorrido de la aflicción a la esperanza culmina en la promesa eterna del Trono: 'Enjugará Dios toda lágrima de los ojos de ellos; y ya no habrá muerte, ni habrá más llanto, ni clamor, ni dolor; porque las primeras cosas pasaron. Y el que estaba sentado en el trono dijo: He aquí, yo hago nuevas todas las cosas'.",
+                "La última palabra sobre la historia de cada hijo de Dios no la tiene el dolor ni la muerte, sino la mano del Padre enjugando toda lágrima para siempre.",
+                "¿De qué manera esta esperanza gloriosa e infalible llena hoy tu corazón de paz y fortaleza para seguir adelante?")
+        )
     }
 
     // =========================================================================
@@ -684,7 +1080,7 @@ object ThematicReadingPlansCatalog {
                 "Lámpara es a mis pies tu palabra, y lumbrera a mi camino. En la antigüedad, una lámpara de aceite no iluminaba kilómetros a la distancia; solo alumbraba el siguiente paso en la oscuridad. Dios no suele mostrarnos todo el mapa, pero su Palabra nos da la luz suficiente para dar el paso correcto hoy.",
                 "La Biblia es la guía primaria, infalible y suficiente para la toma de decisiones rectas.",
                 "¿Consultas primero las Escrituras antes de tomar decisiones financieras, sentimentales o laborales?"),
-            d(4, "Día 4: La Sabiduría del Consejo Bíblico", "Proverbios 11:14; 15:22; 19:20-21", 20, 11, listOf(p(20, "Proverbios", 11), p(20, "Proverbios", 15)),
+            d(4, "Día 4: La Sabiduría del Consejo Bíblico", "Proverbios 11:14; 15:22; 19:20-21", 20, 11, listOf(p(20, "Proverbios", 11), p(20, "Proverbios", 15), p(20, "Proverbios", 19)),
                 "Donde no hay dirección sabia, caerá el pueblo; mas en la multitud de consejeros hay seguridad. Dios utiliza a hermanos maduros, pastores piadosos y mentores en la fe para confirmar o alertarnos sobre caminos peligrosos que a nosotros nos parecen rectos.",
                 "Buscar consejo maduro en la fe derriba los sesgos del orgullo y previene caídas lamentables.",
                 "¿Tienes mentores espirituales maduros a quienes pides consejo antes de dar pasos trascendentales?"),
