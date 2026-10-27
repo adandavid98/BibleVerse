@@ -6,6 +6,13 @@ package com.example.data.bible
  */
 object ThematicReadingPlansCatalog {
 
+    private data class PlanDayMeta(
+        val bookId: Int,
+        val bookName: String,
+        val chapter: Int,
+        val subTitle: String
+    )
+
     private fun p(bookId: Int, bookName: String, chapter: Int) = PlanPassageSegment(bookId, bookName, chapter)
 
     private fun d(
@@ -149,7 +156,7 @@ object ThematicReadingPlansCatalog {
                 "La esperanza cristiana no es la de un espíritu incorpóreo flotando en el vacío. Cristo resucitó corporalmente como primicia de todos los redimidos. En el toque de la final trompeta, lo corruptible se vestirá de incorrupción y la muerte será sorbida en victoria absoluta.",
                 "La resurrección de Cristo es la garantía histórica e indestructible de nuestra propia victoria sobre el sepulcro.",
                 "¿Cómo te llena de consuelo y valentía saber que la muerte física ha perdido definitivamente su aguijón?"),
-            d(5, "Día 5: Seguridad en la Mano del Buen Pastor", "Juan 10:22-30; Romanos 8:31-39", 43, 10, listOf(p(43, "Juan", 10), p(45, "8", 45)),
+            d(5, "Día 5: Seguridad en la Mano del Buen Pastor", "Juan 10:22-30; Romanos 8:31-39", 43, 10, listOf(p(43, "Juan", 10), p(45, "Romanos", 8)),
                 "Jesús declara sobre sus ovejas: 'Yo les doy vida eterna; y no perecerán jamás, ni nadie las arrebatará de mi mano. Mi Padre que me las dio es mayor que todos'. La perseverancia de los santos no descansa en la debilidad de nuestro agarre, sino en la omnipotencia de la mano del Padre y del Hijo.",
                 "Nuestra seguridad eterna descansa en la fidelidad invencible de Dios, de cuyo amor nada ni nadie podrá separarnos.",
                 "¿En qué promesas de Jesús te apoyas cuando las dudas o las acusaciones del enemigo intentan robarte la paz?"),
@@ -314,19 +321,19 @@ object ThematicReadingPlansCatalog {
     // --- 30 DÍAS CON JESÚS (30 Días) ---
     val jesus30Plan: List<ReadingPlanDay> by lazy {
         (1..30).map { dayNum ->
-            val (bookId, bookName, chapter, focusTitle) = when {
-                dayNum <= 7 -> listOf(40, "Mateo", dayNum + 4, "El Sermón del Monte y el Reino")
-                dayNum <= 14 -> listOf(41, "Marcos", dayNum - 7, "Milagros y Poder sobre la Tempestad")
-                dayNum <= 21 -> listOf(42, "Lucas", dayNum - 4, "Parábolas de Gracia y Redención")
-                else -> listOf(43, "Juan", dayNum - 10, "La Cruz, Getsemaní y la Resurrección")
+            val meta = when {
+                dayNum <= 7 -> PlanDayMeta(40, "Mateo", dayNum + 4, "El Sermón del Monte y el Reino")
+                dayNum <= 14 -> PlanDayMeta(41, "Marcos", dayNum - 7, "Milagros y Poder sobre la Tempestad")
+                dayNum <= 21 -> PlanDayMeta(42, "Lucas", dayNum - 4, "Parábolas de Gracia y Redención")
+                else -> PlanDayMeta(43, "Juan", dayNum - 10, "La Cruz, Getsemaní y la Resurrección")
             }
             d(
                 num = dayNum,
-                title = "Día $dayNum: Jesús y $focusTitle",
-                summary = "$bookName $chapter",
-                pBId = bookId as Int,
-                pC = chapter as Int,
-                passages = listOf(p(bookId, bookName as String, chapter)),
+                title = "Día $dayNum: Jesús y ${meta.subTitle}",
+                summary = "${meta.bookName} ${meta.chapter}",
+                pBId = meta.bookId,
+                pC = meta.chapter,
+                passages = listOf(p(meta.bookId, meta.bookName, meta.chapter)),
                 narrative = "Caminar con Jesús es contemplar la encarnación perfecta del amor, la verdad y la santidad de Dios. En este capítulo vemos al Salvador interactuar con hombres quebrantados, confrontar a los religiosos hipócritas y manifestar la soberanía del Reino celestial con milagros y gracia inagotable.",
                 lesson = "Jesucristo es el mismo ayer, hoy y por los siglos; sus palabras y su vida son el fundamento inamovible de nuestra fe.",
                 reflection = "¿Qué rasgo del carácter compasivo y firme de Jesús te desafía más a imitarlo en tus relaciones de hoy?"
@@ -354,30 +361,30 @@ object ThematicReadingPlansCatalog {
     // --- PNEUMATOLOGÍA: EL ESPÍRITU SANTO (15 Días) ---
     val pneumatologyPlan: List<ReadingPlanDay> by lazy {
         (1..15).map { dayNum ->
-            val (bId, bName, ch, subTitle) = when (dayNum) {
-                1 -> listOf(1, "Génesis", 1, "El Espíritu en la Creación del Universo")
-                2 -> listOf(2, "Éxodo", 31, "El Espíritu Capacitando para el Servicio")
-                3 -> listOf(29, "Joel", 2, "La Promesa del Derramamiento Universal")
-                4 -> listOf(42, "Lucas", 4, "Jesús Ungido por el Espíritu Santo")
-                5 -> listOf(43, "Juan", 14, "El Consolador y Maestro de la Verdad")
-                6 -> listOf(43, "Juan", 16, "Convicción de Pecado, Justicia y Juicio")
-                7 -> listOf(44, "Hechos", 2, "El Fuego y Poder de Pentecostés")
-                8 -> listOf(49, "Efesios", 1, "El Sello y Arras de Nuestra Herencia")
-                9 -> listOf(43, "Juan", 3, "La Regeneración Sobrenatural")
-                10 -> listOf(48, "Gálatas", 5, "Andar en el Espíritu vs. las Obras de la Carne")
-                11 -> listOf(48, "Gálatas", 5, "El Fruto del Espíritu en el Creyente")
-                12 -> listOf(46, "1 Corintios", 12, "Diversidad de Dones para Edificación")
-                13 -> listOf(49, "Efesios", 4, "No Contristar al Espíritu Santo")
-                14 -> listOf(45, "Romanos", 8, "La Intercesión del Espíritu en la Oración")
-                else -> listOf(66, "Apocalipsis", 22, "El Espíritu y la Novia Dicen: ¡Ven!")
+            val meta = when (dayNum) {
+                1 -> PlanDayMeta(1, "Génesis", 1, "El Espíritu en la Creación del Universo")
+                2 -> PlanDayMeta(2, "Éxodo", 31, "El Espíritu Capacitando para el Servicio")
+                3 -> PlanDayMeta(29, "Joel", 2, "La Promesa del Derramamiento Universal")
+                4 -> PlanDayMeta(42, "Lucas", 4, "Jesús Ungido por el Espíritu Santo")
+                5 -> PlanDayMeta(43, "Juan", 14, "El Consolador y Maestro de la Verdad")
+                6 -> PlanDayMeta(43, "Juan", 16, "Convicción de Pecado, Justicia y Juicio")
+                7 -> PlanDayMeta(44, "Hechos", 2, "El Fuego y Poder de Pentecostés")
+                8 -> PlanDayMeta(49, "Efesios", 1, "El Sello y Arras de Nuestra Herencia")
+                9 -> PlanDayMeta(43, "Juan", 3, "La Regeneración Sobrenatural")
+                10 -> PlanDayMeta(48, "Gálatas", 5, "Andar en el Espíritu vs. las Obras de la Carne")
+                11 -> PlanDayMeta(48, "Gálatas", 5, "El Fruto del Espíritu en el Creyente")
+                12 -> PlanDayMeta(46, "1 Corintios", 12, "Diversidad de Dones para Edificación")
+                13 -> PlanDayMeta(49, "Efesios", 4, "No Contristar al Espíritu Santo")
+                14 -> PlanDayMeta(45, "Romanos", 8, "La Intercesión del Espíritu en la Oración")
+                else -> PlanDayMeta(66, "Apocalipsis", 22, "El Espíritu y la Novia Dicen: ¡Ven!")
             }
             d(
                 num = dayNum,
-                title = "Día $dayNum: $subTitle",
-                summary = "$bName $ch",
-                pBId = bId as Int,
-                pC = ch as Int,
-                passages = listOf(p(bId, bName as String, ch)),
+                title = "Día $dayNum: ${meta.subTitle}",
+                summary = "${meta.bookName} ${meta.chapter}",
+                pBId = meta.bookId,
+                pC = meta.chapter,
+                passages = listOf(p(meta.bookId, meta.bookName, meta.chapter)),
                 narrative = "El Espíritu Santo es Dios mismo obrando en la historia y en el corazón humano. Desde revolotear sobre las aguas primitivas hasta engendrar a Cristo en el vientre de María y dar a luz a la Iglesia en Pentecostés, el Espíritu es el vivificador, consolador y santificador de nuestras almas.",
                 lesson = "Vivir en el Espíritu no es un misticismo hueco, sino rendir nuestra voluntad a Su señorío para manifestar a Cristo.",
                 reflection = "¿Eres sensible a la voz y convicción del Espíritu Santo en tu conciencia cada día?"
@@ -388,30 +395,30 @@ object ThematicReadingPlansCatalog {
     // --- CRISTO EN EL TABERNÁCULO Y HEBREOS (15 Días) ---
     val tabernaclePlan: List<ReadingPlanDay> by lazy {
         (1..15).map { dayNum ->
-            val (bId, bName, ch, subTitle) = when (dayNum) {
-                1 -> listOf(58, "Hebreos", 1, "Cristo Superior a los Ángeles")
-                2 -> listOf(2, "Éxodo", 27, "El Altar de Bronce: La Expiación Sustitutoria")
-                3 -> listOf(2, "Éxodo", 30, "El Lavacro: Purificación Continua")
-                4 -> listOf(2, "Éxodo", 25, "La Mesa del Pan: Jesús el Pan de Vida")
-                5 -> listOf(2, "Éxodo", 25, "El Candelabro: Cristo la Luz del Mundo")
-                6 -> listOf(2, "Éxodo", 30, "El Altar de Incienso: Intercesión Sacerdotal")
-                7 -> listOf(2, "Éxodo", 26, "El Velo Rasgado: Acceso Libre al Trono")
-                8 -> listOf(2, "Éxodo", 25, "El Arca y el Propiciatorio de Gracia")
-                9 -> listOf(58, "Hebreos", 7, "El Sacerdocio Eterno según Melquisedec")
-                10 -> listOf(3, "Levítico", 16, "El Gran Día de la Expiación (Yom Kipur)")
-                11 -> listOf(2, "Éxodo", 12, "El Cordero Pascual Inmaculado")
-                12 -> listOf(2, "Éxodo", 17, "La Roca Herida que Dio Agua Viva")
-                13 -> listOf(4, "Números", 21, "La Serpiente de Bronce en el Desierto")
-                14 -> listOf(58, "Hebreos", 8, "Mediador de un Mejor Pacto")
-                else -> listOf(58, "Hebreos", 10, "El Sacrificio Perfecto y Definitivo")
+            val meta = when (dayNum) {
+                1 -> PlanDayMeta(58, "Hebreos", 1, "Cristo Superior a los Ángeles")
+                2 -> PlanDayMeta(2, "Éxodo", 27, "El Altar de Bronce: La Expiación Sustitutoria")
+                3 -> PlanDayMeta(2, "Éxodo", 30, "El Lavacro: Purificación Continua")
+                4 -> PlanDayMeta(2, "Éxodo", 25, "La Mesa del Pan: Jesús el Pan de Vida")
+                5 -> PlanDayMeta(2, "Éxodo", 25, "El Candelabro: Cristo la Luz del Mundo")
+                6 -> PlanDayMeta(2, "Éxodo", 30, "El Altar de Incienso: Intercesión Sacerdotal")
+                7 -> PlanDayMeta(2, "Éxodo", 26, "El Velo Rasgado: Acceso Libre al Trono")
+                8 -> PlanDayMeta(2, "Éxodo", 25, "El Arca y el Propiciatorio de Gracia")
+                9 -> PlanDayMeta(58, "Hebreos", 7, "El Sacerdocio Eterno según Melquisedec")
+                10 -> PlanDayMeta(3, "Levítico", 16, "El Gran Día de la Expiación (Yom Kipur)")
+                11 -> PlanDayMeta(2, "Éxodo", 12, "El Cordero Pascual Inmaculado")
+                12 -> PlanDayMeta(2, "Éxodo", 17, "La Roca Herida que Dio Agua Viva")
+                13 -> PlanDayMeta(4, "Números", 21, "La Serpiente de Bronce en el Desierto")
+                14 -> PlanDayMeta(58, "Hebreos", 8, "Mediador de un Mejor Pacto")
+                else -> PlanDayMeta(58, "Hebreos", 10, "El Sacrificio Perfecto y Definitivo")
             }
             d(
                 num = dayNum,
-                title = "Día $dayNum: $subTitle",
-                summary = "$bName $ch",
-                pBId = bId as Int,
-                pC = ch as Int,
-                passages = listOf(p(bId, bName as String, ch)),
+                title = "Día $dayNum: ${meta.subTitle}",
+                summary = "${meta.bookName} ${meta.chapter}",
+                pBId = meta.bookId,
+                pC = meta.chapter,
+                passages = listOf(p(meta.bookId, meta.bookName, meta.chapter)),
                 narrative = "Cada estaca, velo, cortina y utensilio del Tabernáculo en el desierto fue diseñado como una maqueta profética de la persona y obra de Jesucristo. El Antiguo Testamento está saturado de sombras gloriosas cuya realidad visible resplandece en el Nuevo Testamento.",
                 lesson = "Jesucristo es el cumplimiento exacto y perfecto de todas las promesas y figuras sacerdotales de la Ley.",
                 reflection = "¿Comprendes la riqueza y profundidad del Antiguo Testamento a la luz de la Cruz de Cristo?"
@@ -422,30 +429,30 @@ object ThematicReadingPlansCatalog {
     // --- TEOLOGÍA DE LOS PACTOS (15 Días) ---
     val covenantsPlan: List<ReadingPlanDay> by lazy {
         (1..15).map { dayNum ->
-            val (bId, bName, ch, subTitle) = when (dayNum) {
-                1 -> listOf(1, "Génesis", 1, "El Pacto de la Creación")
-                2 -> listOf(1, "Génesis", 3, "El Protoevangelio: La Simiente Prometida")
-                3 -> listOf(1, "Génesis", 9, "El Pacto con Noé y el Arco de Gracia")
-                4 -> listOf(1, "Génesis", 12, "El Pacto Abrahámico: Llamado y Bendición")
-                5 -> listOf(1, "Génesis", 15, "Ratificación Soberana del Pacto")
-                6 -> listOf(1, "Génesis", 17, "La Señal del Pacto y la Circuncisión")
-                7 -> listOf(2, "Éxodo", 19, "El Pacto del Sinaí: La Ley y la Santidad")
-                8 -> listOf(48, "Gálatas", 3, "El Propósito de la Ley como Tutor")
-                9 -> listOf(10, "2 Samuel", 7, "El Pacto Davídico: Trono y Dinastía Eterna")
-                10 -> listOf(24, "Jeremías", 31, "La Promesa del Nuevo Pacto Interior")
-                11 -> listOf(26, "Ezequiel", 36, "El Nuevo Corazón y el Espíritu Santo")
-                12 -> listOf(42, "Lucas", 22, "La Cena del Señor: Sellado con Sangre")
-                13 -> listOf(49, "Efesios", 2, "La Inclusión de los Gentiles en el Pacto")
-                14 -> listOf(58, "Hebreos", 8, "La Superioridad Eterna del Nuevo Pacto")
-                else -> listOf(66, "Apocalipsis", 21, "Consumación: 'Ellos Serán Mi Pueblo'")
+            val meta = when (dayNum) {
+                1 -> PlanDayMeta(1, "Génesis", 1, "El Pacto de la Creación")
+                2 -> PlanDayMeta(1, "Génesis", 3, "El Protoevangelio: La Simiente Prometida")
+                3 -> PlanDayMeta(1, "Génesis", 9, "El Pacto con Noé y el Arco de Gracia")
+                4 -> PlanDayMeta(1, "Génesis", 12, "El Pacto Abrahámico: Llamado y Bendición")
+                5 -> PlanDayMeta(1, "Génesis", 15, "Ratificación Soberana del Pacto")
+                6 -> PlanDayMeta(1, "Génesis", 17, "La Señal del Pacto y la Circuncisión")
+                7 -> PlanDayMeta(2, "Éxodo", 19, "El Pacto del Sinaí: La Ley y la Santidad")
+                8 -> PlanDayMeta(48, "Gálatas", 3, "El Propósito de la Ley como Tutor")
+                9 -> PlanDayMeta(10, "2 Samuel", 7, "El Pacto Davídico: Trono y Dinastía Eterna")
+                10 -> PlanDayMeta(24, "Jeremías", 31, "La Promesa del Nuevo Pacto Interior")
+                11 -> PlanDayMeta(26, "Ezequiel", 36, "El Nuevo Corazón y el Espíritu Santo")
+                12 -> PlanDayMeta(42, "Lucas", 22, "La Cena del Señor: Sellado con Sangre")
+                13 -> PlanDayMeta(49, "Efesios", 2, "La Inclusión de los Gentiles en el Pacto")
+                14 -> PlanDayMeta(58, "Hebreos", 8, "La Superioridad Eterna del Nuevo Pacto")
+                else -> PlanDayMeta(66, "Apocalipsis", 21, "Consumación: 'Ellos Serán Mi Pueblo'")
             }
             d(
                 num = dayNum,
-                title = "Día $dayNum: $subTitle",
-                summary = "$bName $ch",
-                pBId = bId as Int,
-                pC = ch as Int,
-                passages = listOf(p(bId, bName as String, ch)),
+                title = "Día $dayNum: ${meta.subTitle}",
+                summary = "${meta.bookName} ${meta.chapter}",
+                pBId = meta.bookId,
+                pC = meta.chapter,
+                passages = listOf(p(meta.bookId, meta.bookName, meta.chapter)),
                 narrative = "La Biblia no es una colección desordenada de historias, sino la revelación orgánica de un solo plan redentor hilvanado a través de los pactos soberanos de Dios con la humanidad, culminando gloriosamente en el Nuevo Pacto sellado por la sangre del Cordero.",
                 lesson = "Dios es un Dios guardador de pactos; su fidelidad inmutable sostiene toda la historia humana.",
                 reflection = "¿Descansas en la certeza de que Dios jamás quebrantará el pacto de amor sellado contigo en Cristo?"
@@ -474,30 +481,30 @@ object ThematicReadingPlansCatalog {
     // --- DE LA AFLICCIÓN A LA ESPERANZA (15 Días) ---
     val afflictionHopePlan: List<ReadingPlanDay> by lazy {
         (1..15).map { dayNum ->
-            val (bId, bName, ch, subTitle) = when (dayNum) {
-                1 -> listOf(19, "Salmos", 34, "Cercano Está Jehová a los Quebrantados")
-                2 -> listOf(19, "Salmos", 42, "¿Por Qué te Abates, Oh Alma Mía?")
-                3 -> listOf(19, "Salmos", 77, "Clamé a Dios con mi Voz en el Día de Angustia")
-                4 -> listOf(19, "Salmos", 88, "La Honestidad del Lamento en la Oscuridad")
-                5 -> listOf(23, "Isaías", 53, "El Varón de Dolores que Cargó Nuestro Sufrimiento")
-                6 -> listOf(47, "2 Corintios", 1, "El Dios de Toda Consolación")
-                7 -> listOf(47, "2 Corintios", 4, "Tribulados en Todo, Mas no Desesperados")
-                8 -> listOf(47, "2 Corintios", 12, "Bástate Mi Gracia: Poder en la Debilidad")
-                9 -> listOf(1, "Génesis", 50, "Lo que Vosotros Pensasteis para Mal, Dios para Bien")
-                10 -> listOf(19, "Salmos", 23, "Aunque Ande en Valle de Sombra de Muerte")
-                11 -> listOf(45, "Romanos", 8, "Todas las Cosas Ayudan a Bien")
-                12 -> listOf(19, "Salmos", 30, "Por la Noche Durará el Lloro, al Amanecer el Gozo")
-                13 -> listOf(23, "Isaías", 43, "Cuando Pases por las Aguas, Yo Estaré Contigo")
-                14 -> listOf(58, "Hebreos", 12, "La Disciplina Amorosa del Padre y sus Frutos")
-                else -> listOf(66, "Apocalipsis", 21, "Él Enjugará Toda Lágrima de Sus Ojos")
+            val meta = when (dayNum) {
+                1 -> PlanDayMeta(19, "Salmos", 34, "Cercano Está Jehová a los Quebrantados")
+                2 -> PlanDayMeta(19, "Salmos", 42, "¿Por Qué te Abates, Oh Alma Mía?")
+                3 -> PlanDayMeta(19, "Salmos", 77, "Clamé a Dios con mi Voz en el Día de Angustia")
+                4 -> PlanDayMeta(19, "Salmos", 88, "La Honestidad del Lamento en la Oscuridad")
+                5 -> PlanDayMeta(23, "Isaías", 53, "El Varón de Dolores que Cargó Nuestro Sufrimiento")
+                6 -> PlanDayMeta(47, "2 Corintios", 1, "El Dios de Toda Consolación")
+                7 -> PlanDayMeta(47, "2 Corintios", 4, "Tribulados en Todo, Mas no Desesperados")
+                8 -> PlanDayMeta(47, "2 Corintios", 12, "Bástate Mi Gracia: Poder en la Debilidad")
+                9 -> PlanDayMeta(1, "Génesis", 50, "Lo que Vosotros Pensasteis para Mal, Dios para Bien")
+                10 -> PlanDayMeta(19, "Salmos", 23, "Aunque Ande en Valle de Sombra de Muerte")
+                11 -> PlanDayMeta(45, "Romanos", 8, "Todas las Cosas Ayudan a Bien")
+                12 -> PlanDayMeta(19, "Salmos", 30, "Por la Noche Durará el Lloro, al Amanecer el Gozo")
+                13 -> PlanDayMeta(23, "Isaías", 43, "Cuando Pases por las Aguas, Yo Estaré Contigo")
+                14 -> PlanDayMeta(58, "Hebreos", 12, "La Disciplina Amorosa del Padre y sus Frutos")
+                else -> PlanDayMeta(66, "Apocalipsis", 21, "Él Enjugará Toda Lágrima de Sus Ojos")
             }
             d(
                 num = dayNum,
-                title = "Día $dayNum: $subTitle",
-                summary = "$bName $ch",
-                pBId = bId as Int,
-                pC = ch as Int,
-                passages = listOf(p(bId, bName as String, ch)),
+                title = "Día $dayNum: ${meta.subTitle}",
+                summary = "${meta.bookName} ${meta.chapter}",
+                pBId = meta.bookId,
+                pC = meta.chapter,
+                passages = listOf(p(meta.bookId, meta.bookName, meta.chapter)),
                 narrative = "El dolor no es una señal de que Dios te haya abandonado; a menudo es el crisol donde Su presencia se hace más íntima y transformadora. La Biblia no censura el lamento; nos enseña a derramar el alma quebrantada delante del Trono y descubrir la fortaleza milagrosa de la gracia consoladora.",
                 lesson = "Dios no desperdicia ninguna lágrima; cada herida entregada a Él es redimida para dar testimonio de Su fidelidad.",
                 reflection = "¿Le has permitido a Dios consolarte en tu aflicción o has levantado barreras de amargura en tu corazón?"
