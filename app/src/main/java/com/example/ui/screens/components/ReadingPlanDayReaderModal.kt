@@ -82,8 +82,8 @@ fun ReadingPlanDayReaderModal(
     var fontSizeSp by remember { mutableStateOf(17f) }
     var isLoading by remember { mutableStateOf(true) }
     var segmentsData by remember { mutableStateOf<List<DaySegmentWithVerses>>(emptyList()) }
-    var isVersesExpanded by remember(day, effectiveNarrative, isStoriesPlan) {
-        mutableStateOf(effectiveNarrative.isBlank())
+    var isVersesExpanded by remember(day) {
+        mutableStateOf(true)
     }
 
     val scope = rememberCoroutineScope()

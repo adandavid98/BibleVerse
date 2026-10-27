@@ -87,7 +87,7 @@ fun ReadingPlansBottomSheet(
             currentSegmentIndex = startIdx,
             readSegmentIndices = readSegments,
             isCustomPlan = false,
-            storyNarrative = null
+            storyNarrative = day.storyNarrative.ifBlank { null }
         )
         preferences.activatePlan(planType)
         preferences.setLastReadDay(planType, day.dayNumber)
@@ -285,6 +285,8 @@ fun ReadingPlansBottomSheet(
                     val viewingPlanType = detailedCatalogPlanType!!
                     val planDays = remember(viewingPlanType) { BibleReadingPlanCatalog.getPlan(viewingPlanType) }
                     val isStoriesPlan = viewingPlanType == ReadingPlanType.BIBLE_STORIES
+                    val isDevotionalModalPlan = viewingPlanType != ReadingPlanType.TRADITIONAL &&
+                        viewingPlanType != ReadingPlanType.CHRONOLOGICAL
                     var searchQuery by remember { mutableStateOf("") }
 
                     val filteredCatalogDays = remember(planDays, isStoriesPlan, searchQuery) {
@@ -462,9 +464,9 @@ fun ReadingPlansBottomSheet(
                                         .wrapContentHeight()
                                         .heightIn(min = 56.dp, max = 80.dp)
                                         .clickable {
-                                            if (isStoriesPlan) {
-                                                preferences.activatePlan(ReadingPlanType.BIBLE_STORIES)
-                                                preferences.setLastReadDay(ReadingPlanType.BIBLE_STORIES, day.dayNumber)
+                                            if (isDevotionalModalPlan || day.storyNarrative.isNotBlank()) {
+                                                preferences.activatePlan(viewingPlanType)
+                                                preferences.setLastReadDay(viewingPlanType, day.dayNumber)
                                                 activeReadingDay = day
                                             } else {
                                                 launchCatalogDay(day, viewingPlanType)
@@ -551,9 +553,9 @@ fun ReadingPlansBottomSheet(
 
                                         IconButton(
                                             onClick = {
-                                                if (isStoriesPlan) {
-                                                    preferences.activatePlan(ReadingPlanType.BIBLE_STORIES)
-                                                    preferences.setLastReadDay(ReadingPlanType.BIBLE_STORIES, day.dayNumber)
+                                                if (isDevotionalModalPlan || day.storyNarrative.isNotBlank()) {
+                                                    preferences.activatePlan(viewingPlanType)
+                                                    preferences.setLastReadDay(viewingPlanType, day.dayNumber)
                                                     activeReadingDay = day
                                                 } else {
                                                     launchCatalogDay(day, viewingPlanType)

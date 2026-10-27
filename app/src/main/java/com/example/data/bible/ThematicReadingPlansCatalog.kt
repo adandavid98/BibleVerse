@@ -15,6 +15,39 @@ object ThematicReadingPlansCatalog {
 
     private fun p(bookId: Int, bookName: String, chapter: Int) = PlanPassageSegment(bookId, bookName, chapter)
 
+    private fun buildRichDevotional(
+        dayNum: Int,
+        title: String,
+        summary: String,
+        baseExposition: String,
+        lesson: String,
+        reflection: String
+    ): String {
+        if (baseExposition.contains("\n\n")) return baseExposition
+        val cleanTheme = title.substringAfter(": ").trim()
+
+        val theologicalParagraph = when (dayNum % 4) {
+            1 -> "Al profundizar en el contexto de $summary, descubrimos cómo las Escrituras revelan de manera progresiva y armoniosa el carácter inmutable de Dios respecto a «$cleanTheme». No estamos ante principios morales aislados ni ante filosofías humanas pasajeras, sino frente a la revelación viva del Creador. Como bien sintetiza la enseñanza central de esta jornada: $lesson Cuando miramos este pasaje a la luz de la obra redentora de Jesucristo, comprendemos que toda promesa divina encuentra en Él su sí y su amén definitivo."
+            2 -> "Desde una perspectiva teológica e histórica, la lectura de $summary nos confronta con la distancia infinita entre la sabiduría del mundo y la sabiduría del Reino de los Cielos. El estudio de «$cleanTheme» demuestra que Dios no improvisa en la historia de la redención ni en el trato personal con sus hijos. La verdad medular que sostiene este texto es clara y contundente: $lesson Esta realidad doctrinal actúa como un ancla firme para el alma cuando las circunstancias externas parecen contradecir las promesas del Señor."
+            3 -> "Examinar con detenimiento $summary nos invita a contemplar la riqueza inagotable de la gracia soberana en torno a «$cleanTheme». Cada versículo de esta porción bíblica fue inspirado por el Espíritu Santo para derribar nuestra autosuficiencia y llevarnos a una dependencia genuina del Padre. Aquí resplandece una verdad espiritual innegociable: $lesson Al abrazar esta doctrina con fe viva, nuestra mente es renovada y nuestros afectos son alineados con el corazón mismo de Dios."
+            else -> "La unidad orgánica de toda la Biblia brilla con fuerza al estudiar $summary bajo el prisma de «$cleanTheme». Lo que el texto sagrado expone aquí trasciende la época en que fue escrito y penetra directamente en las necesidades más hondas del corazón humano contemporáneo. El fundamento teológico de esta lectura nos recuerda que: $lesson En Cristo Jesús, esta verdad deja de ser un concepto abstracto para convertirse en una realidad transformadora y palpable."
+        }
+
+        val pastoralParagraph = when (dayNum % 3) {
+            1 -> "Llevando esta palabra al terreno práctico de nuestra vida diaria, es indispensable permitir que el texto bíblico examine nuestras intenciones, prioridades y reacciones cotidianas. No basta con asentir intelectualmente a la verdad de $summary; el verdadero crecimiento espiritual ocurre cuando la Palabra encarna en nuestras decisiones concretas en el hogar, el trabajo y la comunidad de fe. Por ello, hoy el Espíritu nos invita a detenernos y considerar con honestidad delante del Señor: $reflection"
+            2 -> "En el caminar cristiano cotidiano, esta enseñanza sobre «$cleanTheme» tiene implicaciones directas y profundas. A menudo corremos el riesgo de leer pasajes como $summary de forma apresurada, sin dejar que su luz disipe nuestras dudas, temores o áreas de tibieza espiritual. Hoy es un día propicio para abrir el corazón sin reservas, meditar pausadamente en los versículos de referencia y responder con humildad a la pregunta que esta lectura nos plantea: $reflection"
+            else -> "Para que esta semilla de la Palabra dé fruto abundante y perdurable en nosotros, necesitamos recibirla con mansedumbre y disposición de obediencia. La lectura pausada de $summary nos equipa para enfrentar las pruebas y desafíos del presente con una visión celestial renovada. Mientras recorres hoy los versículos bíblicos de referencia, deja que esta verdad repose en tu interior y examina tu caminar a la luz de esta reflexión: $reflection"
+        }
+
+        val fourthParagraph = if (dayNum % 2 == 1) {
+            "\n\nDedica unos instantes adicionales a leer con atención los pasajes bíblicos de referencia incluidos aquí abajo ($summary). Subraya en tu corazón aquellas palabras que más resuenen con tu temporada actual y permite que la voz viva de Dios afirme tus pasos a lo largo de toda esta jornada."
+        } else {
+            ""
+        }
+
+        return "$baseExposition\n\n$theologicalParagraph\n\n$pastoralParagraph$fourthParagraph"
+    }
+
     private fun d(
         num: Int,
         title: String,
@@ -33,7 +66,7 @@ object ThematicReadingPlansCatalog {
         primaryChapter = pC,
         primaryVerse = 1,
         passages = passages,
-        storyNarrative = narrative,
+        storyNarrative = buildRichDevotional(num, title, summary, narrative, lesson, reflection),
         spiritualLesson = lesson,
         historicalContext = reflection
     )
@@ -303,17 +336,35 @@ object ThematicReadingPlansCatalog {
     val romansPlan: List<ReadingPlanDay> by lazy {
         (1..30).map { dayNum ->
             val ch = ((dayNum - 1) / 2) + 1
-            val half = if (dayNum % 2 != 0) "Parte 1" else "Parte 2"
+            val isFirstHalf = dayNum % 2 != 0
+            val chapterTheme = when (ch) {
+                1 -> if (isFirstHalf) "El Poder del Evangelio y la Justicia de Dios" else "La Revelación en la Creación y el Corazón Humano"
+                2 -> if (isFirstHalf) "El Juicio Justo e Imparcial de Dios" else "La Verdadera Circuncisión del Corazón"
+                3 -> if (isFirstHalf) "No Hay Justo ni Aun Uno" else "Justificados Gratuitamente por Su Gracia"
+                4 -> if (isFirstHalf) "Abraham Justificado por la Fe" else "La Promesa Firme para Todos los Creyentes"
+                5 -> if (isFirstHalf) "Paz para con Dios y Esperanza en la Prueba" else "El Don de Cristo Supera la Caída de Adán"
+                6 -> if (isFirstHalf) "Muertos al Pecado, Vivos para Dios" else "Siervos de la Justicia y la Dádiva de Vida Eterna"
+                7 -> if (isFirstHalf) "Libres de la Ley para Pertenecer a Cristo" else "La Lucha Interior y la Victoria en Jesucristo"
+                8 -> if (isFirstHalf) "Ninguna Condenación y la Vida en el Espíritu" else "Más que Vencedores: Nada nos Separará de Su Amor"
+                9 -> if (isFirstHalf) "La Soberanía de Dios y las Promesas a Israel" else "El Alfarero Soberano y los Vasos de Misericordia"
+                10 -> if (isFirstHalf) "La Justicia que es por la Fe en Cristo" else "La Fe Viene por el Oír la Palabra de Dios"
+                11 -> if (isFirstHalf) "El Remanente Escogido por Gracia" else "El Olivo Silvestre y la Profundidad de la Sabiduría Divina"
+                12 -> if (isFirstHalf) "Sacrificio Vivo y Renovación de la Mente" else "El Amor Sincero y Vencer el Mal con el Bien"
+                13 -> if (isFirstHalf) "El Ciudadano Cristiano y el Respeto al Orden" else "El Amor como Cumplimiento de la Ley y Vestirse de Cristo"
+                14 -> if (isFirstHalf) "Recibir al Débil en la Fe sin Juzgar" else "Seguir lo que Contribuye a la Paz y la Mutua Edificación"
+                15 -> if (isFirstHalf) "Edificar al Prójimo según el Ejemplo de Cristo" else "El Ministerio Apostólico y la Unidad de la Iglesia"
+                else -> if (isFirstHalf) "Comunión Fraterna y Saludos de Amor en el Cuerpo" else "Doxología Final: Al Único y Sabio Dios sea la Gloria"
+            }
             d(
                 num = dayNum,
-                title = "Día $dayNum: Romanos $ch ($half)",
+                title = "Día $dayNum: Romanos $ch - $chapterTheme",
                 summary = "Romanos $ch",
                 pBId = 45,
                 pC = ch,
                 passages = listOf(p(45, "Romanos", ch)),
-                narrative = "En este pasaje de la carta a los Romanos, el apóstol Pablo expone con precisión magistral los engranajes de la salvación de Dios. Cada versículo derriba el orgullo de la justicia propia humana y ensalza la grandeza inmerecida de la gracia revelada en Cristo Jesús.",
-                lesson = "La justificación por la fe en Cristo produce paz con Dios, victoria sobre el pecado y un amor inquebrantable del cual nada nos separará.",
-                reflection = "¿De qué manera la verdad doctrinal expuesta en Romanos $ch transforma tu adoración y tu comportamiento en el día de hoy?"
+                narrative = "En el capítulo $ch de la epístola a los Romanos, el apóstol Pablo desarrolla con rigor magistral el tema de «$chapterTheme». Cada argumento bíblico desmantela el orgullo de la justicia propia humana y exalta la obra redentora, suficiente y soberana de nuestro Señor Jesucristo.",
+                lesson = "En Romanos $ch aprendemos que $chapterTheme descansa íntegramente en la gracia inmerecida de Dios y en la justicia perfecta de Cristo.",
+                reflection = "¿Cómo transforma la enseñanza de Romanos $ch sobre «$chapterTheme» tu manera de acercarte a Dios y tratar a tu prójimo hoy?"
             )
         }
     }
@@ -321,22 +372,48 @@ object ThematicReadingPlansCatalog {
     // --- 30 DÍAS CON JESÚS (30 Días) ---
     val jesus30Plan: List<ReadingPlanDay> by lazy {
         (1..30).map { dayNum ->
-            val meta = when {
-                dayNum <= 7 -> PlanDayMeta(40, "Mateo", dayNum + 4, "El Sermón del Monte y el Reino")
-                dayNum <= 14 -> PlanDayMeta(41, "Marcos", dayNum - 7, "Milagros y Poder sobre la Tempestad")
-                dayNum <= 21 -> PlanDayMeta(42, "Lucas", dayNum - 4, "Parábolas de Gracia y Redención")
-                else -> PlanDayMeta(43, "Juan", dayNum - 10, "La Cruz, Getsemaní y la Resurrección")
+            val meta = when (dayNum) {
+                1 -> PlanDayMeta(40, "Mateo", 5, "Las Bienaventuranzas y el Carácter del Reino")
+                2 -> PlanDayMeta(40, "Mateo", 6, "La Oración Secreta y la Confianza en el Padre")
+                3 -> PlanDayMeta(40, "Mateo", 7, "Cimiento sobre la Roca y Frutos Verdaderos")
+                4 -> PlanDayMeta(40, "Mateo", 8, "Autoridad de Jesús sobre la Enfermedad y el Mar")
+                5 -> PlanDayMeta(40, "Mateo", 9, "El Médico de las Almas y la Compasión por las Multitudes")
+                6 -> PlanDayMeta(40, "Mateo", 11, "Descanso para los Cansados en el Yugo de Cristo")
+                7 -> PlanDayMeta(40, "Mateo", 13, "Las Parábolas del Sembrador y el Tesoro Escondido")
+                8 -> PlanDayMeta(41, "Marcos", 1, "El Inicio del Ministerio y el Llamado de los Discípulos")
+                9 -> PlanDayMeta(41, "Marcos", 2, "Perdón de Pecados y Señor del Día de Reposo")
+                10 -> PlanDayMeta(41, "Marcos", 4, "Jesús Calma la Tempestad con Su Voz")
+                11 -> PlanDayMeta(41, "Marcos", 5, "Poder Restaurador ante Casos Imposibles")
+                12 -> PlanDayMeta(41, "Marcos", 6, "El Buen Pastor que Multiplicó los Panes")
+                13 -> PlanDayMeta(41, "Marcos", 8, "Tomar la Cruz y Seguir al Mesías")
+                14 -> PlanDayMeta(41, "Marcos", 10, "El Hijo del Hombre Vino para Servir y Dar Su Vida")
+                15 -> PlanDayMeta(42, "Lucas", 4, "Ungido para Dar Buenas Nuevas a los Quebrantados")
+                16 -> PlanDayMeta(42, "Lucas", 7, "Perdón Abundante y Amor Agradecido")
+                17 -> PlanDayMeta(42, "Lucas", 10, "El Buen Samaritano y Elegir la Buena Parte a Sus Pies")
+                18 -> PlanDayMeta(42, "Lucas", 15, "El Abrazo del Padre al Hijo Pródigo")
+                19 -> PlanDayMeta(42, "Lucas", 18, "Perseverancia en la Oración y Humildad de Corazón")
+                20 -> PlanDayMeta(42, "Lucas", 19, "Salvación en Casa de Zaqueo: Buscar lo que se Había Perdido")
+                21 -> PlanDayMeta(42, "Lucas", 24, "El Camino a Emaús y los Corazones que Arden")
+                22 -> PlanDayMeta(43, "Juan", 1, "El Verbo Hecho Carne Lleno de Gracia y de Verdad")
+                23 -> PlanDayMeta(43, "Juan", 3, "Nacer de Nuevo y el Amor Infinito de Dios")
+                24 -> PlanDayMeta(43, "Juan", 4, "El Agua Viva y la Adoración en Espíritu y en Verdad")
+                25 -> PlanDayMeta(43, "Juan", 10, "El Buen Pastor que Da Su Vida por las Ovejas")
+                26 -> PlanDayMeta(43, "Juan", 11, "Yo Soy la Resurrección y la Vida")
+                27 -> PlanDayMeta(43, "Juan", 13, "El Lavatorio de los Pies y el Mandamiento Nuevo")
+                28 -> PlanDayMeta(43, "Juan", 15, "Permanecer en la Vid Verdadera para Llevar Fruto")
+                29 -> PlanDayMeta(43, "Juan", 19, "Consumado Es: El Sacrificio Supremo en el Calvario")
+                else -> PlanDayMeta(43, "Juan", 20, "La Tumba Vacía y el Encuentro con el Cristo Resucitado")
             }
             d(
                 num = dayNum,
-                title = "Día $dayNum: Jesús y ${meta.subTitle}",
+                title = "Día $dayNum: ${meta.subTitle}",
                 summary = "${meta.bookName} ${meta.chapter}",
                 pBId = meta.bookId,
                 pC = meta.chapter,
                 passages = listOf(p(meta.bookId, meta.bookName, meta.chapter)),
-                narrative = "Caminar con Jesús es contemplar la encarnación perfecta del amor, la verdad y la santidad de Dios. En este capítulo vemos al Salvador interactuar con hombres quebrantados, confrontar a los religiosos hipócritas y manifestar la soberanía del Reino celestial con milagros y gracia inagotable.",
-                lesson = "Jesucristo es el mismo ayer, hoy y por los siglos; sus palabras y su vida son el fundamento inamovible de nuestra fe.",
-                reflection = "¿Qué rasgo del carácter compasivo y firme de Jesús te desafía más a imitarlo en tus relaciones de hoy?"
+                narrative = "Al recorrer ${meta.bookName} ${meta.chapter}, contemplamos a Jesucristo revelando «${meta.subTitle}». En cada palabra y en cada gesto del Maestro vemos la plenitud de la gracia y de la verdad acercándose al ser humano quebrantado para restaurarlo, perdonarlo y llamarlo a una vida nueva.",
+                lesson = "En ${meta.bookName} ${meta.chapter}, Jesús se manifiesta como el Salvador soberano y compasivo cuyo poder transforma toda realidad humana.",
+                reflection = "¿Qué actitud o palabra de Jesús en ${meta.bookName} ${meta.chapter} necesitas abrazar e imitar hoy en tu vida diaria?"
             )
         }
     }
@@ -344,16 +421,49 @@ object ThematicReadingPlansCatalog {
     // --- 31 DÍAS EN PROVERBIOS (31 Días) ---
     val proverbs31Plan: List<ReadingPlanDay> by lazy {
         (1..31).map { dayNum ->
+            val provTheme = when (dayNum) {
+                1 -> "El Principio de la Sabiduría es el Temor de Jehová"
+                2 -> "Buscar la Sabiduría como a Tesoros Escondidos"
+                3 -> "Fíate de Jehová de Todo tu Corazón"
+                4 -> "Sobre Toda Cosa Guardada, Guarda tu Corazón"
+                5 -> "Pureza, Fidelidad Conyugal y Huir de la Tentación"
+                6 -> "Diligencia frente a la Pereza y Lo que Dios Aborrece"
+                7 -> "Guardar los Mandamientos como a la Niña de tus Ojos"
+                8 -> "El Clamor Eterno de la Sabiduría Divina"
+                9 -> "El Banquete de la Sabiduría frente a la Necedad"
+                10 -> "El Contraste entre la Integridad del Justo y el Camino Impío"
+                11 -> "Balanza Justa, Humildad y Generosidad que Prospera"
+                12 -> "Amor a la Corrección y Palabras que Sanan"
+                13 -> "Esperanza Cumplida y Caminar con los Sabios"
+                14 -> "Edificar la Casa con Sabiduría y Temor Reverente"
+                15 -> "La Blanda Respuesta Quita la Ira"
+                16 -> "Encomendar a Jehová las Obras y Someter los Planes"
+                17 -> "El Amigo que Ama en Todo Tiempo y el Corazón Alegre"
+                18 -> "Torre Fuerte es el Nombre de Jehová y el Poder de la Lengua"
+                19 -> "Integridad en la Pobreza, Paciencia y Bondad hacia el Necesitado"
+                20 -> "Rectitud en los Negocios y Consejos Profundos del Corazón"
+                21 -> "El Corazón del Rey en la Mano de Jehová y la Justicia"
+                22 -> "El Buen Nombre, la Crianza Piadosa y la Prudencia Financiera"
+                23 -> "Dominio Propio y No Envidiar la Prosperidad del Pecador"
+                24 -> "Siete Veces Cae el Justo y Vuelve a Levantarse"
+                25 -> "Dominio del Espíritu como Ciudad Amurallada"
+                26 -> "Discernimiento ante la Necedad, el Chisme y la Pereza"
+                27 -> "Hierro con Hierro se Aguza: El Valor de la Amistad Fiel"
+                28 -> "El que Confiesa y se Aparta Alcanzará Misericordia"
+                29 -> "Humildad que Recibe Honra y Confiar en Jehová sin Temor"
+                30 -> "La Oración de Agur: Pureza de Palabra y Contentamiento"
+                else -> "Sabiduría en el Liderazgo y el Carácter Virtuoso que Teme a Dios"
+            }
             d(
                 num = dayNum,
-                title = "Día $dayNum: Sabiduría para Vivir - Proverbios $dayNum",
+                title = "Día $dayNum: Proverbios $dayNum - $provTheme",
                 summary = "Proverbios $dayNum",
                 pBId = 20,
                 pC = dayNum,
                 passages = listOf(p(20, "Proverbios", dayNum)),
-                narrative = "El libro de Proverbios aterriza la teología bíblica al terreno práctico de las decisiones cotidianas: las palabras que pronunciamos, el manejo prudente del dinero, la integridad en los negocios, el cuidado del matrimonio y el freno a las pasiones desordenadas. El principio de la sabiduría es el temor reverente a Jehová.",
-                lesson = "La verdadera sabiduría bíblica se demuestra en la conducta recta, el dominio propio y el corazón humilde ante Dios.",
-                reflection = "¿Qué consejo o advertencia específica de Proverbios $dayNum necesitas poner en práctica de inmediato?"
+                narrative = "El capítulo $dayNum de Proverbios aterriza la fe al terreno concreto de «$provTheme». La sabiduría bíblica no es mera acumulación de datos intelectuales, sino la habilidad espiritual de aplicar la verdad de Dios a nuestras palabras, finanzas, relaciones familiares y decisiones diarias.",
+                lesson = "La sabiduría de Proverbios $dayNum enseña que el temor reverente del Señor produce rectitud, prudencia y paz duradera.",
+                reflection = "¿Qué principio práctico de Proverbios $dayNum sobre «$provTheme» necesitas aplicar hoy mismo en tu conducta o palabras?"
             )
         }
     }
@@ -385,9 +495,9 @@ object ThematicReadingPlansCatalog {
                 pBId = meta.bookId,
                 pC = meta.chapter,
                 passages = listOf(p(meta.bookId, meta.bookName, meta.chapter)),
-                narrative = "El Espíritu Santo es Dios mismo obrando en la historia y en el corazón humano. Desde revolotear sobre las aguas primitivas hasta engendrar a Cristo en el vientre de María y dar a luz a la Iglesia en Pentecostés, el Espíritu es el vivificador, consolador y santificador de nuestras almas.",
-                lesson = "Vivir en el Espíritu no es un misticismo hueco, sino rendir nuestra voluntad a Su señorío para manifestar a Cristo.",
-                reflection = "¿Eres sensible a la voz y convicción del Espíritu Santo en tu conciencia cada día?"
+                narrative = "En ${meta.bookName} ${meta.chapter} contemplamos la obra gloriosa de la tercera Persona de la Trinidad: «${meta.subTitle}». El Espíritu Santo no es una fuerza impersonal, sino Dios mismo obrando activamente para dar vida, iluminar la Palabra, santificar el carácter y glorificar a Jesucristo en nosotros.",
+                lesson = "La obra del Espíritu Santo en ${meta.bookName} ${meta.chapter} nos capacita para vivir en santidad, comunión y poder espiritual.",
+                reflection = "¿Cómo puedes rendir hoy tu voluntad a la obra del Espíritu Santo revelada en «${meta.subTitle}»?"
             )
         }
     }
@@ -419,9 +529,9 @@ object ThematicReadingPlansCatalog {
                 pBId = meta.bookId,
                 pC = meta.chapter,
                 passages = listOf(p(meta.bookId, meta.bookName, meta.chapter)),
-                narrative = "Cada estaca, velo, cortina y utensilio del Tabernáculo en el desierto fue diseñado como una maqueta profética de la persona y obra de Jesucristo. El Antiguo Testamento está saturado de sombras gloriosas cuya realidad visible resplandece en el Nuevo Testamento.",
-                lesson = "Jesucristo es el cumplimiento exacto y perfecto de todas las promesas y figuras sacerdotales de la Ley.",
-                reflection = "¿Comprendes la riqueza y profundidad del Antiguo Testamento a la luz de la Cruz de Cristo?"
+                narrative = "El pasaje de ${meta.bookName} ${meta.chapter} nos abre una ventana extraordinaria a la tipología bíblica: «${meta.subTitle}». Cada elemento del santuario antiguo fue diseñado por Dios como una figura profética que anunciaba la persona, el sacerdocio y el sacrificio perfecto de Jesucristo.",
+                lesson = "A través de «${meta.subTitle}», vemos que Jesucristo es el cumplimiento definitivo que nos abre el camino directo a la presencia del Padre.",
+                reflection = "¿De qué manera contemplar a Cristo en «${meta.subTitle}» profundiza tu gratitud y reverencia en la oración hoy?"
             )
         }
     }
@@ -453,9 +563,9 @@ object ThematicReadingPlansCatalog {
                 pBId = meta.bookId,
                 pC = meta.chapter,
                 passages = listOf(p(meta.bookId, meta.bookName, meta.chapter)),
-                narrative = "La Biblia no es una colección desordenada de historias, sino la revelación orgánica de un solo plan redentor hilvanado a través de los pactos soberanos de Dios con la humanidad, culminando gloriosamente en el Nuevo Pacto sellado por la sangre del Cordero.",
-                lesson = "Dios es un Dios guardador de pactos; su fidelidad inmutable sostiene toda la historia humana.",
-                reflection = "¿Descansas en la certeza de que Dios jamás quebrantará el pacto de amor sellado contigo en Cristo?"
+                narrative = "En ${meta.bookName} ${meta.chapter} contemplamos un eslabón decisivo de la historia de la redención: «${meta.subTitle}». Los pactos bíblicos constituyen la columna vertebral de las Escrituras y demuestran cómo Dios se ha comprometido soberanamente a redimir y habitar en medio de Su pueblo.",
+                lesson = "El estudio de «${meta.subTitle}» confirma que Dios es absolutamente fiel a Sus promesas y que todo pacto culmina en Cristo.",
+                reflection = "¿Cómo fortalece tu fe saber que tu relación con Dios descansa en un pacto eterno e inquebrantable sellado por Cristo?"
             )
         }
     }
@@ -464,16 +574,33 @@ object ThematicReadingPlansCatalog {
     val nehemiahPlan: List<ReadingPlanDay> by lazy {
         (1..15).map { dayNum ->
             val ch = dayNum.coerceAtMost(13)
+            val nehTheme = when (dayNum) {
+                1 -> "Quebranto, Carga Espiritual e Intercesión"
+                2 -> "Valentía ante el Rey y Visión Estratégica"
+                3 -> "Trabajo en Equipo: Cada Familia Frente a su Puerta"
+                4 -> "Con una Mano en la Obra y otra en la Espada"
+                5 -> "Integridad Financiera, Justicia y Compasión por el Pueblo"
+                6 -> "Discernimiento y Firmeza ante las Trampas del Enemigo"
+                7 -> "Organización, Mayordomía y Cuidado de las Familias"
+                8 -> "Avivamiento Centrado en la Lectura y Comprensión de la Palabra"
+                9 -> "Confesión Humilde y Memoria de la Fidelidad de Dios"
+                10 -> "Renovación del Pacto y Compromiso Comunitario"
+                11 -> "Disposición Voluntaria para Habitar y Servir"
+                12 -> "Dedicación de los Muros con Gratitud y Alabanza"
+                13 -> "Celo por la Pureza Espiritual y Perseverancia Final"
+                14 -> "El Legado del Líder Siervo que Busca el Favor de Dios"
+                else -> "Restaurar los Muros Espirituales de Nuestra Generación"
+            }
             d(
                 num = dayNum,
-                title = "Día $dayNum: Nehemías $ch - Liderazgo en la Crisis",
+                title = "Día $dayNum: Nehemías $ch - $nehTheme",
                 summary = "Nehemías $ch",
                 pBId = 16,
                 pC = ch,
                 passages = listOf(p(16, "Nehemías", ch)),
-                narrative = "El libro de Nehemías ofrece una clase magistral de liderazgo espiritual y organizacional: diagnosticar el dolor con honestidad, orar antes de planificar, convocar y motivar a personas diversas, trabajar con la pala y la espada frente a la oposición, defender la justicia social y terminar la obra para la gloria de Dios.",
-                lesson = "El liderazgo según Dios combina profunda dependencia en la oración con estrategia valiente y ética incorruptible.",
-                reflection = "¿Qué 'murallas caídas' a tu alrededor te está llamando Dios a reconstruir con fe y diligencia?"
+                narrative = "Al estudiar Nehemías $ch bajo el enfoque de «$nehTheme», descubrimos cómo un hombre o mujer de Dios responde ante los tiempos de ruina y crisis. Nehemías no se quedó en la queja pasiva; combinó una vida de oración ferviente con planificación diligente, coraje frente a la oposición e integridad intachable.",
+                lesson = "En Nehemías $ch aprendemos que «$nehTheme» requiere depender de Dios en oración mientras trabajamos con excelencia y carácter.",
+                reflection = "¿Cómo puedes aplicar hoy el principio de «$nehTheme» en tu familia, trabajo o ministerio?"
             )
         }
     }
@@ -505,9 +632,9 @@ object ThematicReadingPlansCatalog {
                 pBId = meta.bookId,
                 pC = meta.chapter,
                 passages = listOf(p(meta.bookId, meta.bookName, meta.chapter)),
-                narrative = "El dolor no es una señal de que Dios te haya abandonado; a menudo es el crisol donde Su presencia se hace más íntima y transformadora. La Biblia no censura el lamento; nos enseña a derramar el alma quebrantada delante del Trono y descubrir la fortaleza milagrosa de la gracia consoladora.",
-                lesson = "Dios no desperdicia ninguna lágrima; cada herida entregada a Él es redimida para dar testimonio de Su fidelidad.",
-                reflection = "¿Le has permitido a Dios consolarte en tu aflicción o has levantado barreras de amargura en tu corazón?"
+                narrative = "El pasaje consolador de ${meta.bookName} ${meta.chapter} nos sale al encuentro en medio de la prueba con la promesa: «${meta.subTitle}». El sufrimiento no es señal de abandono divino; en las manos del Redentor, el valle de lágrimas se transforma en el lugar donde conocemos la ternura y el poder sustentador del Padre.",
+                lesson = "La promesa de «${meta.subTitle}» en ${meta.bookName} ${meta.chapter} nos asegura que Dios camina con nosotros y redime cada aflicción.",
+                reflection = "¿Qué carga o dolor necesitas entregar hoy al Señor apoyándote en la verdad de «${meta.subTitle}»?"
             )
         }
     }
