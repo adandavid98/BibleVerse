@@ -57,21 +57,24 @@ fun ReadingPlanDayReaderModal(
     val context = LocalContext.current
     val isStoriesPlan = planType == com.example.data.bible.ReadingPlanType.BIBLE_STORIES
 
-    val effectiveNarrative = if (isStoriesPlan) {
-        day.storyNarrative.takeIf { it.isNotBlank() }
-            ?: com.example.data.bible.BibleStoriesPlanCatalog.getStoryDetail(context, day.dayNumber)?.narrative.orEmpty()
+    val effectiveNarrative = if (day.storyNarrative.isNotBlank()) {
+        day.storyNarrative
+    } else if (isStoriesPlan) {
+        com.example.data.bible.BibleStoriesPlanCatalog.getStoryDetail(context, day.dayNumber)?.narrative.orEmpty()
     } else {
         ""
     }
-    val effectiveHistoricalContext = if (isStoriesPlan) {
-        day.historicalContext.takeIf { it.isNotBlank() }
-            ?: com.example.data.bible.BibleStoriesPlanCatalog.getStoryDetail(context, day.dayNumber)?.historicalContext.orEmpty()
+    val effectiveHistoricalContext = if (day.historicalContext.isNotBlank()) {
+        day.historicalContext
+    } else if (isStoriesPlan) {
+        com.example.data.bible.BibleStoriesPlanCatalog.getStoryDetail(context, day.dayNumber)?.historicalContext.orEmpty()
     } else {
         ""
     }
-    val effectiveSpiritualLesson = if (isStoriesPlan) {
-        day.spiritualLesson.takeIf { it.isNotBlank() }
-            ?: com.example.data.bible.BibleStoriesPlanCatalog.getStoryDetail(context, day.dayNumber)?.spiritualLesson.orEmpty()
+    val effectiveSpiritualLesson = if (day.spiritualLesson.isNotBlank()) {
+        day.spiritualLesson
+    } else if (isStoriesPlan) {
+        com.example.data.bible.BibleStoriesPlanCatalog.getStoryDetail(context, day.dayNumber)?.spiritualLesson.orEmpty()
     } else {
         ""
     }
@@ -80,7 +83,7 @@ fun ReadingPlanDayReaderModal(
     var isLoading by remember { mutableStateOf(true) }
     var segmentsData by remember { mutableStateOf<List<DaySegmentWithVerses>>(emptyList()) }
     var isVersesExpanded by remember(day, effectiveNarrative, isStoriesPlan) {
-        mutableStateOf(!isStoriesPlan || effectiveNarrative.isBlank())
+        mutableStateOf(effectiveNarrative.isBlank())
     }
 
     val scope = rememberCoroutineScope()
@@ -401,7 +404,7 @@ fun ReadingPlanDayReaderModal(
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .then(if (isStoriesPlan) Modifier.clickable { isVersesExpanded = !isVersesExpanded } else Modifier)
+                                        .then(if (effectiveNarrative.isNotBlank() || isStoriesPlan) Modifier.clickable { isVersesExpanded = !isVersesExpanded } else Modifier)
                                         .padding(horizontal = 14.dp, vertical = 12.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
@@ -419,7 +422,7 @@ fun ReadingPlanDayReaderModal(
                                         )
                                         Column {
                                             Text(
-                                                text = if (isStoriesPlan) "Texto Bíblico de Referencia" else "Pasajes Bíblicos",
+                                                text = if (effectiveNarrative.isNotBlank() || isStoriesPlan) "Texto Bíblico de Referencia" else "Pasajes Bíblicos",
                                                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
@@ -469,7 +472,7 @@ fun ReadingPlanDayReaderModal(
                                                 modifier = Modifier.size(20.dp)
                                             )
                                         }
-                                        if (isStoriesPlan) {
+                                        if (effectiveNarrative.isNotBlank() || isStoriesPlan) {
                                             IconButton(onClick = { isVersesExpanded = !isVersesExpanded }) {
                                                 Icon(
                                                     if (isVersesExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,

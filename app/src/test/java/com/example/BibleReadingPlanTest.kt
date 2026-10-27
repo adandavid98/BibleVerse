@@ -43,4 +43,21 @@ class BibleReadingPlanTest {
         assertEquals(365, ReadingPlanType.TRADITIONAL.totalDays)
         assertEquals(365, ReadingPlanType.CHRONOLOGICAL.totalDays)
     }
+
+    @Test
+    fun testAllCatalogPlansIntegrityAndDayCount() {
+        for (planType in ReadingPlanType.values()) {
+            val days = BibleReadingPlanCatalog.getPlan(planType)
+            assertEquals("Plan ${planType.name} should have exact totalDays size", planType.totalDays, days.size)
+            for (i in days.indices) {
+                val day = days[i]
+                assertEquals("Contiguous day number for ${planType.name}", i + 1, day.dayNumber)
+                assertTrue("Title should not be blank for ${planType.name} day ${i + 1}", day.title.isNotBlank())
+                assertTrue("Passages summary should not be blank for ${planType.name} day ${i + 1}", day.passagesSummary.isNotBlank())
+                assertTrue("Primary book ID valid for ${planType.name} day ${i + 1}", day.primaryBookId in 1..66)
+                assertTrue("Primary chapter valid for ${planType.name} day ${i + 1}", day.primaryChapter > 0)
+                assertTrue("Passages list not empty for ${planType.name} day ${i + 1}", day.passages.isNotEmpty())
+            }
+        }
+    }
 }

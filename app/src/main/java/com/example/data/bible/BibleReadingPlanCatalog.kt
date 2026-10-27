@@ -23,25 +23,228 @@ enum class ReadingPlanType(
     val id: String,
     val title: String,
     val description: String,
-    val totalDays: Int = 365
+    val totalDays: Int = 365,
+    val categoryName: String = "Inmersión Bíblica",
+    val coverDrawableRes: Int = com.example.R.drawable.plan_cover_classic
 ) {
+    // 1. Inmersión Bíblica y Canónica
     TRADITIONAL(
         id = "TRADITIONAL",
         title = "Plan Clásico en 1 Año",
         description = "Lectura canónica de la Biblia completa de Génesis a Apocalipsis cubriendo los 66 libros y 1,189 capítulos.",
-        totalDays = 365
+        totalDays = 365,
+        categoryName = "Inmersión Bíblica",
+        coverDrawableRes = com.example.R.drawable.plan_cover_classic
     ),
     CHRONOLOGICAL(
         id = "CHRONOLOGICAL",
         title = "Plan Cronológico en 1 Año",
         description = "Lectura de toda la Biblia completa en orden cronológico e histórico cubriendo los 66 libros y 1,189 capítulos.",
-        totalDays = 365
+        totalDays = 365,
+        categoryName = "Inmersión Bíblica",
+        coverDrawableRes = com.example.R.drawable.plan_cover_chronological
     ),
     BIBLE_STORIES(
         id = "BIBLE_STORIES",
         title = "Historias Bíblicas",
         description = "365 grandes historias y relatos bíblicos de Génesis a Apocalipsis, únicos y fieles a las Escrituras.",
-        totalDays = 365
+        totalDays = 365,
+        categoryName = "Inmersión Bíblica",
+        coverDrawableRes = com.example.R.drawable.plan_cover_stories
+    ),
+    PROVERBS_31(
+        id = "PROVERBS_31",
+        title = "31 Días de Sabiduría en Proverbios",
+        description = "Un capítulo diario con principios prácticos para decisiones, negocios y vida recta.",
+        totalDays = 31,
+        categoryName = "Inmersión Bíblica",
+        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+    ),
+    JESUS_30(
+        id = "JESUS_30",
+        title = "30 Días con Jesús",
+        description = "El ministerio terrenal, discursos cumbre y milagros del Salvador en los Evangelios.",
+        totalDays = 30,
+        categoryName = "Inmersión Bíblica",
+        coverDrawableRes = com.example.R.drawable.plan_cover_stories
+    ),
+
+    // 2. Doctrina y Teología Bíblica
+    ESCHATOLOGY(
+        id = "ESCHATOLOGY",
+        title = "Escatología Bíblica: Profecías",
+        description = "Daniel, Mateo 24, epístolas y recorrido exegético integral por Apocalipsis.",
+        totalDays = 30,
+        categoryName = "Doctrina y Teología Bíblica",
+        coverDrawableRes = com.example.R.drawable.plan_cover_chronological
+    ),
+    ROMANS(
+        id = "ROMANS",
+        title = "Romanos: Fundamentos de Gracia",
+        description = "Soteriología profunda, justificación por fe y vida victoriosa en el Espíritu.",
+        totalDays = 30,
+        categoryName = "Doctrina y Teología Bíblica",
+        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+    ),
+    TRINITY(
+        id = "TRINITY",
+        title = "La Trinidad: Un Solo Dios",
+        description = "Padre, Hijo y Espíritu Santo en las Escrituras y en el plan redentor.",
+        totalDays = 7,
+        categoryName = "Doctrina y Teología Bíblica",
+        coverDrawableRes = com.example.R.drawable.plan_cover_stories
+    ),
+    FAITH_WORKS(
+        id = "FAITH_WORKS",
+        title = "Fe y Obras: Gracia y Fruto",
+        description = "La perfecta armonía entre Pablo y Santiago: justificados para buenas obras.",
+        totalDays = 7,
+        categoryName = "Doctrina y Teología Bíblica",
+        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+    ),
+    ETERNAL_LIFE(
+        id = "ETERNAL_LIFE",
+        title = "La Vida Eterna",
+        description = "Conocer íntimamente a Dios, la seguridad de salvación y la gloria venidera.",
+        totalDays = 7,
+        categoryName = "Doctrina y Teología Bíblica",
+        coverDrawableRes = com.example.R.drawable.plan_cover_chronological
+    ),
+    PNEUMATOLOGY(
+        id = "PNEUMATOLOGY",
+        title = "Pneumatología: El Espíritu Santo",
+        description = "La Persona, obra, frutos y dones del Espíritu a través del canon bíblico.",
+        totalDays = 15,
+        categoryName = "Doctrina y Teología Bíblica",
+        coverDrawableRes = com.example.R.drawable.plan_cover_stories
+    ),
+    TABERNACLE_HEBREWS(
+        id = "TABERNACLE_HEBREWS",
+        title = "Cristo en las Sombras del A.T.",
+        description = "Tipología del Tabernáculo, utensilios sagrados y el Sumo Sacerdocio en Hebreos.",
+        totalDays = 15,
+        categoryName = "Doctrina y Teología Bíblica",
+        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+    ),
+    COVENANTS(
+        id = "COVENANTS",
+        title = "La Teología de los Pactos",
+        description = "Historia de la salvación desde Adán hasta el Nuevo Pacto sellado en la Cruz.",
+        totalDays = 15,
+        categoryName = "Doctrina y Teología Bíblica",
+        coverDrawableRes = com.example.R.drawable.plan_cover_chronological
+    ),
+
+    // 3. Vida Cristiana y Crecimiento
+    NEW_LIFE_CHRIST(
+        id = "NEW_LIFE_CHRIST",
+        title = "Vida Nueva en Cristo",
+        description = "Nacidos de nuevo, despojarse del viejo hombre y caminar en luz y comunión.",
+        totalDays = 5,
+        categoryName = "Vida Cristiana y Crecimiento",
+        coverDrawableRes = com.example.R.drawable.plan_cover_stories
+    ),
+    GODS_WILL(
+        id = "GODS_WILL",
+        title = "La Voluntad de Dios",
+        description = "Cómo discernir su guía buena, agradable y perfecta para decisiones clave.",
+        totalDays = 7,
+        categoryName = "Vida Cristiana y Crecimiento",
+        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+    ),
+    NAMES_OF_GOD(
+        id = "NAMES_OF_GOD",
+        title = "Los Nombres de Dios",
+        description = "Elohim, Yahweh-Jireh, Yahweh-Rafa, Yahweh-Shalom, El-Roi y Emanuel.",
+        totalDays = 7,
+        categoryName = "Vida Cristiana y Crecimiento",
+        coverDrawableRes = com.example.R.drawable.plan_cover_chronological
+    ),
+    ARMOR_OF_GOD(
+        id = "ARMOR_OF_GOD",
+        title = "La Armadura de Dios",
+        description = "Firmeza, discernimiento y victoria espiritual según Efesios 6.",
+        totalDays = 7,
+        categoryName = "Vida Cristiana y Crecimiento",
+        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+    ),
+    GOD_SAYS_YOU_ARE(
+        id = "GOD_SAYS_YOU_ARE",
+        title = "Quién Dice Dios que Eres",
+        description = "Identidad inquebrantable, hijos amados por adopción y embajadores del Reino.",
+        totalDays = 5,
+        categoryName = "Vida Cristiana y Crecimiento",
+        coverDrawableRes = com.example.R.drawable.plan_cover_stories
+    ),
+    CALLING_PURPOSE(
+        id = "CALLING_PURPOSE",
+        title = "Vocación y Propósito",
+        description = "Dones espirituales, vencer excusas y consagración activa al servicio de Dios.",
+        totalDays = 7,
+        categoryName = "Vida Cristiana y Crecimiento",
+        coverDrawableRes = com.example.R.drawable.plan_cover_chronological
+    ),
+
+    // 4. Ansiedad, Duelo y Paz Interior
+    PEACE_ANXIETY(
+        id = "PEACE_ANXIETY",
+        title = "Paz en la Tormenta: Ansiedad",
+        description = "Desarmar la preocupación, descansar en el Buen Pastor y soltar las cargas.",
+        totalDays = 5,
+        categoryName = "Ansiedad, Duelo y Paz Interior",
+        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+    ),
+    SOUL_REST(
+        id = "SOUL_REST",
+        title = "Descanso para el Alma",
+        description = "Renovar fuerzas como las águilas y reposar en la suficiencia de la gracia.",
+        totalDays = 7,
+        categoryName = "Ansiedad, Duelo y Paz Interior",
+        coverDrawableRes = com.example.R.drawable.plan_cover_stories
+    ),
+    AFFLICTION_HOPE(
+        id = "AFFLICTION_HOPE",
+        title = "De la Aflicción a la Esperanza",
+        description = "Consuelo en el dolor, salmos de lamento sincero y redención de las heridas.",
+        totalDays = 15,
+        categoryName = "Ansiedad, Duelo y Paz Interior",
+        coverDrawableRes = com.example.R.drawable.plan_cover_chronological
+    ),
+
+    // 5. Relaciones y Familia
+    ENDURING_LOVE(
+        id = "ENDURING_LOVE",
+        title = "Amor que Perdura: Matrimonio",
+        description = "Pacto original, comunicación que edifica, 1 Corintios 13 y el cordón de tres dobleces.",
+        totalDays = 7,
+        categoryName = "Relaciones y Familia",
+        coverDrawableRes = com.example.R.drawable.plan_cover_stories
+    ),
+    POWER_OF_FORGIVENESS(
+        id = "POWER_OF_FORGIVENESS",
+        title = "El Poder del Perdón",
+        description = "Sanar rencores familiares, entregar el juicio a Dios y vivir sin deudas del pasado.",
+        totalDays = 5,
+        categoryName = "Relaciones y Familia",
+        coverDrawableRes = com.example.R.drawable.plan_cover_classic
+    ),
+
+    // 6. Sabiduría, Finanzas y Liderazgo
+    STEWARDSHIP(
+        id = "STEWARDSHIP",
+        title = "Mayordomía Bíblica",
+        description = "Administración diligente, salir de la trampa de deudas y generosidad alegre.",
+        totalDays = 7,
+        categoryName = "Sabiduría, Finanzas y Liderazgo",
+        coverDrawableRes = com.example.R.drawable.plan_cover_chronological
+    ),
+    NEHEMIAH(
+        id = "NEHEMIAH",
+        title = "Liderazgo en Crisis: Nehemías",
+        description = "Reconstrucción, integridad ante la oposición y avivamiento comunitario.",
+        totalDays = 15,
+        categoryName = "Sabiduría, Finanzas y Liderazgo",
+        coverDrawableRes = com.example.R.drawable.plan_cover_classic
     )
 }
 
@@ -63,6 +266,7 @@ object BibleReadingPlanCatalog {
         ReadingPlanType.TRADITIONAL -> traditionalPlan
         ReadingPlanType.CHRONOLOGICAL -> chronologicalPlan
         ReadingPlanType.BIBLE_STORIES -> BibleStoriesPlanCatalog.storiesPlan
+        else -> ThematicReadingPlansCatalog.getThematicPlan(type)
     }
 
     private fun p(bId: Int, bName: String, c: Int) = PlanPassageSegment(bId, bName, c)

@@ -709,11 +709,7 @@ fun ReadingPlansBottomSheet(
                             // Banners de TODOS los Planes Canónicos Activos
                             items(activeCatalogPlansList, key = { "ACTIVE_CATALOG_${it.name}" }) { planType ->
                                 val singleProg = progress.getPlanProgress(planType)
-                                val activeCoverRes = when (planType) {
-                                    ReadingPlanType.TRADITIONAL -> R.drawable.plan_cover_classic
-                                    ReadingPlanType.CHRONOLOGICAL -> R.drawable.plan_cover_chronological
-                                    ReadingPlanType.BIBLE_STORIES -> R.drawable.plan_cover_stories
-                                }
+                                val activeCoverRes = planType.coverDrawableRes
                                 ReadingPlanBannerCard(
                                     title = planType.title,
                                     subtitle = "Día ${preferences.getLastReadDay(planType)} de ${singleProg.totalDays} • ${singleProg.totalCompleted} completados",
@@ -746,9 +742,76 @@ fun ReadingPlansBottomSheet(
                         }
 
                         // -------------------------------------------------------------
-                        // SECCIÓN 2: CATÁLOGO DE PLANES DISPONIBLES
+                        // SECCIÓN 2: CATÁLOGO DE PLANES DISPONIBLES (GRID TEMÁTICO DE 2 TARJETAS)
                         // -------------------------------------------------------------
                         if (selectedLobbyFilter == 0 || selectedLobbyFilter == 2) {
+                            val thematicSections = remember {
+                                listOf(
+                                    Triple(
+                                        "Doctrina y Teología Bíblica",
+                                        Icons.Default.MenuBook,
+                                        listOf(
+                                            ReadingPlanType.ESCHATOLOGY,
+                                            ReadingPlanType.ROMANS,
+                                            ReadingPlanType.TRINITY,
+                                            ReadingPlanType.FAITH_WORKS,
+                                            ReadingPlanType.ETERNAL_LIFE,
+                                            ReadingPlanType.PNEUMATOLOGY,
+                                            ReadingPlanType.TABERNACLE_HEBREWS,
+                                            ReadingPlanType.COVENANTS
+                                        )
+                                    ),
+                                    Triple(
+                                        "Vida Cristiana y Crecimiento",
+                                        Icons.Default.Star,
+                                        listOf(
+                                            ReadingPlanType.NEW_LIFE_CHRIST,
+                                            ReadingPlanType.GODS_WILL,
+                                            ReadingPlanType.NAMES_OF_GOD,
+                                            ReadingPlanType.ARMOR_OF_GOD,
+                                            ReadingPlanType.GOD_SAYS_YOU_ARE,
+                                            ReadingPlanType.CALLING_PURPOSE
+                                        )
+                                    ),
+                                    Triple(
+                                        "Ansiedad, Duelo y Paz Interior",
+                                        Icons.Default.Favorite,
+                                        listOf(
+                                            ReadingPlanType.PEACE_ANXIETY,
+                                            ReadingPlanType.SOUL_REST,
+                                            ReadingPlanType.AFFLICTION_HOPE
+                                        )
+                                    ),
+                                    Triple(
+                                        "Relaciones y Familia",
+                                        Icons.Default.Person,
+                                        listOf(
+                                            ReadingPlanType.ENDURING_LOVE,
+                                            ReadingPlanType.POWER_OF_FORGIVENESS
+                                        )
+                                    ),
+                                    Triple(
+                                        "Sabiduría, Finanzas y Liderazgo",
+                                        Icons.Default.Lightbulb,
+                                        listOf(
+                                            ReadingPlanType.STEWARDSHIP,
+                                            ReadingPlanType.NEHEMIAH
+                                        )
+                                    ),
+                                    Triple(
+                                        "Inmersión Bíblica y Canónica",
+                                        Icons.Default.MenuBook,
+                                        listOf(
+                                            ReadingPlanType.TRADITIONAL,
+                                            ReadingPlanType.CHRONOLOGICAL,
+                                            ReadingPlanType.BIBLE_STORIES,
+                                            ReadingPlanType.PROVERBS_31,
+                                            ReadingPlanType.JESUS_30
+                                        )
+                                    )
+                                )
+                            }
+
                             item {
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
@@ -761,59 +824,90 @@ fun ReadingPlansBottomSheet(
                                 )
                             }
 
-                            // 1. Plan Clásico
-                            item {
-                                val isActive = progress.isPlanActive(ReadingPlanType.TRADITIONAL)
-                                val prog = progress.getPlanProgress(ReadingPlanType.TRADITIONAL)
-                                ReadingPlanBannerCard(
-                                    title = "Plan Clásico",
-                                    subtitle = "Génesis a Apocalipsis en 365 días",
-                                    coverDrawableRes = R.drawable.plan_cover_classic,
-                                    badgeText = if (isActive) "EN CURSO" else null,
-                                    progressPercentage = if (isActive) prog.progressPercentage else null,
-                                    progressText = if (isActive) "${(prog.progressPercentage * 100).toInt()}%" else null,
-                                    onClick = {
-                                        detailedCatalogPlanType = ReadingPlanType.TRADITIONAL
+                            thematicSections.forEach { (sectionTitle, sectionIcon, planList) ->
+                                item(key = "HEADER_SECTION_$sectionTitle") {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        modifier = Modifier.padding(top = 14.dp, bottom = 6.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = sectionIcon,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Text(
+                                            text = sectionTitle.uppercase(),
+                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                letterSpacing = 0.8.sp
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Surface(
+                                            shape = CircleShape,
+                                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                        ) {
+                                            Text(
+                                                text = "${planList.size}",
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
+                                            )
+                                        }
                                     }
-                                )
+                                }
+
+                                val chunkedPairs = planList.chunked(2)
+                                chunkedPairs.forEach { pair ->
+                                    item(key = "ROW_${pair.map { it.name }.joinToString("_")}") {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 4.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                        ) {
+                                            val p1 = pair[0]
+                                            val isActive1 = progress.isPlanActive(p1)
+                                            val prog1 = progress.getPlanProgress(p1)
+                                            ReadingPlanGridCard(
+                                                title = p1.title,
+                                                subtitle = p1.description,
+                                                totalDays = p1.totalDays,
+                                                coverDrawableRes = p1.coverDrawableRes,
+                                                isActive = isActive1,
+                                                progressPercentage = if (isActive1) prog1.progressPercentage else null,
+                                                onClick = { detailedCatalogPlanType = p1 },
+                                                modifier = Modifier.weight(1f)
+                                            )
+
+                                            if (pair.size > 1) {
+                                                val p2 = pair[1]
+                                                val isActive2 = progress.isPlanActive(p2)
+                                                val prog2 = progress.getPlanProgress(p2)
+                                                ReadingPlanGridCard(
+                                                    title = p2.title,
+                                                    subtitle = p2.description,
+                                                    totalDays = p2.totalDays,
+                                                    coverDrawableRes = p2.coverDrawableRes,
+                                                    isActive = isActive2,
+                                                    progressPercentage = if (isActive2) prog2.progressPercentage else null,
+                                                    onClick = { detailedCatalogPlanType = p2 },
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                            } else {
+                                                Spacer(modifier = Modifier.weight(1f))
+                                            }
+                                        }
+                                    }
+                                }
                             }
 
-                            // 2. Plan Cronológico
-                            item {
-                                val isActive = progress.isPlanActive(ReadingPlanType.CHRONOLOGICAL)
-                                val prog = progress.getPlanProgress(ReadingPlanType.CHRONOLOGICAL)
-                                ReadingPlanBannerCard(
-                                    title = "Plan Cronológico",
-                                    subtitle = "Los eventos en su orden histórico • 365 días",
-                                    coverDrawableRes = R.drawable.plan_cover_chronological,
-                                    badgeText = if (isActive) "EN CURSO" else null,
-                                    progressPercentage = if (isActive) prog.progressPercentage else null,
-                                    progressText = if (isActive) "${(prog.progressPercentage * 100).toInt()}%" else null,
-                                    onClick = {
-                                        detailedCatalogPlanType = ReadingPlanType.CHRONOLOGICAL
-                                    }
-                                )
-                            }
-
-                            // 3. Historias de la Biblia
-                            item {
-                                val isActive = progress.isPlanActive(ReadingPlanType.BIBLE_STORIES)
-                                val prog = progress.getPlanProgress(ReadingPlanType.BIBLE_STORIES)
-                                ReadingPlanBannerCard(
-                                    title = "Historias de la Biblia",
-                                    subtitle = "365 relatos canónicos únicos y destacados",
-                                    coverDrawableRes = R.drawable.plan_cover_stories,
-                                    badgeText = if (isActive) "EN CURSO" else null,
-                                    progressPercentage = if (isActive) prog.progressPercentage else null,
-                                    progressText = if (isActive) "${(prog.progressPercentage * 100).toInt()}%" else null,
-                                    onClick = {
-                                        detailedCatalogPlanType = ReadingPlanType.BIBLE_STORIES
-                                    }
-                                )
-                            }
-
-                            // 4. Crear Plan Personalizado
-                            item {
+                            // Banner para Crear Plan Personalizado al pie del Catálogo
+                            item(key = "CUSTOM_PLAN_CREATOR_BANNER") {
+                                Spacer(modifier = Modifier.height(10.dp))
                                 ReadingPlanBannerCard(
                                     title = "Crear Plan Personalizado",
                                     subtitle = "Diseña tu plan eligiendo libros y capítulos a tu propio ritmo",
@@ -1107,6 +1201,135 @@ fun ReadingPlanBannerCard(
                     contentDescription = null,
                     tint = Color.White.copy(alpha = 0.85f),
                     modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ReadingPlanGridCard(
+    title: String,
+    subtitle: String,
+    totalDays: Int,
+    coverDrawableRes: Int,
+    isActive: Boolean = false,
+    progressPercentage: Float? = null,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(105.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = coverDrawableRes),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.matchParentSize()
+                )
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Black.copy(alpha = 0.40f),
+                                    Color.Transparent,
+                                    Color.Black.copy(alpha = 0.65f)
+                                )
+                            )
+                        )
+                )
+
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = Color.Black.copy(alpha = 0.75f),
+                    border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.3f)),
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(7.dp)
+                ) {
+                    Text(
+                        text = if (totalDays == 365) "1 AÑO" else "$totalDays DÍAS",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+
+                if (isActive) {
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = Color(0xFF2B4C6F),
+                        border = BorderStroke(0.5.dp, Color(0xFF7FAAD4).copy(alpha = 0.6f)),
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(7.dp)
+                    ) {
+                        Text(
+                            text = "ACTIVO",
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White,
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+
+                if (isActive && progressPercentage != null) {
+                    LinearProgressIndicator(
+                        progress = { progressPercentage },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(3.dp)
+                            .align(Alignment.BottomCenter),
+                        color = Color(0xFF5AB4F5),
+                        trackColor = Color.White.copy(alpha = 0.25f)
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                        lineHeight = 15.sp
+                    ),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(3.dp))
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 10.sp,
+                        lineHeight = 13.sp
+                    ),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
