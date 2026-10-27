@@ -376,9 +376,15 @@ fun ReadingPlansBottomSheet(
                                         haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                                     },
                                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                                    shape = RoundedCornerShape(10.dp)
+                                    shape = RoundedCornerShape(10.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = MaterialTheme.colorScheme.error
+                                    ),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
                                 ) {
-                                    Text("Activo ✓", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(14.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Quitar", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                                 }
                                 IconButton(
                                     onClick = { showResetCatalogConfirmDialog = viewingPlanType },
