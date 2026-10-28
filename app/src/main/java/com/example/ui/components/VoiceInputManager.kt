@@ -1,6 +1,5 @@
 package com.example.ui.components
 
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -9,6 +8,7 @@ import android.os.Looper
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -32,13 +32,14 @@ class VoiceInputState(
     private var speechRecognizer: SpeechRecognizer? = null
     private val mainHandler = Handler(Looper.getMainLooper())
     private var restartRunnable: Runnable? = null
+    private var consecutiveClientErrors = 0
 
     private fun getPreferredSpanishTag(): String {
         val sysLocale = Locale.getDefault()
         return if (sysLocale.language.equals("es", ignoreCase = true)) {
             sysLocale.toLanguageTag()
         } else {
-            "es-419" // Español Latinoamérica
+            "es-419" // Español Latinoamericano
         }
     }
 
@@ -51,106 +52,114 @@ class VoiceInputState(
             putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, langTag)
             putExtra("android.speech.extra.EXTRA_ADDITIONAL_LANGUAGES", arrayOf(langTag, "es-419", "es-ES", "es-US"))
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
-            putExtra("android.speech.extra.DICTATION_MODE", true)
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
+            putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
+            // Tiempos extendidos para permitir hablar pausadamente
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 600000L)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 5000L)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 5000L)
-        }
-    }
-
-    private fun createRecognizer(): SpeechRecognizer {
-        val googleComponent = ComponentName(
-            "com.google.android.googlequicksearchbox",
-            "com.google.android.voicesearch.service.RecognitionService"
-        )
-        return try {
-            SpeechRecognizer.createSpeechRecognizer(context, googleComponent)
-        } catch (_: Exception) {
-            SpeechRecognizer.createSpeechRecognizer(context)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 4000L)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 4000L)
         }
     }
 
     private fun initRecognizerIfNeeded(): Boolean {
         if (!SpeechRecognizer.isRecognitionAvailable(context)) {
-            Toast.makeText(context, "El reconocimiento de voz no está disponible en este dispositivo", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "El servicio de voz no está habilitado en este dispositivo", Toast.LENGTH_SHORT).show()
             return false
         }
         if (speechRecognizer == null) {
-            speechRecognizer = createRecognizer().apply {
-                setRecognitionListener(object : RecognitionListener {
-                    override fun onReadyForSpeech(params: Bundle?) {}
-
-                    override fun onBeginningOfSpeech() {}
-
-                    override fun onRmsChanged(rmsdB: Float) {
-                        if (isRecording) {
-                            val norm = ((rmsdB + 2f) / 12f).coerceIn(0f, 1f)
-                            rmsLevel = norm
+            try {
+                speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
+                    setRecognitionListener(object : RecognitionListener {
+                        override fun onReadyForSpeech(params: Bundle?) {
+                            Log.d("VoiceInputManager", "onReadyForSpeech")
+                            consecutiveClientErrors = 0
                         }
-                    }
 
-                    override fun onBufferReceived(buffer: ByteArray?) {}
-
-                    override fun onEndOfSpeech() {
-                        if (isRecording) {
-                            scheduleRestart(200)
+                        override fun onBeginningOfSpeech() {
+                            Log.d("VoiceInputManager", "onBeginningOfSpeech")
                         }
-                    }
 
-                    override fun onError(error: Int) {
-                        if (!isRecording) return
+                        override fun onRmsChanged(rmsdB: Float) {
+                            if (isRecording) {
+                                val norm = ((rmsdB + 2f) / 12f).coerceIn(0f, 1f)
+                                rmsLevel = norm
+                            }
+                        }
 
-                        when (error) {
-                            SpeechRecognizer.ERROR_NO_MATCH,
-                            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> {
-                                if (partialText.isNotBlank()) {
-                                    accumulatedText = if (accumulatedText.isBlank()) partialText else "$accumulatedText $partialText"
-                                    partialText = ""
-                                    updateDisplayedText()
+                        override fun onBufferReceived(buffer: ByteArray?) {}
+
+                        override fun onEndOfSpeech() {
+                            Log.d("VoiceInputManager", "onEndOfSpeech")
+                            if (isRecording) {
+                                scheduleRestart(200)
+                            }
+                        }
+
+                        override fun onError(error: Int) {
+                            Log.e("VoiceInputManager", "SpeechRecognizer error: $error")
+                            if (!isRecording) return
+
+                            when (error) {
+                                SpeechRecognizer.ERROR_NO_MATCH,
+                                SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> {
+                                    if (partialText.isNotBlank()) {
+                                        accumulatedText = if (accumulatedText.isBlank()) partialText else "$accumulatedText $partialText"
+                                        partialText = ""
+                                        updateDisplayedText()
+                                    }
+                                    scheduleRestart(250)
                                 }
-                                scheduleRestart(300)
-                            }
-                            SpeechRecognizer.ERROR_CLIENT,
-                            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> {
-                                destroyRecognizer()
-                                scheduleRestart(350)
-                            }
-                            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> {
-                                isRecording = false
-                                Toast.makeText(context, "Se requiere permiso de micrófono para consultar por voz", Toast.LENGTH_SHORT).show()
-                            }
-                            else -> {
-                                scheduleRestart(400)
+                                SpeechRecognizer.ERROR_CLIENT,
+                                SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> {
+                                    consecutiveClientErrors++
+                                    destroyRecognizer()
+                                    if (consecutiveClientErrors < 3) {
+                                        scheduleRestart(350)
+                                    } else {
+                                        isRecording = false
+                                        Toast.makeText(context, "Por favor verifica que la app de Google o voz esté activa", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> {
+                                    isRecording = false
+                                    Toast.makeText(context, "Se requiere permiso de micrófono para consultar por voz", Toast.LENGTH_SHORT).show()
+                                }
+                                else -> {
+                                    scheduleRestart(350)
+                                }
                             }
                         }
-                    }
 
-                    override fun onResults(results: Bundle?) {
-                        val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                        val text = matches?.firstOrNull()?.trim() ?: ""
-                        if (text.isNotBlank()) {
-                            accumulatedText = if (accumulatedText.isBlank()) text else "$accumulatedText $text"
-                            partialText = ""
-                            updateDisplayedText()
+                        override fun onResults(results: Bundle?) {
+                            val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                            val text = matches?.firstOrNull()?.trim() ?: ""
+                            Log.d("VoiceInputManager", "onResults: $text")
+                            if (text.isNotBlank()) {
+                                accumulatedText = if (accumulatedText.isBlank()) text else "$accumulatedText $text"
+                                partialText = ""
+                                updateDisplayedText()
+                            }
+                            if (isRecording) {
+                                scheduleRestart(150)
+                            }
                         }
-                        if (isRecording) {
-                            scheduleRestart(200)
-                        }
-                    }
 
-                    override fun onPartialResults(partialResults: Bundle?) {
-                        if (!isRecording) return
-                        val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                        val current = matches?.firstOrNull()?.trim() ?: ""
-                        if (current.isNotBlank()) {
-                            partialText = current
-                            updateDisplayedText()
+                        override fun onPartialResults(partialResults: Bundle?) {
+                            if (!isRecording) return
+                            val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                            val current = matches?.firstOrNull()?.trim() ?: ""
+                            if (current.isNotBlank()) {
+                                partialText = current
+                                updateDisplayedText()
+                            }
                         }
-                    }
 
-                    override fun onEvent(eventType: Int, params: Bundle?) {}
-                })
+                        override fun onEvent(eventType: Int, params: Bundle?) {}
+                    })
+                }
+            } catch (e: Exception) {
+                Log.e("VoiceInputManager", "Error creating SpeechRecognizer", e)
+                return false
             }
         }
         return true
@@ -164,6 +173,7 @@ class VoiceInputState(
                     initRecognizerIfNeeded()
                     speechRecognizer?.startListening(getSpeechIntent())
                 } catch (e: Exception) {
+                    Log.e("VoiceInputManager", "Error starting listening on restart", e)
                     destroyRecognizer()
                     initRecognizerIfNeeded()
                     speechRecognizer?.startListening(getSpeechIntent())
@@ -183,19 +193,27 @@ class VoiceInputState(
     }
 
     fun startListening() {
-        if (!initRecognizerIfNeeded()) return
         accumulatedText = ""
         partialText = ""
         currentTranscribedText = ""
         rmsLevel = 0f
         isRecording = true
+        consecutiveClientErrors = 0
 
-        try {
-            speechRecognizer?.startListening(getSpeechIntent())
-        } catch (e: Exception) {
-            destroyRecognizer()
-            initRecognizerIfNeeded()
-            speechRecognizer?.startListening(getSpeechIntent())
+        mainHandler.post {
+            if (!initRecognizerIfNeeded()) {
+                isRecording = false
+                return@post
+            }
+            try {
+                speechRecognizer?.startListening(getSpeechIntent())
+            } catch (e: Exception) {
+                Log.e("VoiceInputManager", "Error starting listening", e)
+                destroyRecognizer()
+                if (initRecognizerIfNeeded()) {
+                    speechRecognizer?.startListening(getSpeechIntent())
+                }
+            }
         }
     }
 

@@ -1,8 +1,6 @@
 package com.example.ui.components
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,9 +22,23 @@ fun GeminiVoiceVisualizerPill(
     modifier: Modifier = Modifier
 ) {
     val barCount = 13
+
+    // Onda sutil continua que da vida a las barras como en Gemini
+    val infiniteTransition = rememberInfiniteTransition(label = "geminiWavePulse")
+    val phase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = (2 * Math.PI).toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "wavePhase"
+    )
+
+    // Reacción inmediata al volumen real de la voz
     val animatedRms by animateFloatAsState(
-        targetValue = rmsLevel.coerceIn(0.08f, 1f),
-        animationSpec = tween(durationMillis = 70, easing = LinearEasing),
+        targetValue = rmsLevel.coerceIn(0f, 1f),
+        animationSpec = tween(durationMillis = 80, easing = LinearEasing),
         label = "geminiRmsAnimation"
     )
 
@@ -53,7 +65,11 @@ fun GeminiVoiceVisualizerPill(
             ) {
                 for (i in 0 until barCount) {
                     val bellCurve = sin((i + 1) * Math.PI / (barCount + 1)).toFloat()
-                    val dynamicHeight = (6.dp + (22.dp * bellCurve * animatedRms)).coerceIn(5.dp, 28.dp)
+                    val waveOffset = (sin(phase + (i * 0.5f)) + 1f) / 2f // 0f a 1f suave
+                    val idlePulse = 5.dp + (4.dp * waveOffset.toFloat()) // 5dp a 9dp en reposo
+                    val voiceBoost = 20.dp * bellCurve * animatedRms     // hasta 29dp al hablar
+
+                    val dynamicHeight = (idlePulse + voiceBoost).coerceIn(4.dp, 29.dp)
 
                     Box(
                         modifier = Modifier
