@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -32,16 +33,41 @@ class VoiceInputState(
     private val mainHandler = Handler(Looper.getMainLooper())
     private var restartRunnable: Runnable? = null
 
+    private fun getPreferredSpanishTag(): String {
+        val sysLocale = Locale.getDefault()
+        return if (sysLocale.language.equals("es", ignoreCase = true)) {
+            sysLocale.toLanguageTag()
+        } else {
+            "es-419" // Español Latinoamérica
+        }
+    }
+
     private fun getSpeechIntent(): Intent {
+        val langTag = getPreferredSpanishTag()
         return Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
+            putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, langTag)
+            putExtra("android.speech.extra.EXTRA_ADDITIONAL_LANGUAGES", arrayOf(langTag, "es-419", "es-ES", "es-US"))
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
             putExtra("android.speech.extra.DICTATION_MODE", true)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 300000L)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 10000L)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 10000L)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 600000L)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 5000L)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 5000L)
+        }
+    }
+
+    private fun createRecognizer(): SpeechRecognizer {
+        val googleComponent = ComponentName(
+            "com.google.android.googlequicksearchbox",
+            "com.google.android.voicesearch.service.RecognitionService"
+        )
+        return try {
+            SpeechRecognizer.createSpeechRecognizer(context, googleComponent)
+        } catch (_: Exception) {
+            SpeechRecognizer.createSpeechRecognizer(context)
         }
     }
 
@@ -51,7 +77,7 @@ class VoiceInputState(
             return false
         }
         if (speechRecognizer == null) {
-            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
+            speechRecognizer = createRecognizer().apply {
                 setRecognitionListener(object : RecognitionListener {
                     override fun onReadyForSpeech(params: Bundle?) {}
 
@@ -67,9 +93,8 @@ class VoiceInputState(
                     override fun onBufferReceived(buffer: ByteArray?) {}
 
                     override fun onEndOfSpeech() {
-                        // Si el usuario aún no presionó stop, nos preparamos para continuar
                         if (isRecording) {
-                            scheduleRestart(100)
+                            scheduleRestart(200)
                         }
                     }
 
@@ -79,20 +104,24 @@ class VoiceInputState(
                         when (error) {
                             SpeechRecognizer.ERROR_NO_MATCH,
                             SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> {
-                                // Pausa en el habla, reiniciamos escucha para permitir hablar cuanto quiera
-                                scheduleRestart(150)
+                                if (partialText.isNotBlank()) {
+                                    accumulatedText = if (accumulatedText.isBlank()) partialText else "$accumulatedText $partialText"
+                                    partialText = ""
+                                    updateDisplayedText()
+                                }
+                                scheduleRestart(300)
                             }
                             SpeechRecognizer.ERROR_CLIENT,
                             SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> {
                                 destroyRecognizer()
-                                scheduleRestart(200)
+                                scheduleRestart(350)
                             }
                             SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> {
                                 isRecording = false
                                 Toast.makeText(context, "Se requiere permiso de micrófono para consultar por voz", Toast.LENGTH_SHORT).show()
                             }
                             else -> {
-                                scheduleRestart(300)
+                                scheduleRestart(400)
                             }
                         }
                     }
@@ -106,7 +135,7 @@ class VoiceInputState(
                             updateDisplayedText()
                         }
                         if (isRecording) {
-                            scheduleRestart(100)
+                            scheduleRestart(200)
                         }
                     }
 
@@ -136,6 +165,8 @@ class VoiceInputState(
                     speechRecognizer?.startListening(getSpeechIntent())
                 } catch (e: Exception) {
                     destroyRecognizer()
+                    initRecognizerIfNeeded()
+                    speechRecognizer?.startListening(getSpeechIntent())
                 }
             }
         }
@@ -147,6 +178,7 @@ class VoiceInputState(
             .filter { it.isNotBlank() }
             .joinToString(" ")
             .trim()
+            .replace("\\s+".toRegex(), " ")
         currentTranscribedText = combined
     }
 
@@ -176,7 +208,14 @@ class VoiceInputState(
             speechRecognizer?.stopListening()
         } catch (_: Exception) {}
 
-        val result = currentTranscribedText
+        updateDisplayedText()
+        val raw = currentTranscribedText
+        val result = if (raw.isNotBlank()) {
+            raw.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+        } else {
+            ""
+        }
+
         accumulatedText = ""
         partialText = ""
         currentTranscribedText = ""
