@@ -29,6 +29,15 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.Manifest
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.core.content.ContextCompat
+import com.example.R
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.data.bible.ChatMessage
@@ -48,6 +57,32 @@ fun BibleChatDialog(
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+
+    val context = LocalContext.current
+    val voiceInputState = rememberVoiceInputState()
+    var hasRecordPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        hasRecordPermission = isGranted
+        if (isGranted) {
+            voiceInputState.startListening()
+        } else {
+            Toast.makeText(context, "Se requiere permiso de micrófono para consultar por voz", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val onStartVoiceClick = {
+        if (hasRecordPermission) {
+            voiceInputState.startListening()
+        } else {
+            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
     val clipboardManager = LocalClipboardManager.current
 
     val quickTopics = remember {
@@ -317,43 +352,96 @@ fun BibleChatDialog(
                         .padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedTextField(
-                        value = inputText,
-                        onValueChange = { inputText = it },
-                        modifier = Modifier
-                            .weight(1f)
-                            .testTag("chat_input_field"),
-                        textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
-                        placeholder = {
-                            Text(
-                                "Haz una pregunta bíblica o doctrinal...",
-                                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp)
-                            )
-                        },
-                        maxLines = 4,
-                        shape = RoundedCornerShape(20.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                    if (voiceInputState.isRecording) {
+                        GeminiVoiceVisualizerPill(
+                            rmsLevel = voiceInputState.rmsLevel,
+                            onStopClick = {
+                                val recordedText = voiceInputState.stopListening()
+                                if (recordedText.isNotBlank()) {
+                                    inputText = if (inputText.isBlank()) recordedText else "$inputText $recordedText"
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .testTag("voice_visualizer_pill")
                         )
-                    )
+                    } else {
+                        OutlinedTextField(
+                            value = inputText,
+                            onValueChange = { inputText = it },
+                            modifier = Modifier
+                                .weight(1f)
+                                .testTag("chat_input_field"),
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
+                            placeholder = {
+                                Text(
+                                    "Haz una pregunta bíblica o doctrinal...",
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp)
+                                )
+                            },
+                            trailingIcon = {
+                                if (inputText.isBlank()) {
+                                    IconButton(
+                                        onClick = onStartVoiceClick,
+                                        modifier = Modifier.testTag("btn_voice_input")
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_mic),
+                                            contentDescription = "Consultar por voz",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(22.dp)
+                                        )
+                                    }
+                                } else {
+                                    IconButton(
+                                        onClick = { inputText = "" },
+                                        modifier = Modifier.testTag("btn_clear_input")
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Limpiar texto",
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                            },
+                            maxLines = 4,
+                            shape = RoundedCornerShape(20.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                            )
+                        )
+                    }
 
                     Spacer(modifier = Modifier.width(8.dp))
 
+                    val canSend = (voiceInputState.isRecording || inputText.isNotBlank()) && !isLoading
                     IconButton(
                         onClick = {
-                            val text = inputText.trim()
-                            if (text.isNotBlank() && !isLoading) {
-                                onSendMessage(text)
-                                inputText = ""
+                            if (voiceInputState.isRecording) {
+                                val recorded = voiceInputState.stopListening()
+                                val combined = if (inputText.isBlank()) recorded else "$inputText $recorded"
+                                val trimmed = combined.trim()
+                                if (trimmed.isNotBlank() && !isLoading) {
+                                    onSendMessage(trimmed)
+                                    inputText = ""
+                                }
+                            } else {
+                                val text = inputText.trim()
+                                if (text.isNotBlank() && !isLoading) {
+                                    onSendMessage(text)
+                                    inputText = ""
+                                }
                             }
                         },
-                        enabled = inputText.isNotBlank() && !isLoading,
+                        enabled = canSend,
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
                             .background(
-                                if (inputText.isNotBlank() && !isLoading)
+                                if (canSend)
                                     MaterialTheme.colorScheme.primary
                                 else
                                     MaterialTheme.colorScheme.surfaceVariant
@@ -363,7 +451,7 @@ fun BibleChatDialog(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Send,
                             contentDescription = "Enviar pregunta",
-                            tint = if (inputText.isNotBlank() && !isLoading)
+                            tint = if (canSend)
                                 MaterialTheme.colorScheme.onPrimary
                             else
                                 MaterialTheme.colorScheme.onSurfaceVariant
