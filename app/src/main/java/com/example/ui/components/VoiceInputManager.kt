@@ -54,10 +54,10 @@ class VoiceInputState(
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
             putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
-            // Tiempos extendidos para permitir hablar pausadamente
+            // Tiempos optimizados para respuesta inmediata y captura fluida
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 600000L)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 4000L)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 4000L)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 800L)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 800L)
         }
     }
 
@@ -91,7 +91,7 @@ class VoiceInputState(
                         override fun onEndOfSpeech() {
                             Log.d("VoiceInputManager", "onEndOfSpeech")
                             if (isRecording) {
-                                scheduleRestart(200)
+                                scheduleRestart(80)
                             }
                         }
 
@@ -107,7 +107,7 @@ class VoiceInputState(
                                         partialText = ""
                                         updateDisplayedText()
                                     }
-                                    scheduleRestart(250)
+                                    scheduleRestart(100)
                                 }
                                 SpeechRecognizer.ERROR_CLIENT,
                                 SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> {
@@ -140,7 +140,7 @@ class VoiceInputState(
                                 updateDisplayedText()
                             }
                             if (isRecording) {
-                                scheduleRestart(150)
+                                scheduleRestart(80)
                             }
                         }
 
