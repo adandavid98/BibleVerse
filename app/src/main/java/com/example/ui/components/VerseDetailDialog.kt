@@ -756,14 +756,26 @@ fun VerseDetailDialog(
                                 }
                             }
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = verse.context,
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontSize = (15 * fontScale).sp,
-                                    lineHeight = (22 * fontScale).sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                            if (isEnrichingAi && verse.context.isBlank()) {
+                                Text(
+                                    text = "Escudriñando las Escrituras con IA...",
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontSize = (15 * fontScale).sp,
+                                        lineHeight = (22 * fontScale).sp,
+                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                )
+                            } else {
+                                Text(
+                                    text = verse.context,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontSize = (15 * fontScale).sp,
+                                        lineHeight = (22 * fontScale).sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
                     }
 

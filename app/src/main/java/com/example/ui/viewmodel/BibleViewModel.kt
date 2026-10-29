@@ -505,8 +505,44 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     fun enrichVerseContextWithAi(verseId: Long) {
         viewModelScope.launch {
             val current = repository.getVerseByIdDirect(verseId) ?: return@launch
+            val previousContext = current.context
             _isGeneratingContext.value = true
             _syncStatusMessage.value = "Generando exégesis con IA..."
+            // Inicializar vacío para que el efecto máquina de escribir fluya inmediatamente
+            _selectedVerseForDetail.value = current.copy(context = "")
+
+            val fullTargetText = StringBuilder()
+            val displayedText = StringBuilder()
+            var isStreamFinished = false
+
+            // Corrutina de efecto máquina de escribir progresiva a ~60fps idéntica al Chatbot
+            val typewriterJob = launch {
+                while (!isStreamFinished || displayedText.length < fullTargetText.length) {
+                    val targetLen = synchronized(fullTargetText) { fullTargetText.length }
+                    if (displayedText.length < targetLen) {
+                        val remaining = targetLen - displayedText.length
+                        val step = when {
+                            remaining > 250 -> 10
+                            remaining > 120 -> 6
+                            remaining > 60 -> 4
+                            remaining > 20 -> 2
+                            else -> 1
+                        }
+                        val nextLen = (displayedText.length + step).coerceAtMost(targetLen)
+                        val chunkToAppend = synchronized(fullTargetText) {
+                            fullTargetText.substring(displayedText.length, nextLen)
+                        }
+                        displayedText.append(chunkToAppend)
+                        val currentText = displayedText.toString()
+
+                        _selectedVerseForDetail.value = current.copy(context = currentText)
+                        delay(16)
+                    } else {
+                        delay(20)
+                    }
+                }
+            }
+
             try {
                 val parts = current.reference.split(" ")
                 val book = current.book.ifBlank { parts.dropLast(1).joinToString(" ").ifBlank { "Salmos" } }
@@ -515,17 +551,24 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
                 val chapter = cvParts.getOrNull(0)?.filter { it.isDigit() }?.toIntOrNull() ?: 1
                 val verse = cvParts.getOrNull(1) ?: "1"
 
-                val result = GeminiVerseContextService.generateContext(
+                val result = GeminiVerseContextService.explainVersesStream(
                     book = book,
                     chapter = chapter,
-                    verse = verse,
+                    verseRange = verse,
                     verseText = current.text.removeSurrounding("«", "»"),
-                    bibleVersion = current.bibleVersion
+                    bibleVersion = current.bibleVersion,
+                    onChunk = { chunk ->
+                        val cleanChunk = chunk.replace("*", "").replace("#", "")
+                        synchronized(fullTargetText) {
+                            fullTargetText.append(cleanChunk)
+                        }
+                    }
                 )
-                val newContext = when (result) {
-                    is ContextGenerationResult.Success -> result.contextText
-                    is ContextGenerationResult.Error -> result.fallbackContext
-                }
+
+                isStreamFinished = true
+                typewriterJob.join()
+
+                val newContext = synchronized(fullTargetText) { fullTargetText.toString().trim() }
                 if (newContext.isNotBlank()) {
                     val updated = current.copy(
                         context = newContext,
@@ -534,8 +577,13 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
                     repository.updateVerse(updated)
                     _selectedVerseForDetail.value = updated
                     _syncStatusMessage.value = "¡Contexto enriquecido con IA con éxito!"
+                } else {
+                    _selectedVerseForDetail.value = current.copy(context = previousContext)
                 }
             } catch (e: Exception) {
+                isStreamFinished = true
+                typewriterJob.cancel()
+                _selectedVerseForDetail.value = current.copy(context = previousContext)
                 _syncStatusMessage.value = "No se pudo conectar con la IA. Se mantuvo el contexto actual."
             } finally {
                 _isGeneratingContext.value = false
