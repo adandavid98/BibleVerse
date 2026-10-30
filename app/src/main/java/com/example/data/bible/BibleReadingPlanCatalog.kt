@@ -277,14 +277,15 @@ object BibleReadingPlanCatalog {
         summary: String,
         pBId: Int,
         pC: Int,
-        passages: List<PlanPassageSegment>
+        passages: List<PlanPassageSegment>,
+        pVerse: Int = 1
     ) = ReadingPlanDay(
         dayNumber = num,
         title = title,
         passagesSummary = summary,
         primaryBookId = pBId,
         primaryChapter = pC,
-        primaryVerse = 1,
+        primaryVerse = pVerse,
         passages = passages
     )
 
@@ -846,9 +847,9 @@ object BibleReadingPlanCatalog {
         d(147, "Día 147: 1 Crónicas 26-29; Salmos 127", "1 Crónicas 26-29; Salmos 127", 13, 26, listOf(p(13, "1 Crónicas", 26), p(13, "1 Crónicas", 27), p(13, "1 Crónicas", 28), p(13, "1 Crónicas", 29), p(19, "Salmos", 127))),
         d(148, "Día 148: Salmos 111-118", "Salmos 111-118", 19, 111, listOf(p(19, "Salmos", 111), p(19, "Salmos", 112), p(19, "Salmos", 113), p(19, "Salmos", 114), p(19, "Salmos", 115), p(19, "Salmos", 116), p(19, "Salmos", 117), p(19, "Salmos", 118))),
         d(149, "Día 149: 1 Reyes 1-2; Salmos 37-94", "1 Reyes 1-2; Salmos 37-94", 11, 1, listOf(p(11, "1 Reyes", 1), p(11, "1 Reyes", 2), p(19, "Salmos", 37), p(19, "Salmos", 71), p(19, "Salmos", 94))),
-        d(150, "Día 150: Salmos 119", "Salmos 119", 19, 119, listOf(p(19, "Salmos", 119))),
+        d(150, "Día 150: Salmos 119:1-88", "Salmos 119:1-88", 19, 119, listOf(p(19, "Salmos", 119)), pVerse = 1),
         d(151, "Día 151: 1 Reyes 3-4; 2 Crónicas 1; Salmos 72", "1 Reyes 3-4; 2 Crónicas 1; Salmos 72", 11, 3, listOf(p(11, "1 Reyes", 3), p(11, "1 Reyes", 4), p(14, "2 Crónicas", 1), p(19, "Salmos", 72))),
-        d(152, "Día 152: Salmos 119", "Salmos 119", 19, 119, listOf(p(19, "Salmos", 119))),
+        d(152, "Día 152: Salmos 119:89-176", "Salmos 119:89-176", 19, 119, listOf(p(19, "Salmos", 119)), pVerse = 89),
         d(153, "Día 153: Cantares 1-8", "Cantares 1-8", 22, 1, listOf(p(22, "Cantares", 1), p(22, "Cantares", 2), p(22, "Cantares", 3), p(22, "Cantares", 4), p(22, "Cantares", 5), p(22, "Cantares", 6), p(22, "Cantares", 7), p(22, "Cantares", 8))),
         d(154, "Día 154: Proverbios 1-3", "Proverbios 1-3", 20, 1, listOf(p(20, "Proverbios", 1), p(20, "Proverbios", 2), p(20, "Proverbios", 3))),
         d(155, "Día 155: Proverbios 4-6", "Proverbios 4-6", 20, 4, listOf(p(20, "Proverbios", 4), p(20, "Proverbios", 5), p(20, "Proverbios", 6))),

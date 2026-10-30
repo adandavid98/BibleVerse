@@ -3817,8 +3817,8 @@
   },
   {
     "dayNumber": 150,
-    "title": "Día 150: Salmos 119",
-    "passagesSummary": "Salmos 119",
+    "title": "Día 150: Salmos 119:1-88",
+    "passagesSummary": "Salmos 119:1-88",
     "primaryBookId": 19,
     "primaryChapter": 119,
     "segments": [
@@ -3827,7 +3827,8 @@
         "bookName": "Salmos",
         "chapter": 119
       }
-    ]
+    ],
+    "primaryVerse": 1
   },
   {
     "dayNumber": 151,
@@ -3860,8 +3861,8 @@
   },
   {
     "dayNumber": 152,
-    "title": "Día 152: Salmos 119",
-    "passagesSummary": "Salmos 119",
+    "title": "Día 152: Salmos 119:89-176",
+    "passagesSummary": "Salmos 119:89-176",
     "primaryBookId": 19,
     "primaryChapter": 119,
     "segments": [
@@ -3870,7 +3871,8 @@
         "bookName": "Salmos",
         "chapter": 119
       }
-    ]
+    ],
+    "primaryVerse": 89
   },
   {
     "dayNumber": 153,

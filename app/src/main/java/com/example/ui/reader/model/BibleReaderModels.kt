@@ -61,6 +61,7 @@ data class ReadingPlanSession(
     val dayTitle: String,
     val segments: List<com.example.data.bible.PlanPassageSegment>,
     val currentSegmentIndex: Int = 0,
+    val startVerse: Int = 1,
     val readSegmentIndices: Set<Int> = emptySet(),
     val isCustomPlan: Boolean = false,
     val storyNarrative: String? = null

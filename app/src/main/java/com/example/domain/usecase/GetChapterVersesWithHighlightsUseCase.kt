@@ -35,7 +35,7 @@ class GetChapterVersesWithHighlightsUseCase(
                     bookName = bookName,
                     chapter = chapter,
                     verseNumber = verse.verseNumber,
-                    text = verse.text,
+                    text = com.example.data.bible.BibleTextSanitizer.sanitize(verse.text),
                     highlightColorHex = highlightMap[verse.verseNumber]?.colorHex,
                     isSelected = false,
                     sectionHeading = catalogHeading ?: verse.sectionHeading,

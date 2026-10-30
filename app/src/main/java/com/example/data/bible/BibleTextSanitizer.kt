@@ -19,6 +19,16 @@ object BibleTextSanitizer {
         "(?i)^(?:LIBRO\\s+(?:PRIMERO|SEGUNDO|TERCERO|CUARTO|QUINTO|I|II|III|IV|V)\\s*\\([^)]*\\)\\s*)?Salmos?\\s+\\d+[.:]?\\s*"
     )
 
+    // Trailing Hebrew acrostic letters (e.g. Dálet, He, Bet in Psalm 119) and translator musical tags (Interludio)
+    private val TRAILING_ACROSTIC_AND_POETIC_REGEX = Regex(
+        "(?i)\\s+(?:Alef|Álef|Bet|Beth|Gu[ií]mel|Gimel|D[aá]let|Daleth|He|Vav|Waw|Za[ií]n|Z[aá]yin|Jet|Chet|Het|Tet|Thet|Yod|Yodh|Caf|Kaf|Caph|L[aá]med|Lamed|Mem|Nun|S[aá]mec|S[aá]mej|Samekh|Ayin|Ay[ií]n|Ain|Pe|Phe|Tsade|Sade|Tsadhe|Tzaddi|Cof|Qof|Qoph|Resh|Shin|Sin|Tau|Tav|Taw|Interludio)[.:\\-—–]?\\s*$"
+    )
+
+    // Leading acrostic letter at the start of verse 1 (e.g. "Alef Felices son los íntegros...")
+    private val LEADING_ACROSTIC_REGEX = Regex(
+        "(?i)^\\s*(?:Alef|Álef)[.:\\-—–]?\\s+(?=[A-ZÁÉÍÓÚa-záéíóú])"
+    )
+
     // Multiple consecutive whitespace characters
     private val MULTI_SPACE_REGEX = Regex("\\s{2,}")
 
@@ -64,6 +74,12 @@ object BibleTextSanitizer {
 
         // 9. Strip editorial Psalm and book division headers prepended to verse text (e.g. NTV Salmos)
         text = text.replace(PSALM_HEADER_PREFIX_REGEX, "").trim()
+
+        // 10. Strip stray leading acrostic headers at start of verse (e.g. "Alef Felices...")
+        text = text.replace(LEADING_ACROSTIC_REGEX, "").trim()
+
+        // 11. Strip trailing Hebrew acrostic letter names and musical pause tags erroneously glued to verse end (e.g. "Dálet", "Bet", "Interludio")
+        text = text.replace(TRAILING_ACROSTIC_AND_POETIC_REGEX, "").trim()
 
         return text
     }

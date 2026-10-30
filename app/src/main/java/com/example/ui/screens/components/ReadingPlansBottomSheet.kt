@@ -85,6 +85,7 @@ fun ReadingPlansBottomSheet(
             dayTitle = day.title,
             segments = segments,
             currentSegmentIndex = startIdx,
+            startVerse = day.primaryVerse,
             readSegmentIndices = readSegments,
             isCustomPlan = false,
             storyNarrative = day.storyNarrative.ifBlank { null }

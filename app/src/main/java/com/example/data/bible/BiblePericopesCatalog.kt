@@ -36,6 +36,31 @@ object BiblePericopesCatalog {
         }
     }
 
+    val PSALM_119_ACROSTICS = mapOf(
+        1 to "Excelencias de la ley de Dios — Álef (א)",
+        9 to "Bet (ב)",
+        17 to "Guímel (ג)",
+        25 to "Dálet (ד)",
+        33 to "He (ה)",
+        41 to "Vav (ו)",
+        49 to "Záyin (ז)",
+        57 to "Jet (ח)",
+        65 to "Tet (ט)",
+        73 to "Yod (י)",
+        81 to "Kaf (כ)",
+        89 to "Lámed (ל)",
+        97 to "Mem (מ)",
+        105 to "Nun (נ)",
+        113 to "Sámec (ס)",
+        121 to "Ayin (ע)",
+        129 to "Pe (פ)",
+        137 to "Tsade (צ)",
+        145 to "Qof (ק)",
+        153 to "Resh (ר)",
+        161 to "Shin (ש)",
+        169 to "Tav (ת)"
+    )
+
     private val DEDICATED_VERSIONS = setOf("TLA", "DHH", "DHH94PC", "NBLA", "LBLA", "NTV", "NVI")
 
     fun isDedicatedVersion(version: String): Boolean {
@@ -44,10 +69,12 @@ object BiblePericopesCatalog {
     }
 
     fun hasHeadingsForChapter(bookId: Int, chapter: Int): Boolean {
+        if (bookId == 19 && chapter == 119) return true
         return chaptersWithHeadings.contains("${bookId}_${chapter}")
     }
 
     fun hasHeadingsForChapter(bookId: Int, chapter: Int, version: String): Boolean {
+        if (bookId == 19 && chapter == 119) return true
         val norm = OfflineBibleManager.normalizeVersion(version)
         return if (DEDICATED_VERSIONS.contains(norm)) {
             chaptersWithHeadings.contains("${bookId}_${chapter}@$norm")
@@ -63,6 +90,13 @@ object BiblePericopesCatalog {
         verse: Int,
         version: String = "RVR1960"
     ): String? {
+        if (bookId == 19 && chapter == 119) {
+            val acrostic = PSALM_119_ACROSTICS[verse]
+            if (acrostic != null) {
+                return acrostic
+            }
+        }
+
         if (!initialized && context != null) {
             ensureInitialized(context)
         }

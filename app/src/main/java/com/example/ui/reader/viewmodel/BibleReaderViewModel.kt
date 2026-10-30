@@ -228,6 +228,7 @@ class BibleReaderViewModel(
                 orderIndex = currentSegment.bookId
             )
 
+        val scrollVerse = if (segmentIdx == 0 && session.startVerse > 1) session.startVerse else 1
         val updatedSession = session.copy(currentSegmentIndex = segmentIdx)
         _uiState.update {
             it.copy(
@@ -235,11 +236,11 @@ class BibleReaderViewModel(
                 currentBook = targetBook,
                 currentChapter = currentSegment.chapter,
                 selectedVerseNumbers = emptySet(),
-                targetScrollVerse = 1
+                targetScrollVerse = scrollVerse
             )
         }
         viewModelScope.launch {
-            preferencesRepository.updateLastPosition(targetBook.id, currentSegment.chapter, 1)
+            preferencesRepository.updateLastPosition(targetBook.id, currentSegment.chapter, scrollVerse)
         }
         loadChapter(targetBook, currentSegment.chapter, _uiState.value.preferences.bibleVersion)
     }
