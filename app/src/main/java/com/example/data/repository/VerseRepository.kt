@@ -62,6 +62,46 @@ class VerseRepository(private val verseDao: VerseDao) {
                     verseDao.insertVerses(missing)
                 }
             }
+            repairMissingOrDuplicateContexts()
+        }
+    }
+
+    suspend fun repairMissingOrDuplicateContexts() {
+        withContext(Dispatchers.IO) {
+            val all = verseDao.getAllVersesDirect()
+            val toUpdate = mutableListOf<VerseEntity>()
+            for (v in all) {
+                val ctxTrim = v.context.trim()
+                val ctxLower = ctxTrim.lowercase()
+                val txtClean = v.text.replace("«", "").replace("»", "").replace("\"", "").trim()
+                val ctxClean = ctxTrim.replace("«", "").replace("»", "").replace("\"", "").trim()
+
+                val isMarker = ctxLower.contains("lector de la biblia")
+                val isBlank = ctxTrim.isBlank()
+                val isDuplicateText = ctxClean.isNotEmpty() && (
+                    ctxClean.equals(txtClean, ignoreCase = true) ||
+                    (ctxClean.length > 25 && txtClean.contains(ctxClean, ignoreCase = true)) ||
+                    (txtClean.length > 25 && ctxClean.contains(txtClean, ignoreCase = true))
+                )
+
+                if (isMarker || isBlank || isDuplicateText) {
+                    val parts = v.chapterVerse.split(":")
+                    val ch = parts.getOrNull(0)?.filter { it.isDigit() }?.toIntOrNull() ?: 1
+                    val vs = parts.getOrNull(1)?.filter { it.isDigit() }?.ifBlank { "1" } ?: "1"
+                    val resolved = com.example.data.bible.BibleContextEngine.getLocalContext(
+                        bookName = v.book,
+                        chapter = ch,
+                        verse = vs,
+                        verseText = v.text
+                    )
+                    if (resolved.isNotBlank() && resolved != v.context) {
+                        toUpdate.add(v.copy(context = resolved, updatedAt = System.currentTimeMillis()))
+                    }
+                }
+            }
+            if (toUpdate.isNotEmpty()) {
+                toUpdate.forEach { verseDao.updateVerse(it) }
+            }
         }
     }
 

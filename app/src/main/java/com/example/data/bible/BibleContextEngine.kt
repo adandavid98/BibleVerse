@@ -429,7 +429,15 @@ object BibleContextEngine {
             it.reference.equals(ref1, ignoreCase = true) ||
             it.reference.replace(" ", "").equals(ref2.replace(" ", ""), ignoreCase = true)
         }
-        return match?.context?.takeIf { it.isNotBlank() }
+        val ctx = match?.context?.takeIf { it.isNotBlank() } ?: return null
+        val txt = match.text.replace("«", "").replace("»", "").replace("\"", "").trim()
+        val ctxClean = ctx.replace("«", "").replace("»", "").replace("\"", "").trim()
+        if (ctx.contains("Lector de la Biblia", ignoreCase = true) ||
+            ctxClean.equals(txt, ignoreCase = true) ||
+            (ctxClean.length > 25 && txt.contains(ctxClean, ignoreCase = true))) {
+            return null
+        }
+        return ctx
     }
 
     /**

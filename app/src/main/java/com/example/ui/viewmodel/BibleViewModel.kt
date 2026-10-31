@@ -385,13 +385,21 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val reference = "$book $chapterVerse".trim()
             val formattedText = if (!text.startsWith("«") && !text.endsWith("»")) "«$text»" else text
+            val resolvedContext = if (context.isBlank()) {
+                val parts = chapterVerse.split(":")
+                val ch = parts.getOrNull(0)?.filter { it.isDigit() }?.toIntOrNull() ?: 1
+                val vs = parts.getOrNull(1)?.filter { it.isDigit() }?.ifBlank { "1" } ?: "1"
+                com.example.data.bible.BibleContextEngine.getLocalContext(book, ch, vs, formattedText)
+            } else {
+                context
+            }
             val newVerse = VerseEntity(
                 book = book,
                 chapterVerse = chapterVerse,
                 reference = reference,
                 testament = testament,
                 text = formattedText,
-                context = context,
+                context = resolvedContext,
                 topic = topic.ifBlank { "Personal" },
                 notes = notes,
                 isCustom = true,

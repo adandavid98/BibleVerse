@@ -441,9 +441,21 @@ class BibleReaderViewModel(
                     val existing = allVerses.find {
                         it.reference.trim().equals(ref.trim(), ignoreCase = true)
                     }
+                    val localCtx = com.example.data.bible.BibleContextEngine.getLocalContext(
+                        bookName = currentBook.name,
+                        chapter = chapter,
+                        verse = v.verseNumber.toString(),
+                        verseText = v.text
+                    )
                     if (existing != null) {
+                        val ctx = if (existing.context.contains("Lector de la Biblia", ignoreCase = true) || existing.context.isBlank()) {
+                            localCtx
+                        } else {
+                            existing.context
+                        }
                         dao.updateVerse(
                             existing.copy(
+                                context = ctx,
                                 highlightColor = colorHex,
                                 updatedAt = System.currentTimeMillis()
                             )
@@ -455,7 +467,7 @@ class BibleReaderViewModel(
                             reference = ref,
                             testament = testament,
                             text = v.text,
-                            context = "Versículo resaltado desde el Lector de la Biblia.",
+                            context = localCtx,
                             topic = "Biblia",
                             isFavorite = false,
                             highlightColor = colorHex,
@@ -804,9 +816,21 @@ class BibleReaderViewModel(
                     val existing = allVerses.find {
                         it.reference.trim().equals(ref.trim(), ignoreCase = true)
                     }
+                    val localCtx = com.example.data.bible.BibleContextEngine.getLocalContext(
+                        bookName = currentBook.name,
+                        chapter = chapter,
+                        verse = v.verseNumber.toString(),
+                        verseText = v.text
+                    )
                     if (existing != null) {
+                        val ctx = if (existing.context.contains("Lector de la Biblia", ignoreCase = true) || existing.context.isBlank()) {
+                            localCtx
+                        } else {
+                            existing.context
+                        }
                         dao.updateVerse(
                             existing.copy(
+                                context = ctx,
                                 isFavorite = true,
                                 highlightColor = if (colorHex.isNotBlank()) colorHex else existing.highlightColor,
                                 updatedAt = System.currentTimeMillis()
@@ -819,7 +843,7 @@ class BibleReaderViewModel(
                             reference = ref,
                             testament = testament,
                             text = v.text,
-                            context = "Versículo guardado desde el Lector de la Biblia.",
+                            context = localCtx,
                             topic = "Biblia",
                             isFavorite = true,
                             highlightColor = colorHex,

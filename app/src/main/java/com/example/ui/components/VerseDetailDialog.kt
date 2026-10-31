@@ -108,7 +108,26 @@ fun VerseDetailDialog(
     var editTopic by remember(verse.id, isEditingVerse) { mutableStateOf(verse.topic) }
     var editBibleVersion by remember(verse.id, isEditingVerse) { mutableStateOf(verse.bibleVersion.ifBlank { "RVR1960" }) }
     var editText by remember(verse.id, isEditingVerse) { mutableStateOf(verse.text.removeSurrounding("«", "»")) }
-    var editContext by remember(verse.id, isEditingVerse) { mutableStateOf(verse.context) }
+    val resolvedContext = remember(verse.id, verse.context, verse.text) {
+        val ctxTrim = verse.context.trim()
+        val txtClean = verse.text.replace("«", "").replace("»", "").replace("\"", "").trim()
+        val ctxClean = ctxTrim.replace("«", "").replace("»", "").replace("\"", "").trim()
+        val isMarker = ctxTrim.contains("Lector de la Biblia", ignoreCase = true)
+        val isDuplicate = ctxClean.isNotEmpty() && (
+            ctxClean.equals(txtClean, ignoreCase = true) ||
+            (ctxClean.length > 25 && txtClean.contains(ctxClean, ignoreCase = true)) ||
+            (txtClean.length > 25 && ctxClean.contains(txtClean, ignoreCase = true))
+        )
+        if (ctxTrim.isBlank() || isMarker || isDuplicate) {
+            val parts = verse.chapterVerse.split(":")
+            val ch = parts.getOrNull(0)?.filter { it.isDigit() }?.toIntOrNull() ?: 1
+            val vs = parts.getOrNull(1)?.filter { it.isDigit() }?.ifBlank { "1" } ?: "1"
+            BibleContextEngine.getLocalContext(verse.book, ch, vs, verse.text)
+        } else {
+            verse.context
+        }
+    }
+    var editContext by remember(verse.id, isEditingVerse) { mutableStateOf(resolvedContext) }
     var editErrorMessage by remember(verse.id, isEditingVerse) { mutableStateOf<String?>(null) }
     var showVersionModal by remember { mutableStateOf(false) }
 
@@ -768,7 +787,7 @@ fun VerseDetailDialog(
                                 )
                             } else {
                                 Text(
-                                    text = verse.context,
+                                    text = resolvedContext,
                                     style = MaterialTheme.typography.bodyMedium.copy(
                                         fontSize = (15 * fontScale).sp,
                                         lineHeight = (22 * fontScale).sp
