@@ -69,34 +69,51 @@ class VerseRepository(private val verseDao: VerseDao) {
     suspend fun repairMissingOrDuplicateContexts() {
         withContext(Dispatchers.IO) {
             val all = verseDao.getAllVersesDirect()
+            val initialMap = InitialVersesData.verses.associateBy {
+                it.reference.trim().lowercase().replace("\\s+".toRegex(), " ")
+            }
             val toUpdate = mutableListOf<VerseEntity>()
             for (v in all) {
-                val ctxTrim = v.context.trim()
+                var updated = v
+                val normRef = v.reference.trim().lowercase().replace("\\s+".toRegex(), " ")
+                val initialCanonical = initialMap[normRef]
+
+                // 1. Sync full canonical text if it is a curated verse that was incomplete
+                if (initialCanonical != null && !v.isCustom && v.text != initialCanonical.text) {
+                    updated = updated.copy(text = initialCanonical.text)
+                }
+
+                val ctxTrim = updated.context.trim()
                 val ctxLower = ctxTrim.lowercase()
-                val txtClean = v.text.replace("«", "").replace("»", "").replace("\"", "").trim()
+                val txtClean = updated.text.replace("«", "").replace("»", "").replace("\"", "").trim()
                 val ctxClean = ctxTrim.replace("«", "").replace("»", "").replace("\"", "").trim()
 
                 val isMarker = ctxLower.contains("lector de la biblia")
                 val isBlank = ctxTrim.isBlank()
+                val hasDoubleDot = ctxTrim.contains("..")
                 val isDuplicateText = ctxClean.isNotEmpty() && (
                     ctxClean.equals(txtClean, ignoreCase = true) ||
                     (ctxClean.length > 25 && txtClean.contains(ctxClean, ignoreCase = true)) ||
                     (txtClean.length > 25 && ctxClean.contains(txtClean, ignoreCase = true))
                 )
 
-                if (isMarker || isBlank || isDuplicateText) {
-                    val parts = v.chapterVerse.split(":")
+                if (isMarker || isBlank || isDuplicateText || hasDoubleDot) {
+                    val parts = updated.chapterVerse.split(":")
                     val ch = parts.getOrNull(0)?.filter { it.isDigit() }?.toIntOrNull() ?: 1
                     val vs = parts.getOrNull(1)?.filter { it.isDigit() }?.ifBlank { "1" } ?: "1"
                     val resolved = com.example.data.bible.BibleContextEngine.getLocalContext(
-                        bookName = v.book,
+                        bookName = updated.book,
                         chapter = ch,
                         verse = vs,
-                        verseText = v.text
+                        verseText = updated.text
                     )
-                    if (resolved.isNotBlank() && resolved != v.context) {
-                        toUpdate.add(v.copy(context = resolved, updatedAt = System.currentTimeMillis()))
+                    if (resolved.isNotBlank()) {
+                        updated = updated.copy(context = resolved)
                     }
+                }
+
+                if (updated != v) {
+                    toUpdate.add(updated.copy(updatedAt = System.currentTimeMillis()))
                 }
             }
             if (toUpdate.isNotEmpty()) {

@@ -107,22 +107,38 @@ fun VerseDetailDialog(
     var editReference by remember(verse.id, isEditingVerse) { mutableStateOf(verse.reference) }
     var editTopic by remember(verse.id, isEditingVerse) { mutableStateOf(verse.topic) }
     var editBibleVersion by remember(verse.id, isEditingVerse) { mutableStateOf(verse.bibleVersion.ifBlank { "RVR1960" }) }
-    var editText by remember(verse.id, isEditingVerse) { mutableStateOf(verse.text.removeSurrounding("«", "»")) }
-    val resolvedContext = remember(verse.id, verse.context, verse.text) {
+    val resolvedText = remember(verse.id, verse.text, verse.reference) {
+        val normRef = verse.reference.trim().lowercase().replace("\\s+".toRegex(), " ")
+        if (!verse.isCustom) {
+            val canonical = com.example.data.initial.InitialVersesData.verses.firstOrNull {
+                it.reference.trim().lowercase().replace("\\s+".toRegex(), " ") == normRef
+            }
+            if (canonical != null && verse.text != canonical.text) {
+                canonical.text
+            } else {
+                verse.text
+            }
+        } else {
+            verse.text
+        }
+    }
+    var editText by remember(verse.id, isEditingVerse) { mutableStateOf(resolvedText.removeSurrounding("«", "»")) }
+    val resolvedContext = remember(verse.id, verse.context, resolvedText) {
         val ctxTrim = verse.context.trim()
-        val txtClean = verse.text.replace("«", "").replace("»", "").replace("\"", "").trim()
+        val txtClean = resolvedText.replace("«", "").replace("»", "").replace("\"", "").trim()
         val ctxClean = ctxTrim.replace("«", "").replace("»", "").replace("\"", "").trim()
         val isMarker = ctxTrim.contains("Lector de la Biblia", ignoreCase = true)
+        val hasDoubleDot = ctxTrim.contains("..")
         val isDuplicate = ctxClean.isNotEmpty() && (
             ctxClean.equals(txtClean, ignoreCase = true) ||
             (ctxClean.length > 25 && txtClean.contains(ctxClean, ignoreCase = true)) ||
             (txtClean.length > 25 && ctxClean.contains(txtClean, ignoreCase = true))
         )
-        if (ctxTrim.isBlank() || isMarker || isDuplicate) {
+        if (ctxTrim.isBlank() || isMarker || isDuplicate || hasDoubleDot) {
             val parts = verse.chapterVerse.split(":")
             val ch = parts.getOrNull(0)?.filter { it.isDigit() }?.toIntOrNull() ?: 1
             val vs = parts.getOrNull(1)?.filter { it.isDigit() }?.ifBlank { "1" } ?: "1"
-            BibleContextEngine.getLocalContext(verse.book, ch, vs, verse.text)
+            BibleContextEngine.getLocalContext(verse.book, ch, vs, resolvedText)
         } else {
             verse.context
         }
@@ -614,7 +630,7 @@ fun VerseDetailDialog(
                         ) {
                             Column(modifier = Modifier.padding(20.dp)) {
                                 Text(
-                                    text = verse.text,
+                                    text = resolvedText,
                                     style = MaterialTheme.typography.titleLarge.copy(
                                         fontFamily = FontFamily.Serif,
                                         fontStyle = FontStyle.Italic,
