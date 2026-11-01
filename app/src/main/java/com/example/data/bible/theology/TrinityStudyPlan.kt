@@ -74,7 +74,7 @@ object TrinityStudyPlan {
                     I. Contexto Histórico y Exégesis Textual:
                     El bautismo del Señor Jesús a orillas del río Jordán constituye uno de los momentos cumbres de la historia de la salvación. Juan el Bautista administraba un bautismo de arrepentimiento para la remisión de pecados; sin embargo, Jesús, siendo santo e intachable, descendió a las aguas para «cumplir toda justicia» (Mt 3:15). Al sumergirse, Cristo no confesaba pecados propios, sino que se identificaba voluntariamente con la humanidad caída que había venido a rescatar como Siervo Sufriente.
                     
-                    En el instante exacto en que Jesús sale de las aguas, los cielos se abrieron y se produjo una escena de asombrosa trascendencia: el Espíritu de Dios descendió sobre Él en forma corporal como paloma, y simultáneamente resonó desde los cielos la voz del Padre: «Este es mi Hijo amado, en quien tengo complacencia» (Mt 3:17).
+                    En el instante exacto en que Jesús sale de las aguas mientras oraba (Lucas 3:21-22), los cielos se abrieron y se produjo una escena de asombrosa trascendencia: el Espíritu Santo descendió sobre Él en forma corporal como paloma, y simultáneamente resonó desde los cielos la voz del Padre: «Este es mi Hijo amado, en quien tengo complacencia» (Mateo 3:17).
                     
                     Las tres Personas divinas se manifiestan al mismo tiempo, en un mismo suceso, cumpliendo funciones distintas pero en absoluta armonía: el Hijo en las aguas en carne visible, el Espíritu descendiendo con unción capacitadora, y el Padre testificando con voz paternal desde la gloria celestial.
                     

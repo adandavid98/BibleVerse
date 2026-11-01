@@ -192,7 +192,7 @@ object TabernacleStudyPlan {
                     3. Humo Ascendente Continuo: Mañana y tarde, cuando el sacerdote arreglaba las lámparas, quemaba incienso aromático continuo ante Jehová (Éx 30:7-8).
                     
                     II. Desarrollo Teológico y Cristocéntrico:
-                    En el simbolismo bíblico universal, el incienso representa las oraciones y la intercesión de los santos ascendiendo como olor grato ante el trono celestial (Salmo 141:2; Apocalipsis 5:8; 8:3-4). Pero antes de ser nuestras oraciones imperfectas, el Altar de Oro tipifica la intercesión perpetua, eficaz e intachable de nuestro Sumo Sacerdote Jesucristo.
+                    En el simbolismo bíblico universal, el incienso representa las oraciones y la intercesión de los santos ascendiendo como olor grato ante el trono celestial (Salmo 141:2; Apocalipsis 5:8; Apocalipsis 8:3-4). Pero antes de ser nuestras oraciones imperfectas, el Altar de Oro tipifica la intercesión perpetua, eficaz e intachable de nuestro Sumo Sacerdote Jesucristo.
                     
                     Hebreos 7:25 proclama el triunfo de su ministerio celestial presente: «por lo cual puede también salvar perpetuamente a los que por medio de él se acercan a Dios, viviendo siempre para interceder por ellos». Cristo no solo murió por nosotros en el pasado; vive hoy a la diestra del Padre intercediendo por nuestro nombre cada segundo. 
                     
@@ -269,7 +269,7 @@ object TabernacleStudyPlan {
                 passages = listOf(seg(2, "Éxodo", 28), seg(3, "Levítico", 8), seg(58, "Hebreos", 4)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
-                    En Éxodo 28, Dios ordenó confeccionar las vestiduras sagradas para Aarón y sus sucesores en el sumo sacerdocio: «Y harás vestiduras sagradas a Aarón tu hermano, para honra y hermosura» (Éxodo 28:2). Cada prenda ministerial constituía una proclamación visual de la mediación sacerdotal:
+                    En Éxodo 28 (cuya solemne investidura y unción se relata en Levítico 8:1-12), Dios ordenó confeccionar las vestiduras sagradas para Aarón y sus sucesores en el sumo sacerdocio: «Y harás vestiduras sagradas a Aarón tu hermano, para honra y hermosura» (Éxodo 28:2). Cada prenda ministerial constituía una proclamación visual de la mediación sacerdotal:
                     
                     1. Las Piedras de Ónice en las Hombreras del Efod (Éx 28:9-12): Dos piedras de ónice grabadas con los nombres de las doce tribus de Israel (seis en cada hombro) engastadas en oro. Los hombros simbolizan la fuerza y el poder sustentador: el sumo sacerdote llevaba al pueblo de Dios sobre sus hombros ante la presencia del Señor.
                     2. El Pectoral del Juicio («Joshen haMishpat», Éx 28:15-29): Una prenda cuadrada colocada directamente sobre el pecho y el corazón del sumo sacerdote, adornada con doce piedras preciosas distintas incrustadas en cuatro hileras de tres (sardio, topacio, esmeralda, zafiro, diamante, etc.), cada una con el nombre de una tribu. Al ministrar en el santuario, Aarón llevaba los nombres del pueblo de Dios sobre su propio corazón continuamente como memorial delante de Jehová.
@@ -316,7 +316,7 @@ object TabernacleStudyPlan {
             createStudyDay(
                 dayNumber = 12,
                 title = "Día 12: El Orden de Melquisedec: Un Sacerdocio Superior y Eterno",
-                passagesSummary = "Génesis 14:17-20; Salmo 110:1-4; Hebreos 7:1-19",
+                passagesSummary = "Hebreos 7:1-19; Génesis 14:17-20; Salmo 110:1-4",
                 primaryBookId = 58,
                 primaryChapter = 7,
                 passages = listOf(seg(58, "Hebreos", 7), seg(1, "Génesis", 14), seg(19, "Salmos", 110)),
@@ -419,7 +419,7 @@ object TabernacleStudyPlan {
                     
                     «Acerquémonos con corazón sincero, en plena certidumbre de fe, purificados los corazones de mala conciencia, y lavados los cuerpos con agua pura. Mantengamos firme, sin fluctuar, la profesión de nuestra esperanza, porque fiel es el que prometió».
                     
-                    El culto del Tabernáculo ha encontrado su plenitud gloriosa. Ya no nos acercamos con temor servil ni con zozobra de muerte; nos acercamos como hijos amados, comprados por precio infinito, al Trono de la Gracia del Rey del universo. Nuestra vida entera es ahora un sacerdocio santo de adoración, comunión y servicio gozoso al Señor.
+                    El culto del Tabernáculo ha encontrado su plenitud gloriosa. Ya no nos acercamos con temor servil ni con zozobra de muerte; nos acercamos como hijos amados, comprados por precio infinito, al Trono de la Gracia del Rey del universo (Hebreos 4:14-16). Nuestra vida entera es ahora un sacerdocio santo de adoración, comunión y servicio gozoso al Señor.
                 """,
                 doctrinalThesis = "Bajo el Nuevo Pacto no nos acercamos al terror del monte Sinaí, sino al monte de Sión, donde la sangre rociada de Cristo habla perdón eterno y nos concede comunión confiada con el Dios vivo.",
                 exegeticalAnalysis = "El contraste entre el clamor de la sangre de Abel (retribución) y la sangre de Cristo (gracia y reconciliación) en Hebreos 12:24 corona la superioridad salvífica absoluta del Nuevo Pacto."

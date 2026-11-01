@@ -27,7 +27,7 @@ object EschatologyStudyPlan {
                     
                     Pedro utiliza la metáfora de la «antorcha» («lychnōi»): en medio de las tinieblas morales, políticas e ideológicas del mundo presente, la profecía divina no fue dada para alimentar debates de especulación vanidosa o fabricar calendarios sensacionalistas de fechas exactas, sino para iluminar el camino de la Iglesia y afirmarla en la soberanía de Dios.
                     
-                    En los versículos 20 y 21 se establece el origen divino inerrante de las Escrituras proféticas: «entendiendo primero esto, que ninguna profecía de la Escritura es de interpretación privada, porque nunca la profecía fue traída por voluntad humana, sino que los santos hombres de Dios hablaron siendo inspirados por el Espíritu Santo». La palabra para «inspirados» es «pheromenoi» (llevados o impulsados por el viento soberano del Espíritu, como las velas de un barco impulsadas por el viento en altamar).
+                    En los versículos 20 y 21 se establece el origen divino inerrante de las Escrituras proféticas (en armonía con Amós 3:7: «Porque no hará nada Jehová el Señor, sin que revele su secreto a sus siervos los profetas»): «entendiendo primero esto, que ninguna profecía de la Escritura es de interpretación privada, porque nunca la profecía fue traída por voluntad humana, sino que los santos hombres de Dios hablaron siendo inspirados por el Espíritu Santo». La palabra para «inspirados» es «pheromenoi» (llevados o impulsados por el viento soberano del Espíritu, como las velas de un barco impulsadas por el viento en altamar).
                     
                     II. Desarrollo Teológico y Cristocéntrico:
                     En la teología bíblica, la escatología (el estudio de las últimas cosas, «ta eschata») es eminentemente pastoral y santificadora. Cada vez que el Nuevo Testamento revela una verdad sobre el retorno de Cristo o el juicio final, la conclusión inmediata no es una teoría fría, sino un imperativo ético de consagración.
@@ -226,7 +226,7 @@ object EschatologyStudyPlan {
                 passages = listOf(seg(40, "Mateo", 24), seg(41, "Marcos", 13), seg(42, "Lucas", 21)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
-                    Pocos días antes de su crucifixión, Jesús salió del templo de Jerusalén por última vez. Cuando sus discípulos le señalaron con admiración los colosales sillares de piedra del complejo herodiano, el Señor profetizó con solemnidad: «¿Veis todo esto? De cierto os digo, que no quedará aquí piedra sobre piedra, que no sea derribada» (Mateo 24:2).
+                    Pocos días antes de su crucifixión, Jesús salió del templo de Jerusalén por última vez (relato registrado en los tres sinópticos: Mateo 24:1-14; Marcos 13:1-13; Lucas 21:5-19). Cuando sus discípulos le señalaron con admiración los colosales sillares de piedra del complejo herodiano, el Señor profetizó con solemnidad: «¿Veis todo esto? De cierto os digo, que no quedará aquí piedra sobre piedra, que no sea derribada» (Mateo 24:2).
                     
                     Sentado después en la ladera del Monte de los Olivos con vista panorámica a la ciudad santa, los discípulos se acercaron aparte formulándole una triple pregunta (v. 3):
                     1. «¿Cuándo serán estas cosas?» (la destrucción del templo).
@@ -258,11 +258,11 @@ object EschatologyStudyPlan {
                     I. Contexto Histórico y Exégesis Textual:
                     En Mateo 24:15, el Señor Jesús introduce una clave hermenéutica directa: «Por tanto, cuando veáis en el lugar santo la abominación desoladora de que habló el profeta Daniel (el que lee, entienda), entonces los que estén en Judea, huyan a los montes».
                     
-                    En el versículo 21 se profetiza el período de mayor angustia de la historia humana: «porque habrá entonces gran tribulación, cual no la ha habido desde el principio del mundo hasta ahora, ni la habrá. Y si aquellos días no fuesen acortados, nadie sería salvo; mas por causa de los escogidos, aquellos días serán acortados».
+                    En el versículo 21 se profetiza el período de mayor angustia de la historia humana (anunciado en Daniel 12:1): «porque habrá entonces gran tribulación, cual no la ha habido desde el principio del mundo hasta ahora, ni la habrá. Y si aquellos días no fuesen acortados, nadie sería salvo; mas por causa de los escogidos, aquellos días serán acortados».
                     
                     Jesús advierte que en esos días se levantarán falsos cristos y falsos profetas haciendo grandes señales y prodigios para engañar, si fuese posible, aun a los escogidos (v. 24). Si alguien dice «mira, el Cristo está en el desierto o en las habitaciones secretas», no le creáis.
                     
-                    ¿Por qué? Porque la venida de Cristo no será un evento clandestino, secreto ni local: «Porque como el relámpago que sale del oriente y se muestra hasta el occidente, así será también la venida del Hijo del Hombre» (v. 27). La Segunda Venida de Cristo será un acontecimiento cósmico, visible, inconfundible y público ante los ojos de toda la humanidad.
+                    ¿Por qué? Porque la venida de Cristo no será un evento clandestino, secreto ni local: «Porque como el relámpago que sale del oriente y se muestra hasta el occidente, así será también la venida del Hijo del Hombre» (v. 27; como proclama Apocalipsis 1:7: «He aquí que viene con las nubes, y todo ojo le verá»). La Segunda Venida de Cristo será un acontecimiento cósmico, visible, inconfundible y público ante los ojos de toda la humanidad.
                     
                     II. Desarrollo Teológico y Cristocéntrico:
                     En los versículos 29 al 31 se describe el desenlace triunfal:
@@ -280,8 +280,8 @@ object EschatologyStudyPlan {
                 title = "Día 10: Las Parábolas de la Vigilancia: Las Vírgenes y los Talentos",
                 passagesSummary = "Mateo 24:36-51; Mateo 25:1-30",
                 primaryBookId = 40,
-                primaryChapter = 25,
-                passages = listOf(seg(40, "Mateo", 25), seg(40, "Mateo", 24)),
+                primaryChapter = 24,
+                passages = listOf(seg(40, "Mateo", 24), seg(40, "Mateo", 25)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
                     Tras revelar los acontecimientos proféticos del fin, Jesús pronuncia una advertencia perentoria en Mateo 24:36: «Pero del día y la hora nadie sabe, ni aun los ángeles de los cielos, sino sólo mi Padre». Quien pretenda calcular fechas exactas para el retorno de Cristo usurpa las prerrogativas del Padre y contradice las palabras directas del Salvador. Por tanto, el mandamiento innegociable es: «Velad, pues, porque no sabéis a qué hora ha de venir vuestro Señor» (v. 42).
@@ -315,7 +315,7 @@ object EschatologyStudyPlan {
                     
                     «Tampoco queremos, hermanos, que ignoréis acerca de los que duermen, para que no os entristezcáis como los otros que no tienen esperanza» (v. 13). Pablo utiliza el hermoso eufemismo cristiano de «dormir» («koimaō»): para el creyente, la muerte física no es la extinción aniquiladora ni una prisión definitiva; es un sueño temporal del cuerpo mientras el alma está con Cristo, aguardando el despertar glorioso de la resurrección.
                     
-                    En los versículos 16 y 17 se detalla la secuencia triunfal:
+                    En los versículos 16 y 17 se detalla la secuencia triunfal (complementada con 1 Corintios 15:51-54, donde lo corruptible se viste de incorrupción en un abrir y cerrar de ojos a la final trompeta):
                     1. «Porque el Señor mismo con voz de mando, con voz de arcángel, y con trompeta de Dios, descenderá del cielo»: Cristo no enviará a un delegado; Él mismo descenderá con autoridad soberana.
                     2. «Y los muertos en Cristo resucitarán primero»: Lejos de quedar en desventaja, los creyentes fallecidos tendrán la primacía de ser levantados en cuerpos incorruptibles en primer lugar.
                     3. «Luego nosotros los que vivimos, los que hayamos quedado, seremos arrebatados juntamente con ellos en las nubes para recibir al Señor en el aire, y así estaremos siempre con el Señor».
@@ -345,7 +345,7 @@ object EschatologyStudyPlan {
                     
                     Para el mundo incrédulo sumido en la autosuficiencia y la diversión mundana, el Día del Señor irrumpirá como un ladrón en la noche («kleptēs en nykti»), tomando a todos por sorpresa en medio de sus falsas ilusiones de paz terrenal.
                     
-                    Sin embargo, en el versículo 4 Pablo introduce un contraste fundamental que cambia por completo la condición del creyente: «Mas vosotros, hermanos, no estáis en tinieblas, para que aquel día os sorprenda como ladrón. Porque todos vosotros sois hijos de luz e hijos del día; no somos de la noche ni de las tinieblas. Por tanto, no durmamos como los demás, sino velemos y seamos sobrios» (vv. 4-6).
+                    Sin embargo, en el versículo 4 Pablo introduce un contraste fundamental que cambia por completo la condición del creyente: «Mas vosotros, hermanos, no estáis en tinieblas, para que aquel día os sorprenda como ladrón. Porque todos vosotros sois hijos de luz e hijos del día; no somos de la noche ni de las tinieblas. Por tanto, no durmamos como los demás, sino velemos y seamos sobrios» (vv. 4-6; como exhorta también Efesios 5:8-14: «antes erais tinieblas, mas ahora sois luz en el Señor; andad como hijos de luz»).
                     
                     II. Desarrollo Teológico y Cristocéntrico:
                     Estar despiertos y ser sobrios («nēphōmen») implica una actitud de lucidez moral y equilibrio espiritual. Pablo describe la armadura del creyente escatológico en el versículo 8: «vestidos con la coraza de fe y de amor, y con la esperanza de salvación como yelmo». Las tres virtudes teologales —fe, amor y esperanza (1 Corintios 13:13)— son el equipamiento que protege nuestro corazón y nuestra mente de las seducciones del mundo.
@@ -374,7 +374,7 @@ object EschatologyStudyPlan {
                     
                     Pablo revela dos señales precursoras ineludibles:
                     1. «La Apostasía» («hē apostasia»): No un enfriamiento espiritual común, sino un abandono y rebelión deliberada a gran escala contra la verdad del Evangelio desde dentro de la profesión religiosa.
-                    2. «El Hombre de Pecado, el Hijo de Perdición» (el Anticristo escatológico): Un líder inicuo «el cual se opone y se levanta contra todo lo que se llama Dios o es objeto de culto; tanto que se sienta en el templo de Dios como Dios, haciéndose pasar por Dios» (v. 4).
+                    2. «El Hombre de Pecado, el Hijo de Perdición» (el Anticristo escatológico, prefigurado por los muchos anticristos de los que advierte 1 Juan 2:18-22): Un líder inicuo «el cual se opone y se levanta contra todo lo que se llama Dios o es objeto de culto; tanto que se sienta en el templo de Dios como Dios, haciéndose pasar por Dios» (v. 4).
                     
                     En los versículos 6 y 7, Pablo explica que actualmente opera «el misterio de la iniquidad» («to mystērion tēs anomias», el espíritu anticristiano ya activo en el mundo), pero hay un poder y agente que lo detiene («to katechon» / «ho katechōn», tradicionalmente identificado con la presencia del Espíritu Santo y el gobierno moral ordenado por Dios) hasta que a su tiempo sea quitado de en medio.
                     
@@ -401,7 +401,7 @@ object EschatologyStudyPlan {
                     
                     Pedro refuta su necedad recordándoles el cataclismo del Diluvio: el mundo antiguo fue destruido anegado en agua por la misma Palabra divina (vv. 5-6). Y en el versículo 7 añade la advertencia para el presente: «pero los cielos y la tierra que existen ahora, están reservados por la misma palabra, guardados para el fuego en el día del juicio y de la perdición de los hombres impíos».
                     
-                    En los versículos 8 y 9 se explica la aparente tardanza del Señor desde la perspectiva divina: «que para con el Señor un día es como mil años, y mil años como un día. El Señor no retarda su promesa, según algunos la tienen por tardanza, sino que es paciente para con nosotros, no queriendo que ninguno perezca, sino que todos procedan al arrepentimiento». Dios no está retrasado según un reloj humano; su paciencia dilata el juicio para que la plenitud de sus escogidos sea alcanzada por la gracia salvadora.
+                    En los versículos 8 y 9 se explica la aparente tardanza del Señor desde la perspectiva divina (aludiendo al Salmo 90:1-4: «Porque mil años delante de tus ojos son como el día de ayer, que pasó»): «que para con el Señor un día es como mil años, y mil años como un día. El Señor no retarda su promesa, según algunos la tienen por tardanza, sino que es paciente para con nosotros, no queriendo que ninguno perezca, sino que todos procedan al arrepentimiento». Dios no está retrasado según un reloj humano; su paciencia dilata el juicio para que la plenitud de sus escogidos sea alcanzada por la gracia salvadora.
                     
                     II. Desarrollo Teológico y Cristocéntrico:
                     En el versículo 10 se profetiza la disolución purificadora final: «Pero el día del Señor vendrá como ladrón en la noche; en el cual los cielos pasarán con grande estruendo, y los elementos ardiendo serán deshechos, y la tierra y las obras que en ella hay serán quemadas».
@@ -522,12 +522,12 @@ object EschatologyStudyPlan {
                     Y cuando Juan se vuelve esperando ver a un león feroz rugiendo con garras destructivas, lo que contempla en el versículo 6 lo deja sobrecogido: «Y miré, y vi... en medio de los ancianos, estaba en pie un Cordero como inmolado» (Arnion hōs esphagmenon).
                     
                     II. Desarrollo Teológico y Cristocéntrico:
-                    La paradoja teológica más sublime de la Escritura resplandece aquí: el León que vence es el Cordero inmolado. Cristo conquista no mediante la violencia opresora de los tiranos mundiales, sino mediante su sacrificio expiatorio en la cruz del Calvario. El Cordero está «en pie» (resucitado y victorioso), pero lleva las señales de haber sido degollado («esphagmenon», en tiempo perfecto: las marcas eternas de los clavos que testifican de su victoria).
+                    La paradoja teológica más sublime de la Escritura resplandece aquí: el León que vence es el Cordero inmolado (el Cordero de Dios que quita el pecado del mundo, Juan 1:29). Cristo conquista no mediante la violencia opresora de los tiranos mundiales, sino mediante su sacrificio expiatorio en la cruz del Calvario. El Cordero está «en pie» (resucitado y victorioso), pero lleva las señales de haber sido degollado («esphagmenon», en tiempo perfecto: las marcas eternas de los clavos que testifican de su victoria).
                     
                     El Cordero se acerca y toma el libro de la mano derecha del que está sentado en el trono. En ese instante, los cuatro seres vivientes y los veinticuatro ancianos caen postrados con arpas y copas de oro llenas de incienso (las oraciones de los santos) y entonan un cántico nuevo (vv. 9-10):
                     «Digno eres de tomar el libro y de abrir sus sellos; porque tú fuiste inmolado, y con tu sangre nos has redimido para Dios, de todo linaje y lengua y pueblo y nación; y nos has hecho para nuestro Dios reyes y sacerdotes, y reinaremos sobre la tierra».
                     
-                    La adoración se expande en círculos concéntricos infinitos: millones de ángeles claman «El Cordero que fue inmolado es digno» (v. 12), y finalmente toda criatura en los cielos, la tierra y el mar proclama gloria eterna al que está sentado en el trono y al Cordero (v. 13). Jesucristo tiene en sus manos el destino de la historia.
+                    La adoración se expande en círculos concéntricos infinitos: millones de ángeles claman «El Cordero que fue inmolado es digno» (v. 12), y finalmente toda criatura en los cielos, la tierra y el mar proclama gloria eterna al que está sentado en el trono y al Cordero (v. 13; cumpliéndose Filipenses 2:9-11). Jesucristo tiene en sus manos el destino de la historia.
                 """,
                 doctrinalThesis = "Jesucristo es el León de Judá y el Cordero inmolado, el único digno en todo el universo de desatar los sellos de la historia y consumar la redención eterna con su sangre.",
                 exegeticalAnalysis = "La designación «Arnion hōs esphagmenon» en Apocalipsis 5:6 combina la realeza davídica con la expiación sacrificial pascual, proclamando que la cruz es el fundamento de su señorío cósmico."
@@ -543,7 +543,7 @@ object EschatologyStudyPlan {
                 passages = listOf(seg(66, "Apocalipsis", 6), seg(38, "Zacarías", 1), seg(38, "Zacarías", 6)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
-                    En Apocalipsis 6, el Cordero comienza a abrir uno a uno los siete sellos del rollo de la historia, desatando juicios providenciales sobre una tierra rebelde:
+                    En Apocalipsis 6, el Cordero comienza a abrir uno a uno los siete sellos del rollo de la historia, desatando juicios providenciales sobre una tierra rebelde a través de los cuatro jinetes (cuyo simbolismo cromático toma su trasfondo profético de las visiones de caballos y carros de Zacarías 1:7-11 y Zacarías 6:1-8):
                     
                     1. El Primer Sello (vv. 1-2): Un caballo blanco; el que lo montaba tenía un arco militar y le fue dada una corona («stephanos»), y salió venciendo y para vencer. Representa la marcha del militarismo conquistador y las falsas promesas de paz imperial que engañan a las naciones.
                     2. El Segundo Sello (vv. 3-4): Un caballo bermejo (rojo sangre); al jinete le fue dado poder de quitar de la tierra la paz y que se matasen unos a otros, entregándosele una gran espada. Representa la carnicería sangrienta de la guerra civil e internacional.
@@ -654,7 +654,7 @@ object EschatologyStudyPlan {
                 passagesSummary = "Apocalipsis 12:1-17; Génesis 3:15; Romanos 8:33-34",
                 primaryBookId = 66,
                 primaryChapter = 12,
-                passages = listOf(seg(66, "Apocalipsis", 12), seg(1, "Génesis", 3)),
+                passages = listOf(seg(66, "Apocalipsis", 12), seg(1, "Génesis", 3), seg(45, "Romanos", 8)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
                     En Apocalipsis 12 se abre el telón espiritual del conflicto cósmico que subyace a toda la historia humana desde Génesis 3:15. Juan contempla una gran señal en el cielo:
@@ -665,7 +665,7 @@ object EschatologyStudyPlan {
                     El dragón intentó devorar al Niño en cuanto naciese (a través de la matanza de los inocentes por Herodes, la tentación en el desierto y la cruz); pero Cristo resucitó victorioso y ascendió al trono de la gloria.
                     
                     II. Desarrollo Teológico y Cristocéntrico:
-                    En los versículos 7 al 10 se describe la batalla celestial: Miguel y sus ángeles luchan contra el dragón, y Satanás es arrojado a la tierra desprovisto de todo poder de acusación: «ha sido lanzado fuera el acusador de nuestros hermanos, el que los acusaba delante de nuestro Dios día y noche».
+                    En los versículos 7 al 10 se describe la batalla celestial: Miguel y sus ángeles luchan contra el dragón, y Satanás es arrojado a la tierra desprovisto de todo poder de acusación: «ha sido lanzado fuera el acusador de nuestros hermanos, el que los acusaba delante de nuestro Dios día y noche» (en plena armonía con Romanos 8:33-34: «¿Quién acusará a los escogidos de Dios? Dios es el que justifica»).
                     
                     En el versículo 11 resuena la fórmula apostólica de la victoria cristiana sobre el enemigo espiritual:
                     «Y ellos le han vencido por medio de la sangre del Cordero y de la palabra del testimonio de ellos, y menospreciaron sus vidas hasta la muerte».
@@ -692,7 +692,7 @@ object EschatologyStudyPlan {
                     En Apocalipsis 13 se describe la manifestación terrenal de la trinidad satánica que usurpa y parodia la gloria del Dios Trino:
                     - El Dragón parodia al Padre celestial otorgando su trono y autoridad.
                     - La Bestia que sube del Mar (vv. 1-10) parodia al Hijo: un líder político y militar imperial soberbio, con una herida mortal que fue sanada (parodia engañosa de la resurrección), a quien se le da boca que habla grandes cosas y blasfemias contra Dios, su santuario y los que moran en el cielo. Se le permitió hacer guerra contra los santos y vencerlos en el plano físico terrenal, recibiendo la adoración de todos los moradores de la tierra cuyos nombres no están inscritos en el libro de la vida del Cordero inmolado (v. 8).
-                    - La Bestia que sube de la Tierra (vv. 11-18, el Falso Profeta): Tenía dos cuernos semejantes a los de un cordero pero hablaba como un dragón. Parodia al Espíritu Santo: realiza señales prodigiosas para que la tierra adore a la primera bestia, levanta una imagen a la bestia y fuerza a todos los hombres a llevar una marca en la mano derecha o en la frente para poder comprar o vender («el número de su nombre: seiscientos sesenta y seis», 666, el número del ser humano caído imperfecto repetido tres veces en contraste con el siete de la perfección divina).
+                    - La Bestia que sube de la Tierra (vv. 11-18, el Falso Profeta): Tenía dos cuernos semejantes a los de un cordero pero hablaba como un dragón. Parodia al Espíritu Santo: realiza señales prodigiosas mentirosas (como advierte 2 Tesalonicenses 2:8-12) para que la tierra adore a la primera bestia, levanta una imagen a la bestia y fuerza a todos los hombres a llevar una marca en la mano derecha o en la frente para poder comprar o vender («el número de su nombre: seiscientos sesenta y seis», 666, el número del ser humano caído imperfecto repetido tres veces en contraste con el siete de la perfección divina).
                     
                     II. Desarrollo Teológico y Cristocéntrico:
                     A lo largo de la historia de la Iglesia, los poderes totalitarios paganos han encarnado este espíritu de la bestia, exigiendo una lealtad absoluta y adoración idolátrica que solo pertenece a Dios, persiguiendo económicamente y martirizando a quienes rehúsan claudicar.
@@ -723,7 +723,7 @@ object EschatologyStudyPlan {
                     El versículo 13 registra una bendita voz del cielo: «Escribe: Bienaventurados de aquí en adelante los muertos que mueren en el Señor. Sí, dice el Espíritu, descansarán de sus trabajos, porque sus obras con ellos siguen».
                     
                     II. Desarrollo Teológico y Cristocéntrico:
-                    En los versículos 14 al 20 se ejecuta la doble cosecha de la historia humana:
+                    En los versículos 14 al 20 se ejecuta la doble cosecha de la historia humana (en cumplimiento de Joel 3:12-14 y Mateo 13:37-43):
                     - La Siega del Trigo (vv. 14-16): Uno semejante al Hijo del Hombre sentado sobre una nube blanca con una hoz aguda en su mano siega la tierra: la recolección de los redimidos en los graneros del Reino celestial (Mateo 13:30).
                     - La Vendimia de la Ira (vv. 17-20): Los racimos de la vid de la tierra pecadora son vendimiados y arrojados al gran lagar del furor de Dios fuera de la ciudad. 
                     
@@ -767,15 +767,15 @@ object EschatologyStudyPlan {
                 title = "Día 27: Apocalipsis 17 y 18: La Caída de Babilonia la Grande",
                 passagesSummary = "Apocalipsis 17:1-14; Apocalipsis 18:1-24; Isaías 21:9",
                 primaryBookId = 66,
-                primaryChapter = 18,
-                passages = listOf(seg(66, "Apocalipsis", 18), seg(66, "Apocalipsis", 17), seg(23, "Isaías", 21)),
+                primaryChapter = 17,
+                passages = listOf(seg(66, "Apocalipsis", 17), seg(66, "Apocalipsis", 18), seg(23, "Isaías", 21)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
                     En Apocalipsis 17 y 18 se expone la naturaleza y el juicio definitivo de «Babilonia la Grande»: el sistema mundial apóstata, seductor, idólatra y mercantil que a lo largo de las edades ha intentado seducir al ser humano con el lujo, la fornicación espiritual y el desprecio a Dios.
                     
                     En el capítulo 17 se presenta como una ramera vestida de púrpura y escarlata, adornada de oro y piedras preciosas, sentada sobre una bestia escarlata y embriagada con la sangre de los santos y de los mártires de Jesús (vv. 4-6). En el versículo 14 se proclama el desenlace de la confrontación: «Pelearán contra el Cordero, y el Cordero los vencerá, porque él es Señor de señores y Rey de reyes; y los que están con él son llamados y elegidos y fieles».
                     
-                    En Apocalipsis 18, un ángel con gran poder alumbra la tierra con su gloria clamando con voz potente: «Ha caído, ha caído la gran Babilonia» (v. 2). En el versículo 4 resuena el mandamiento urgente de santidad para el pueblo de Dios: «Salid de ella, pueblo mío, para que no seáis partícipes de sus pecados, ni recibáis parte de sus plagas».
+                    En Apocalipsis 18, un ángel con gran poder alumbra la tierra con su gloria clamando con voz potente: «Ha caído, ha caído la gran Babilonia» (v. 2; cumpliendo el clamor profético de Isaías 21:9). En el versículo 4 resuena el mandamiento urgente de santidad para el pueblo de Dios: «Salid de ella, pueblo mío, para que no seáis partícipes de sus pecados, ni recibáis parte de sus plagas».
                     
                     El juicio sobre el sistema babilónico es fulminante e instantáneo: «en un solo día vendrán sus plagas; muerte, llanto y hambre... en una sola hora ha venido tu juicio» (vv. 8, 10). Los reyes y los mercaderes de la tierra lloran al ver arder el humo de su incendio porque nadie compra más sus mercaderías; pero en el cielo se escucha la orden: «Alégrate sobre ella, cielo, y vosotros, santos, apóstoles y profetas; porque Dios os ha hecho justicia en ella» (v. 20).
                     
@@ -799,11 +799,11 @@ object EschatologyStudyPlan {
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
                     Apocalipsis 19 se abre con la primera ocasión en todo el Nuevo Testamento donde se utiliza la palabra hebrea de alabanza universal: «¡Aleluya!» («Hallēlu-Yāh», ¡Alabad a Jehová!). Una inmensa voz de multitud resuena en los cielos cuatro veces consecutivas celebrando la caída de la opresión babilónica y el inicio del clímax de la historia:
-                    «Gocémonos y alegrémonos y démosle gloria; porque han llegado las bodas del Cordero, y su esposa se ha preparado. Y a ella se le ha concedido que se vista de lino fino, limpio y resplandeciente; porque el lino fino es las acciones justas de los santos» (vv. 7-8).
+                    «Gocémonos y alegrémonos y démosle gloria; porque han llegado las bodas del Cordero, y su esposa se ha preparado. Y a ella se le ha concedido que se vista de lino fino, limpio y resplandeciente; porque el lino fino es las acciones justas de los santos» (vv. 7-8; consumando la parábola de las bodas del hijo del rey en Mateo 22:1-14).
                     
                     El matrimonio celestial entre Cristo y su Iglesia redimida llega a su consumación eterna. El versículo 9 proclama: «Bienaventurados los que son llamados a la cena de las bodas del Cordero».
                     
-                    Acto seguido, en el versículo 11, el cielo se abre de par en par y entra en escena la manifestación más imponente de toda la profecía:
+                    Acto seguido, en el versículo 11, el cielo se abre de par en par y entra en escena la manifestación más imponente de toda la profecía (en cumplimiento de Isaías 63:1-4):
                     «Y vi el cielo abierto; y he aquí un caballo blanco, y el que lo montaba se llamaba Fiel y Verdadero, y con justicia juzga y pelea. Sus ojos eran como llama de fuego, y había en su cabeza muchas diademas... Estaba vestido de una ropa teñida en sangre; y su nombre es: EL VERBO DE DIOS. Y los ejércitos celestiales, vestidos de lino finísimo, blanco y limpio, le seguían en caballos blancos. De su boca sale una espada aguda, para herir con ella a las naciones... Y en su vestidura y en su muslo tiene escrito este nombre: REY DE REYES Y SEÑOR DE SEÑORES».
                     
                     II. Desarrollo Teológico y Cristocéntrico:

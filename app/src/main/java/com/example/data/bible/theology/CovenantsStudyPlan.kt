@@ -23,7 +23,7 @@ object CovenantsStudyPlan {
                 passages = listOf(seg(19, "Salmos", 25), seg(58, "Hebreos", 6), seg(19, "Salmos", 89)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
-                    La Biblia no es una recopilación inconexa de proverbios morales ni una antología desordenada de relatos piadosos; es la revelación progresiva y orgánica del plan redentor de Dios estructurado de principio a fin a través de pactos divinos. El Salmo 25:14 declara con profunda reverencia: «La comunión íntima de Jehová es con los que le temen, y a ellos hará conocer su pacto».
+                    La Biblia no es una recopilación inconexa de proverbios morales ni una antología desordenada de relatos piadosos; es la revelación progresiva y orgánica del plan redentor de Dios estructurado de principio a fin a través de pactos divinos. El Salmo 25:14 declara con profunda reverencia: «La comunión íntima de Jehová es con los que le temen, y a ellos hará conocer su pacto», verdad exaltada también en el Salmo 89:1-4 («Hice pacto con mi escogido; juré a David mi siervo, diciendo: Para siempre confirmaré tu descendencia»).
                     
                     El vocablo hebreo utilizado para pacto es «Berit» (en el griego neotestamentario: «diathēkē»). En la cultura del antiguo Cercano Oriente, un pacto no era un contrato comercial horizontal entre partes iguales que negocian cláusulas en paridad. En la teología bíblica, un «Berit» es un vínculo soberano y solemne establecido por Dios por pura iniciativa de gracia, sellado con juramento y sangre, donde el Señor se compromete a ser el Dios de su pueblo y demanda una lealtad exclusiva de corazón.
                     
@@ -44,11 +44,11 @@ object CovenantsStudyPlan {
                 title = "Día 2: El Pacto en el Edén: Creación, Mandato y la Caída",
                 passagesSummary = "Génesis 1:26-31; Génesis 2:15-17; Oseas 6:7",
                 primaryBookId = 1,
-                primaryChapter = 2,
-                passages = listOf(seg(1, "Génesis", 2), seg(1, "Génesis", 1), seg(28, "Oseas", 6)),
+                primaryChapter = 1,
+                passages = listOf(seg(1, "Génesis", 1), seg(1, "Génesis", 2), seg(28, "Oseas", 6)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
-                    En los primeros dos capítulos del Génesis, Dios coloca al ser humano en el huerto de Edén en un estado de inocencia original, bendición y comunión íntima con su Creador. Aunque el término específico «pacto» no aparece explícitamente en Génesis 2, todos los elementos constitutivos de un pacto están plenamente presentes: las partes contrayentes (Dios el Creador soberano y Adán el hombre creado), el mandato pactual, la promesa implícita de vida eterna y la advertencia penal ante la desobediencia.
+                    En los primeros dos capítulos del Génesis (Génesis 1:26-31; 2:15-17), Dios coloca al ser humano creado a su imagen en el huerto de Edén en un estado de inocencia original, bendición y comunión íntima con su Creador. Aunque el término específico «pacto» no aparece explícitamente en Génesis 2, todos los elementos constitutivos de un pacto están plenamente presentes: las partes contrayentes (Dios el Creador soberano y Adán el hombre creado), el mandato pactual, la promesa implícita de vida eterna y la advertencia penal ante la desobediencia.
                     
                     En Génesis 2:16-17 leemos el mandamiento probatorio: «De todo árbol del huerto podrás comer; mas del árbol de la ciencia del bien y del mal no comerás; porque el día que de él comieres, ciertamente morirás» (en hebreo: mot tamut, «muriendo morirás»). El árbol del conocimiento no era venenoso intrínsecamente; representaba la línea de soberanía entre el Creador y la criatura. Adán debía someterse a la revelación moral de Dios en lugar de erigirse en legislador autónomo de lo bueno y lo malo.
                     
@@ -98,8 +98,8 @@ object CovenantsStudyPlan {
                 title = "Día 4: El Pacto Noéico: La Preservación Común del Orden Creado",
                 passagesSummary = "Génesis 8:20-22; Génesis 9:8-17; Isaías 54:8-10",
                 primaryBookId = 1,
-                primaryChapter = 9,
-                passages = listOf(seg(1, "Génesis", 9), seg(1, "Génesis", 8), seg(23, "Isaías", 54)),
+                primaryChapter = 8,
+                passages = listOf(seg(1, "Génesis", 8), seg(1, "Génesis", 9), seg(23, "Isaías", 54)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
                     Tras el diluvio universal que arrasó con la violencia desbordada de la humanidad impía, el arca reposó sobre los montes de Ararat y Noé ofreció holocaustos de animales limpios sobre un altar ante Jehová. En Génesis 8:21, el Señor olió olor grato y proclamó en su corazón: «No volveré más a maldecir la tierra por causa del hombre; porque el intento del corazón del hombre es malo desde su juventud; ni volveré más a destruir todo ser viviente, como he hecho».
@@ -221,7 +221,7 @@ object CovenantsStudyPlan {
                     - Jesucristo, el Hijo obediente, cargó con el madero de su propia cruz subiendo a la colina del sacrificio (Juan 19:17).
                     - Pero a diferencia de Isaac, en la cruz nadie gritó «¡detén tu mano!»; la espada de la santa justicia de Dios cayó con toda su fuerza sobre el Sustituto inocente para que nosotros pudiéramos ser perdonados.
                     
-                    Jesús mismo confirmó esta revelación en Juan 8:56: «Abraham vuestro padre se gozó de que había de ver mi día; y lo vio, y se gozó». En el carnero trabado en el zarzal en Moriah, Abraham vio el Evangelio de la cruz y adoró al Dios que provee la redención.
+                    Jesús mismo confirmó esta revelación en Juan 8:56: «Abraham vuestro padre se gozó de que había de ver mi día; y lo vio, y se gozó». Asimismo, Hebreos 11:17-19 destaca que Abraham ofreció a Isaac «pensando que Dios es poderoso para levantar aun de entre los muertos, de donde, en sentido figurado, también le volvió a recibir». En el carnero trabado en el zarzal en Moriah, Abraham vio el Evangelio de la cruz y de la resurrección, y adoró al Dios que provee la redención.
                 """,
                 doctrinalThesis = "El sacrificio en el monte Moriah es la prefiguración tipológica cumbre de la expiación sustitutiva, donde Dios proveyó a su propio Hijo en la cruz en nuestro lugar.",
                 exegeticalAnalysis = "El nombre divino «YHWH-Jireh» (Gn 22:14) y la frase profética «en el monte de Jehová será provisto» fijan geográfica y teológicamente el sacrificio redentor de Cristo en Jerusalén."
@@ -233,8 +233,8 @@ object CovenantsStudyPlan {
                 title = "Día 9: El Pacto Mosaico en el Sinaí: La Ley como Tutor Sagrado",
                 passagesSummary = "Éxodo 19:1-8; Éxodo 24:1-11; Gálatas 3:19-25",
                 primaryBookId = 2,
-                primaryChapter = 24,
-                passages = listOf(seg(2, "Éxodo", 24), seg(2, "Éxodo", 19), seg(48, "Gálatas", 3)),
+                primaryChapter = 19,
+                passages = listOf(seg(2, "Éxodo", 19), seg(2, "Éxodo", 24), seg(48, "Gálatas", 3)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
                     Tres meses después de haber sido liberados con brazo extendido de la esclavitud de Egipto mediante la Pascua del cordero, Israel llegó al pie del monte Sinaí. En Éxodo 19:5-6, Dios propone los términos del pacto teocrático nacional: «Ahora, pues, si diereis oído a mi voz, y guardareis mi pacto, vosotros seréis mi especial tesoro sobre todos los pueblos... y vosotros me seréis un reino de sacerdotes, y gente santa».
@@ -295,7 +295,7 @@ object CovenantsStudyPlan {
                     
                     En 2 Samuel 7:12-16 resuena la promesa del Pacto Davídico: «Y cuando tus días sean cumplidos, y duermas con tus padres, yo levantaré después de ti a uno de tu linaje, el cual procederá de tus entrañas, y afirmaré su reino. Él edificará casa a mi nombre, y yo afirmaré para siempre el trono de su reino... Y será afirmada tu casa y tu reino para siempre delante de tu rostro, y tu trono será estable eternamente».
                     
-                    Aunque esta profecía poseía una aplicación histórica inmediata en su hijo Salomón (quien construyó el templo de Jerusalén y cometió iniquidades que trajeron disciplina paternal, v. 14), los términos de la promesa trascienden por completo la mortalidad humana: ningún monarca terrenal vive «para siempre», ni el reino terrenal de Judá permaneció inmutable (fue arrasado por Babilonia en el 586 a.C.).
+                    Aunque esta profecía poseía una aplicación histórica inmediata en su hijo Salomón (quien construyó el templo de Jerusalén y cometió iniquidades que trajeron disciplina paternal, v. 14), los términos de la promesa —exaltados poéticamente en el Salmo 89:19-37 («No olvidaré mi pacto, ni mudaré lo que ha salido de mis labios... Su descendencia será para siempre, y su trono como el sol delante de mí»)— trascienden por completo la mortalidad humana: ningún monarca terrenal vive «para siempre», ni el reino terrenal de Judá permaneció inmutable (fue arrasado por Babilonia en el 586 a.C.).
                     
                     II. Desarrollo Teológico y Cristocéntrico:
                     La promesa de un trono eterno solo podía cumplirse en un Rey eterno que venciera a la muerte. Mil años más tarde, el ángel Gabriel se presentó ante la virgen María en Nazaret y proclamó la inauguración definitiva del Pacto Davídico en Lucas 1:31-33:
@@ -326,7 +326,7 @@ object CovenantsStudyPlan {
                     
                     El Nuevo Pacto introduce cuatro bendiciones incomparables:
                     1. Regeneración Interior: La ley no se impone desde tablas exteriores de piedra, sino que se graba en los afectos y en la mente del corazón regenerado.
-                    2. Comunión Pactual Perfecta: «Yo seré a ellos por Dios, y ellos me serán por pueblo».
+                    2. Comunión Pactual Perfecta: «Yo seré a ellos por Dios, y ellos me serán por pueblo» (promesa que Ezequiel 37:24-28 amplía anunciando un «pacto de paz» y el santuario de Dios entre ellos para siempre).
                     3. Conocimiento Íntimo Universal de Dios: «Todos me conocerán, desde el más pequeño hasta el más grande».
                     4. Perdón Total y Olvido Soberano de los Pecados: Dios cancela la deuda y borra el expediente acusatorio para siempre.
                     
@@ -353,12 +353,12 @@ object CovenantsStudyPlan {
                     
                     Pero en esa noche solemne, Jesús tomó los elementos tradicionales y los revistió de un significado infinitamente superior:
                     1. El Pan: «Y tomó el pan y dio gracias, y lo partió y les dio, diciendo: Esto es mi cuerpo, que por vosotros es dado; haced esto en memoria de mí» (Lucas 22:19). El pan ya no apuntaba al éxodo de Faraón; apuntaba al cuerpo santo del Cordero de Dios quebrantado por nosotros.
-                    2. La Copa: «De igual manera, después que hubo cenado, tomó la copa, diciendo: Esta copa es el nuevo pacto en mi sangre, que por vosotros se derrama» (Lucas 22:20; en griego: «hē kainē diathēkē en tōi haimati mou»).
+                    2. La Copa: «De igual manera, después que hubo cenado, tomó la copa, diciendo: Esta copa es el nuevo pacto en mi sangre, que por vosotros se derrama» (Lucas 22:20; en griego: «hē kainē diathēkē en tōi haimati mou»; instituida de igual modo en 1 Corintios 11:23-26 y Mateo 26:26-29, donde añade: «para remisión de los pecados»).
                     
                     El eco de Éxodo 24:8 resuena con fuerza: Moisés había dicho «He aquí la sangre del pacto» mientras rociaba sangre animal sobre el pueblo; pero Jesús declara: «Esta copa es el NUEVO PACTO en MI sangre». Ya no sangre de carneros ni de machos cabríos, sino la sangre inocente, pura e infinita del Hijo unigénito de Dios.
                     
                     II. Desarrollo Teológico y Cristocéntrico:
-                    Con la muerte de Cristo en el Calvario, el Nuevo Pacto profetizado por Jeremías quedó legal y espiritualmente ratificado en el cielo y en la tierra. Cada vez que la Iglesia participa de la Santa Cena del Señor, no asiste a un sacrificio repetido (pues Cristo murió una sola vez para siempre, Hechos 9:28), sino a un memorial pactual sagrado de comunión y alabanza.
+                    Con la muerte de Cristo en el Calvario, el Nuevo Pacto profetizado por Jeremías quedó legal y espiritualmente ratificado en el cielo y en la tierra. Cada vez que la Iglesia participa de la Santa Cena del Señor, no asiste a un sacrificio repetido (pues Cristo murió una sola vez para siempre, Hebreos 9:28), sino a un memorial pactual sagrado de comunión y alabanza.
                     
                     El cáliz nos recuerda que nuestra salvación costó la vida misma de Dios encarnado. Bebemos de la copa del Nuevo Pacto sabiendo que Jesús bebió por nosotros en Getsemaní y en el Gólgota la amarga copa de la ira santa de Dios contra nuestro pecado, para que nosotros pudiéramos beber eternamente la copa de su bendición y gracia soberana.
                 """,
@@ -398,7 +398,7 @@ object CovenantsStudyPlan {
                 passagesSummary = "Hebreos 13:20-21; Apocalipsis 21:1-7; Apocalipsis 22:1-5",
                 primaryBookId = 58,
                 primaryChapter = 13,
-                passages = listOf(seg(58, "Hebreos", 13), seg(66, "Apocalipsis", 21)),
+                passages = listOf(seg(58, "Hebreos", 13), seg(66, "Apocalipsis", 21), seg(66, "Apocalipsis", 22)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
                     En la hermosa bendición pastoral que concluye la epístola a los Hebreos (capítulo 13, versículos 20 al 21), el autor sagrado eleva una doxología sublime que resume la totalidad de la teología de los pactos:
@@ -407,9 +407,9 @@ object CovenantsStudyPlan {
                     
                     Nótese el título glorioso que recibe el pacto: «la sangre del pacto eterno» («en haimati diathēkēs aiōniou»). No es un pacto transitorio que caduca ni un arreglo temporal; es un decreto eterno concebido en el consejo trinitario antes de la fundación del mundo y cuya bienaventuranza durará por las edades sin fin.
                     
-                    La meta última de todos los pactos bíblicos se sintetiza en la célebre fórmula pactual que resuena a lo largo de toda la Escritura: «Yo seré vuestro Dios, y vosotros seréis mi pueblo». Esta promesa se susurró a Abraham (Gn 17:7), se repitió a Israel en el Sinaí (Éx 6:7), se ratificó en los profetas (Jer 31:33; Ez 37:27) y alcanza su culminación monumental en la Nueva Jerusalén en Apocalipsis 21:3:
+                    La meta última de todos los pactos bíblicos se sintetiza en la célebre fórmula pactual que resuena a lo largo de toda la Escritura: «Yo seré vuestro Dios, y vosotros seréis mi pueblo». Esta promesa se susurró a Abraham (Gn 17:7), se repitió a Israel en el Sinaí (Éx 6:7), se ratificó en los profetas (Jer 31:33; Ez 37:27) y alcanza su culminación monumental en la Nueva Jerusalén en Apocalipsis 21:3 y Apocalipsis 22:1-5:
                     
-                    «Y oí una gran voz del cielo que decía: He aquí el tabernáculo de Dios con los hombres, y él morará con ellos; y ellos serán su pueblo, y Dios mismo estará con ellos como su Dios».
+                    «Y oí una gran voz del cielo que decía: He aquí el tabernáculo de Dios con los hombres, y él morará con ellos; y ellos serán su pueblo, y Dios mismo estará con ellos como su Dios... y sus siervos le servirán, y verán su rostro, y su nombre estará en sus frentes» (Ap 21:3; 22:3-4).
                     
                     II. Desarrollo Teológico y Cristocéntrico:
                     La historia humana no es un ciclo ciego ni una tragedia sin sentido; es la gran marcha triunfal del Dios de los pactos redimiendo a un pueblo innumerable para su gloria. En la eternidad venidera, en los cielos nuevos y tierra nueva, contemplaremos al Cordero de Dios en el trono y comprenderemos con perfecta claridad cómo cada prueba, cada promesa y cada pacto bíblico nos condujo a la bienaventuranza eterna.

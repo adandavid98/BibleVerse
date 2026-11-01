@@ -24,7 +24,7 @@ object FaithWorksStudyPlan {
                     I. Contexto Histórico y Exégesis Textual:
                     El punto de partida ineludible para comprender la relación bíblica entre la fe y las obras radica en el diagnóstico que las Escrituras hacen de la condición humana caída. En Efesios 2:1, el apóstol Pablo declara con crudeza: «Y él os dio vida a vosotros, cuando estabais muertos en vuestros delitos y pecados» (en griego: nekrous tois paraptōmasin). El texto no dice que el pecador estaba herido, débil o moralmente enfermo; afirma tajantemente que estaba espiritualmente muerto. Un cadáver espiritual es absolutamente incapaz de generar méritos ante un Dios infinitamente santo.
                     
-                    Por esta causa, la salvación brota de una iniciativa puramente divina y unilateral: «Porque por gracia sois salvos por medio de la fe; y esto no de vosotros, pues es don de Dios; no por obras, para que nadie se gloríe» (Ef 2:8-9). La palabra griega para don es «dōron»: un obsequio inmerecido e irrevocable. La fe no es una obra meritoria que nosotros le ofrecemos a Dios para ganarnos el cielo, sino la mano vacía del mendigo espiritual que recibe el regalo de la justicia imputada de Cristo.
+                    Por esta causa, la salvación brota de una iniciativa puramente divina y unilateral: «Porque por gracia sois salvos por medio de la fe; y esto no de vosotros, pues es don de Dios; no por obras, para que nadie se gloríe» (Ef 2:8-9), verdad que armoniza con la proclamación de Romanos 3:21-28, donde Dios justifica gratuitamente por su gracia, mediante la redención en Cristo Jesús, al que es de la fe de Jesús sin las obras de la ley. La palabra griega para don es «dōron»: un obsequio inmerecido e irrevocable. La fe no es una obra meritoria que nosotros le ofrecemos a Dios para ganarnos el cielo, sino la mano vacía del mendigo espiritual que recibe el regalo de la justicia imputada de Cristo.
                     
                     Sin embargo, el pasaje no culmina en el versículo 9. El versículo 10 añade la meta inquebrantable de este rescate: «Porque somos hechura suya, creados en Cristo Jesús para buenas obras, las cuales Dios preparó de antemano para que anduviésemos en ellas». Las obras no son la raíz ni la causa de la salvación; son su fruto deliberado, su diseño original y su consecuencia inevitable.
                     
@@ -41,7 +41,7 @@ object FaithWorksStudyPlan {
             createStudyDay(
                 dayNumber = 2,
                 title = "Día 2: Abraham: Justificado por la Fe antes de la Ley",
-                passagesSummary = "Génesis 15:1-6; Romanos 4:1-12",
+                passagesSummary = "Romanos 4:1-12; Génesis 15:1-6",
                 primaryBookId = 45,
                 primaryChapter = 4,
                 passages = listOf(seg(45, "Romanos", 4), seg(1, "Génesis", 15)),
@@ -106,7 +106,7 @@ object FaithWorksStudyPlan {
                     Santiago demuestra que una fe puramente intelectual es idéntica a la religión de los demonios: «Tú crees que Dios es uno; bien haces. También los demonios creen, y tiemblan» (Stg 2:19). Los demonios poseen una teología monoteísta impecable, pero están irremediablemente perdidos porque su asentimiento mental carece de regeneración, sumisión y amor.
                     
                     II. Desarrollo Teológico y Cristocéntrico:
-                    Santiago no está combatiendo la justificación por la fe proclamada por Pablo; está combatiendo la hipocresía de una confesión de labios que no transforma el corazón. Una fe que no produce compasión hacia el hermano desnudo o hambriento (Stg 2:15-16) no es una fe bíblica; es un cadáver espiritual: «Porque como el cuerpo sin espíritu está muerto, así también la fe sin obras está muerta» (Stg 2:26).
+                    Santiago no está combatiendo la justificación por la fe proclamada por Pablo; está combatiendo la hipocresía de una confesión de labios que no transforma el corazón. Una fe que no produce compasión hacia el hermano desnudo o hambriento (Stg 2:15-16; en plena sintonía con la exhortación de 1 Juan 3:16-18: «no amemos de palabra ni de lengua, sino de hecho y en verdad») no es una fe bíblica; es un cadáver espiritual: «Porque como el cuerpo sin espíritu está muerto, así también la fe sin obras está muerta» (Stg 2:26).
                     
                     Cristo enseñó exactamente este mismo principio en el Sermón del Monte: «No todo el que me dice: Señor, Señor, entrará en el reino de los cielos, sino el que hace la voluntad de mi Padre que está en los cielos» (Mateo 7:21). Las obras son el pulso vital que evidencia que el alma ha resucitado de entre los muertos por la gracia de Dios.
                 """,
@@ -119,9 +119,9 @@ object FaithWorksStudyPlan {
                 dayNumber = 5,
                 title = "Día 5: La Armonía Apostólica: Pablo y Santiago Hablan con una Sola Voz",
                 passagesSummary = "Romanos 3:28; Santiago 2:21-25; Génesis 22:1-12",
-                primaryBookId = 59,
-                primaryChapter = 2,
-                passages = listOf(seg(59, "Santiago", 2), seg(45, "Romanos", 3)),
+                primaryBookId = 45,
+                primaryChapter = 3,
+                passages = listOf(seg(45, "Romanos", 3), seg(59, "Santiago", 2), seg(1, "Génesis", 22)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
                     A primera vista, un lector superficial podría pensar que existe una contradicción insalvable entre Romanos 3:28 («Concluimos, pues, que el hombre es justificado por fe sin las obras de la ley») y Santiago 2:24 («Vosotros veis, pues, que el hombre es justificado por las obras, y no solamente por la fe»). Sin embargo, un análisis exegético cuidadoso revela que ambos apóstoles utilizan el mismo vocabulario pero en contextos polémicos distintos y con acepciones complementarias.
@@ -148,7 +148,7 @@ object FaithWorksStudyPlan {
                 passagesSummary = "Tito 3:3-8; Mateo 7:15-20; Juan 15:1-8",
                 primaryBookId = 56,
                 primaryChapter = 3,
-                passages = listOf(seg(56, "Tito", 3), seg(40, "Mateo", 7)),
+                passages = listOf(seg(56, "Tito", 3), seg(40, "Mateo", 7), seg(43, "Juan", 15)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
                     En Tito 3:4-8, el apóstol Pablo articula con maestría pedagógica el engranaje indivisible entre la gracia salvadora y la práctica de las buenas obras. En el versículo 5 proclama con contundencia: «Nos salvó, no por obras de justicia que nosotros hubiéramos hecho, sino por su misericordia, por el lavamiento de la regeneración y por la renovación en el Espíritu Santo».

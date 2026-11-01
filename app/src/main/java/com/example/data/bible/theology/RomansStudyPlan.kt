@@ -26,7 +26,7 @@ object RomansStudyPlan {
                     I. Contexto Histórico y Exégesis Textual:
                     La epístola a los Romanos fue escrita por el apóstol Pablo alrededor del año 57 d.C. desde la ciudad de Corinto, durante su tercer viaje misionero. Pablo se dirigía a la iglesia en la capital del Imperio Romano, una congregación mixta compuesta por creyentes de origen judío y gentil a la que él aún no había visitado en persona.
                     
-                    En el versículo 1, Pablo se presenta con tres títulos trascendentales: «Pablo, siervo de Jesucristo, llamado a ser apóstol, apartado para el evangelio de Dios». La palabra griega para siervo es «doulos»: un esclavo por amor y propiedad exclusiva, cuya voluntad está enteramente rendida a su Señor (Kyrios). No se presenta con títulos honoríficos mundanos, sino como propiedad comprada de Cristo.
+                    En el versículo 1, Pablo —quien fue transformado y llamado soberanamente camino a Damasco como vaso escogido (Hechos 9:1-16)— se presenta con tres títulos trascendentales: «Pablo, siervo de Jesucristo, llamado a ser apóstol, apartado para el evangelio de Dios». La palabra griega para siervo es «doulos»: un esclavo por amor y propiedad exclusiva, cuya voluntad está enteramente rendida a su Señor (Kyrios). No se presenta con títulos honoríficos mundanos, sino como propiedad comprada de Cristo.
                     
                     Pablo define el Evangelio («Euangelion», Buena Noticia) con tres verdades estructurales:
                     1. Fue prometido de antemano por sus profetas en las santas Escrituras (v. 2): El Evangelio no es una novedad improvisada ni una religión inventada, sino el cumplimiento del plan eterno de Dios anunciado en todo el Antiguo Testamento.
@@ -85,7 +85,7 @@ object RomansStudyPlan {
                     
                     La «ira de Dios» («orgē Theou») no es un arrebato emocional descontrolado, rencoroso o caprichoso como la ira humana; es la santa, deliberada, constante y justa hostilidad del Dios santo contra el mal moral y la rebelión cósmica de sus criaturas.
                     
-                    Pablo expone la doctrina de la Revelación General: en la creación visible, las obras de Dios proclaman de forma incesante «su eterno poder y deidad, de modo que no tienen excusa» (vv. 19-20). El ser humano no es inocente por falta de luz; la tragedia del hombre natural radica en que «detiene con injusticia la verdad» («katechō»: suprime, ahoga y encarcela activamente el conocimiento de Dios para vivir según sus pasiones pecaminosas).
+                    Pablo expone la doctrina de la Revelación General: en la creación visible (como canta el Salmo 19:1-6: «Los cielos cuentan la gloria de Dios, y el firmamento anuncia la obra de sus manos»), las obras de Dios proclaman de forma incesante «su eterno poder y deidad, de modo que no tienen excusa» (vv. 19-20). El ser humano no es inocente por falta de luz; la tragedia del hombre natural radica en que «detiene con injusticia la verdad» («katechō»: suprime, ahoga y encarcela activamente el conocimiento de Dios para vivir según sus pasiones pecaminosas).
                     
                     II. Desarrollo Teológico y Cristocéntrico:
                     La raíz de todo pecado humano es la idolatría espiritual: habiendo conocido a Dios, no le glorificaron como a Dios ni le dieron gracias, sino que se envanecieron en sus razonamientos y su necio corazón fue entenebrecido (v. 21). «Cambiaron la gloria del Dios incorruptible en semejanza de imagen de hombre corruptible, de aves, de cuadrúpedos y de reptiles» (v. 23).
@@ -113,7 +113,7 @@ object RomansStudyPlan {
                     2. Versículo 26: «Por esto Dios los entregó a pasiones vergonzosas».
                     3. Versículo 28: «Y como ellos no aprobaron tener en cuenta a Dios, Dios los entregó a una mente reprobada, para hacer cosas que no convienen».
                     
-                    El verbo griego para «entregó» es «paredōken»: un término judicial que significa entregar a un convicto en manos de sus verdugos. Dios entrega al hombre pecador a la tiranía de sus propios deseos destructivos.
+                    El verbo griego para «entregó» es «paredōken»: un término judicial que significa entregar a un convicto en manos de sus verdugos. Dios entrega al hombre pecador a la tiranía de sus propios deseos destructivos y a la vanidad de su mente entenebrecida (como describe también Efesios 4:17-19).
                     
                     El texto culmina con una lista exhaustiva de pecados que destruyen el tejido social (injusticia, avaricia, malicia, envidia, homicidios, murmuradores, soberbios, desobedientes a los padres, desleales, sin afecto natural, implacables, sin misericordia). El versículo 32 denuncia el estado más profundo de corrupción: personas que sabiendo el juicio de Dios, no solo cometen estas cosas, sino que «se complacen con los que las practican», celebrando y normalizando la iniquidad.
                     
@@ -136,7 +136,7 @@ object RomansStudyPlan {
                 passages = listOf(seg(45, "Romanos", 2), seg(40, "Mateo", 7)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
-                    En Romanos 2:1, Pablo da un giro pedagógico de brillante maestría. Habiendo descrito la depravación del mundo pagano gentil en el capítulo 1, cualquier lector moralista o religioso judío estaría asintiendo con complacencia y condenando a los gentiles. En ese instante, Pablo dispara una saeta a la conciencia del moralista: «Por lo cual eres inexcusable, oh hombre, quienquiera que seas tú que juzgas; pues en lo que juzgas a otro, te condenas a ti mismo; porque tú que juzgas haces lo mismo».
+                    En Romanos 2:1, Pablo da un giro pedagógico de brillante maestría. Habiendo descrito la depravación del mundo pagano gentil en el capítulo 1, cualquier lector moralista o religioso judío estaría asintiendo con complacencia y condenando a los gentiles. En ese instante, Pablo dispara una saeta a la conciencia del moralista: «Por lo cual eres inexcusable, oh hombre, quienquiera que seas tú que juzgas; pues en lo que juzgas a otro, te condenas a ti mismo; porque tú que juzgas haces lo mismo» (eco directo de la advertencia de Cristo en Mateo 7:1-5 sobre la viga en el ojo propio).
                     
                     Pablo desenmascara la hipocresía del moralismo religioso: condenar el pecado en los demás mientras se practica el mismo pecado en secreto o con refinamiento exterior no libra a nadie del juicio de Dios.
                     
@@ -174,7 +174,7 @@ object RomansStudyPlan {
                     «Pues no es judío el que lo es exteriormente, ni es la circuncisión la que se hace exteriormente en la carne; sino que es judío el que lo es en lo interior, y la circuncisión es la del corazón, en espíritu, no en letra; la alabanza del cual no viene de los hombres, sino de Dios».
                     
                     II. Desarrollo Teológico y Cristocéntrico:
-                    La religión basada en la letra externa y en los ritos ceremoniales busca la aprobación humana y produce orgullo farisaico. Pero el pacto de Dios siempre demandó la circuncisión del corazón (Deuteronomio 30:6; Jeremías 4:4): el quebrantamiento de la soberbia y la regeneración de los afectos por el Espíritu Santo.
+                    La religión basada en la letra externa y en los ritos ceremoniales busca la aprobación humana y produce orgullo farisaico. Pero el pacto de Dios siempre demandó la circuncisión del corazón (Deuteronomio 10:12-16; 30:6; Jeremías 4:4): el quebrantamiento de la soberbia y la regeneración de los afectos por el Espíritu Santo.
                     
                     Pablo juega con el significado hebreo de la palabra Judío («Yehudí», derivado de Yehudá, que significa «Alabanza»): el verdadero judío según el corazón de Dios es aquel cuya alabanza no procede de los hombres, sino del Creador.
                     
@@ -191,12 +191,12 @@ object RomansStudyPlan {
                 passagesSummary = "Romanos 3:1-20; Salmo 14:1-3; Salmo 53:1-3",
                 primaryBookId = 45,
                 primaryChapter = 3,
-                passages = listOf(seg(45, "Romanos", 3), seg(19, "Salmos", 14)),
+                passages = listOf(seg(45, "Romanos", 3), seg(19, "Salmos", 14), seg(19, "Salmos", 53)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
                     En Romanos 3:9-20, el apóstol Pablo presenta el acta de acusación final de su juicio teológico universal. Habiendo examinado al gentil en el capítulo 1 y al judío en el capítulo 2, formula la pregunta procesal: «¿Qué, pues? ¿Somos nosotros mejores que ellos? En ninguna manera; pues ya hemos acusado a judíos y a gentiles, que todos están bajo pecado» (v. 9).
                     
-                    Para sustentar este veredicto categórico, Pablo compone una sobrecogedora cadena de citas del Antiguo Testamento (Salmos 14, 53, 5, 140, 10, 36 e Isaías 59) que diagnostica la corrupción humana en tres dimensiones:
+                    Para sustentar este veredicto categórico, Pablo compone una sobrecogedora cadena de citas del Antiguo Testamento (Salmo 14:1-3, Salmo 53:1-3, Salmos 5, 140, 10, 36 e Isaías 59) que diagnostica la corrupción humana en tres dimensiones:
                     1. En el Carácter y la Condición Moral (vv. 10-12): «No hay justo, ni aun uno; no hay quien entienda, no hay quien busque a Dios. Todos se desviaron, a una se hicieron inútiles; no hay quien haga lo bueno, no hay ni siquiera uno». La depravación humana es total: no significa que todo hombre sea tan malo como podría ser, sino que cada facultad (mente, voluntad, afectos) está infectada por el pecado.
                     2. En las Conversaciones y el Habla (vv. 13-14): «Sepulcro abierto es su garganta; con su lengua engañan. Veneno de áspides hay debajo de sus labios; su boca está llena de maldición y de amargura».
                     3. En las Acciones y la Violencia (vv. 15-18): «Sus pies se apresuran para derramar sangre; quebranto y desventura hay en sus caminos... No hay temor de Dios delante de sus ojos».
@@ -233,7 +233,7 @@ object RomansStudyPlan {
                     II. Desarrollo Teológico y Cristocéntrico:
                     En los versículos 25 y 26 se revela el misterio supremo de la cruz: Dios puso a Cristo «como propiciación [Hilastērion] por medio de la fe en su sangre, para manifestar su justicia... a fin de que él sea el justo, y el que justifica al que es de la fe de Jesús».
                     
-                    ¿Cómo puede un Dios santo perdonar a pecadores culpables sin comprometer su propia justicia? Si un juez terrenal dejara libre a un criminal asesino sin castigar el delito, ese juez sería corrupto e injusto. Dios no barrió nuestros pecados debajo de la alfombra cósmica; descargó el castigo completo e implacable sobre su propio Hijo encarnado en la cruz. En el Calvario, Dios demostró ser perfectamente Justo (el pecado fue castigado hasta la última gota) y al mismo tiempo el Justificador amoroso de todo aquel que cree en Jesús.
+                    ¿Cómo puede un Dios santo perdonar a pecadores culpables sin comprometer su propia justicia? Si un juez terrenal dejara libre a un criminal asesino sin castigar el delito, ese juez sería corrupto e injusto. Dios no barrió nuestros pecados debajo de la alfombra cósmica; descargó el castigo completo e implacable sobre su propio Hijo encarnado en la cruz («Al que no conoció pecado, por nosotros lo hizo pecado, para que nosotros fuésemos hechos justicia de Dios en él», 2 Corintios 5:18-21). En el Calvario, Dios demostró ser perfectamente Justo (el pecado fue castigado hasta la última gota) y al mismo tiempo el Justificador amoroso de todo aquel que cree en Jesús.
                 """,
                 doctrinalThesis = "La justificación es un acto judicial gratuito de Dios basado en la redención y propiciación de Cristo en la cruz, donde Dios preserva su santa justicia al justificar al impío por la fe.",
                 exegeticalAnalysis = "Los términos «dōrean» (gratuitamente / sin causa), «apolytrōsis» (rescate pagado) e «Hilastērion» (propiciación) en Romanos 3:24-25 constituyen el núcleo doctrinal indestructible de la soteriología bíblica."
@@ -251,7 +251,7 @@ object RomansStudyPlan {
                     I. Contexto Histórico y Exégesis Textual:
                     En Romanos 3:27-31, habiendo establecido la justificación gratuita por la fe en la sangre propiciatoria de Cristo, el apóstol Pablo extrae tres conclusiones demoledoras contra el orgullo religioso humano:
                     
-                    1. La Exclusión Total de la Jactancia (v. 27): «¿Dónde, pues, está la jactancia? Queda excluida. ¿Por cuál ley? ¿Por la de las obras? No, sino por la ley de la fe». La palabra para excluida es «exekleisthē»: la puerta ha sido cerrada con cerrojo de una vez y para siempre. Si la salvación dependiera en un 1% de nuestro esfuerzo, tendríamos motivos para enorgullecernos ante Dios y mirar con desdén a los demás. Pero siendo 100% por gracia mediante la fe, toda vanagloria queda abolida y solo Cristo recibe la honra.
+                    1. La Exclusión Total de la Jactancia (v. 27): «¿Dónde, pues, está la jactancia? Queda excluida. ¿Por cuál ley? ¿Por la de las obras? No, sino por la ley de la fe» (en plena armonía con Efesios 2:8-9: «no por obras, para que nadie se gloríe»). La palabra para excluida es «exekleisthē»: la puerta ha sido cerrada con cerrojo de una vez y para siempre. Si la salvación dependiera en un 1% de nuestro esfuerzo, tendríamos motivos para enorgullecernos ante Dios y mirar con desdén a los demás. Pero siendo 100% por gracia mediante la fe, toda vanagloria queda abolida y solo Cristo recibe la honra.
                     2. La Conclusión Dogmática Innegociable (v. 28): «Concluimos, pues, que el hombre es justificado por fe sin las obras de la ley» (pistei dikaioussthai anthrōpon chōris ergōn nomou). Esta es la célebre Sola Fide que sacudió los cimientos de la Europa medieval.
                     3. El Dios Único de Judíos y Gentiles (vv. 29-30): «¿Es Dios solamente Dios de los judíos? ¿No es también Dios de los gentiles? Ciertamente, también de los gentiles. Porque Dios es uno, y él justificará por la fe a los de la circuncisión, y por medio de la fe a los de la incircuncisión». La salvación por la sola fe es el gran nivelador de la humanidad: ante la cruz no hay privilegios de casta, raza o nación; todos somos pecadores salvados por el mismo Redentor.
                     
@@ -304,7 +304,7 @@ object RomansStudyPlan {
                 passages = listOf(seg(45, "Romanos", 4), seg(1, "Génesis", 17)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
-                    En Romanos 4:13-25, el apóstol Pablo analiza la naturaleza de la fe bíblica a través del relato de Abraham cuando recibió la promesa de que sería padre de multitudes siendo él de casi cien años de edad y considerando la matriz estéril y muerta de Sara.
+                    En Romanos 4:13-25, el apóstol Pablo analiza la naturaleza de la fe bíblica a través del relato de Abraham cuando recibió la promesa de que sería padre de multitudes siendo él de casi cien años de edad y considerando la matriz estéril y muerta de Sara (Génesis 17:15-22).
                     
                     El versículo 18 registra una frase inmortal: «Él creyó en esperanza contra esperanza, para llegar a ser padre de muchas gentes... Y no se debilitó en la fe al considerar su cuerpo, que estaba ya como muerto... ni tampoco la esterilidad de la matriz de Sara. Tampoco dudó, por incredulidad, de la promesa de Dios, sino que se fortaleció en fe, dando gloria a Dios, plenamente convencido de que era también poderoso para hacer todo lo que había prometido; por lo cual también su fe le fue contada por justicia» (vv. 18-22).
                     
@@ -336,7 +336,7 @@ object RomansStudyPlan {
                     1. Paz para con Dios (v. 1): «Justificados, pues, por la fe, tenemos paz para con Dios por medio de nuestro Señor Jesucristo». La hostilidad terminó; ya no somos enemigos bajo ira, sino hijos reconciliados.
                     2. Acceso a la Gracia en que Estamos Firmes (v. 2): Por medio de Cristo tenemos «entrada» («prosagōgē», introducción formal a la presencia del Rey celestial). No estamos bajo juicio temeroso; estamos firmes en un estado permanente de favor inmerecido.
                     3. La Esperanza Inconmovible de la Gloria de Dios (v. 2): Un anhelo gozoso y certero del triunfo escatológico final.
-                    4. La Gloria en las Tribulaciones (vv. 3-4): «Y no sólo esto, sino que también nos gloriamos en las tribulaciones, sabiendo que la tribulación produce paciencia; y la paciencia, prueba; y la prueba, esperanza». La palabra griega para tribulación es «thlipsis» (presión aplastante, aflicción profunda). En las manos soberanas de Dios, el sufrimiento del creyente deja de ser un castigo penal y se convierte en un instrumento paternal de santificación que forja el carácter aprobado («dokimē», oro purificado en el crisol).
+                    4. La Gloria en las Tribulaciones (vv. 3-4): «Y no sólo esto, sino que también nos gloriamos en las tribulaciones, sabiendo que la tribulación produce paciencia; y la paciencia, prueba; y la prueba, esperanza» (verdad paralela a Santiago 1:2-4: «tened por sumo gozo cuando os halléis en diversas pruebas, sabiendo que la prueba de vuestra fe produce paciencia»). La palabra griega para tribulación es «thlipsis» (presión aplastante, aflicción profunda). En las manos soberanas de Dios, el sufrimiento del creyente deja de ser un castigo penal y se convierte en un instrumento paternal de santificación que forja el carácter aprobado («dokimē», oro purificado en el crisol).
                     
                     II. Desarrollo Teológico y Cristocéntrico:
                     La cumbre de esta seguridad se corona en el versículo 5: «y la esperanza no avergüenza; porque el amor de Dios ha sido derramado en nuestros corazones por el Espíritu Santo que nos fue dado».
@@ -363,7 +363,7 @@ object RomansStudyPlan {
                     - Éramos «pecadores» (v. 8: «hamartōlōn», violadores continuos de su santa ley).
                     - Éramos «enemigos» (v. 10: «echthroi», en activa hostilidad moral contra el Creador).
                     
-                    En la sociedad humana, difícilmente alguien moriría por un justo, aunque tal vez por un bienhechor alguno osara morir. Pero en el versículo 8 resplandece la singularidad absoluta del Dios bíblico: «Mas Dios muestra su amor para con nosotros, en que siendo aún pecadores, Cristo murió por nosotros». Dios no esperó a que nos reformáramos, limpiáramos o buscáramos su favor; envió a su Hijo a morir por nosotros cuando éramos sus enemigos declarados.
+                    En la sociedad humana, difícilmente alguien moriría por un justo, aunque tal vez por un bienhechor alguno osara morir. Pero en el versículo 8 resplandece la singularidad absoluta del Dios bíblico: «Mas Dios muestra su amor para con nosotros, en que siendo aún pecadores, Cristo murió por nosotros» (en sintonía con 1 Juan 4:9-11: «En esto consiste el amor: no en que nosotros hayamos amado a Dios, sino en que él nos amó a nosotros, y envió a su Hijo en propiciación por nuestros pecados»). Dios no esperó a que nos reformáramos, limpiáramos o buscáramos su favor; envió a su Hijo a morir por nosotros cuando éramos sus enemigos declarados.
                     
                     II. Desarrollo Teológico y Cristocéntrico:
                     De aquí Pablo extrae su conclusión matemática celestial en los versículos 9 y 10:
@@ -391,7 +391,7 @@ object RomansStudyPlan {
                     
                     El versículo 12 describe el origen de la catástrofe humana: «Por tanto, como el pecado entró en el mundo por un hombre, y por el pecado la muerte, así la muerte pasó a todos los hombres, por cuanto todos pecaron». El verbo «pecaron» («hēmarton») está en tiempo aoristo: describe una acción histórica puntual que ocurrió en el huerto del Edén cuando Adán, como cabeza federal de la raza, pecó y arrastró a toda su descendencia biológica a la culpabilidad legal y a la corrupción moral.
                     
-                    Sin embargo, en el versículo 14, Pablo llama a Adán «figura del que había de venir» («typos tou mellontos», tipo de Cristo). El paralelismo tipológico descansa en el principio de la representación federal: lo que una cabeza representativa hace, se aplica a todos los que están unidos a ella:
+                    Sin embargo, en el versículo 14, Pablo llama a Adán «figura del que había de venir» («typos tou mellontos», tipo de Cristo, a quien en 1 Corintios 15:45-49 denomina el «postrer Adán» y el «segundo hombre, que es el Señor mismo del cielo»). El paralelismo tipológico descansa en el principio de la representación federal: lo que una cabeza representativa hace, se aplica a todos los que están unidos a ella:
                     - En Adán: Una sola transgresión trajo condenación, juicio y reinado de la muerte sobre todos los que están en él por nacimiento carnal (vv. 16-18).
                     - En Cristo: Un solo acto de obediencia justa en la cruz trajo justificación gratuita, don de justicia y reino de vida sobre todos los que están en Él por la fe salvadora (vv. 17-19).
                     
@@ -420,7 +420,7 @@ object RomansStudyPlan {
                     
                     En los versículos 3 al 6, Pablo explica la teología de la unión mística con Cristo simbolizada en las aguas del bautismo:
                     1. Sepultados en su Muerte (vv. 3-4): Al creer en Jesús, fuimos unidos espiritualmente a Él de modo que su muerte en la cruz fue nuestra muerte a la tiranía del pecado. Nuestro viejo hombre («palaios anthrōpos») fue crucificado juntamente con Él para que el cuerpo del pecado sea destruido, a fin de que no sirvamos más al pecado (v. 6).
-                    2. Resucitados para Vida Nueva (vv. 4-5): Así como Cristo resucitó de los muertos por la gloria del Padre, así también nosotros fuimos levantados espiritualmente para «andar en novedad de vida» («en kainotēti zōēs peripatēsōmen»).
+                    2. Resucitados para Vida Nueva (vv. 4-5): Así como Cristo resucitó de los muertos por la gloria del Padre, así también nosotros fuimos levantados espiritualmente para «andar en novedad de vida» («en kainotēti zōēs peripatēsōmen»; como afirma Colosenses 3:1-4: «Habéis resucitado con Cristo, buscad las cosas de arriba... porque habéis muerto, y vuestra vida está escondida con Cristo en Dios»).
                     
                     II. Desarrollo Teológico y Cristocéntrico:
                     En el versículo 11, Pablo prescribe el ejercicio espiritual indispensable de la fe santificadora: «Así también vosotros consideraos muertos al pecado, pero vivos para Dios en Cristo Jesús, Señor nuestro».
@@ -448,7 +448,7 @@ object RomansStudyPlan {
                     En el versículo 14 resuena la carta magna de la libertad cristiana: «Porque el pecado no se enseñoreará de vosotros; pues no estáis bajo la ley, sino bajo la gracia». No estar bajo la ley significa que ya no estamos bajo el pacto de obras que condena al transgresor sin capacitarlo; estar bajo la gracia significa que estamos bajo el poder vivificador del Espíritu que nos capacita para vencer el pecado.
                     
                     II. Desarrollo Teológico y Cristocéntrico:
-                    Pablo desmantela la falsa noción secular de «libertad»: el ser humano nunca es autónomo; siempre es esclavo de aquello a lo que se somete (v. 16): o es esclavo del pecado para muerte, o es esclavo de Dios para santidad y vida eterna.
+                    Pablo desmantela la falsa noción secular de «libertad»: el ser humano nunca es autónomo; siempre es esclavo de aquello a lo que se somete (v. 16; tal como enseñó Jesús en Juan 8:31-36: «todo aquel que hace pecado, esclavo es del pecado... Así que, si el Hijo os libertare, seréis verdaderamente libres»): o es esclavo del pecado para muerte, o es esclavo de Dios para santidad y vida eterna.
                     
                     El capítulo concluye con un versículo de solemne belleza en el versículo 23: «Porque la paga del pecado es muerte, mas la dádiva de Dios es vida eterna en Cristo Jesús Señor nuestro».
                     
@@ -474,7 +474,7 @@ object RomansStudyPlan {
                     
                     Pablo explica que la mujer casada está ligada por la ley a su marido mientras este vive; pero si el marido muere, queda legalmente libre de la ley del matrimonio y puede unirse a otro varón sin ser llamada adúltera (vv. 2-3).
                     
-                    En el versículo 4, Pablo aplica la analogía teológica a nuestra redención: «Así también vosotros, hermanos míos, habéis muerto a la ley mediante el cuerpo de Cristo, para que seáis de otro, del que resucitó de los muertos, a fin de que llevemos fruto para Dios».
+                    En el versículo 4, Pablo aplica la analogía teológica a nuestra redención: «Así también vosotros, hermanos míos, habéis muerto a la ley mediante el cuerpo de Cristo, para que seáis de otro, del que resucitó de los muertos, a fin de que llevemos fruto para Dios» (verdad que expresa en Gálatas 2:19-20: «Porque yo por la ley soy muerto para la ley, a fin de vivir para Dios. Con Cristo estoy juntamente crucificado»).
                     
                     ¿Quién murió para romper el vínculo legal de condenación? No fue la Ley la que murió (pues la ley moral de Dios es santa y eterna); ¡fuimos nosotros los que morimos a la ley cuando nuestro viejo hombre fue crucificado en el cuerpo de Cristo! La muerte rompe todos los contratos legales: la Ley ya no tiene jurisdicción penal sobre un cadáver que ha resucitado en una nueva esfera de vida.
                     
@@ -504,7 +504,7 @@ object RomansStudyPlan {
                     A partir del versículo 14 y hasta el 25 se describe uno de los pasajes más debatidos y vivencialmente intensos de toda la Biblia: la angustiosa batalla que el alma regenerada experimenta frente al pecado remanente en su carne mortal:
                     «Porque sabemos que la ley es espiritual; mas yo soy carnal, vendido al pecado. Porque lo que hago, no lo entiendo; pues no hago lo que quiero, sino lo que aborrezco, eso hago... Y yo sé que en mí, esto es, en mi carne, no mora el bien; porque el querer el bien está en mí, pero no el hacerlo» (vv. 14-15, 18).
                     
-                    Nótese que quien habla en estos versículos ama apasionadamente la ley de Dios: «Porque según el hombre interior, me deleito en la ley de Dios» (v. 22). Un impío no regenerado jamás se deleita en la santa ley de Dios (Romanos 8:7). Solo un creyente cuya mente ha sido iluminada por la gracia siente el dolor agudo y desgarrador de no poder alcanzar la perfección intachable que su corazón anhela.
+                    Nótese que quien habla en estos versículos ama apasionadamente la ley de Dios: «Porque según el hombre interior, me deleito en la ley de Dios» (v. 22, con el mismo afecto piadoso del Salmo 119:9-16: «En mi corazón he guardado tus dichos, para no pecar contra ti... En tus estatutos me recrearé»). Un impío no regenerado jamás se deleita en la santa ley de Dios (Romanos 8:7). Solo un creyente cuya mente ha sido iluminada por la gracia siente el dolor agudo y desgarrador de no poder alcanzar la perfección intachable que su corazón anhela.
                     
                     II. Desarrollo Teológico y Cristocéntrico:
                     Esta agonía culmina en el clamor conmovedor del versículo 24: «¡Miserable de mí! ¿Quién me librará de este cuerpo de muerte?». En la antigüedad militar, algunos tiranos ataban el cadáver descompuesto de un asesinado a la espalda del homicida hasta que la putrefacción lo matara. Pablo siente el peso agobiante de la naturaleza pecaminosa residual que lucha contra su alma.
@@ -537,7 +537,7 @@ object RomansStudyPlan {
                     II. Desarrollo Teológico y Cristocéntrico:
                     La condenación que merecíamos fue ejecutada y consumada en el cuerpo de Cristo en el madero. La justicia de Dios quedó plenamente satisfecha. Por lo tanto, condenar a quien está en Cristo equivaldría a exigir un doble pago por la misma deuda, lo cual es imposible para el Juez santo de toda la tierra.
                     
-                    Vivir en Cristo transforma nuestra mente: los que son de la carne piensan en las cosas de la carne; pero los que son del Espíritu, en las cosas del Espíritu (v. 5). Ocuparse de la carne es muerte, pero ocuparse del Espíritu es vida y paz (v. 6). El creyente camina con la frente en alto, libre de culpa paralizante, amparado bajo el paraguas de la gracia eterna.
+                    Vivir en Cristo transforma nuestra mente: los que son de la carne piensan en las cosas de la carne; pero los que son del Espíritu, en las cosas del Espíritu (v. 5; como exhorta Gálatas 5:16-18: «Andad en el Espíritu, y no satisfagáis los deseos de la carne»). Ocuparse de la carne es muerte, pero ocuparse del Espíritu es vida y paz (v. 6). El creyente camina con la frente en alto, libre de culpa paralizante, amparado bajo el paraguas de la gracia eterna.
                 """,
                 doctrinalThesis = "La justificación en Cristo elimina de forma total y definitiva toda condenación judicial (katakrima) para el creyente, inaugurando el gobierno de la ley del Espíritu de vida.",
                 exegeticalAnalysis = "La posición enfática inicial de «ouden katakrima» en Romanos 8:1 establece el principio inamovible de la exoneración penal absoluta de todo aquel que está unido judicialmente a Cristo."
@@ -557,7 +557,7 @@ object RomansStudyPlan {
                     
                     En el derecho romano de la época de Pablo, la adopción («hyiothesia») era un acto jurídico de inmenso poder: un patriarca adoptaba formalmente a un hijo, extinguiendo por completo todas las deudas de su vida anterior y otorgándole todos los derechos hereditarios y la plena dignidad de hijo biológico legítimo. El padre jamás podía repudiar o desheredar a un hijo adoptado legalmente.
                     
-                    El Espíritu Santo clama en nuestro corazón con el término arameo íntimo que Jesús mismo utilizó en el huerto de Getsemaní: «¡Abba!» (Marcos 14:36). «Abba» era la palabra del lenguaje familiar cotidiano con que los niños hebreos se dirigían a sus padres terrenales con ternura, confianza absoluta y reverencia. El creyente ya no se acerca a Dios temblando como un esclavo teme a su amo con látigo; se acerca a los brazos amorosos de su Padre celestial.
+                    El Espíritu Santo clama en nuestro corazón con el término arameo íntimo que Jesús mismo utilizó en el huerto de Getsemaní: «¡Abba!» (Marcos 14:36; Gálatas 4:4-7). «Abba» era la palabra del lenguaje familiar cotidiano con que los niños hebreos se dirigían a sus padres terrenales con ternura, confianza absoluta y reverencia. El creyente ya no se acerca a Dios temblando como un esclavo teme a su amo con látigo; se acerca a los brazos amorosos de su Padre celestial.
                     
                     En el versículo 16 se confirma el ministerio del consuelo interior: «El Espíritu mismo da testimonio a nuestro espíritu, de que somos hijos de Dios».
                     
@@ -580,7 +580,7 @@ object RomansStudyPlan {
                 passages = listOf(seg(45, "Romanos", 8), seg(47, "2 Corintios", 4)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
-                    En Romanos 8:18, el apóstol Pablo establece una ecuación espiritual que recalibra por completo nuestra perspectiva ante el dolor humano: «Pues tengo por cierto que las aflicciones del tiempo presente no son comparables con la gloria venidera que en nosotros ha de manifestarse». La palabra griega para «tengo por cierto» es «logizomai» (hago el cálculo numérico infalible): al poner en una balanza todo el sufrimiento del mundo entero y en el otro platillo el peso eterno de gloria, las aflicciones terrenales se desvanecen como una pluma.
+                    En Romanos 8:18, el apóstol Pablo establece una ecuación espiritual que recalibra por completo nuestra perspectiva ante el dolor humano: «Pues tengo por cierto que las aflicciones del tiempo presente no son comparables con la gloria venidera que en nosotros ha de manifestarse» (en plena armonía con 2 Corintios 4:16-18: «Porque esta leve tribulación momentánea produce en nosotros un cada vez más excelente y eterno peso de gloria»). La palabra griega para «tengo por cierto» es «logizomai» (hago el cálculo numérico infalible): al poner en una balanza todo el sufrimiento del mundo entero y en el otro platillo el peso eterno de gloria, las aflicciones terrenales se desvanecen como una pluma.
                     
                     En los versículos 19 al 22, Pablo amplía el lente hacia el cosmos entero: la creación material fue sujetada a vanidad («mataiotēs», futilidad, descomposición, catástrofes) no por su propia voluntad, sino por causa de la maldición del pecado de Adán (Génesis 3:17-18).
                     
@@ -609,7 +609,7 @@ object RomansStudyPlan {
                     
                     En medio del dolor intenso, la aflicción extrema o la confusión, con frecuencia el creyente se queda sin palabras, sin saber exactamente cómo orar o qué pedir. En ese abismo de fragilidad, el Espíritu Santo que habita en nuestro ser toma nuestra carga («synantilambanetai», se coloca al otro lado de la carga pesada para levantarla con nosotros) e intercede directamente ante el Padre con gemidos santos e inefables que concuerdan a la perfección con el consejo divino.
                     
-                    De esta intercesión omnipotente emana la célebre afirmación del versículo 28: «Y sabemos que a los que aman a Dios, todas las cosas les ayudan a bien, esto es, a los que conforme a su propósito son llamados». La frase «todas las cosas» («panta») no excluye las pruebas, las pérdidas o las aflicciones; en la soberanía de Dios, incluso las circunstancias más dolorosas son tejidas providencialmente para la madurez espiritual de los santos y la gloria del Creador.
+                    De esta intercesión omnipotente emana la célebre afirmación del versículo 28: «Y sabemos que a los que aman a Dios, todas las cosas les ayudan a bien, esto es, a los que conforme a su propósito son llamados» (quienes hacen todas las cosas según el designio de su voluntad, Efesios 1:3-12). La frase «todas las cosas» («panta») no excluye las pruebas, las pérdidas o las aflicciones; en la soberanía de Dios, incluso las circunstancias más dolorosas son tejidas providencialmente para la madurez espiritual de los santos y la gloria del Creador.
                     
                     II. Desarrollo Teológico y Cristocéntrico:
                     En los versículos 29 y 30 se expone lo que la teología sistemática ha denominado «La Cadena de Oro de la Salvación» (Ordo Salutis):
@@ -641,7 +641,7 @@ object RomansStudyPlan {
                     2. «El que no escatimó ni a su propio Hijo, sino que lo entregó por todos nosotros, ¿cómo no nos dará también con él todas las cosas?» (v. 32). Si nos dio el regalo de valor infinito (su Hijo en la cruz), ninguna bendición necesaria menor nos será negada.
                     3. «¿Quién acusará a los escogidos de Dios? Dios es el que justifica» (v. 33). Si el Juez supremo del universo ha firmado nuestra sentencia de justificación absolutoria, ninguna acusación de Satanás, del mundo o de nuestra conciencia culpable tiene validez legal.
                     4. «¿Quién es el que condenará? Cristo es el que murió; más aun, el que también resucitó, el que además está a la diestra de Dios, el que también intercede por nosotros» (v. 34).
-                    5. «¿Quién nos separará del amor de Cristo? ¿Tribulación, o angustia, o persecución, o hambre, o desnudez, o peligro, o espada?» (v. 35).
+                    5. «¿Quién nos separará del amor de Cristo? ¿Tribulación, o angustia, o persecución, o hambre, o desnudez, o peligro, o espada?» (v. 35; citando en el v. 36 el clamor de los mártires del Salmo 44:22: «Por causa de ti somos muertos todo el tiempo; somos contados como ovejas de matadero»).
                     
                     II. Desarrollo Teológico y Cristocéntrico:
                     La respuesta de Pablo en los versículos 37 al 39 es un himno de triunfo universal: «Antes, en todas estas cosas somos más que vencedores por medio de aquel que nos amó». La palabra para «más que vencedores» es un término acuñado por Pablo: «hypernikōmen» (súper-vencedores). No vencemos escapando de las pruebas en una burbuja de inmunidad física, sino triunfando en medio del sufrimiento porque las pruebas no pueden separarnos de Cristo, sino que afirman nuestra fe.
@@ -666,7 +666,7 @@ object RomansStudyPlan {
                     
                     La respuesta categórica de Pablo en Romanos 9:6 es: «No que la palabra de Dios haya fallado; porque no todos los que descienden de Israel son israelitas». Pablo demuestra mediante las Escrituras que la pertenencia al pueblo de Dios nunca dependió del linaje biológico natural, sino de la soberana elección de gracia:
                     1. En la descendencia de Abraham (vv. 7-9): No todos los hijos carnales fueron herederos; Ismael fue despedido, pero «en Isaac te será llamada descendencia».
-                    2. En los gemelos Jacob y Esaú (vv. 10-13): Nacidos del mismo padre y de la misma madre en el mismo parto, antes de que hubiesen nacido ni hecho bien ni mal («para que el propósito de Dios conforme a la elección permaneciese, no por las obras sino por el que llama»), Dios declaró a Rebeca: «El mayor servirá al menor».
+                    2. En los gemelos Jacob y Esaú (vv. 10-13; Génesis 25:19-26): Nacidos del mismo padre y de la misma madre en el mismo parto, antes de que hubiesen nacido ni hecho bien ni mal («para que el propósito de Dios conforme a la elección permaneciese, no por las obras sino por el que llama»), Dios declaró a Rebeca: «El mayor servirá al menor».
                     
                     Ante la objeción humana de si hay injusticia en Dios por elegir soberanamente, Pablo responde en el versículo 15 citando la revelación dada a Moisés en Éxodo 33:19: «Tendré misericordia del que yo tenga misericordia, y me compadeceré del que yo me compadezca. Así que no depende del que quiere, ni del que corre, sino de Dios que tiene misericordia» (vv. 15-16).
                     
@@ -721,7 +721,7 @@ object RomansStudyPlan {
                     
                     Pablo demuestra que siempre ha existido un «remanente escogido por gracia» («leimma kat' eklogēn charitos», v. 5), tal como en los días oscuros de Elías cuando Dios se reservó a siete mil hombres que no doblaron sus rodillas ante Baal.
                     
-                    Para advertir a los creyentes gentiles contra el orgullo antisemita o la soberbia espiritual, Pablo utiliza la parábola del Olivo (vv. 16-24):
+                    Para advertir a los creyentes gentiles contra el orgullo antisemita o la soberbia espiritual, Pablo utiliza la parábola del Olivo (vv. 16-24; figura pactual evocada ya en Jeremías 11:16-17):
                     - La raíz santa del olivo son los patriarcas y las promesas de pacto dadas a Abraham.
                     - Algunas de las ramas naturales (judíos incrédulos) fueron desgajadas a causa de su incredulidad.
                     - Los gentiles son ramas de un «olivo silvestre» («agrielaios») que fueron injertadas milagrosamente contra naturaleza en el buen olivo, participando de la rica savia de las promesas.
@@ -753,7 +753,7 @@ object RomansStudyPlan {
                     
                     La ética cristiana no nace de la imposición de una lista fría de reglas legalistas; nace «por las misericordias de Dios» («oiktirmoi tou Theou»): es la respuesta espontánea de amor y asombro ante todo lo que Cristo hizo por nosotros en los capítulos 1 al 11.
                     
-                    Pablo utiliza el vocabulario sacrificial del templo del Antiguo Testamento pero con un giro revolucionario:
+                    Pablo utiliza el vocabulario sacrificial del templo del Antiguo Testamento pero con un giro revolucionario (en sintonía con el sacerdocio santo de 1 Pedro 2:4-5 para ofrecer sacrificios espirituales aceptables a Dios por medio de Jesucristo):
                     - En el Antiguo Pacto, los sacrificios eran animales muertos que se quemaban en el altar.
                     - En el Nuevo Pacto, nuestro sacrificio es «vivo» («thysian zōsan»): una vida corporal consagrada enteramente a Dios día tras día.
                     - Este es nuestro «culto racional» («logikē latreia»): un servicio espiritual consciente, deliberado y coherente con la verdad del Evangelio.
@@ -790,7 +790,7 @@ object RomansStudyPlan {
                     - Empatía profunda: «Gosaos con los que se gozan; llorad con los que lloran» (v. 15).
                     
                     II. Desarrollo Teológico y Cristocéntrico:
-                    La prueba de fuego del amor cristiano se expone en los versículos 17 al 21, donde Pablo reitera la enseñanza de Jesús en el Sermón del Monte:
+                    La prueba de fuego del amor cristiano se expone en los versículos 17 al 21, donde Pablo reitera la enseñanza de Jesús en el Sermón del Monte (Mateo 5:43-48: «Amad a vuestros enemigos, bendecid a los que os maldicen»):
                     «No paguéis a nadie mal por mal... Si es posible, en cuanto dependa de vosotros, estad en paz con todos los hombres. No os vengáis vosotros mismos, amados míos, sino dejad lugar a la ira de Dios; porque escrito está: Mía es la venganza, yo pagaré, dice el Señor. Así que, si tu enemigo tuviere hambre, dale de comer; si tuviere sed, dale de beber... No seas vencido de lo malo, sino vence con el bien el mal».
                     
                     Vengarse personalmente es un acto de desconfianza e insubordinación donde el ser humano intenta usurpar el trono del Juez supremo de la tierra. El cristiano confía en que Dios ejecutará perfecta justicia a su debido tiempo. Mientras tanto, desarma la hostilidad del enemigo con la generosidad y el perdón de Cristo. Esta es la victoria del Reino de los Cielos sobre el odio del mundo.
@@ -809,7 +809,7 @@ object RomansStudyPlan {
                 passages = listOf(seg(45, "Romanos", 13), seg(60, "1 Pedro", 2)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
-                    En Romanos 13:1-7, Pablo aborda la relación del creyente con el gobierno secular en el corazón mismo del Imperio Romano gobernado por las autoridades civiles paganas: «Sométase toda persona a las autoridades superiores; porque no hay autoridad sino de parte de Dios, y las que hay, por Dios han sido establecidas».
+                    En Romanos 13:1-7 (en plena concordancia con la exhortación apostólica de 1 Pedro 2:13-17), Pablo aborda la relación del creyente con el gobierno secular en el corazón mismo del Imperio Romano gobernado por las autoridades civiles paganas: «Sométase toda persona a las autoridades superiores; porque no hay autoridad sino de parte de Dios, y las que hay, por Dios han sido establecidas».
                     
                     Pablo enseña que el gobierno civil es una institución de la gracia común divina diseñada para refrenar el caos, castigar el malhechor y promover el orden público pacífico: el magistrado es «servidor de Dios [diakonos Theou] para tu bien... pues no en vano lleva la espada» (v. 4). Por esta razón, el cristiano cumple sus deberes cívicos con integridad: paga los tributos, honra a quien merece honra y ora por sus gobernantes (1 Timoteo 2:1-2), reconociendo que la soberanía última pertenece a Dios (y obedeciendo a Dios antes que a los hombres cuando una ley terrenal demanda pecar directamente contra el Creador, Hechos 5:29).
                     

@@ -20,7 +20,7 @@ object PneumatologyStudyPlan {
                 passagesSummary = "Génesis 1:1-3; Salmo 104:24-30; Job 33:4",
                 primaryBookId = 1,
                 primaryChapter = 1,
-                passages = listOf(seg(1, "Génesis", 1), seg(19, "Salmos", 104)),
+                passages = listOf(seg(1, "Génesis", 1), seg(19, "Salmos", 104), seg(18, "Job", 33)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
                     En la apertura misma del texto bíblico (Génesis 1:2), se nos presenta al Espíritu Santo actuando en el origen del cosmos: «Y la tierra estaba desordenada y vacía, y las tinieblas estaban sobre la faz del abismo, y el Espíritu de Dios se movía sobre la faz de las aguas».
@@ -150,8 +150,8 @@ object PneumatologyStudyPlan {
                 title = "Día 6: El Espíritu en la Encarnación y Ministerio de Cristo",
                 passagesSummary = "Lucas 1:30-35; Lucas 4:14-21; Isaías 61:1-3",
                 primaryBookId = 42,
-                primaryChapter = 4,
-                passages = listOf(seg(42, "Lucas", 4), seg(42, "Lucas", 1), seg(23, "Isaías", 61)),
+                primaryChapter = 1,
+                passages = listOf(seg(42, "Lucas", 1), seg(42, "Lucas", 4), seg(23, "Isaías", 61)),
                 studyNarrative = """
                     I. Contexto Histórico y Exégesis Textual:
                     La vida terrenal del Señor Jesucristo estuvo impregnada de principio a fin por la acción del Espíritu Santo. En la anunciación a la virgen María (Lucas 1:35), el ángel Gabriel explicó el milagro de la concepción virginal: «El Espíritu Santo vendrá sobre ti, y el poder del Altísimo te cubrirá con su sombra; por lo cual también el Santo Ser que nacerá, será llamado Hijo de Dios». La humanidad perfecta y sin pecado de Cristo fue concebida sobrenaturalmente por obra del Espíritu.
@@ -363,7 +363,7 @@ object PneumatologyStudyPlan {
                     En la iglesia de Corinto se había desatado una lamentable distorsión de los dones espirituales: algunos miembros competían por protagonismo, vanagloriándose de los dones más llamativos (como el hablar en lenguas) y menospreciando los ministerios menos visibles pero fundamentales para la comunidad. En 1 Corintios 12, Pablo establece los principios teológicos inmutables que deben gobernar los dones en el Cuerpo de Cristo.
                     
                     1. Origen Soberano de la Gracia: La palabra griega para don espiritual es «charisma» (plural: «charismata»), derivada de «charis» (gracia). No son habilidades humanas innatas ni premios al mérito espiritual; son manifestaciones inmerecidas de la gracia divina: «Pero todas estas cosas las hace uno y el mismo Espíritu, repartiendo a cada uno en particular como él quiere» (1 Co 12:11).
-                    2. Propósito Comunitario: En el versículo 7, Pablo declara con meridiana claridad la finalidad exclusiva de todo don: «Pero a cada uno le es dada la manifestación del Espíritu para provecho» (pros to sympheron, para la edificación colectiva y provecho mutuo del Cuerpo). El don que no edifica a la iglesia, no sirve a su propósito instituido por Dios.
+                    2. Propósito Comunitario: En el versículo 7, Pablo declara con meridiana claridad la finalidad exclusiva de todo don: «Pero a cada uno le es dada la manifestación del Espíritu para provecho» (pros to sympheron, para la edificación colectiva y provecho mutuo del Cuerpo), principio que reitera en Romanos 12:3-8 al exhortar a pensar con cordura y en 1 Corintios 14:1-12 («procurad abundar en ellos para edificación de la iglesia»). El don que no edifica a la iglesia, no sirve a su propósito instituido por Dios.
                     3. La Supremacía del Amor: En 1 Corintios 13, Pablo demuestra que el ejercicio del don más sublime (elocuencia angélica, profecía, fe para mover montañas o filantropía extrema) desprovisto de amor («agapē») es reducido a la nada absoluta: «vengo a ser como metal que resuena, o címbalo que retiñe».
                     
                     II. Desarrollo Teológico y Cristocéntrico:
