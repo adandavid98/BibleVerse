@@ -56,6 +56,16 @@ fun ReadingPlanDayReaderModal(
 ) {
     val context = LocalContext.current
     val isStoriesPlan = planType == com.example.data.bible.ReadingPlanType.BIBLE_STORIES
+    val isTheologyPlan = planType.categoryName == "Doctrina y Teología Bíblica" || planType in listOf(
+        com.example.data.bible.ReadingPlanType.ESCHATOLOGY,
+        com.example.data.bible.ReadingPlanType.ROMANS,
+        com.example.data.bible.ReadingPlanType.TRINITY,
+        com.example.data.bible.ReadingPlanType.FAITH_WORKS,
+        com.example.data.bible.ReadingPlanType.ETERNAL_LIFE,
+        com.example.data.bible.ReadingPlanType.PNEUMATOLOGY,
+        com.example.data.bible.ReadingPlanType.TABERNACLE_HEBREWS,
+        com.example.data.bible.ReadingPlanType.COVENANTS
+    )
 
     val effectiveNarrative = if (day.storyNarrative.isNotBlank()) {
         day.storyNarrative
@@ -292,7 +302,7 @@ fun ReadingPlanDayReaderModal(
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Text(
-                                        text = if (isStoriesPlan) "El Relato Bíblico" else "Devocional y Estudio",
+                                        text = if (isStoriesPlan) "El Relato Bíblico" else if (isTheologyPlan) "Estudio Bíblico y Exégesis" else "Devocional y Estudio",
                                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.colorScheme.primary
                                     )
@@ -350,7 +360,7 @@ fun ReadingPlanDayReaderModal(
                                                     modifier = Modifier.size(18.dp)
                                                 )
                                                 Text(
-                                                    text = if (isStoriesPlan) "Contexto Histórico y Cultural" else "Pregunta de Reflexión",
+                                                    text = if (isStoriesPlan) "Contexto Histórico y Cultural" else if (isTheologyPlan) "Contexto Exegético y Análisis" else "Pregunta de Reflexión",
                                                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                                     color = MaterialTheme.colorScheme.primary
                                                 )
@@ -387,7 +397,7 @@ fun ReadingPlanDayReaderModal(
                                                     modifier = Modifier.size(18.dp)
                                                 )
                                                 Text(
-                                                    text = if (isStoriesPlan) "Enseñanza para Memorizar" else "Clave Doctrinal y Espiritual",
+                                                    text = if (isStoriesPlan) "Enseñanza para Memorizar" else if (isTheologyPlan) "Tesis Doctrinal y Teológica" else "Clave Doctrinal y Espiritual",
                                                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                                     color = MaterialTheme.colorScheme.primary
                                                 )
@@ -439,7 +449,7 @@ fun ReadingPlanDayReaderModal(
                                         )
                                         Column {
                                             Text(
-                                                text = if (effectiveNarrative.isNotBlank() || isStoriesPlan) "Texto Bíblico de Referencia" else "Pasajes Bíblicos",
+                                                text = if (isTheologyPlan) "Pasajes Bíblicos de Estudio" else if (effectiveNarrative.isNotBlank() || isStoriesPlan) "Texto Bíblico de Referencia" else "Pasajes Bíblicos",
                                                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
