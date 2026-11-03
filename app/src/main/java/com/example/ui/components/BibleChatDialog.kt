@@ -16,6 +16,9 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -369,6 +372,11 @@ fun BibleChatDialog(
                         OutlinedTextField(
                             value = inputText,
                             onValueChange = { inputText = it },
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Sentences,
+                                autoCorrectEnabled = true,
+                                keyboardType = KeyboardType.Text
+                            ),
                             modifier = Modifier
                                 .weight(1f)
                                 .testTag("chat_input_field"),
