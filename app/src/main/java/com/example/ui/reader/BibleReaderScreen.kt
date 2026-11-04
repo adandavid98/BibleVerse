@@ -485,7 +485,7 @@ fun BibleReaderScreen(
                                 )
                             }
                         }
-                        .padding(horizontal = 22.dp),
+                        .padding(horizontal = 14.dp),
                     contentPadding = PaddingValues(top = 12.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
