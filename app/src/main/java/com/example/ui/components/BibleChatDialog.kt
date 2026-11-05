@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import android.Manifest
 import android.content.pm.PackageManager
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
@@ -112,41 +113,24 @@ fun BibleChatDialog(
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
             dismissOnBackPress = true,
-            dismissOnClickOutside = true,
+            dismissOnClickOutside = false,
             decorFitsSystemWindows = false
         )
     ) {
-        Box(
+        BackHandler(onBack = onDismiss)
+
+        Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.55f))
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onDismiss
-                ),
-            contentAlignment = Alignment.BottomCenter
+                .testTag("bible_chat_dialog"),
+            color = MaterialTheme.colorScheme.background
         ) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.94f)
-                    .imePadding()
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {}
-                    )
-                    .testTag("bible_chat_dialog"),
-                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 6.dp,
-                shadowElevation = 10.dp
-            ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .statusBarsPadding()
                     .navigationBarsPadding()
+                    .imePadding()
             ) {
                 // Top Header
                 Row(
@@ -481,7 +465,6 @@ fun BibleChatDialog(
                     }
                 }
             }
-        }
         }
     }
 }
