@@ -9,6 +9,7 @@ import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
 import androidx.core.content.FileProvider
+import com.example.data.model.VerseEntity
 import com.example.ui.reader.model.ShareCardTemplate
 import java.io.File
 import java.io.FileOutputStream
@@ -474,5 +475,173 @@ object CardBitmapRenderer {
             e.printStackTrace()
             null
         }
+    }
+
+    fun renderVerseOfTheDayBitmap(
+        context: Context,
+        verse: VerseEntity,
+        backgroundDrawableRes: Int,
+        width: Int = 1080,
+        height: Int = 1350
+    ): Bitmap {
+        val clean = com.example.data.bible.OfflineBibleManager.cleanVerseText(verse.text)
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+
+        // 1. Cargar imagen de fondo y dibujar con Center-Crop
+        try {
+            val options = BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888 }
+            val bgBitmap = BitmapFactory.decodeResource(context.resources, backgroundDrawableRes, options)
+            if (bgBitmap != null) {
+                val scale = maxOf(width.toFloat() / bgBitmap.width, height.toFloat() / bgBitmap.height)
+                val scaledW = (bgBitmap.width * scale).toInt()
+                val scaledH = (bgBitmap.height * scale).toInt()
+                val dx = (width - scaledW) / 2f
+                val dy = (height - scaledH) / 2f
+                val srcRect = Rect(0, 0, bgBitmap.width, bgBitmap.height)
+                val dstRect = RectF(dx, dy, dx + scaledW, dy + scaledH)
+                canvas.drawBitmap(bgBitmap, srcRect, dstRect, Paint(Paint.FILTER_BITMAP_FLAG))
+            } else {
+                drawDeepNight(canvas, width, height, clean, verse.reference)
+                return bitmap
+            }
+        } catch (e: Exception) {
+            drawDeepNight(canvas, width, height, clean, verse.reference)
+            return bitmap
+        }
+
+        // 2. Degradado vertical oscuro (scrim) para máxima legibilidad
+        val scrimPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            shader = LinearGradient(
+                0f, 0f, 0f, height.toFloat(),
+                intArrayOf(
+                    Color.argb(120, 0, 0, 0),
+                    Color.argb(165, 0, 0, 0),
+                    Color.argb(225, 0, 0, 0)
+                ),
+                floatArrayOf(0f, 0.45f, 1f),
+                Shader.TileMode.CLAMP
+            )
+        }
+        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), scrimPaint)
+
+        // 3. Encabezado en dorado
+        val headerPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#FFD54F")
+            textSize = 34f
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+            letterSpacing = 0.12f
+            setShadowLayer(6f, 0f, 2f, Color.argb(220, 0, 0, 0))
+        }
+
+        val paddingH = 90f
+        val contentW = (width - paddingH * 2).toInt()
+
+        // 4. Texto bíblico en Serif Itálico
+        val versePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            typeface = Typeface.create(Typeface.SERIF, Typeface.ITALIC)
+            setShadowLayer(8f, 0f, 3f, Color.argb(220, 0, 0, 0))
+        }
+
+        val availableTextHeight = (height * 0.48f).toInt()
+        val optimalSize = calculateOptimalFontSize(clean, contentW, availableTextHeight, Typeface.create(Typeface.SERIF, Typeface.ITALIC))
+            .coerceAtLeast(36f)
+        versePaint.textSize = optimalSize
+
+        val verseLayout = createStaticLayout("«$clean»", versePaint, contentW, Layout.Alignment.ALIGN_NORMAL)
+
+        // 5. Cita y Tema
+        val citPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            textSize = 38f
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+            setShadowLayer(6f, 0f, 2f, Color.argb(200, 0, 0, 0))
+        }
+
+        val totalBlockHeight = 60f + verseLayout.height + 60f + 50f
+        val startY = ((height - totalBlockHeight) / 2f).coerceAtLeast(180f)
+
+        // Encabezado
+        canvas.drawText("✦  VERSÍCULO DEL DÍA", paddingH, startY, headerPaint)
+
+        // Texto
+        val textY = startY + 55f
+        canvas.save()
+        canvas.translate(paddingH, textY)
+        verseLayout.draw(canvas)
+        canvas.restore()
+
+        // Cita
+        val botY = textY + verseLayout.height + 55f
+        canvas.drawText("— ${verse.reference}", paddingH, botY + 34f, citPaint)
+
+        // Etiqueta del tema
+        if (verse.topic.isNotBlank()) {
+            val pillPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.WHITE
+                textSize = 28f
+                typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+            }
+            val pillText = verse.topic.trim()
+            val textWidth = pillPaint.measureText(pillText)
+            val pillPadH = 22f
+            val pillH = 46f
+            val pillW = textWidth + pillPadH * 2
+            val pillX = width - paddingH - pillW
+            val pillY = botY
+
+            val bgPillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.WHITE
+                alpha = 55
+                style = Paint.Style.FILL
+            }
+            val borderPillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.WHITE
+                alpha = 120
+                style = Paint.Style.STROKE
+                strokeWidth = 1.5f
+            }
+            val pillRect = RectF(pillX, pillY, pillX + pillW, pillY + pillH)
+            canvas.drawRoundRect(pillRect, 14f, 14f, bgPillPaint)
+            canvas.drawRoundRect(pillRect, 14f, 14f, borderPillPaint)
+            canvas.drawText(pillText, pillX + pillPadH, pillY + 32f, pillPaint)
+        }
+
+        // 6. Pie de marca
+        val footPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#CBD5E1")
+            alpha = 180
+            textSize = 26f
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
+            textAlign = Paint.Align.CENTER
+        }
+        canvas.drawText("BibleVerse • Lámpara a mis pies", width / 2f, height - 60f, footPaint)
+
+        return bitmap
+    }
+
+    fun shareVerseOfTheDayImage(
+        context: Context,
+        verse: VerseEntity,
+        backgroundDrawableRes: Int
+    ): Uri? {
+        val bitmap = renderVerseOfTheDayBitmap(context, verse, backgroundDrawableRes)
+        val fileUri = saveBitmapToCache(context, bitmap) ?: return null
+
+        val clean = com.example.data.bible.OfflineBibleManager.cleanVerseText(verse.text)
+        val shareText = "«$clean» — ${verse.reference}\n\nCompartido desde BibleVerse"
+
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "image/png"
+            putExtra(Intent.EXTRA_STREAM, fileUri)
+            putExtra(Intent.EXTRA_TEXT, shareText)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        val chooser = Intent.createChooser(intent, "Compartir Versículo del Día").apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(chooser)
+        return fileUri
     }
 }

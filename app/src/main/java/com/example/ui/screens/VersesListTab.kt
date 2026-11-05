@@ -207,7 +207,9 @@ fun VersesListTab(
                     fontScale = uiState.fontSizeScale,
                     onClick = { viewModel.openVerseDetail(vod) },
                     onFavoriteToggle = { viewModel.toggleFavorite(vod) },
-                    onShare = { viewModel.shareVerse(context, vod) }
+                    onShareWithBackground = { bgRes ->
+                        com.example.ui.reader.export.CardBitmapRenderer.shareVerseOfTheDayImage(context, vod, bgRes)
+                    }
                 )
             }
         }

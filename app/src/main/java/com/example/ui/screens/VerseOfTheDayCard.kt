@@ -72,7 +72,8 @@ fun VerseOfTheDayCard(
     fontScale: Float = 1.0f,
     onClick: () -> Unit,
     onFavoriteToggle: () -> Unit,
-    onShare: () -> Unit
+    onShare: () -> Unit = {},
+    onShareWithBackground: ((backgroundDrawableRes: Int) -> Unit)? = null
 ) {
     // Rotation by day of year + verse.id with manual user shuffle offset
     val dayOfYear = remember { Calendar.getInstance().get(Calendar.DAY_OF_YEAR) }
@@ -177,9 +178,15 @@ fun VerseOfTheDayCard(
                             )
                         }
 
-                        // Share
+                        // Share (with photographic background)
                         IconButton(
-                            onClick = onShare,
+                            onClick = {
+                                if (onShareWithBackground != null) {
+                                    onShareWithBackground(backgroundDrawableRes)
+                                } else {
+                                    onShare()
+                                }
+                            },
                             modifier = Modifier.size(36.dp)
                         ) {
                             Icon(
