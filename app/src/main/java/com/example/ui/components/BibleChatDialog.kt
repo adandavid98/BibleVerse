@@ -2,6 +2,8 @@ package com.example.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -110,29 +112,41 @@ fun BibleChatDialog(
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
             dismissOnBackPress = true,
-            dismissOnClickOutside = false,
+            dismissOnClickOutside = true,
             decorFitsSystemWindows = false
         )
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .imePadding()
-                .padding(start = 12.dp, end = 12.dp, top = 28.dp, bottom = 32.dp),
-            contentAlignment = Alignment.Center
+                .background(Color.Black.copy(alpha = 0.55f))
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onDismiss
+                ),
+            contentAlignment = Alignment.BottomCenter
         ) {
             Surface(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(24.dp))
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.94f)
+                    .imePadding()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {}
+                    )
                     .testTag("bible_chat_dialog"),
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
                 color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 6.dp,
                 shadowElevation = 10.dp
             ) {
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .navigationBarsPadding()
             ) {
                 // Top Header
                 Row(
@@ -488,7 +502,7 @@ fun ChatMessageBubble(
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
     ) {
         Column(
-            modifier = Modifier.widthIn(max = 340.dp),
+            modifier = Modifier.fillMaxWidth(if (isUser) 0.85f else 1f),
             horizontalAlignment = if (isUser) Alignment.End else Alignment.Start
         ) {
             Box(
