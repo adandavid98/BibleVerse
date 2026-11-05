@@ -10,7 +10,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -121,23 +124,21 @@ fun BibleChatDialog(
             modifier = Modifier
                 .fillMaxSize()
                 .imePadding()
-                .padding(top = 28.dp),
-            contentAlignment = Alignment.BottomCenter
+                .padding(top = 28.dp, bottom = 32.dp),
+            contentAlignment = Alignment.Center
         ) {
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                    .clip(RoundedCornerShape(20.dp))
                     .testTag("bible_chat_dialog"),
-                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                shape = RoundedCornerShape(20.dp),
                 color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 6.dp,
                 shadowElevation = 10.dp
             ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .navigationBarsPadding()
+                modifier = Modifier.fillMaxSize()
             ) {
                 // Top Header
                 Row(
@@ -213,6 +214,7 @@ fun BibleChatDialog(
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
                                 .padding(24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
@@ -265,7 +267,8 @@ fun BibleChatDialog(
                                     Text(
                                         text = topic,
                                         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
-                                        maxLines = 1
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }
