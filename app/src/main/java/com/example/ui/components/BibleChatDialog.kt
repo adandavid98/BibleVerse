@@ -108,30 +108,21 @@ fun BibleChatDialog(
         }
     }
 
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            dismissOnBackPress = true,
-            dismissOnClickOutside = false,
-            decorFitsSystemWindows = false
-        )
-    ) {
-        BackHandler(onBack = onDismiss)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-        Surface(
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = null,
+        modifier = Modifier.testTag("bible_chat_dialog")
+    ) {
+        Column(
             modifier = Modifier
-                .fillMaxSize()
-                .testTag("bible_chat_dialog"),
-            color = MaterialTheme.colorScheme.background
+                .fillMaxWidth()
+                .fillMaxHeight(0.92f)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .statusBarsPadding()
-                    .navigationBarsPadding()
-                    .imePadding()
-            ) {
                 // Top Header
                 Row(
                     modifier = Modifier
@@ -466,7 +457,6 @@ fun BibleChatDialog(
                 }
             }
         }
-    }
 }
 
 @Composable
