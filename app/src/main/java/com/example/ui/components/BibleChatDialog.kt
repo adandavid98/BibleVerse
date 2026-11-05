@@ -135,7 +135,9 @@ fun BibleChatDialog(
                 shadowElevation = 10.dp
             ) {
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .navigationBarsPadding()
             ) {
                 // Top Header
                 Row(
@@ -355,7 +357,7 @@ fun BibleChatDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.surface)
-                        .padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 24.dp),
+                        .padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (voiceInputState.isRecording) {
