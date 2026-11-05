@@ -108,21 +108,35 @@ fun BibleChatDialog(
         }
     }
 
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    ModalBottomSheet(
+    Dialog(
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = null,
-        modifier = Modifier.testTag("bible_chat_dialog")
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = false,
+            decorFitsSystemWindows = false
+        )
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.92f)
+                .fillMaxSize()
+                .imePadding()
+                .padding(top = 28.dp),
+            contentAlignment = Alignment.BottomCenter
         ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                    .testTag("bible_chat_dialog"),
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 6.dp,
+                shadowElevation = 10.dp
+            ) {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
                 // Top Header
                 Row(
                     modifier = Modifier
@@ -341,7 +355,7 @@ fun BibleChatDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.surface)
-                        .padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 14.dp),
+                        .padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 24.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (voiceInputState.isRecording) {
@@ -457,6 +471,8 @@ fun BibleChatDialog(
                 }
             }
         }
+        }
+    }
 }
 
 @Composable
