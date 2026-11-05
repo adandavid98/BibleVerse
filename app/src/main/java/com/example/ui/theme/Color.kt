@@ -38,24 +38,29 @@ val DarkTextPrimary = Color(0xFFE9EEF5)
 val DarkTextSecondary = Color(0xFF8B9BB0)
 val DarkBorder = Color(0xFF283446)
 
-// Vivid Bible Highlighter Colors
+// Vivid Bible Highlighter Colors (Synchronized with YouVersion Palette)
 object BibleHighlightColors {
-    val Yellow = Color(0xFFFFF176)
-    val Green = Color(0xFFA7F3D0)
-    val Blue = Color(0xFFBAE6FD)
-    val Pink = Color(0xFFFBCFE8)
-    val Orange = Color(0xFFFED7AA)
+    val Yellow = Color(0xFFFACC15)
+    val Green = Color(0xFF22C55E)
+    val Blue = Color(0xFF38BDF8)
+    val Pink = Color(0xFFEC4899)
+    val Orange = Color(0xFFF97316)
 
     val list = listOf(
-        HighlightOption("Amarillo", "#FFF176", Yellow),
-        HighlightOption("Verde Menta", "#A7F3D0", Green),
-        HighlightOption("Celeste Cielo", "#BAE6FD", Blue),
-        HighlightOption("Rosa Suave", "#FBCFE8", Pink),
-        HighlightOption("Naranja Ámbar", "#FED7AA", Orange)
+        HighlightOption("Amarillo", "#FACC15", Yellow),
+        HighlightOption("Verde Esmeralda", "#22C55E", Green),
+        HighlightOption("Azul Cielo", "#38BDF8", Blue),
+        HighlightOption("Rosa Fucsia", "#EC4899", Pink),
+        HighlightOption("Naranja Cálido", "#F97316", Orange)
     )
 
     fun getColorFromHex(hex: String): Color? {
-        return list.firstOrNull { it.hex.equals(hex, ignoreCase = true) }?.color
+        if (hex.isBlank()) return null
+        return try {
+            Color(android.graphics.Color.parseColor(hex))
+        } catch (e: Exception) {
+            list.firstOrNull { it.hex.equals(hex, ignoreCase = true) }?.color
+        }
     }
 }
 

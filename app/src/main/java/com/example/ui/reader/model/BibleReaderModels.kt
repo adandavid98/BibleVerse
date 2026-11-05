@@ -38,19 +38,19 @@ data class HighlightColorItem(
 
 object HighlightPalette {
     val colors = listOf(
-        // Tonos oscuros y profundos
-        HighlightColorItem("#1E40AF", "Azul Zafiro Oscuro"),
-        HighlightColorItem("#166534", "Verde Bosque Oscuro"),
-        HighlightColorItem("#7E22CE", "Púrpura Imperial"),
-        HighlightColorItem("#991B1B", "Rojo Carmesí"),
-        HighlightColorItem("#B45309", "Ámbar Intenso"),
-        // Tonos clásicos
-        HighlightColorItem("#FEF08A", "Amarillo Sol"),
-        HighlightColorItem("#A7F3D0", "Verde Menta"),
-        HighlightColorItem("#BAE6FD", "Azul Cielo"),
-        HighlightColorItem("#E9D5FF", "Lavanda"),
-        HighlightColorItem("#FBCFE8", "Rosa Pastel"),
-        HighlightColorItem("#FED7AA", "Melocotón")
+        // Tonos principales (claros, definidos y equilibrados estilo YouVersion)
+        HighlightColorItem("#38BDF8", "Azul Cielo"),
+        HighlightColorItem("#22C55E", "Verde Esmeralda"),
+        HighlightColorItem("#A855F7", "Púrpura Real"),
+        HighlightColorItem("#EF4444", "Rojo Puro"),
+        HighlightColorItem("#F97316", "Naranja Cálido"),
+        HighlightColorItem("#FACC15", "Amarillo Marcador"),
+        // Tonos secundarios definidos y distinguibles
+        HighlightColorItem("#14B8A6", "Turquesa Menta"),
+        HighlightColorItem("#6366F1", "Azul Índigo"),
+        HighlightColorItem("#8B5CF6", "Violeta Amatista"),
+        HighlightColorItem("#EC4899", "Rosa Fucsia"),
+        HighlightColorItem("#F59E0B", "Ámbar Miel")
     )
 }
 
