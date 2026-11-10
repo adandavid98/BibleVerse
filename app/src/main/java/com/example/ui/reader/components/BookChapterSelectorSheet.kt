@@ -135,8 +135,6 @@ fun BookChapterSelectorSheet(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .navigationBarsPadding()
-                        .imePadding()
                         .padding(horizontal = 20.dp)
                         .padding(top = 8.dp, bottom = 12.dp)
                 ) {
@@ -206,7 +204,9 @@ fun BookChapterSelectorSheet(
 
                             LazyColumn(
                                 state = bookListState,
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth(),
                                 contentPadding = PaddingValues(bottom = 36.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
