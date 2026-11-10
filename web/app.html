@@ -29,13 +29,13 @@
         <span>BibleVerse</span>
       </div>
       <div class="top-bar-actions">
-        <button class="icon-btn" id="btn-open-ai" title="Asistente Bíblico con IA">
+        <button class="icon-btn" id="btn-open-ai" title="Asistente Teológico con IA">
           <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
           </svg>
           <span class="badge-ai">IA</span>
         </button>
-        <button class="icon-btn" id="btn-open-settings" title="Ajustes">
+        <button class="icon-btn" id="btn-open-settings" title="Ajustes de Lectura">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -44,13 +44,12 @@
       </div>
     </header>
 
-    <!-- Área de Contenido con Scroll -->
+    <!-- Área de Contenido Principal -->
     <main class="main-content">
 
       <!-- Pestaña 1: Versículos & Devocionales (Home) -->
       <section class="tab-pane active" id="tab-verses">
-        <!-- Card Versículo del Día -->
-        <article class="verse-of-day-card" id="verse-day-card">
+        <article class="verse-of-day-card">
           <span class="verse-tag" id="vod-tag">Fortaleza</span>
           <p class="verse-quote" id="vod-quote">"Cargando..."</p>
           <div class="verse-reference" id="vod-ref">-</div>
@@ -70,47 +69,43 @@
           </div>
         </article>
 
-        <!-- Chips de Filtro Rápido -->
+        <!-- Chips de Filtro Rápido de Categorías -->
         <div class="chips-scroll">
           <button class="chip active">Todos</button>
           <button class="chip">Paz en la Ansiedad</button>
           <button class="chip">Propósito de Dios</button>
           <button class="chip">Sanidad y Fe</button>
           <button class="chip">Sabiduría</button>
+          <button class="chip">Fortaleza</button>
         </div>
 
-        <!-- Lista de Versículos Destacados -->
+        <!-- Feed de Versículos Temáticos -->
         <div id="popular-verses-feed">
-          <div class="verse-item-card">
-            <span class="verse-tag">Paz</span>
-            <div style="font-weight:700; color:var(--secondary-color); margin:6px 0;">Salmos 23:1</div>
-            <div style="font-family:var(--font-serif); line-height:1.6;">"Jehová es mi pastor; nada me faltará."</div>
-          </div>
-          <div class="verse-item-card">
-            <span class="verse-tag">Esperanza</span>
-            <div style="font-weight:700; color:var(--secondary-color); margin:6px 0;">Jeremías 29:11</div>
-            <div style="font-family:var(--font-serif); line-height:1.6;">"Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal..."</div>
-          </div>
-          <div class="verse-item-card">
-            <span class="verse-tag">Fe</span>
-            <div style="font-weight:700; color:var(--secondary-color); margin:6px 0;">Romanos 8:28</div>
-            <div style="font-family:var(--font-serif); line-height:1.6;">"Y sabemos que a los que aman a Dios, todas las cosas les ayudan a bien..."</div>
-          </div>
+          <!-- Renderizado dinámico -->
         </div>
       </section>
 
       <!-- Pestaña 2: Lector Bíblico 100% Interactivo -->
       <section class="tab-pane" id="tab-reader">
         <div class="reader-header">
-          <div class="book-selector" id="btn-select-book">
+          <div class="book-selector" id="btn-select-book" title="Cambiar libro o capítulo">
             <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
             <span id="reader-book-name">Salmos 23</span>
             <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
           </div>
-          <span class="version-pill">RVR 1960</span>
+          
+          <div class="version-pill" id="btn-open-version-selector" title="Cambiar versión bíblica">
+            <span id="reader-version-code">RVR1960</span>
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+          </div>
         </div>
 
-        <!-- Texto Bíblico con Versículos Clickeables -->
+        <div class="reader-nav-arrows">
+          <button class="reader-arrow-btn" id="btn-prev-chapter">← Capítulo Anterior</button>
+          <button class="reader-arrow-btn" id="btn-next-chapter">Siguiente Capítulo →</button>
+        </div>
+
+        <!-- Lista de Versículos con Selección y Resaltado -->
         <div class="bible-text-container" id="bible-verses-list">
           <!-- Renderizado dinámico -->
         </div>
@@ -118,27 +113,18 @@
 
       <!-- Pestaña 3: Buscador Bíblico -->
       <section class="tab-pane" id="tab-search">
-        <div class="search-input-box">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <input type="text" id="search-input" placeholder="Buscar versículos, temas o libros...">
+        <div class="search-input-box" style="display:flex; align-items:center; gap:10px; background:var(--surface-color); border:1px solid var(--border-color); border-radius:28px; padding:10px 18px; margin-bottom:16px;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="search-input" placeholder="Buscar versículos, temas o promesas..." style="flex:1; background:transparent; border:none; outline:none; font-size:0.95rem; color:var(--text-primary);">
         </div>
         <div id="search-results">
-          <div class="empty-state">
-            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <p>Escribe una palabra o tema bíblico para buscar al instante.</p>
-          </div>
+          <!-- Renderizado dinámico -->
         </div>
       </section>
 
-      <!-- Pestaña 4: Favoritos y Notas -->
+      <!-- Pestaña 4: Favoritos y Notas Guardadas -->
       <section class="tab-pane" id="tab-favorites">
-        <h3 style="font-size:1.1rem; color:var(--primary-color); margin-bottom:14px;">Mis Versículos Guardados</h3>
+        <h3 style="font-size:1.15rem; color:var(--primary-color); margin-bottom:14px; font-weight:800;">Mis Versículos Guardados</h3>
         <div id="favorites-list">
           <!-- Renderizado dinámico -->
         </div>
@@ -146,17 +132,58 @@
 
     </main>
 
-    <!-- Barra Flotante de Resaltadores (Aparece al tocar un versículo) -->
-    <div class="highlight-toolbar" id="highlight-toolbar">
-      <div class="color-dot" style="background:#FACC15;" data-color="yellow" title="Amarillo"></div>
-      <div class="color-dot" style="background:#22C55E;" data-color="green" title="Verde"></div>
-      <div class="color-dot" style="background:#38BDF8;" data-color="blue" title="Azul"></div>
-      <div class="color-dot" style="background:#EC4899;" data-color="pink" title="Rosa"></div>
-      <div class="color-dot" style="background:#F97316;" data-color="orange" title="Naranja"></div>
-      <div class="color-dot" style="background:#E2E8F0; text-align:center; font-size:12px; line-height:24px; color:#64748B;" data-color="clear" title="Quitar">✕</div>
-      <button class="icon-btn" id="btn-copy-selected" style="width:30px; height:30px;" title="Copiar">
-        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-      </button>
+    <!-- VerseActionBar - Bottom Sheet Idéntico a Android (YouVersion Style) -->
+    <div class="verse-action-bar" id="verse-action-bar">
+      <div class="sheet-drag-handle"></div>
+      
+      <!-- Fila Superior: Deseleccionar, Contador y Paleta de 5 Colores -->
+      <div class="action-bar-top-row">
+        <div class="selection-info">
+          <button class="icon-btn" id="btn-clear-selection" style="width:30px; height:30px;" title="Cerrar selección">✕</button>
+          <span id="selection-count-text">1 selec.</span>
+        </div>
+
+        <div class="palette-swatches">
+          <!-- Botón Quitar Resaltado -->
+          <div class="reset-swatch" id="btn-reset-highlight" title="Quitar resaltado">✕</div>
+          <!-- 5 Colores Oficiales -->
+          <div class="color-swatch" style="background:#FACC15;" data-hex="#FACC15" title="Amarillo"></div>
+          <div class="color-swatch" style="background:#22C55E;" data-hex="#22C55E" title="Verde"></div>
+          <div class="color-swatch" style="background:#38BDF8;" data-hex="#38BDF8" title="Azul"></div>
+          <div class="color-swatch" style="background:#EC4899;" data-hex="#EC4899" title="Rosa"></div>
+          <div class="color-swatch" style="background:#F97316;" data-hex="#F97316" title="Naranja"></div>
+        </div>
+      </div>
+
+      <div class="action-bar-divider"></div>
+
+      <!-- Fila de Acciones Rápidas (Explicar con IA, Comparar, Copiar, Guardar, Imagen) -->
+      <div class="action-bar-buttons-row">
+        <button class="action-pill-btn" id="btn-action-explain">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg>
+          <span>Explicar</span>
+        </button>
+
+        <button class="action-pill-btn" id="btn-action-compare">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M9.01 14H2v2h7.01v3L13 15l-3.99-4v3zm5.98-1v-3H22V8h-7.01V5L11 9l3.99 4z"/></svg>
+          <span>Comparar</span>
+        </button>
+
+        <button class="action-pill-btn" id="btn-action-image">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+          <span>Imagen</span>
+        </button>
+
+        <button class="action-pill-btn" id="btn-action-copy">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+          <span>Copiar</span>
+        </button>
+
+        <button class="action-pill-btn" id="btn-action-save">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
+          <span>Guardar</span>
+        </button>
+      </div>
     </div>
 
     <!-- Bottom Navigation Bar (Material 3 Tabs) -->
@@ -190,48 +217,167 @@
       </button>
     </nav>
 
-    <!-- Modal de Ajustes -->
-    <div class="modal-overlay" id="settings-modal">
-      <div class="bottom-sheet">
-        <div class="sheet-header">
-          <h3 style="color:var(--primary-color);">Ajustes de Lectura</h3>
-          <button class="icon-btn" id="btn-close-settings">✕</button>
+    <!-- Modal 1: Selector de Libros y Capítulos (BookChapterSelectorSheet) -->
+    <div class="modal-overlay" id="book-selector-modal">
+      <div class="full-bottom-sheet">
+        <div class="sheet-header-title">
+          <h3 style="color:var(--primary-color); font-weight:800;">Seleccionar Pasaje</h3>
+          <button class="icon-btn" id="btn-close-book-selector">✕</button>
         </div>
 
-        <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:8px;">Tema y Paleta Visual:</p>
-        <div class="theme-options-grid">
-          <div class="theme-card light-card active" data-theme-val="light">☀️ Claro (Luz)</div>
-          <div class="theme-card sepia-card" data-theme-val="sepia">📖 Sepia Cálido</div>
-          <div class="theme-card dark-card" data-theme-val="dark">🌙 Noche Profunda</div>
+        <!-- Paso 1: Lista de Libros -->
+        <div id="selector-step-books">
+          <!-- Filtros de Testamento -->
+          <div style="display:flex; gap:8px; margin-bottom:12px;">
+            <button class="chip testament-tab active" data-filter="ALL">Todos</button>
+            <button class="chip testament-tab" data-filter="AT">Antiguo T. (39)</button>
+            <button class="chip testament-tab" data-filter="NT">Nuevo T. (27)</button>
+          </div>
+
+          <div style="background:var(--surface-color); border:1px solid var(--border-color); border-radius:20px; padding:8px 14px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="book-search-input" placeholder="Buscar libro..." style="border:none; background:transparent; width:100%; outline:none; font-size:0.9rem; color:var(--text-primary);">
+          </div>
+
+          <div id="selector-books-list" style="max-height:55vh; overflow-y:auto;">
+            <!-- Libros -->
+          </div>
         </div>
 
-        <div style="margin-top:20px; padding:14px; background:var(--surface-color); border-radius:14px;">
-          <p style="font-weight:700; color:var(--primary-color); margin-bottom:4px;">Estado PWA & Almacenamiento</p>
-          <p style="font-size:0.8rem; color:var(--text-secondary);">Esta aplicación almacena los versículos localmente para leer sin conexión a internet.</p>
+        <!-- Paso 2: Cuadrícula de Capítulos -->
+        <div id="selector-step-chapters" style="display:none;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+            <button class="icon-btn" id="btn-back-to-books">←</button>
+            <div>
+              <h4 id="chapters-book-title" style="font-size:1.15rem; color:var(--primary-color); font-weight:800;">Libro</h4>
+              <span style="font-size:0.8rem; color:var(--text-secondary);">Selecciona un capítulo:</span>
+            </div>
+          </div>
+
+          <div class="chapters-grid" id="selector-chapters-grid" style="max-height:55vh; overflow-y:auto;">
+            <!-- Cuadrícula 1, 2, 3... -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Modal 2: Selector de Versiones Bíblicas (BibleVersionSelectorDialog) -->
+    <div class="modal-overlay" id="version-selector-modal">
+      <div class="full-bottom-sheet">
+        <div class="sheet-header-title">
+          <h3 style="color:var(--primary-color); font-weight:800;">Versiones Bíblicas</h3>
+          <button class="icon-btn" id="btn-close-version-selector">✕</button>
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:14px;">Selecciona la traducción con la que deseas leer las Sagradas Escrituras:</p>
+        <div id="versions-list-container" style="max-height:60vh; overflow-y:auto;">
+          <!-- Renderizado dinámico -->
         </div>
       </div>
     </div>
 
-    <!-- Modal de Asistente Bíblico con IA -->
+    <!-- Modal 3: Comparador de Versículos (VerseVersionComparatorBottomSheet) -->
+    <div class="modal-overlay" id="compare-modal">
+      <div class="full-bottom-sheet">
+        <div class="sheet-header-title">
+          <div>
+            <span style="font-size:0.75rem; text-transform:uppercase; font-weight:bold; color:var(--secondary-color);">Comparador de Versiones</span>
+            <h3 id="compare-citation-title" style="color:var(--primary-color); font-weight:800;">-</h3>
+          </div>
+          <button class="icon-btn" id="btn-close-compare">✕</button>
+        </div>
+        <div id="compare-results-list" style="max-height:60vh; overflow-y:auto;">
+          <!-- Comparación dinámica -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 4: Explicación Teológica con IA (ExplainVerseBottomSheet) -->
+    <div class="modal-overlay" id="explain-modal">
+      <div class="full-bottom-sheet">
+        <div class="sheet-header-title">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="badge-ai" style="font-size:0.8rem;">IA</span>
+            <h3 style="color:var(--primary-color); font-weight:800;">Explicación del Pasaje</h3>
+          </div>
+          <button class="icon-btn" id="btn-close-explain">✕</button>
+        </div>
+        <div style="font-weight:700; color:var(--secondary-color); margin-bottom:4px;" id="explain-citation">-</div>
+        <blockquote id="explain-verse-quote" style="font-family:var(--font-serif); background:var(--surface-color); padding:12px; border-radius:12px; font-style:italic; margin-bottom:14px; border-left:4px solid var(--secondary-color);"></blockquote>
+        <div id="explain-theology-text" style="line-height:1.6; font-size:0.92rem; color:var(--text-primary); max-height:50vh; overflow-y:auto;">
+          <!-- Exégesis -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 5: Chatbot Teológico Completo con IA -->
     <div class="modal-overlay" id="ai-modal">
-      <div class="bottom-sheet" style="max-height:85%;">
-        <div class="sheet-header">
+      <div class="full-bottom-sheet" style="max-height:90%;">
+        <div class="sheet-header-title">
           <div style="display:flex; align-items:center; gap:8px;">
             <span class="badge-ai" style="font-size:0.85rem;">IA</span>
-            <h3 style="color:var(--primary-color);">Asistente Bíblico</h3>
+            <h3 style="color:var(--primary-color); font-weight:800;">Asistente Bíblico</h3>
           </div>
           <button class="icon-btn" id="btn-close-ai">✕</button>
         </div>
 
-        <div id="ai-chat-body" style="height:260px; overflow-y:auto; padding:10px 0;">
-          <div style="background:var(--surface-color); padding:12px; border-radius:14px; margin-bottom:10px; font-size:0.9rem; line-height:1.5;">
-            ¡Paz de Dios! Soy el asistente bíblico de BibleVerse. Puedes preguntarme el contexto de un pasaje, dudas teológicas o pedir una reflexión devocional para tu día.
+        <!-- Chips de Preguntas Rápidas -->
+        <div style="display:flex; gap:6px; overflow-x:auto; margin-bottom:10px; scrollbar-width:none; padding-bottom:4px;">
+          <button class="chip ai-prompt-chip" style="font-size:0.75rem;">¿Contexto histórico?</button>
+          <button class="chip ai-prompt-chip" style="font-size:0.75rem;">¿Qué es la gracia?</button>
+          <button class="chip ai-prompt-chip" style="font-size:0.75rem;">Paz en la ansiedad</button>
+        </div>
+
+        <div id="ai-chat-body" style="flex:1; min-height:220px; max-height:45vh; overflow-y:auto; padding:10px 0;">
+          <div style="background:var(--surface-color); padding:12px; border-radius:14px; margin-bottom:10px; font-size:0.88rem; line-height:1.5;">
+            ¡Paz de Dios! Soy el asistente bíblico de BibleVerse. Puedes preguntarme el contexto histórico de cualquier versículo, dudas teológicas o pedir una reflexión para tu jornada.
           </div>
         </div>
 
         <div style="display:flex; gap:8px; margin-top:10px;">
-          <input type="text" id="ai-chat-input" placeholder="Pregunta sobre un versículo o tema..." style="flex:1; padding:10px 14px; border-radius:20px; border:1px solid var(--border-color); background:var(--surface-color); color:var(--text-primary); outline:none;">
-          <button id="btn-send-ai-prompt" style="background:var(--primary-color); color:var(--on-primary); border:none; border-radius:20px; padding:0 16px; font-weight:bold; cursor:pointer;">Enviar</button>
+          <input type="text" id="ai-chat-input" placeholder="Pregunta sobre la Biblia o teología..." style="flex:1; padding:11px 16px; border-radius:22px; border:1px solid var(--border-color); background:var(--surface-color); color:var(--text-primary); outline:none;">
+          <button id="btn-send-ai-prompt" style="background:var(--primary-color); color:var(--on-primary); border:none; border-radius:22px; padding:0 18px; font-weight:bold; cursor:pointer;">Enviar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 6: Ajustes de Lectura Completos (ReaderSettingsBottomSheet) -->
+    <div class="modal-overlay" id="settings-modal">
+      <div class="full-bottom-sheet">
+        <div class="sheet-header-title">
+          <h3 style="color:var(--primary-color); font-weight:800;">Ajustes de Lectura</h3>
+          <button class="icon-btn" id="btn-close-settings">✕</button>
+        </div>
+
+        <!-- Tema de Pantalla -->
+        <p style="font-size:0.88rem; font-weight:700; color:var(--text-primary); margin-bottom:8px;">Tema de Pantalla:</p>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:18px;">
+          <div class="theme-card light-card active" data-theme-val="light" style="padding:12px 6px; border-radius:12px; border:2px solid var(--border-color); text-align:center; font-size:0.82rem; font-weight:bold; cursor:pointer;">☀️ Claro</div>
+          <div class="theme-card sepia-card" data-theme-val="sepia" style="padding:12px 6px; border-radius:12px; border:2px solid var(--border-color); text-align:center; font-size:0.82rem; font-weight:bold; cursor:pointer;">📖 Sepia</div>
+          <div class="theme-card dark-card" data-theme-val="dark" style="padding:12px 6px; border-radius:12px; border:2px solid var(--border-color); text-align:center; font-size:0.82rem; font-weight:bold; cursor:pointer;">🌙 Noche</div>
+        </div>
+
+        <!-- Tamaño de Letra -->
+        <p style="font-size:0.88rem; font-weight:700; color:var(--text-primary); margin-bottom:8px;">Tamaño de Fuente:</p>
+        <div style="display:flex; align-items:center; justify-content:space-between; background:var(--surface-color); padding:8px 16px; border-radius:14px; margin-bottom:18px;">
+          <button class="action-pill" id="btn-font-smaller" style="font-size:1.1rem; padding:4px 16px;">A -</button>
+          <span id="font-size-label" style="font-weight:bold; color:var(--primary-color);">18px</span>
+          <button class="action-pill" id="btn-font-larger" style="font-size:1.1rem; padding:4px 16px;">A +</button>
+        </div>
+
+        <!-- Interlineado -->
+        <p style="font-size:0.88rem; font-weight:700; color:var(--text-primary); margin-bottom:8px;">Interlineado del Lector:</p>
+        <div style="display:flex; gap:8px; margin-bottom:18px;">
+          <button class="chip line-spacing-pill" data-spacing="1.5">Compacto</button>
+          <button class="chip line-spacing-pill active" data-spacing="1.85">Normal</button>
+          <button class="chip line-spacing-pill" data-spacing="2.2">Amplio</button>
+        </div>
+
+        <!-- Tipografía -->
+        <p style="font-size:0.88rem; font-weight:700; color:var(--text-primary); margin-bottom:8px;">Tipografía:</p>
+        <div style="display:flex; gap:8px; margin-bottom:18px;">
+          <button class="chip font-family-pill active" data-font="serif" style="font-family:var(--font-serif);">Serif Clásica</button>
+          <button class="chip font-family-pill" data-font="sans" style="font-family:var(--font-family);">Sans Moderna</button>
         </div>
       </div>
     </div>

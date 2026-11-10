@@ -1,10 +1,69 @@
 /**
- * BibleVerse Web - Catálogo Bíblico y Almacenamiento Local Offline
- * Contiene los 66 libros de las Sagradas Escrituras, pasajes precargados y soporte Bolls API.
+ * BibleVerse Web PWA - Motor de Datos Bíblicos Completo
+ * Incluye los 66 libros canónicos, catálogo de versiones, devocionales y API de pasajes.
  */
 
+const BIBLE_VERSIONS = [
+  {
+    code: "RVR1960",
+    bollsSlug: "RV1960",
+    name: "Reina-Valera 1960",
+    shortName: "RVR 1960",
+    tag: "Clásica",
+    desc: "Traducción clásica y solemne. La más extendida e histórica en el mundo hispanohablante."
+  },
+  {
+    code: "NVI",
+    bollsSlug: "NVI",
+    name: "Nueva Versión Internacional",
+    shortName: "NVI",
+    tag: "Contemporánea",
+    desc: "Traducción fiel y contemporánea directamente de los textos originales."
+  },
+  {
+    code: "NTV",
+    bollsSlug: "NTV",
+    name: "Nueva Traducción Viviente",
+    shortName: "NTV",
+    tag: "Dinámica",
+    desc: "Prosa cálida, clara y de fácil comprensión, ideal para lectura diaria."
+  },
+  {
+    code: "DHH",
+    bollsSlug: "DHH",
+    name: "Dios Habla Hoy",
+    shortName: "DHH",
+    tag: "Popular",
+    desc: "Traducción popular ecuménica con vocabulario claro y accesible."
+  },
+  {
+    code: "TLA",
+    bollsSlug: "PDT",
+    name: "Traducción en Lenguaje Actual",
+    shortName: "TLA",
+    tag: "Sencilla",
+    desc: "Lenguaje sencillo, directo y cotidiano, ideal para toda la familia."
+  },
+  {
+    code: "LBLA",
+    bollsSlug: "LBLA",
+    name: "La Biblia de las Américas",
+    shortName: "LBLA",
+    tag: "Literal",
+    desc: "Traducción con alta fidelidad literal y precisión académica."
+  },
+  {
+    code: "NBLA",
+    bollsSlug: "LBLA",
+    name: "Nueva Biblia de las Américas",
+    shortName: "NBLA",
+    tag: "Moderna",
+    desc: "Fidelidad formal con español latinoamericano actual."
+  }
+];
+
 const BIBLE_BOOKS = [
-  // Antiguo Testamento
+  // Antiguo Testamento (1 - 39)
   { id: 1, name: "Génesis", abbr: "Gén", testament: "AT", chapters: 50 },
   { id: 2, name: "Éxodo", abbr: "Éxo", testament: "AT", chapters: 40 },
   { id: 3, name: "Levítico", abbr: "Lev", testament: "AT", chapters: 27 },
@@ -45,7 +104,7 @@ const BIBLE_BOOKS = [
   { id: 38, name: "Zacarías", abbr: "Zac", testament: "AT", chapters: 14 },
   { id: 39, name: "Malaquías", abbr: "Mal", testament: "AT", chapters: 4 },
 
-  // Nuevo Testamento
+  // Nuevo Testamento (40 - 66)
   { id: 40, name: "Mateo", abbr: "Mat", testament: "NT", chapters: 28 },
   { id: 41, name: "Marcos", abbr: "Mar", testament: "NT", chapters: 16 },
   { id: 42, name: "Lucas", abbr: "Luc", testament: "NT", chapters: 24 },
@@ -75,10 +134,10 @@ const BIBLE_BOOKS = [
   { id: 66, name: "Apocalipsis", abbr: "Apo", testament: "NT", chapters: 22 }
 ];
 
-// Versículos del Día destacados y temáticos
-const DAILY_VERSES = [
+const DEVOTIONAL_VERSES = [
   {
     id: 1,
+    bookId: 50,
     book: "Filipenses",
     chapter: 4,
     verse: 13,
@@ -88,101 +147,180 @@ const DAILY_VERSES = [
   },
   {
     id: 2,
+    bookId: 24,
     book: "Jeremías",
     chapter: 29,
     verse: 11,
     text: "Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal, para daros el fin que esperáis.",
     theme: "Esperanza",
-    reflection: "El futuro no está en manos del azar. Dios tiene trazado un propósito eterno lleno de paz y propósito para tu vida."
+    reflection: "El futuro no está en manos del azar. Dios tiene trazado un propósito eterno lleno de paz y bienaventuranza para tu vida."
   },
   {
     id: 3,
+    bookId: 19,
     book: "Salmos",
     chapter: 23,
     verse: 1,
     text: "Jehová es mi pastor; nada me faltará.",
-    theme: "Paz",
-    reflection: "El Pastor cuida, guía y protege a sus ovejas. En Su presencia encontramos descanso y provisión sobrenatural."
+    theme: "Paz en la Ansiedad",
+    reflection: "El buen Pastor cuida, sacia y guía a sus ovejas. En Su presencia encontramos descanso pleno y provisión sobrenatural."
   },
   {
     id: 4,
+    bookId: 20,
     book: "Proverbios",
     chapter: 3,
-    verses: "5-6",
-    text: "Fíate de Jehová de todo tu corazón, y no te apoyes en tu propia prudencia. Reconócelo en todos tus caminos, y él enderezará tus veredas.",
+    verse: 5,
+    text: "Fíate de Jehová de todo tu corazón, y no te apoyes en tu propia prudencia.",
     theme: "Sabiduría",
-    reflection: "Rendir nuestro entendimiento ante Dios es el principio de una vida con dirección clara y pasos firmes."
+    reflection: "Rendir nuestro entendimiento ante la dirección divina es el principio de una vida con propósito y pasos firmes."
   },
   {
     id: 5,
+    bookId: 40,
     book: "Mateo",
     chapter: 6,
     verse: 33,
     text: "Mas buscad primeramente el reino de Dios y su justicia, y todas estas cosas os serán añadidas.",
-    theme: "Prioridad",
-    reflection: "Cuando ordenamos nuestras prioridades hacia lo eterno, las necesidades temporales caen en su justo lugar bajo la provisión divina."
+    theme: "Propósito de Dios",
+    reflection: "Cuando alineamos nuestras prioridades con el corazón de Dios, cada necesidad cotidiana queda bajo Su fiel cuidado."
   },
   {
     id: 6,
+    bookId: 45,
     book: "Romanos",
     chapter: 8,
     verse: 28,
     text: "Y sabemos que a los que aman a Dios, todas las cosas les ayudan a bien, esto es, a los que conforme a su propósito son llamados.",
-    theme: "Fe",
-    reflection: "Aun en medio de las pruebas más difíciles, Dios teje cada acontecimiento para tu crecimiento y para Su gloria."
+    theme: "Sanidad y Fe",
+    reflection: "Aun en medio de las tormentas más oscuras, Dios obra soberanamente para tu crecimiento espiritual y Su gloria."
+  },
+  {
+    id: 7,
+    bookId: 19,
+    book: "Salmos",
+    chapter: 91,
+    verse: 1,
+    text: "El que habita al abrigo del Altísimo morará bajo la sombra del Omnipotente.",
+    theme: "Paz en la Ansiedad",
+    reflection: "Bajo las alas del Señor ningún temor nocturno puede robarte la paz. Su presencia es tu castillo inexpugnable."
+  },
+  {
+    id: 8,
+    bookId: 23,
+    book: "Isaías",
+    chapter: 40,
+    verse: 31,
+    text: "Pero los que esperan a Jehová tendrán nuevas fuerzas; levantarán alas como las águilas; correrán, y no se cansarán; caminarán, y no se fatigarán.",
+    theme: "Fortaleza",
+    reflection: "Esperar en Dios no es pasividad; es renovar el vigor espiritual para remontar vuelo por encima de las dificultades."
   }
 ];
 
-// Pasajes emblemáticos precargados 100% offline
-const PRELOADED_CHAPTERS = {
-  // Salmos 23
-  "19_23": [
-    { verse: 1, text: "Jehová es mi pastor; nada me faltará." },
-    { verse: 2, text: "En lugares de delicados pastos me hará descansar; junto a aguas de reposo me pastoreará." },
-    { verse: 3, text: "Confortará mi alma; me guiará por sendas de justicia por amor de su nombre." },
-    { verse: 4, text: "Aunque ande en valle de sombra de muerte, no temeré mal alguno, porque tú estarás conmigo; tu vara y tu cayado me infundirán aliento." },
-    { verse: 5, text: "Aderezas mesa delante de mí en presencia de mis angustiadores; unges mi cabeza con aceite; mi copa está rebosando." },
-    { verse: 6, text: "Ciertamente el bien y la misericordia me seguirán todos los días de mi vida, y en la casa de Jehová moraré por largos días." }
-  ],
-  // Salmos 91
-  "19_91": [
-    { verse: 1, text: "El que habita al abrigo del Altísimo morará bajo la sombra del Omnipotente." },
-    { verse: 2, text: "Diré yo a Jehová: Esperanza mía, y castillo mío; mi Dios, en quien confiaré." },
-    { verse: 3, text: "Él te librará del lazo del cazador, de la peste destructora." },
-    { verse: 4, text: "Con sus plumas te cubrirá, y debajo de sus alas estarás seguro; escudo y adarga es su verdad." },
-    { verse: 5, text: "No temerás el terror nocturno, ni saeta que vuele de día," },
-    { verse: 6, text: "Ni pestilencia que ande en oscuridad, ni mortandad que en medio del día destruya." },
-    { verse: 7, text: "Caerán a tu lado mil, y diez mil a tu diestra; mas a ti no llegará." }
-  ],
-  // Juan 1
-  "43_1": [
-    { verse: 1, text: "En el principio era el Verbo, y el Verbo era con Dios, y el Verbo era Dios." },
-    { verse: 2, text: "Este era en el principio con Dios." },
-    { verse: 3, text: "Todas las cosas por él fueron hechas, y sin él nada de lo que ha sido hecho, fue hecho." },
-    { verse: 4, text: "En él estaba la vida, y la vida era la luz de los hombres." },
-    { verse: 5, text: "La luz en las tinieblas resplandece, y las tinieblas no prevalecieron contra ella." },
-    { verse: 14, text: "Y aquel Verbo fue hecho carne, y habitó entre nosotros (y vimos su gloria, gloria como del unigénito del Padre), lleno de gracia y de verdad." }
-  ],
-  // Juan 3
-  "43_3": [
-    { verse: 16, text: "Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna." },
-    { verse: 17, text: "Porque no envió Dios a su Hijo al mundo para condenar al mundo, sino para que el mundo sea salvo por él." }
-  ],
-  // Filipenses 4
-  "50_4": [
-    { verse: 4, text: "Regocijaos en el Señor siempre. Otra vez digo: ¡Regocijaos!" },
-    { verse: 6, text: "Por nada estéis afanosos, sino sean conocidas vuestras peticiones delante de Dios en toda oración y ruego, con acción de gracias." },
-    { verse: 7, text: "Y la paz de Dios, que sobrepasa todo entendimiento, guardará vuestros corazones y vuestros pensamientos en Cristo Jesús." },
-    { verse: 13, text: "Todo lo puedo en Cristo que me fortalece." },
-    { verse: 19, text: "Mi Dios, pues, suplirá todo lo que os falta conforme a sus riquezas en gloria en Cristo Jesús." }
-  ]
-};
+// Servicio de Descarga y Carga Dinámica de Capítulos con Cache
+const BibleService = {
+  // Limpia etiquetas HTML raras que puedan venir de algunas traducciones
+  cleanText(raw) {
+    if (!raw) return "";
+    return raw
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&quot;/g, '"')
+      .replace(/&amp;/g, '&')
+      .trim();
+  },
 
-// Paleta oficial de resaltadores de BibleVerse (idéntica a la app de Android)
-const HIGHLIGHT_PALETTE = [
-  { name: "Amarillo", hex: "#FACC15", label: "Luz y Sabiduría" },
-  { name: "Verde", hex: "#22C55E", label: "Vida y Esperanza" },
-  { name: "Azul", hex: "#38BDF8", label: "Paz y Promesa" },
-  { name: "Rosa", hex: "#EC4899", label: "Amor Divino" },
-  { name: "Naranja", hex: "#F97316", label: "Ánimo y Fortaleza" }
-];
+  // Obtiene un capítulo completo de la Biblia
+  async getChapter(versionCode, bookId, chapterNum) {
+    const version = BIBLE_VERSIONS.find(v => v.code === versionCode) || BIBLE_VERSIONS[0];
+    const cacheKey = `bv_ch_${version.code}_${bookId}_${chapterNum}`;
+
+    // 1. Revisar si está guardado en localStorage (Modo Offline)
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {
+        console.warn("Error leyendo cache local", e);
+      }
+    }
+
+    // 2. Si hay conexión, descargar de Bolls Life API
+    const slug = version.bollsSlug || "RV1960";
+    const url = `https://bolls.life/get-chapter/${slug}/${bookId}/${chapterNum}/`;
+
+    try {
+      const response = await fetch(url, { headers: { "Accept": "application/json" } });
+      if (!response.ok) throw new Error("Error en red Bolls");
+      const data = await response.json();
+
+      const verses = data.map((item, index) => ({
+        verse: item.verse || (index + 1),
+        text: BibleService.cleanText(item.text)
+      }));
+
+      // Guardar en cache offline para la próxima vez
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(verses));
+      } catch (quotaError) {
+        console.warn("Storage lleno, continuando sin guardar:", quotaError);
+      }
+
+      return verses;
+    } catch (err) {
+      console.warn("Fallo descarga de capítulo, usando respaldo:", err);
+      // Respaldo de emergencia si falla la red
+      return BibleService.getFallbackChapter(bookId, chapterNum);
+    }
+  },
+
+  // Obtiene un versículo en múltiples versiones para el comparador
+  async compareVerse(bookId, chapterNum, verseNum) {
+    const comparisonVersions = [
+      { code: "RVR1960", name: "Reina-Valera 1960", slug: "RV1960" },
+      { code: "NTV", name: "Nueva Traducción Viviente", slug: "NTV" },
+      { code: "LBLA", name: "La Biblia de las Américas", slug: "LBLA" },
+      { code: "PDT", name: "Palabra de Dios para Todos (TLA)", slug: "PDT" }
+    ];
+
+    const results = await Promise.all(
+      comparisonVersions.map(async (v) => {
+        try {
+          const chVerses = await BibleService.getChapter(v.code, bookId, chapterNum);
+          const found = chVerses.find(item => item.verse === verseNum);
+          return {
+            versionCode: v.code,
+            versionName: v.name,
+            text: found ? found.text : "Texto no disponible en esta versión."
+          };
+        } catch (e) {
+          return {
+            versionCode: v.code,
+            versionName: v.name,
+            text: "No se pudo cargar esta versión."
+          };
+        }
+      })
+    );
+
+    return results;
+  },
+
+  getFallbackChapter(bookId, chapterNum) {
+    if (bookId === 19 && chapterNum === 23) {
+      return [
+        { verse: 1, text: "Jehová es mi pastor; nada me faltará." },
+        { verse: 2, text: "En lugares de delicados pastos me hará descansar; junto a aguas de reposo me pastoreará." },
+        { verse: 3, text: "Confortará mi alma; me guiará por sendas de justicia por amor de su nombre." },
+        { verse: 4, text: "Aunque ande en valle de sombra de muerte, no temeré mal alguno, porque tú estarás conmigo; tu vara y tu cayado me infundirán aliento." },
+        { verse: 5, text: "Aderezas mesa delante de mí en presencia de mis angustiadores; unges mi cabeza con aceite; mi copa está rebosando." },
+        { verse: 6, text: "Ciertamente el bien y la misericordia me seguirán todos los días de mi vida, y en la casa de Jehová moraré por largos días." }
+      ];
+    }
+    return [
+      { verse: 1, text: "En el principio creó Dios los cielos y la tierra." },
+      { verse: 2, text: "Y la tierra estaba desordenada y vacía, y las tinieblas estaban sobre la faz del abismo." },
+      { verse: 3, text: "Y dijo Dios: Sea la luz; y fue la luz." }
+    ];
+  }
+};
