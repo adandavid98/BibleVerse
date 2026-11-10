@@ -112,8 +112,11 @@ jobs:
           echo "APK built at: $APK_PATH"
           mkdir -p build-artifacts
           OUTPUT_APK="build-artifacts/BibleVerse-${VERSION_TAG}.apk"
+          LATEST_APK="build-artifacts/BibleVerse-latest.apk"
           cp "$APK_PATH" "$OUTPUT_APK"
+          cp "$APK_PATH" "$LATEST_APK"
           echo "FINAL_APK=$OUTPUT_APK" >> $GITHUB_ENV
+          echo "LATEST_APK=$LATEST_APK" >> $GITHUB_ENV
 
       - name: Create GitHub Release and Upload APK
         uses: softprops/action-gh-release@v2
@@ -126,13 +129,14 @@ jobs:
             ¡Nueva versión disponible para instalar directamente en tu teléfono Android!
             
             ### 📥 Descarga directa del instalador:
-            - Descarga el archivo **`BibleVerse-${{ env.VERSION_TAG }}.apk`** adjunto abajo.
+            - Descarga el archivo **`BibleVerse-${{ env.VERSION_TAG }}.apk`** (o **`BibleVerse-latest.apk`**) adjunto abajo.
             - También puedes actualizar automáticamente desde la aplicación en **Ajustes > Actualizaciones de la Aplicación**.
             
             ---
             *Compilado automáticamente mediante GitHub Actions.*
           files: |
             ${{ env.FINAL_APK }}
+            ${{ env.LATEST_APK }}
           draft: false
           prerelease: false
           make_latest: true

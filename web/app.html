@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>BibleVerse - Santa Biblia y Devocionales</title>
+
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#1E3A5F">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BibleVerse">
+  <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="./assets/icons/favicon.png">
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="./css/app.css">
+</head>
+<body>
+
+  <!-- Contenedor Responsivo Centralizado (Estilo Teléfono en Desktop / Pantalla Completa en Móvil) -->
+  <div class="app-container">
+
+    <!-- Top App Bar (Material 3) -->
+    <header class="top-bar">
+      <div class="top-bar-title">
+        <img src="./assets/icons/app-logo.svg" alt="BibleVerse Logo">
+        <span>BibleVerse</span>
+      </div>
+      <div class="top-bar-actions">
+        <button class="icon-btn" id="btn-open-ai" title="Asistente Bíblico con IA">
+          <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
+          </svg>
+          <span class="badge-ai">IA</span>
+        </button>
+        <button class="icon-btn" id="btn-open-settings" title="Ajustes">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Área de Contenido con Scroll -->
+    <main class="main-content">
+
+      <!-- Pestaña 1: Versículos & Devocionales (Home) -->
+      <section class="tab-pane active" id="tab-verses">
+        <!-- Card Versículo del Día -->
+        <article class="verse-of-day-card" id="verse-day-card">
+          <span class="verse-tag" id="vod-tag">Fortaleza</span>
+          <p class="verse-quote" id="vod-quote">"Cargando..."</p>
+          <div class="verse-reference" id="vod-ref">-</div>
+          <div class="reflection-box">
+            <strong style="color:var(--primary-color); display:block; margin-bottom:4px;">Reflexión de hoy:</strong>
+            <span id="vod-reflection">-</span>
+          </div>
+          <div class="card-actions">
+            <button class="action-pill" id="btn-fav-vod">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              Favorito
+            </button>
+            <button class="action-pill" id="btn-share-vod">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
+              Compartir
+            </button>
+          </div>
+        </article>
+
+        <!-- Chips de Filtro Rápido -->
+        <div class="chips-scroll">
+          <button class="chip active">Todos</button>
+          <button class="chip">Paz en la Ansiedad</button>
+          <button class="chip">Propósito de Dios</button>
+          <button class="chip">Sanidad y Fe</button>
+          <button class="chip">Sabiduría</button>
+        </div>
+
+        <!-- Lista de Versículos Destacados -->
+        <div id="popular-verses-feed">
+          <div class="verse-item-card">
+            <span class="verse-tag">Paz</span>
+            <div style="font-weight:700; color:var(--secondary-color); margin:6px 0;">Salmos 23:1</div>
+            <div style="font-family:var(--font-serif); line-height:1.6;">"Jehová es mi pastor; nada me faltará."</div>
+          </div>
+          <div class="verse-item-card">
+            <span class="verse-tag">Esperanza</span>
+            <div style="font-weight:700; color:var(--secondary-color); margin:6px 0;">Jeremías 29:11</div>
+            <div style="font-family:var(--font-serif); line-height:1.6;">"Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal..."</div>
+          </div>
+          <div class="verse-item-card">
+            <span class="verse-tag">Fe</span>
+            <div style="font-weight:700; color:var(--secondary-color); margin:6px 0;">Romanos 8:28</div>
+            <div style="font-family:var(--font-serif); line-height:1.6;">"Y sabemos que a los que aman a Dios, todas las cosas les ayudan a bien..."</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pestaña 2: Lector Bíblico 100% Interactivo -->
+      <section class="tab-pane" id="tab-reader">
+        <div class="reader-header">
+          <div class="book-selector" id="btn-select-book">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+            <span id="reader-book-name">Salmos 23</span>
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+          </div>
+          <span class="version-pill">RVR 1960</span>
+        </div>
+
+        <!-- Texto Bíblico con Versículos Clickeables -->
+        <div class="bible-text-container" id="bible-verses-list">
+          <!-- Renderizado dinámico -->
+        </div>
+      </section>
+
+      <!-- Pestaña 3: Buscador Bíblico -->
+      <section class="tab-pane" id="tab-search">
+        <div class="search-input-box">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="search-input" placeholder="Buscar versículos, temas o libros...">
+        </div>
+        <div id="search-results">
+          <div class="empty-state">
+            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <p>Escribe una palabra o tema bíblico para buscar al instante.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pestaña 4: Favoritos y Notas -->
+      <section class="tab-pane" id="tab-favorites">
+        <h3 style="font-size:1.1rem; color:var(--primary-color); margin-bottom:14px;">Mis Versículos Guardados</h3>
+        <div id="favorites-list">
+          <!-- Renderizado dinámico -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Barra Flotante de Resaltadores (Aparece al tocar un versículo) -->
+    <div class="highlight-toolbar" id="highlight-toolbar">
+      <div class="color-dot" style="background:#FACC15;" data-color="yellow" title="Amarillo"></div>
+      <div class="color-dot" style="background:#22C55E;" data-color="green" title="Verde"></div>
+      <div class="color-dot" style="background:#38BDF8;" data-color="blue" title="Azul"></div>
+      <div class="color-dot" style="background:#EC4899;" data-color="pink" title="Rosa"></div>
+      <div class="color-dot" style="background:#F97316;" data-color="orange" title="Naranja"></div>
+      <div class="color-dot" style="background:#E2E8F0; text-align:center; font-size:12px; line-height:24px; color:#64748B;" data-color="clear" title="Quitar">✕</div>
+      <button class="icon-btn" id="btn-copy-selected" style="width:30px; height:30px;" title="Copiar">
+        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+      </button>
+    </div>
+
+    <!-- Bottom Navigation Bar (Material 3 Tabs) -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-tab="verses">
+        <div class="nav-pill">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
+        </div>
+        <span>Versículos</span>
+      </button>
+
+      <button class="nav-item" data-tab="reader">
+        <div class="nav-pill">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19 1l-5 5v11l5-4.5V1zM1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5V6c-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6zm22 13.5V6c-.6-.45-1.25-.75-2-1V17.5c.75.25 1.4.55 2 1z"/></svg>
+        </div>
+        <span>Lector</span>
+      </button>
+
+      <button class="nav-item" data-tab="search">
+        <div class="nav-pill">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </div>
+        <span>Buscador</span>
+      </button>
+
+      <button class="nav-item" data-tab="favorites">
+        <div class="nav-pill">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </div>
+        <span>Favoritos</span>
+      </button>
+    </nav>
+
+    <!-- Modal de Ajustes -->
+    <div class="modal-overlay" id="settings-modal">
+      <div class="bottom-sheet">
+        <div class="sheet-header">
+          <h3 style="color:var(--primary-color);">Ajustes de Lectura</h3>
+          <button class="icon-btn" id="btn-close-settings">✕</button>
+        </div>
+
+        <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:8px;">Tema y Paleta Visual:</p>
+        <div class="theme-options-grid">
+          <div class="theme-card light-card active" data-theme-val="light">☀️ Claro (Luz)</div>
+          <div class="theme-card sepia-card" data-theme-val="sepia">📖 Sepia Cálido</div>
+          <div class="theme-card dark-card" data-theme-val="dark">🌙 Noche Profunda</div>
+        </div>
+
+        <div style="margin-top:20px; padding:14px; background:var(--surface-color); border-radius:14px;">
+          <p style="font-weight:700; color:var(--primary-color); margin-bottom:4px;">Estado PWA & Almacenamiento</p>
+          <p style="font-size:0.8rem; color:var(--text-secondary);">Esta aplicación almacena los versículos localmente para leer sin conexión a internet.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Asistente Bíblico con IA -->
+    <div class="modal-overlay" id="ai-modal">
+      <div class="bottom-sheet" style="max-height:85%;">
+        <div class="sheet-header">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="badge-ai" style="font-size:0.85rem;">IA</span>
+            <h3 style="color:var(--primary-color);">Asistente Bíblico</h3>
+          </div>
+          <button class="icon-btn" id="btn-close-ai">✕</button>
+        </div>
+
+        <div id="ai-chat-body" style="height:260px; overflow-y:auto; padding:10px 0;">
+          <div style="background:var(--surface-color); padding:12px; border-radius:14px; margin-bottom:10px; font-size:0.9rem; line-height:1.5;">
+            ¡Paz de Dios! Soy el asistente bíblico de BibleVerse. Puedes preguntarme el contexto de un pasaje, dudas teológicas o pedir una reflexión devocional para tu día.
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <input type="text" id="ai-chat-input" placeholder="Pregunta sobre un versículo o tema..." style="flex:1; padding:10px 14px; border-radius:20px; border:1px solid var(--border-color); background:var(--surface-color); color:var(--text-primary); outline:none;">
+          <button id="btn-send-ai-prompt" style="background:var(--primary-color); color:var(--on-primary); border:none; border-radius:20px; padding:0 16px; font-weight:bold; cursor:pointer;">Enviar</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="./js/bible-data.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

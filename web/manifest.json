@@ -1,0 +1,49 @@
+{
+  "name": "BibleVerse - Santa Biblia y Devocionales",
+  "short_name": "BibleVerse",
+  "description": "Tu Biblia personal, devocionales y asistente de estudio 100% offline y sin anuncios.",
+  "start_url": "./app.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FBF9F5",
+  "theme_color": "#1E3A5F",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "./assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icons/app-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["books", "lifestyle", "education"],
+  "shortcuts": [
+    {
+      "name": "Lector Bíblico",
+      "short_name": "Lector",
+      "description": "Continuar tu lectura bíblica",
+      "url": "./app.html#reader",
+      "icons": [{ "src": "./assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Versículo del Día",
+      "short_name": "Diario",
+      "description": "Ver el versículo y reflexión de hoy",
+      "url": "./app.html#daily",
+      "icons": [{ "src": "./assets/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
