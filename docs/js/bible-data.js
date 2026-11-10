@@ -584,10 +584,11 @@ async function getOfficialChapterAudioUrl(version, bookId, chapter) {
 // =========================================================================
 const GEMINI_INTEGRATED_KEY = "AQ.Ab8RN6LZvsGY" + "zdV9eGWT7wBLkER47" + "KM7Vh6I4GgtHW_OAJfOeQ";
 const GEMINI_MODELS = [
-  "gemini-3-flash-preview",
-  "gemini-3.1-flash-lite-preview",
+  "gemini-flash-lite-latest",
+  "gemini-3.1-flash-lite",
   "gemini-flash-latest",
-  "gemini-2.0-flash"
+  "gemini-3.8-flash",
+  "gemini-2.5-flash-lite"
 ];
 
 function getLocalScholarlyExegesis(bookName, chapter = 1, verse = "1", verseText = "") {
