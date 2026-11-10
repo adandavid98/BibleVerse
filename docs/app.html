@@ -877,6 +877,17 @@
             <span>Scroll continuo entre capítulos</span>
             <input type="checkbox" id="toggle-continuous-scroll" class="ui-switch">
           </div>
+
+          <div class="action-bar-divider" style="margin:16px 0 12px 0;"></div>
+          <label class="modal-label">✨ Inteligencia Artificial Gemini (Opcional)</label>
+          <p style="font-size:0.8rem; color:var(--text-muted); margin:0 0 8px 0; line-height:1.4;">
+            Si configuraste <code>GEMINI_API_KEY</code> en las Variables de Entorno de Vercel, la IA funciona automáticamente y protegida. También puedes ingresar tu clave gratuita de Google AI Studio aquí:
+          </p>
+          <div style="display:flex; gap:8px;">
+            <input type="password" id="input-custom-gemini-key" placeholder="AIzaSy..." style="flex:1; padding:8px 12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-primary); font-family:monospace; font-size:0.85rem;" />
+            <button class="chip" id="btn-save-gemini-key" style="background:var(--accent-gold); color:#1a1306; font-weight:700; border:none; cursor:pointer;">Guardar</button>
+          </div>
+          <div id="gemini-key-status" style="font-size:0.75rem; color:var(--accent-gold); margin-top:6px; min-height:16px;"></div>
         </div>
       </div>
     </div>

@@ -1749,6 +1749,36 @@ document.addEventListener("DOMContentLoaded", () => {
     applyReaderVisualPreferences();
   });
 
+  const inputGeminiKey = document.getElementById("input-custom-gemini-key");
+  const btnSaveGeminiKey = document.getElementById("btn-save-gemini-key");
+  const lblGeminiStatus = document.getElementById("gemini-key-status");
+
+  function refreshGeminiKeyStatus() {
+    const saved = localStorage.getItem("bibleverse_custom_gemini_key");
+    if (inputGeminiKey && saved) {
+      inputGeminiKey.value = saved;
+    }
+    if (lblGeminiStatus) {
+      if (saved) {
+        lblGeminiStatus.textContent = "✓ Clave personalizada activa (" + saved.substring(0, 6) + "...)";
+      } else {
+        lblGeminiStatus.textContent = "ℹ️ Conectando vía Vercel Serverless / Motor Teológico Local";
+      }
+    }
+  }
+  refreshGeminiKeyStatus();
+
+  btnSaveGeminiKey?.addEventListener("click", () => {
+    const val = inputGeminiKey?.value?.trim() || "";
+    if (val) {
+      localStorage.setItem("bibleverse_custom_gemini_key", val);
+      if (lblGeminiStatus) lblGeminiStatus.textContent = "✓ Clave guardada correctamente.";
+    } else {
+      localStorage.removeItem("bibleverse_custom_gemini_key");
+      if (lblGeminiStatus) lblGeminiStatus.textContent = "Clave eliminada. Usando Vercel / Motor Local.";
+    }
+  });
+
   // =========================================================================
   // 11. MÓDULO 5: PLANES DE LECTURA Y DEVOCIONALES (26 Planes + Personalizados)
   // =========================================================================
