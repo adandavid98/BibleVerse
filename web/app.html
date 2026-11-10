@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>BibleVerse - Santa Biblia y Devocionales</title>
+  <title>BibleVerse - Santa Biblia, Planes y Estudio Teológico</title>
 
   <!-- PWA Meta Tags -->
   <link rel="manifest" href="./manifest.json">
@@ -19,24 +19,37 @@
 </head>
 <body>
 
-  <!-- Contenedor Responsivo Centralizado (Estilo Teléfono en Desktop / Pantalla Completa en Móvil) -->
-  <div class="app-container">
+  <div class="app-container" id="app-root">
 
-    <!-- Top App Bar (Material 3) -->
-    <header class="top-bar">
-      <div class="top-bar-title">
+    <!-- ===================================================================
+         TOP APP BAR (Visible en Versículos, Buscador y Favoritos)
+         Oculta en Lector y Ajustes igual que en HomeScreen.kt de Android
+         =================================================================== -->
+    <header class="top-bar" id="main-top-bar">
+      <div class="top-bar-title" id="btn-scroll-top" title="Subir al inicio">
         <img src="./assets/icons/app-logo.svg" alt="BibleVerse Logo">
-        <span>BibleVerse</span>
+        <div class="top-bar-title-texts">
+          <span class="brand-main">BibleVerse</span>
+          <span class="brand-sub">Compilación Canónica Fundamental</span>
+        </div>
       </div>
       <div class="top-bar-actions">
-        <button class="icon-btn" id="btn-open-ai" title="Asistente Teológico con IA">
-          <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24">
+        <button class="icon-btn ai-pill-trigger" id="btn-open-ai" title="Asistente Bíblico con IA">
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
           </svg>
           <span class="badge-ai">IA</span>
         </button>
-        <button class="icon-btn" id="btn-open-settings" title="Ajustes de Lectura">
-          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <button class="icon-btn" id="btn-open-plans-top" title="Planes de Lectura y Devocionales">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </button>
+        <button class="icon-btn" id="btn-open-settings" title="Ajustes de la Aplicación">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
@@ -44,99 +57,363 @@
       </div>
     </header>
 
-    <!-- Área de Contenido Principal -->
-    <main class="main-content">
+    <!-- ===================================================================
+         MAIN CONTENT AREA
+         =================================================================== -->
+    <main class="main-content" id="main-scroll-container">
 
-      <!-- Pestaña 1: Versículos & Devocionales (Home) -->
+      <!-- ===============================================================
+           PESTAÑA 0: VERSÍCULOS Y DEVOCIONALES (VersesListTab.kt)
+           =============================================================== -->
       <section class="tab-pane active" id="tab-verses">
-        <article class="verse-of-day-card">
-          <span class="verse-tag" id="vod-tag">Fortaleza</span>
+
+        <!-- Tarjeta CONTINUAR LECTURA -->
+        <div class="continue-reading-card" id="continue-reading-card">
+          <div class="continue-reading-info">
+            <span class="continue-eyebrow">📖 CONTINUAR LECTURA</span>
+            <strong id="continue-reading-label">Salmos 23 • RVR1960</strong>
+          </div>
+          <button class="continue-reading-btn" id="btn-continue-reading">Abrir →</button>
+        </div>
+
+        <!-- Tarjeta VERSÍCULO DEL DÍA (VerseOfTheDayCard.kt) -->
+        <article class="verse-of-day-card" id="vod-card">
+          <div class="vod-top-row">
+            <span class="vod-badge">✨ VERSÍCULO DEL DÍA</span>
+            <span class="verse-tag" id="vod-tag">Fortaleza</span>
+          </div>
           <p class="verse-quote" id="vod-quote">"Cargando..."</p>
           <div class="verse-reference" id="vod-ref">-</div>
           <div class="reflection-box">
-            <strong style="color:var(--primary-color); display:block; margin-bottom:4px;">Reflexión de hoy:</strong>
+            <strong class="reflection-title">📜 Contexto Histórico y Teológico:</strong>
             <span id="vod-reflection">-</span>
           </div>
           <div class="card-actions">
-            <button class="action-pill" id="btn-fav-vod">
-              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-              Favorito
+            <button class="action-pill" id="btn-fav-vod" title="Guardar en Favoritos">
+              <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              <span>Favorito</span>
             </button>
-            <button class="action-pill" id="btn-share-vod">
-              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
-              Compartir
+            <button class="action-pill" id="btn-read-vod-chapter" title="Leer capítulo en el Lector">
+              <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M19 1l-5 5v11l5-4.5V1zM1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5V6c-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6z"/></svg>
+              <span>Capítulo</span>
+            </button>
+            <button class="action-pill" id="btn-image-vod" title="Crear Imagen para Compartir">
+              <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              <span>Imagen</span>
+            </button>
+            <button class="action-pill" id="btn-share-vod" title="Compartir versículo">
+              <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
+              <span>Compartir</span>
             </button>
           </div>
         </article>
 
-        <!-- Chips de Filtro Rápido de Categorías -->
-        <div class="chips-scroll">
-          <button class="chip active">Todos</button>
-          <button class="chip">Paz en la Ansiedad</button>
-          <button class="chip">Propósito de Dios</button>
-          <button class="chip">Sanidad y Fe</button>
-          <button class="chip">Sabiduría</button>
-          <button class="chip">Fortaleza</button>
+        <!-- Banner de PLANES DE LECTURA Y DEVOCIONALES -->
+        <div class="plans-promo-banner" id="btn-open-plans-banner">
+          <img src="./assets/drawable/plan_cover_chronological.webp" alt="Planes de Lectura" class="plans-banner-bg">
+          <div class="plans-banner-overlay">
+            <div class="plans-banner-text">
+              <span class="plans-banner-tag">📅 26 PLANES Y ESTUDIOS TEOLÓGICOS</span>
+              <h4>Planes de Lectura y Devocionales</h4>
+              <p id="active-plan-banner-sub">Biblia en 1 Año, Historias Bíblicas, Escatología, Romanos y más →</p>
+            </div>
+          </div>
         </div>
 
-        <!-- Feed de Versículos Temáticos -->
-        <div id="popular-verses-feed">
-          <!-- Renderizado dinámico -->
+        <!-- Buscador rápido dentro de la compilación de 365 versículos -->
+        <div class="inline-search-bar">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="verses-filter-input" placeholder="Filtrar entre los 365 versículos fundamentales...">
+          <button class="clear-inline-btn" id="btn-clear-verses-filter" style="display:none;">✕</button>
         </div>
+
+        <!-- Filtros Canónicos (Todos, Antiguo Testamento, Nuevo Testamento, Por Libro) -->
+        <div class="chips-scroll" id="canonical-filter-chips">
+          <button class="chip active" data-testament="ALL" id="chip-testament-all">Todos (365)</button>
+          <button class="chip" data-testament="AT">Antiguo Testamento</button>
+          <button class="chip" data-testament="NT">Nuevo Testamento</button>
+          <button class="chip chip-book-picker" id="btn-open-book-filter-modal">📚 Por Libro...</button>
+        </div>
+
+        <!-- Filtros por Tema Espiritual -->
+        <div class="chips-scroll sub-chips" id="topic-filter-chips">
+          <!-- Renderizado dinámico con los temas de InitialVersesData -->
+        </div>
+
+        <!-- Contador de versículos mostrados -->
+        <div class="feed-status-bar">
+          <span id="verses-count-label">Mostrando 365 versículos canónicos</span>
+          <button class="link-reset-btn" id="btn-reset-all-filters" style="display:none;">Restablecer filtros</button>
+        </div>
+
+        <!-- Lista de Tarjetas de Versículos (VerseCard.kt) -->
+        <div id="popular-verses-feed"></div>
       </section>
 
-      <!-- Pestaña 2: Lector Bíblico 100% Interactivo -->
+      <!-- ===============================================================
+           PESTAÑA 1: LECTOR BÍBLICO INTERACTIVO (BibleReaderScreen.kt)
+           =============================================================== -->
       <section class="tab-pane" id="tab-reader">
+
+        <!-- Banner de Sesión Activa de Plan de Lectura (Visible cuando se lee desde un Plan) -->
+        <div class="plan-session-bar" id="reader-plan-session-bar" style="display:none;">
+          <div class="plan-session-top">
+            <button class="plan-session-back" id="btn-exit-plan-session">← Volver al Plan</button>
+            <span class="plan-session-title" id="reader-plan-session-title">Día 1 • Plan</span>
+            <button class="plan-session-complete-btn" id="btn-complete-plan-day-reader">✓ Completar Día</button>
+          </div>
+          <div class="plan-session-segments" id="reader-plan-segments-row"></div>
+        </div>
+
+        <!-- TopBar Exclusiva del Lector Bíblico -->
         <div class="reader-header">
-          <div class="book-selector" id="btn-select-book" title="Cambiar libro o capítulo">
-            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+          <button class="book-selector" id="btn-select-book" title="Seleccionar Libro, Capítulo y Versículo">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
             <span id="reader-book-name">Salmos 23</span>
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
-          </div>
-          
-          <div class="version-pill" id="btn-open-version-selector" title="Cambiar versión bíblica">
-            <span id="reader-version-code">RVR1960</span>
-            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+            <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+          </button>
+
+          <div class="reader-header-right">
+            <button class="reader-tool-btn" id="btn-toggle-audio-bar" title="Escuchar Capítulo en Audio">
+              <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
+              <span>Audio</span>
+            </button>
+
+            <button class="version-pill" id="btn-open-version-selector" title="Cambiar Traducción Bíblica">
+              <span id="reader-version-code">RVR1960</span>
+              <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+            </button>
+
+            <button class="reader-tool-btn aa-btn" id="btn-open-reader-settings" title="Apariencia, Fuente y Opciones del Lector">
+              <strong>Aa</strong>
+            </button>
           </div>
         </div>
 
+        <!-- Controles Superiores de Navegación de Capítulo -->
         <div class="reader-nav-arrows">
-          <button class="reader-arrow-btn" id="btn-prev-chapter">← Capítulo Anterior</button>
-          <button class="reader-arrow-btn" id="btn-next-chapter">Siguiente Capítulo →</button>
+          <button class="reader-arrow-btn" id="btn-prev-chapter">← Cap. Anterior</button>
+          <span class="reader-chapter-indicator" id="reader-chapter-subtitle">Salmos • Capítulo 23</span>
+          <button class="reader-arrow-btn" id="btn-next-chapter">Cap. Siguiente →</button>
         </div>
 
-        <!-- Lista de Versículos con Selección y Resaltado -->
-        <div class="bible-text-container" id="bible-verses-list">
-          <!-- Renderizado dinámico -->
+        <!-- Contenedor de Versículos del Capítulo (Con Perícopas y Palabras de Jesús en Rojo) -->
+        <div class="bible-text-container" id="bible-verses-list"></div>
+
+        <!-- Pie de Capítulo para Navegación Rápida o Scroll Continuo -->
+        <div class="reader-chapter-footer">
+          <button class="reader-arrow-btn" id="btn-prev-chapter-bottom">← Capítulo Anterior</button>
+          <button class="reader-arrow-btn primary" id="btn-next-chapter-bottom">Siguiente Capítulo →</button>
         </div>
       </section>
 
-      <!-- Pestaña 3: Buscador Bíblico -->
+      <!-- ===============================================================
+           PESTAÑA 2: BUSCADOR BÍBLICO EN LOS 66 LIBROS (SearchTab.kt)
+           =============================================================== -->
       <section class="tab-pane" id="tab-search">
-        <div class="search-input-box" style="display:flex; align-items:center; gap:10px; background:var(--surface-color); border:1px solid var(--border-color); border-radius:28px; padding:10px 18px; margin-bottom:16px;">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input type="text" id="search-input" placeholder="Buscar versículos, temas o promesas..." style="flex:1; background:transparent; border:none; outline:none; font-size:0.95rem; color:var(--text-primary);">
+        <div class="search-header-box">
+          <div class="search-input-row">
+            <div class="search-input-wrapper">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="search-input" placeholder="Buscar palabra, frase o cita (ej. Juan 3:16, gracia)...">
+              <button class="clear-inline-btn" id="btn-clear-search-input" style="display:none;">✕</button>
+            </div>
+            <select id="search-version-select" class="version-mini-select" title="Versión donde buscar">
+              <option value="RVR1960">RVR1960</option>
+              <option value="NVI">NVI</option>
+              <option value="NBLA">NBLA</option>
+              <option value="DHH">DHH</option>
+              <option value="TLA">TLA</option>
+            </select>
+          </div>
+
+          <!-- Filtros de Alcance (Toda la Biblia, A.T., N.T., Por Libro) -->
+          <div class="chips-scroll" id="search-scope-chips">
+            <button class="chip active" data-scope="ALL">Toda la Biblia (66)</button>
+            <button class="chip" data-scope="OT">Antiguo T. (39)</button>
+            <button class="chip" data-scope="NT">Nuevo T. (27)</button>
+            <select id="search-book-select" class="search-book-dropdown">
+              <option value="">Por Libro específico...</option>
+            </select>
+          </div>
         </div>
-        <div id="search-results">
-          <!-- Renderizado dinámico -->
-        </div>
+
+        <div id="search-status-bar" class="feed-status-bar" style="display:none;"></div>
+        <div id="search-results"></div>
       </section>
 
-      <!-- Pestaña 4: Favoritos y Notas Guardadas -->
+      <!-- ===============================================================
+           PESTAÑA 3: FAVORITOS, RESALTADOS Y NOTAS (FavoritesAndNotesTab.kt)
+           =============================================================== -->
       <section class="tab-pane" id="tab-favorites">
-        <h3 style="font-size:1.15rem; color:var(--primary-color); margin-bottom:14px; font-weight:800;">Mis Versículos Guardados</h3>
-        <div id="favorites-list">
-          <!-- Renderizado dinámico -->
+        <div class="favorites-header">
+          <div class="favorites-top-row">
+            <h3>Mi Colección Personal</h3>
+            <button class="action-pill" id="btn-export-from-favs" title="Exportar Colección">
+              📄 Exportar
+            </button>
+          </div>
+
+          <!-- 3 Sub-pestañas con contadores exactos igual que FavoritesAndNotesTab.kt -->
+          <div class="fav-subtabs">
+            <button class="fav-subtab active" data-subtab="FAVORITES" id="subtab-btn-favorites">
+              ❤️ Favoritos (<span id="count-favs">0</span>)
+            </button>
+            <button class="fav-subtab" data-subtab="HIGHLIGHTS" id="subtab-btn-highlights">
+              🔖 Resaltados (<span id="count-highlights">0</span>)
+            </button>
+            <button class="fav-subtab" data-subtab="NOTES" id="subtab-btn-notes">
+              ✏️ Con Notas (<span id="count-notes">0</span>)
+            </button>
+          </div>
+
+          <div class="inline-search-bar" style="margin-top:10px;">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="favorites-search-input" placeholder="Buscar en mis guardados, resaltados o notas...">
+          </div>
+        </div>
+
+        <div id="favorites-list"></div>
+      </section>
+
+      <!-- ===============================================================
+           PESTAÑA 4: AJUSTES COMPLETOS (SettingsTab.kt)
+           =============================================================== -->
+      <section class="tab-pane" id="tab-settings">
+        <div class="settings-screen-header">
+          <button class="icon-btn" id="btn-back-from-settings" title="Volver">←</button>
+          <div>
+            <h2>Ajustes y Preferencias</h2>
+            <p>Personalización, Planes, Versiones Offline y Respaldo</p>
+          </div>
+        </div>
+
+        <!-- 1. Resumen de Planes de Lectura -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <span class="settings-card-icon">📅</span>
+            <div>
+              <h4>Mis Planes de Lectura</h4>
+              <p id="settings-plans-summary">0 planes en curso • 0 completados</p>
+            </div>
+          </div>
+          <button class="primary-full-btn" id="btn-settings-open-plans">Abrir Catálogo y Mis Planes (26)</button>
+        </div>
+
+        <!-- 2. Tema Visual y Escala Tipográfica -->
+        <div class="settings-card">
+          <h4>🎨 Tema Visual de la Aplicación</h4>
+          <div class="theme-options-grid" id="settings-theme-grid">
+            <button class="theme-option-card active" data-theme="light">☀️ Claro Clásico</button>
+            <button class="theme-option-card" data-theme="sepia">📜 Sepia Cálido</button>
+            <button class="theme-option-card" data-theme="dark">🌙 Oscuro</button>
+            <button class="theme-option-card" data-theme="oled">🖤 Noche OLED</button>
+          </div>
+
+          <div class="settings-row" style="margin-top:14px;">
+            <span>Tamaño de fuente en lectura</span>
+            <div class="font-stepper">
+              <button class="stepper-btn" id="settings-font-dec">A−</button>
+              <span id="settings-font-val">19px</span>
+              <button class="stepper-btn" id="settings-font-inc">A+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Recordatorio Diario de Lectura -->
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <h4>🔔 Recordatorio Diario</h4>
+              <p class="settings-sub">Recibe una notificación diaria con el Versículo del Día</p>
+            </div>
+            <input type="checkbox" id="toggle-daily-reminder" class="ui-switch">
+          </div>
+          <div class="settings-row" style="margin-top:10px;">
+            <span>Hora del recordatorio:</span>
+            <input type="time" id="reminder-time-input" value="08:00" class="time-input">
+          </div>
+          <button class="secondary-full-btn" id="btn-test-notification" style="margin-top:10px;">
+            🔔 Probar Notificación Ahora
+          </button>
+        </div>
+
+        <!-- 4. Sincronización y Respaldo en la Nube -->
+        <div class="settings-card">
+          <h4>☁️ Sincronización y Respaldo (Cloud Sync)</h4>
+          <p class="settings-sub">Guarda o restaura tus versículos favoritos, resaltados de colores, notas personales y progreso de planes entre dispositivos.</p>
+          <div class="settings-btn-group">
+            <button class="secondary-full-btn" id="btn-open-cloud-sync">☁️ Abrir Gestor de Sincronización</button>
+            <button class="secondary-full-btn" id="btn-open-export-dialog">📄 Exportar Colección (PDF / JSON / TXT)</button>
+          </div>
+        </div>
+
+        <!-- 5. Gestor de Versiones Bíblicas Offline -->
+        <div class="settings-card">
+          <h4>📚 Versiones Bíblicas Disponibles (Offline / Online)</h4>
+          <p class="settings-sub">5 traducciones completas están integradas localmente sin internet; puedes pre-descargar las demás.</p>
+          <div id="settings-versions-list" class="settings-versions-list"></div>
+        </div>
+
+        <!-- 6. Información y Descarga APK Android -->
+        <div class="settings-card">
+          <h4>📱 Aplicación Oficial BibleVerse</h4>
+          <p class="settings-sub">Versión Web PWA Sincronizada 100% con BibleVerse Android APK.</p>
+          <div class="settings-btn-group">
+            <a href="https://github.com/adandavid98/BibleVerse/releases/latest/download/BibleVerse-latest.apk" class="primary-full-btn" style="text-align:center; text-decoration:none; display:block;">
+              🤖 Descargar APK Oficial para Android
+            </a>
+            <a href="./index.html" class="secondary-full-btn" style="text-align:center; text-decoration:none; display:block;">
+              🌐 Ver Página de Presentación (Landing Page)
+            </a>
+          </div>
         </div>
       </section>
 
     </main>
 
-    <!-- VerseActionBar - Bottom Sheet Idéntico a Android (YouVersion Style) -->
+    <!-- ===================================================================
+         FLOATING ACTION BUTTON (FAB +)
+         Visible en Pestaña 0 (Versículos) y Pestaña 3 (Favoritos)
+         =================================================================== -->
+    <button class="fab-add-verse" id="btn-fab-add-verse" title="Agregar Versículo a la Colección">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+    </button>
+
+    <!-- ===================================================================
+         REPRODUCTOR DE AUDIO DEL LECTOR (BibleAudioBottomBar.kt)
+         =================================================================== -->
+    <div class="bible-audio-bar" id="bible-audio-bar" style="display:none;">
+      <div class="audio-bar-top">
+        <div class="audio-track-info">
+          <strong id="audio-bar-title">Salmos 23 • RVR1960</strong>
+          <span id="audio-bar-subtitle">🎙️ Audio Bíblico</span>
+        </div>
+        <div class="audio-bar-modes">
+          <button class="audio-mode-chip active" id="btn-audio-mode-tts" title="Lectura versículo a versículo con resaltado">🗣️ Voz Guía</button>
+          <button class="audio-mode-chip" id="btn-audio-mode-mp3" title="Audio humano dramatizado del capítulo">🎵 MP3 Oficial</button>
+          <button class="icon-btn" id="btn-close-audio-bar" title="Cerrar reproductor">✕</button>
+        </div>
+      </div>
+      <div class="audio-bar-controls">
+        <button class="audio-ctrl-btn" id="btn-audio-prev" title="Versículo anterior">⏮</button>
+        <button class="audio-play-btn" id="btn-audio-play-pause" title="Reproducir / Pausar">▶</button>
+        <button class="audio-ctrl-btn" id="btn-audio-next" title="Siguiente versículo">⏭</button>
+        <button class="audio-speed-btn" id="btn-audio-speed" title="Velocidad de lectura">1.0x</button>
+      </div>
+      <audio id="official-mp3-player" preload="none" style="display:none;"></audio>
+    </div>
+
+    <!-- ===================================================================
+         BARRA DE ACCIÓN DE VERSÍCULO EN EL LECTOR (VerseActionBar.kt)
+         6 Acciones: Explicar, Comparar, Imagen, Copiar, Guardar, Referencias
+         =================================================================== -->
     <div class="verse-action-bar" id="verse-action-bar">
       <div class="sheet-drag-handle"></div>
-      
-      <!-- Fila Superior: Deseleccionar, Contador y Paleta de 5 Colores -->
+
       <div class="action-bar-top-row">
         <div class="selection-info">
           <button class="icon-btn" id="btn-clear-selection" style="width:30px; height:30px;" title="Cerrar selección">✕</button>
@@ -144,9 +421,7 @@
         </div>
 
         <div class="palette-swatches">
-          <!-- Botón Quitar Resaltado -->
           <div class="reset-swatch" id="btn-reset-highlight" title="Quitar resaltado">✕</div>
-          <!-- 5 Colores Oficiales -->
           <div class="color-swatch" style="background:#FACC15;" data-hex="#FACC15" title="Amarillo"></div>
           <div class="color-swatch" style="background:#22C55E;" data-hex="#22C55E" title="Verde"></div>
           <div class="color-swatch" style="background:#38BDF8;" data-hex="#38BDF8" title="Azul"></div>
@@ -157,16 +432,20 @@
 
       <div class="action-bar-divider"></div>
 
-      <!-- Fila de Acciones Rápidas (Explicar con IA, Comparar, Copiar, Guardar, Imagen) -->
       <div class="action-bar-buttons-row">
         <button class="action-pill-btn" id="btn-action-explain">
-          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg>
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5z"/></svg>
           <span>Explicar</span>
         </button>
 
         <button class="action-pill-btn" id="btn-action-compare">
           <svg fill="currentColor" viewBox="0 0 24 24"><path d="M9.01 14H2v2h7.01v3L13 15l-3.99-4v3zm5.98-1v-3H22V8h-7.01V5L11 9l3.99 4z"/></svg>
           <span>Comparar</span>
+        </button>
+
+        <button class="action-pill-btn" id="btn-action-references">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+          <span>Referencias</span>
         </button>
 
         <button class="action-pill-btn" id="btn-action-image">
@@ -186,8 +465,10 @@
       </div>
     </div>
 
-    <!-- Bottom Navigation Bar (Material 3 Tabs) -->
-    <nav class="bottom-nav">
+    <!-- ===================================================================
+         BOTTOM NAVIGATION BAR (4 Pestañas Principales)
+         =================================================================== -->
+    <nav class="bottom-nav" id="main-bottom-nav">
       <button class="nav-item active" data-tab="verses">
         <div class="nav-pill">
           <svg fill="currentColor" viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
@@ -217,174 +498,591 @@
       </button>
     </nav>
 
-    <!-- Modal 1: Selector de Libros y Capítulos (BookChapterSelectorSheet) -->
+    <!-- ===================================================================
+         MODAL 1: SELECTOR DE 3 PASOS: LIBRO -> CAPÍTULO -> VERSÍCULO
+         (BookChapterSelectorSheet.kt)
+         =================================================================== -->
     <div class="modal-overlay" id="book-selector-modal">
       <div class="full-bottom-sheet">
         <div class="sheet-header-title">
-          <h3 style="color:var(--primary-color); font-weight:800;">Seleccionar Pasaje</h3>
+          <h3>Ir al Pasaje Bíblico</h3>
           <button class="icon-btn" id="btn-close-book-selector">✕</button>
+        </div>
+
+        <!-- Tabs de 3 Pasos (LIBRO | CAPÍTULO | VERSÍCULO) -->
+        <div class="three-step-tabs">
+          <button class="step-tab active" id="step-tab-book">1. LIBRO</button>
+          <button class="step-tab" id="step-tab-chapter">2. CAPÍTULO</button>
+          <button class="step-tab" id="step-tab-verse">3. VERSÍCULO</button>
         </div>
 
         <!-- Paso 1: Lista de Libros -->
         <div id="selector-step-books">
-          <!-- Filtros de Testamento -->
-          <div style="display:flex; gap:8px; margin-bottom:12px;">
-            <button class="chip testament-tab active" data-filter="ALL">Todos</button>
+          <div style="display:flex; gap:8px; margin-bottom:10px;">
+            <button class="chip testament-tab active" data-filter="ALL">Todos (66)</button>
             <button class="chip testament-tab" data-filter="AT">Antiguo T. (39)</button>
             <button class="chip testament-tab" data-filter="NT">Nuevo T. (27)</button>
           </div>
-
-          <div style="background:var(--surface-color); border:1px solid var(--border-color); border-radius:20px; padding:8px 14px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+          <div class="inline-search-bar" style="margin-bottom:10px;">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" id="book-search-input" placeholder="Buscar libro..." style="border:none; background:transparent; width:100%; outline:none; font-size:0.9rem; color:var(--text-primary);">
+            <input type="text" id="book-search-input" placeholder="Buscar libro (ej. Génesis, Salmos, Juan)...">
           </div>
-
-          <div id="selector-books-list" style="max-height:55vh; overflow-y:auto;">
-            <!-- Libros -->
-          </div>
+          <div id="selector-books-list" style="max-height:52vh; overflow-y:auto;"></div>
         </div>
 
         <!-- Paso 2: Cuadrícula de Capítulos -->
         <div id="selector-step-chapters" style="display:none;">
-          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+          <div class="step-subheader">
             <button class="icon-btn" id="btn-back-to-books">←</button>
-            <div>
-              <h4 id="chapters-book-title" style="font-size:1.15rem; color:var(--primary-color); font-weight:800;">Libro</h4>
-              <span style="font-size:0.8rem; color:var(--text-secondary);">Selecciona un capítulo:</span>
-            </div>
+            <h4 id="selected-book-title-chapters">Salmos</h4>
           </div>
-
-          <div class="chapters-grid" id="selector-chapters-grid" style="max-height:55vh; overflow-y:auto;">
-            <!-- Cuadrícula 1, 2, 3... -->
-          </div>
+          <div class="chapter-grid" id="selector-chapters-grid" style="max-height:54vh; overflow-y:auto;"></div>
         </div>
 
+        <!-- Paso 3: Cuadrícula de Versículos Exactos (BIBLE_CANONICAL_COUNTS) -->
+        <div id="selector-step-verses" style="display:none;">
+          <div class="step-subheader">
+            <button class="icon-btn" id="btn-back-to-chapters">←</button>
+            <h4 id="selected-chapter-title-verses">Salmos 23 • Selecciona Versículo</h4>
+          </div>
+          <div style="margin-bottom:10px;">
+            <button class="secondary-full-btn" id="btn-open-chapter-from-verse-step">📖 Abrir Capítulo Completo desde el Versículo 1</button>
+          </div>
+          <div class="chapter-grid" id="selector-verses-grid" style="max-height:48vh; overflow-y:auto;"></div>
+        </div>
       </div>
     </div>
 
-    <!-- Modal 2: Selector de Versiones Bíblicas (BibleVersionSelectorDialog) -->
+    <!-- ===================================================================
+         MODAL 2: SELECTOR DE VERSIONES BÍBLICAS (BibleVersionPickerSheet.kt)
+         =================================================================== -->
     <div class="modal-overlay" id="version-selector-modal">
       <div class="full-bottom-sheet">
         <div class="sheet-header-title">
-          <h3 style="color:var(--primary-color); font-weight:800;">Versiones Bíblicas</h3>
+          <h3>Versiones de la Biblia (7)</h3>
           <button class="icon-btn" id="btn-close-version-selector">✕</button>
         </div>
-        <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:14px;">Selecciona la traducción con la que deseas leer las Sagradas Escrituras:</p>
-        <div id="versions-list-container" style="max-height:60vh; overflow-y:auto;">
-          <!-- Renderizado dinámico -->
+        <div id="versions-list-container" style="max-height:65vh; overflow-y:auto;"></div>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         MODAL 3: DETALLE DE VERSÍCULO COMPLETO (VerseDetailDialog.kt)
+         Contexto, Enriquecer con IA, 5 Colores, Notas, Editar, Eliminar, PDF
+         =================================================================== -->
+    <div class="modal-overlay" id="verse-detail-modal">
+      <div class="full-bottom-sheet">
+        <div class="sheet-header-title">
+          <div>
+            <span class="verse-tag" id="detail-verse-topic">Fe</span>
+            <h3 id="detail-verse-ref" style="margin-top:4px;">Juan 3:16</h3>
+          </div>
+          <button class="icon-btn" id="btn-close-verse-detail">✕</button>
+        </div>
+
+        <div style="max-height:72vh; overflow-y:auto; padding-right:4px;">
+          <!-- Vista Lectura -->
+          <div id="detail-view-mode">
+            <blockquote class="detail-verse-quote" id="detail-verse-text"></blockquote>
+
+            <!-- Paleta de 5 colores de resaltado dentro del detalle -->
+            <div class="detail-highlight-row">
+              <span>Resaltar:</span>
+              <div class="palette-swatches" id="detail-palette-swatches">
+                <div class="reset-swatch" data-detail-hex="" title="Sin resaltado">✕</div>
+                <div class="color-swatch" style="background:#FACC15;" data-detail-hex="#FACC15"></div>
+                <div class="color-swatch" style="background:#22C55E;" data-detail-hex="#22C55E"></div>
+                <div class="color-swatch" style="background:#38BDF8;" data-detail-hex="#38BDF8"></div>
+                <div class="color-swatch" style="background:#EC4899;" data-detail-hex="#EC4899"></div>
+                <div class="color-swatch" style="background:#F97316;" data-detail-hex="#F97316"></div>
+              </div>
+            </div>
+
+            <!-- Contexto Histórico y Teológico + Enriquecer con IA -->
+            <div class="detail-section-card">
+              <div class="detail-section-header">
+                <strong>📜 Contexto Histórico y Teológico</strong>
+                <button class="ai-mini-btn" id="btn-detail-enrich-ai">✨ Profundizar con IA</button>
+              </div>
+              <p id="detail-verse-context" style="white-space:pre-line; line-height:1.6; font-size:0.92rem; margin-top:8px;"></p>
+            </div>
+
+            <!-- Notas Personales -->
+            <div class="detail-section-card">
+              <strong>✏️ Mis Notas y Reflexión Personal</strong>
+              <textarea id="detail-verse-notes" rows="3" class="modal-textarea" placeholder="Escribe aquí tus notas, oración o aplicación personal sobre este pasaje..."></textarea>
+              <button class="primary-full-btn" id="btn-save-detail-note" style="margin-top:8px;">💾 Guardar Nota Personal</button>
+            </div>
+
+            <!-- Botonera de Acciones del Detalle -->
+            <div class="detail-actions-grid">
+              <button class="action-pill" id="btn-detail-open-reader">📖 Leer Capítulo</button>
+              <button class="action-pill" id="btn-detail-share-image">🖼️ Crear Imagen</button>
+              <button class="action-pill" id="btn-detail-export-pdf">📄 Exportar PDF</button>
+              <button class="action-pill" id="btn-detail-edit-verse">✏️ Editar Versículo</button>
+              <button class="action-pill danger" id="btn-detail-delete-verse">🗑️ Eliminar</button>
+            </div>
+          </div>
+
+          <!-- Modo Edición de Versículo -->
+          <div id="detail-edit-mode" style="display:none;">
+            <label class="modal-label">Cita / Referencia</label>
+            <input type="text" id="edit-verse-ref-input" class="modal-input">
+            <label class="modal-label">Tema / Categoría</label>
+            <input type="text" id="edit-verse-topic-input" class="modal-input">
+            <label class="modal-label">Texto del Versículo</label>
+            <textarea id="edit-verse-text-input" rows="3" class="modal-textarea"></textarea>
+            <label class="modal-label">Contexto Histórico y Teológico</label>
+            <textarea id="edit-verse-context-input" rows="4" class="modal-textarea"></textarea>
+            <div style="display:flex; gap:10px; margin-top:12px;">
+              <button class="secondary-full-btn" id="btn-cancel-edit-verse">Cancelar</button>
+              <button class="primary-full-btn" id="btn-save-edit-verse">Guardar Cambios</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Modal 3: Comparador de Versículos (VerseVersionComparatorBottomSheet) -->
+    <!-- ===================================================================
+         MODAL 4: AGREGAR NUEVO VERSÍCULO (AddVerseDialog.kt - FAB +)
+         =================================================================== -->
+    <div class="modal-overlay" id="add-verse-modal">
+      <div class="full-bottom-sheet">
+        <div class="sheet-header-title">
+          <h3>➕ Agregar Versículo a la Colección</h3>
+          <button class="icon-btn" id="btn-close-add-verse">✕</button>
+        </div>
+
+        <div style="max-height:74vh; overflow-y:auto; padding-right:4px;">
+          <div class="form-grid-3">
+            <div>
+              <label class="modal-label">Libro</label>
+              <select id="add-verse-book" class="modal-input"></select>
+            </div>
+            <div>
+              <label class="modal-label">Cap.</label>
+              <select id="add-verse-chapter" class="modal-input"></select>
+            </div>
+            <div>
+              <label class="modal-label">Versículo</label>
+              <select id="add-verse-number" class="modal-input"></select>
+            </div>
+          </div>
+
+          <div class="form-grid-2" style="margin-top:8px;">
+            <div>
+              <label class="modal-label">Versión Bíblica</label>
+              <select id="add-verse-version" class="modal-input">
+                <option value="RVR1960">RVR 1960</option>
+                <option value="NVI">NVI</option>
+                <option value="NBLA">NBLA</option>
+                <option value="DHH">DHH</option>
+                <option value="TLA">TLA</option>
+                <option value="NTV">NTV</option>
+                <option value="LBLA">LBLA</option>
+              </select>
+            </div>
+            <div>
+              <label class="modal-label">Tema / Categoría</label>
+              <input type="text" id="add-verse-topic" class="modal-input" value="Promesas" placeholder="Ej. Fe, Paz, Esperanza...">
+            </div>
+          </div>
+
+          <label class="modal-label" style="margin-top:10px;">Texto Bíblico (Autocompletado)</label>
+          <textarea id="add-verse-text" rows="3" class="modal-textarea" placeholder="Selecciona libro, capítulo y versículo..."></textarea>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+            <label class="modal-label" style="margin:0;">Contexto Histórico y Teológico</label>
+            <button class="ai-mini-btn" id="btn-add-verse-ai-context" type="button">✨ Generar con IA</button>
+          </div>
+          <textarea id="add-verse-context" rows="3" class="modal-textarea" placeholder="Pulsa 'Generar con IA' o escribe el contexto del pasaje..."></textarea>
+
+          <label class="modal-label" style="margin-top:10px;">Nota Personal (Opcional)</label>
+          <textarea id="add-verse-notes" rows="2" class="modal-textarea" placeholder="Tu reflexión personal..."></textarea>
+
+          <button class="primary-full-btn" id="btn-submit-add-verse" style="margin-top:14px;">
+            ✓ Guardar en Mi Colección
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         MODAL 5: FILTRAR POR LIBRO EN VERSÍCULOS (BookFilterDialog)
+         =================================================================== -->
+    <div class="modal-overlay" id="book-filter-modal">
+      <div class="full-bottom-sheet">
+        <div class="sheet-header-title">
+          <h3>📚 Filtrar Compilación por Libro</h3>
+          <button class="icon-btn" id="btn-close-book-filter">✕</button>
+        </div>
+        <div class="inline-search-bar" style="margin-bottom:10px;">
+          <input type="text" id="book-filter-search" placeholder="Buscar libro...">
+        </div>
+        <div id="book-filter-list" style="max-height:60vh; overflow-y:auto;"></div>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         MODAL 6: COMPARADOR INTERACTIVO DE VERSIONES (VerseCompareBottomSheet.kt)
+         =================================================================== -->
     <div class="modal-overlay" id="compare-modal">
       <div class="full-bottom-sheet">
         <div class="sheet-header-title">
           <div>
-            <span style="font-size:0.75rem; text-transform:uppercase; font-weight:bold; color:var(--secondary-color);">Comparador de Versiones</span>
-            <h3 id="compare-citation-title" style="color:var(--primary-color); font-weight:800;">-</h3>
+            <h3>⚖️ Comparar Versiones</h3>
+            <span id="compare-passage-title" style="font-size:0.85rem; color:var(--accent-gold); font-weight:700;">Salmos 23:1</span>
           </div>
           <button class="icon-btn" id="btn-close-compare">✕</button>
         </div>
-        <div id="compare-results-list" style="max-height:60vh; overflow-y:auto;">
-          <!-- Comparación dinámica -->
-        </div>
+
+        <!-- Selector de versiones activas para comparar -->
+        <div class="chips-scroll" id="compare-active-versions-bar" style="margin-bottom:10px;"></div>
+
+        <div id="compare-versions-list" style="max-height:60vh; overflow-y:auto;"></div>
       </div>
     </div>
 
-    <!-- Modal 4: Explicación Teológica con IA (ExplainVerseBottomSheet) -->
+    <!-- ===================================================================
+         MODAL 7: EXPLICACIÓN EXEGÉTICA CON IA (ExplanationBottomSheet.kt)
+         =================================================================== -->
     <div class="modal-overlay" id="explain-modal">
       <div class="full-bottom-sheet">
         <div class="sheet-header-title">
           <div style="display:flex; align-items:center; gap:8px;">
-            <span class="badge-ai" style="font-size:0.8rem;">IA</span>
-            <h3 style="color:var(--primary-color); font-weight:800;">Explicación del Pasaje</h3>
+            <span style="font-size:1.3rem;">✨</span>
+            <div>
+              <h3>Exégesis y Explicación Bíblica</h3>
+              <span id="explain-source-badge" style="font-size:0.75rem; color:var(--accent-gold); font-weight:700;">IA Gemini + Motor Teológico</span>
+            </div>
           </div>
           <button class="icon-btn" id="btn-close-explain">✕</button>
         </div>
-        <div style="font-weight:700; color:var(--secondary-color); margin-bottom:4px;" id="explain-citation">-</div>
-        <blockquote id="explain-verse-quote" style="font-family:var(--font-serif); background:var(--surface-color); padding:12px; border-radius:12px; font-style:italic; margin-bottom:14px; border-left:4px solid var(--secondary-color);"></blockquote>
-        <div id="explain-theology-text" style="line-height:1.6; font-size:0.92rem; color:var(--text-primary); max-height:50vh; overflow-y:auto;">
-          <!-- Exégesis -->
+
+        <div id="explain-content" style="max-height:58vh; overflow-y:auto; line-height:1.65; font-size:0.95rem;"></div>
+
+        <div style="display:flex; gap:8px; margin-top:12px;">
+          <button class="secondary-full-btn" id="btn-copy-explanation">📋 Copiar Explicación</button>
+          <button class="primary-full-btn" id="btn-share-explanation">📤 Compartir</button>
         </div>
       </div>
     </div>
 
-    <!-- Modal 5: Chatbot Teológico Completo con IA -->
-    <div class="modal-overlay" id="ai-modal">
-      <div class="full-bottom-sheet" style="max-height:90%;">
+    <!-- ===================================================================
+         MODAL 8: REFERENCIAS CRUZADAS Y PARALELOS (CrossReferencesBottomSheet.kt)
+         =================================================================== -->
+    <div class="modal-overlay" id="xref-modal">
+      <div class="full-bottom-sheet">
         <div class="sheet-header-title">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span class="badge-ai" style="font-size:0.85rem;">IA</span>
-            <h3 style="color:var(--primary-color); font-weight:800;">Asistente Bíblico</h3>
+          <div>
+            <h3>🔗 Referencias Cruzadas y Paralelos</h3>
+            <span id="xref-subtitle" style="font-size:0.84rem; color:var(--accent-gold); font-weight:700;">Salmos 23:1</span>
           </div>
-          <button class="icon-btn" id="btn-close-ai">✕</button>
+          <button class="icon-btn" id="btn-close-xref">✕</button>
+        </div>
+        <div id="xref-list-container" style="max-height:64vh; overflow-y:auto;"></div>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         MODAL 9: DISEÑADOR DE IMAGEN DE VERSÍCULO (ShareTemplateDialog.kt)
+         4 Estilos + 12 Fondos Fotográficos verse_bg_01..12.webp en Canvas
+         =================================================================== -->
+    <div class="modal-overlay" id="image-share-modal">
+      <div class="full-bottom-sheet">
+        <div class="sheet-header-title">
+          <h3>🖼️ Crear Imagen de Versículo</h3>
+          <button class="icon-btn" id="btn-close-image-share">✕</button>
         </div>
 
-        <!-- Chips de Preguntas Rápidas -->
-        <div style="display:flex; gap:6px; overflow-x:auto; margin-bottom:10px; scrollbar-width:none; padding-bottom:4px;">
-          <button class="chip ai-prompt-chip" style="font-size:0.75rem;">¿Contexto histórico?</button>
-          <button class="chip ai-prompt-chip" style="font-size:0.75rem;">¿Qué es la gracia?</button>
-          <button class="chip ai-prompt-chip" style="font-size:0.75rem;">Paz en la ansiedad</button>
-        </div>
+        <div style="max-height:74vh; overflow-y:auto; text-align:center;">
+          <canvas id="share-canvas" width="1080" height="1080" style="width:100%; max-width:300px; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.2); margin:0 auto 12px; display:block;"></canvas>
 
-        <div id="ai-chat-body" style="flex:1; min-height:220px; max-height:45vh; overflow-y:auto; padding:10px 0;">
-          <div style="background:var(--surface-color); padding:12px; border-radius:14px; margin-bottom:10px; font-size:0.88rem; line-height:1.5;">
-            ¡Paz de Dios! Soy el asistente bíblico de BibleVerse. Puedes preguntarme el contexto histórico de cualquier versículo, dudas teológicas o pedir una reflexión para tu jornada.
+          <div style="text-align:left; margin-bottom:8px; font-size:0.82rem; font-weight:700; color:var(--text-secondary);">Plantillas Clásicas:</div>
+          <div class="chips-scroll" id="share-style-templates" style="margin-bottom:10px;">
+            <button class="chip active" data-tpl="minimalist">📜 Minimalista</button>
+            <button class="chip" data-tpl="sacred">🏛️ Sagrado</button>
+            <button class="chip" data-tpl="parchment">✨ Pergamino</button>
+            <button class="chip" data-tpl="night">🌙 Noche</button>
           </div>
-        </div>
 
-        <div style="display:flex; gap:8px; margin-top:10px;">
-          <input type="text" id="ai-chat-input" placeholder="Pregunta sobre la Biblia o teología..." style="flex:1; padding:11px 16px; border-radius:22px; border:1px solid var(--border-color); background:var(--surface-color); color:var(--text-primary); outline:none;">
-          <button id="btn-send-ai-prompt" style="background:var(--primary-color); color:var(--on-primary); border:none; border-radius:22px; padding:0 18px; font-weight:bold; cursor:pointer;">Enviar</button>
+          <div style="text-align:left; margin-bottom:8px; font-size:0.82rem; font-weight:700; color:var(--text-secondary);">12 Fondos Paisajísticos Oficiales:</div>
+          <div class="bg-thumbs-scroll" id="share-photo-bgs"></div>
+
+          <div style="display:flex; gap:10px; margin-top:14px;">
+            <button class="secondary-full-btn" id="btn-copy-share-citation">📋 Copiar Texto</button>
+            <button class="primary-full-btn" id="btn-download-share-image">⬇️ Descargar / Compartir PNG</button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Modal 6: Ajustes de Lectura Completos (ReaderSettingsBottomSheet) -->
+    <!-- ===================================================================
+         MODAL 10: AJUSTES DEL LECTOR BÍBLICO (ReaderSettingsBottomSheet.kt)
+         4 Temas, 6 Fuentes, Tamaño, Interlineado, 3 Switches
+         =================================================================== -->
     <div class="modal-overlay" id="settings-modal">
       <div class="full-bottom-sheet">
         <div class="sheet-header-title">
-          <h3 style="color:var(--primary-color); font-weight:800;">Ajustes de Lectura</h3>
+          <h3>Aa • Apariencia de Lectura</h3>
           <button class="icon-btn" id="btn-close-settings">✕</button>
         </div>
 
-        <!-- Tema de Pantalla -->
-        <p style="font-size:0.88rem; font-weight:700; color:var(--text-primary); margin-bottom:8px;">Tema de Pantalla:</p>
-        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:18px;">
-          <div class="theme-card light-card active" data-theme-val="light" style="padding:12px 6px; border-radius:12px; border:2px solid var(--border-color); text-align:center; font-size:0.82rem; font-weight:bold; cursor:pointer;">☀️ Claro</div>
-          <div class="theme-card sepia-card" data-theme-val="sepia" style="padding:12px 6px; border-radius:12px; border:2px solid var(--border-color); text-align:center; font-size:0.82rem; font-weight:bold; cursor:pointer;">📖 Sepia</div>
-          <div class="theme-card dark-card" data-theme-val="dark" style="padding:12px 6px; border-radius:12px; border:2px solid var(--border-color); text-align:center; font-size:0.82rem; font-weight:bold; cursor:pointer;">🌙 Noche</div>
-        </div>
+        <div style="max-height:72vh; overflow-y:auto; padding-right:4px;">
+          <label class="modal-label">Tema de color</label>
+          <div class="theme-options-grid">
+            <button class="chip theme-btn active" data-theme="light">☀️ Claro</button>
+            <button class="chip theme-btn" data-theme="sepia">📜 Sepia</button>
+            <button class="chip theme-btn" data-theme="dark">🌙 Oscuro</button>
+            <button class="chip theme-btn" data-theme="oled">🖤 OLED</button>
+          </div>
 
-        <!-- Tamaño de Letra -->
-        <p style="font-size:0.88rem; font-weight:700; color:var(--text-primary); margin-bottom:8px;">Tamaño de Fuente:</p>
-        <div style="display:flex; align-items:center; justify-content:space-between; background:var(--surface-color); padding:8px 16px; border-radius:14px; margin-bottom:18px;">
-          <button class="action-pill" id="btn-font-smaller" style="font-size:1.1rem; padding:4px 16px;">A -</button>
-          <span id="font-size-label" style="font-weight:bold; color:var(--primary-color);">18px</span>
-          <button class="action-pill" id="btn-font-larger" style="font-size:1.1rem; padding:4px 16px;">A +</button>
-        </div>
+          <label class="modal-label" style="margin-top:14px;">Tipografía (6 Familias)</label>
+          <div class="font-family-grid" id="reader-font-family-grid">
+            <button class="chip font-family-btn active" data-font="serif" style="font-family:Georgia, serif;">Serif</button>
+            <button class="chip font-family-btn" data-font="sans" style="font-family:system-ui, sans-serif;">Sans</button>
+            <button class="chip font-family-btn" data-font="condensed" style="font-family:'Arial Narrow', sans-serif;">Condensada</button>
+            <button class="chip font-family-btn" data-font="casual" style="font-family:'Trebuchet MS', sans-serif;">Casual</button>
+            <button class="chip font-family-btn" data-font="cursive" style="font-family:'Palatino Linotype', Georgia, serif; font-style:italic;">Cursiva</button>
+            <button class="chip font-family-btn" data-font="mono" style="font-family:monospace;">Mono</button>
+          </div>
 
-        <!-- Interlineado -->
-        <p style="font-size:0.88rem; font-weight:700; color:var(--text-primary); margin-bottom:8px;">Interlineado del Lector:</p>
-        <div style="display:flex; gap:8px; margin-bottom:18px;">
-          <button class="chip line-spacing-pill" data-spacing="1.5">Compacto</button>
-          <button class="chip line-spacing-pill active" data-spacing="1.85">Normal</button>
-          <button class="chip line-spacing-pill" data-spacing="2.2">Amplio</button>
-        </div>
+          <div class="settings-row" style="margin-top:14px;">
+            <label class="modal-label" style="margin:0;">Tamaño de Letra</label>
+            <div class="font-stepper">
+              <button class="stepper-btn" id="btn-font-decrease">A−</button>
+              <span id="font-size-label">19px</span>
+              <button class="stepper-btn" id="btn-font-increase">A+</button>
+            </div>
+          </div>
 
-        <!-- Tipografía -->
-        <p style="font-size:0.88rem; font-weight:700; color:var(--text-primary); margin-bottom:8px;">Tipografía:</p>
-        <div style="display:flex; gap:8px; margin-bottom:18px;">
-          <button class="chip font-family-pill active" data-font="serif" style="font-family:var(--font-serif);">Serif Clásica</button>
-          <button class="chip font-family-pill" data-font="sans" style="font-family:var(--font-family);">Sans Moderna</button>
+          <label class="modal-label" style="margin-top:14px;">Interlineado</label>
+          <div style="display:flex; gap:8px;">
+            <button class="chip line-spacing-btn" data-lh="1.45" style="flex:1;">Compacto</button>
+            <button class="chip line-spacing-btn active" data-lh="1.8" style="flex:1;">Normal</button>
+            <button class="chip line-spacing-btn" data-lh="2.15" style="flex:1;">Amplio</button>
+          </div>
+
+          <div class="action-bar-divider" style="margin:14px 0;"></div>
+
+          <div class="settings-row">
+            <span>Palabras de Jesús en rojo</span>
+            <input type="checkbox" id="toggle-red-letters" class="ui-switch" checked>
+          </div>
+          <div class="settings-row" style="margin-top:10px;">
+            <span>Títulos de sección (Perícopas)</span>
+            <input type="checkbox" id="toggle-section-headings" class="ui-switch" checked>
+          </div>
+          <div class="settings-row" style="margin-top:10px;">
+            <span>Scroll continuo entre capítulos</span>
+            <input type="checkbox" id="toggle-continuous-scroll" class="ui-switch">
+          </div>
         </div>
       </div>
+    </div>
+
+    <!-- ===================================================================
+         MODAL 11: PLANES DE LECTURA Y DEVOCIONALES (ReadingPlansBottomSheet.kt)
+         26 Planes Oficiales + Planes Personalizados + Lector de Día de 3 Pilares
+         =================================================================== -->
+    <div class="modal-overlay" id="reading-plans-modal">
+      <div class="full-bottom-sheet" style="max-height:90vh;">
+        <div class="sheet-header-title">
+          <h3>📅 Planes de Lectura y Estudios</h3>
+          <button class="icon-btn" id="btn-close-reading-plans">✕</button>
+        </div>
+
+        <!-- Vista Principal de Planes (3 Pestañas: Mis Planes | Catálogo | Completados) -->
+        <div id="plans-main-view">
+          <div class="fav-subtabs" style="margin-bottom:12px;">
+            <button class="fav-subtab active" data-plantab="CATALOG" id="plantab-btn-catalog">📚 Catálogo (26)</button>
+            <button class="fav-subtab" data-plantab="ACTIVE" id="plantab-btn-active">🔥 Mis Planes (<span id="count-active-plans">0</span>)</button>
+            <button class="fav-subtab" data-plantab="COMPLETED" id="plantab-btn-completed">🏆 Completados (<span id="count-completed-plans">0</span>)</button>
+          </div>
+
+          <div id="plans-tab-content" style="max-height:68vh; overflow-y:auto; padding-right:4px;"></div>
+        </div>
+
+        <!-- Vista Detalle de Días de un Plan Seleccionado -->
+        <div id="plan-days-detail-view" style="display:none; max-height:76vh; overflow-y:auto;">
+          <div class="step-subheader">
+            <button class="icon-btn" id="btn-back-to-plans-list">←</button>
+            <div>
+              <h4 id="plan-detail-title">Plan de Lectura</h4>
+              <span id="plan-detail-progress-text" style="font-size:0.8rem; color:var(--accent-gold); font-weight:700;">0% completado</span>
+            </div>
+          </div>
+          <div class="plan-progress-bar-wrap">
+            <div class="plan-progress-bar-fill" id="plan-detail-progress-bar" style="width:0%;"></div>
+          </div>
+          <div id="plan-days-list-container" style="margin-top:12px;"></div>
+        </div>
+
+        <!-- Vista Lector Devocional del Día (3 Pilares + Botones a Pasajes) -->
+        <div id="plan-day-reader-view" style="display:none; max-height:76vh; overflow-y:auto;">
+          <div class="step-subheader">
+            <button class="icon-btn" id="btn-back-to-plan-days">←</button>
+            <div>
+              <span id="day-reader-badge" class="verse-tag">Día 1</span>
+              <h4 id="day-reader-title" style="margin-top:3px;">Título del Día</h4>
+            </div>
+          </div>
+
+          <div class="detail-section-card" style="margin-top:10px;">
+            <strong>📖 Pasajes Bíblicos de Hoy (<span id="day-reader-summary"></span>):</strong>
+            <div id="day-reader-passage-buttons" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
+          </div>
+
+          <div class="detail-section-card" id="day-reader-narrative-card">
+            <strong>📜 I. Exposición Bíblica y Narrativa</strong>
+            <p id="day-reader-narrative" style="white-space:pre-line; line-height:1.68; font-size:0.94rem; margin-top:8px;"></p>
+          </div>
+
+          <div class="detail-section-card" id="day-reader-lesson-card">
+            <strong>✝️ II. Enseñanza Espiritual y Tesis Doctrinal</strong>
+            <p id="day-reader-lesson" style="white-space:pre-line; line-height:1.62; font-size:0.93rem; margin-top:8px;"></p>
+          </div>
+
+          <div class="detail-section-card" id="day-reader-context-card">
+            <strong>🏛️ III. Contexto Histórico y Reflexión Práctica</strong>
+            <p id="day-reader-context" style="white-space:pre-line; line-height:1.62; font-size:0.93rem; margin-top:8px;"></p>
+          </div>
+
+          <button class="primary-full-btn" id="btn-toggle-complete-day-modal" style="margin-top:12px;">
+            ✓ Marcar Día como Completado
+          </button>
+        </div>
+
+        <!-- Vista Crear Plan Personalizado (CreateCustomPlanDialog.kt) -->
+        <div id="create-custom-plan-view" style="display:none; max-height:74vh; overflow-y:auto;">
+          <div class="step-subheader">
+            <button class="icon-btn" id="btn-back-from-custom-plan">←</button>
+            <h4>✨ Crear Plan de Estudio Personalizado</h4>
+          </div>
+          <label class="modal-label">Nombre de tu Plan</label>
+          <input type="text" id="custom-plan-title" class="modal-input" placeholder="Ej. Estudio de los Salmos de David, Fe en Tiempos Difíciles...">
+          <label class="modal-label">Libro o Enfoque Temático</label>
+          <select id="custom-plan-book" class="modal-input"></select>
+          <label class="modal-label">Duración del Plan (Días)</label>
+          <select id="custom-plan-duration" class="modal-input">
+            <option value="5">5 Días</option>
+            <option value="7" selected>7 Días (1 Semana)</option>
+            <option value="14">14 Días (2 Semanas)</option>
+            <option value="21">21 Días</option>
+            <option value="30">30 Días (1 Mes)</option>
+          </select>
+          <button class="primary-full-btn" id="btn-Generate-custom-plan" style="margin-top:14px;">
+            ✨ Generar e Iniciar Mi Plan
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         MODAL 12: ASISTENTE BÍBLICO IA (BibleChatDialog.kt)
+         Temas Rápidos, Chips de Citas Bíblicas, Dictado por Voz y TTS
+         =================================================================== -->
+    <div class="modal-overlay" id="ai-chat-modal">
+      <div class="full-bottom-sheet" style="height:88vh; display:flex; flex-direction:column;">
+        <div class="sheet-header-title">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:1.3rem;">✨</span>
+            <div>
+              <h3>Asistente Bíblico y Teológico IA</h3>
+              <span style="font-size:0.75rem; color:var(--text-secondary);">Exégesis, Doctrina y Consejería Bíblica</span>
+            </div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="icon-btn" id="btn-clear-ai-chat" title="Limpiar conversación">🗑️</button>
+            <button class="icon-btn" id="btn-close-ai-chat" title="Cerrar">✕</button>
+          </div>
+        </div>
+
+        <!-- Chips de Consultas Rápidas Teológicas -->
+        <div class="chips-scroll" id="ai-quick-topics" style="margin-bottom:10px;">
+          <button class="chip ai-topic-chip">¿Qué enseña la Biblia sobre la escatología?</button>
+          <button class="chip ai-topic-chip">Explícame la Gracia y la Justificación</button>
+          <button class="chip ai-topic-chip">¿Quién es el Espíritu Santo y su obra?</button>
+          <button class="chip ai-topic-chip">¿Cuál es el significado de los pactos bíblicos?</button>
+          <button class="chip ai-topic-chip">¿Cómo enfrentar la ansiedad según la Biblia?</button>
+        </div>
+
+        <!-- Mensajes del Chat -->
+        <div id="ai-chat-messages" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:12px; padding:8px 4px;"></div>
+
+        <!-- Barra de Entrada con Micrófono y Envío -->
+        <div class="chat-input-row">
+          <button class="icon-btn" id="btn-voice-mic" title="Consultar por Voz (Micrófono)">🎤</button>
+          <input type="text" id="ai-chat-input" placeholder="Pregunta sobre un versículo, doctrina o tema bíblico...">
+          <button class="chat-send-btn" id="btn-send-ai-chat" title="Enviar consulta">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         MODAL 13: SINCRONIZACIÓN Y RESPALDO CLOUD (CloudSyncDialog.kt)
+         =================================================================== -->
+    <div class="modal-overlay" id="cloud-sync-modal">
+      <div class="full-bottom-sheet">
+        <div class="sheet-header-title">
+          <h3>☁️ Sincronización y Respaldo</h3>
+          <button class="icon-btn" id="btn-close-cloud-sync">✕</button>
+        </div>
+        <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:12px;">
+          Exporta tu código de sincronización o archivo de respaldo para restaurar tus favoritos, resaltados, notas y planes en cualquier navegador o teléfono.
+        </p>
+        <div class="detail-section-card">
+          <strong>📤 1. Crear Respaldo de Mis Datos</strong>
+          <div style="display:flex; gap:8px; margin-top:10px;">
+            <button class="primary-full-btn" id="btn-download-backup-json">⬇️ Descargar Respaldo (.json)</button>
+            <button class="secondary-full-btn" id="btn-copy-sync-code">📋 Copiar Código Sync</button>
+          </div>
+        </div>
+        <div class="detail-section-card" style="margin-top:12px;">
+          <strong>📥 2. Restaurar Datos desde Respaldo</strong>
+          <textarea id="restore-sync-textarea" rows="3" class="modal-textarea" placeholder="Pega aquí tu código de sincronización JSON o selecciona un archivo..."></textarea>
+          <div style="display:flex; gap:8px; margin-top:8px;">
+            <label class="secondary-full-btn" style="text-align:center; cursor:pointer; margin:0;">
+              📂 Subir Archivo .json
+              <input type="file" id="restore-file-input" accept=".json" style="display:none;">
+            </label>
+            <button class="primary-full-btn" id="btn-apply-restore-sync">✓ Restaurar Ahora</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         MODAL 14: EXPORTAR COLECCIÓN (ExportDialog.kt - PDF, JSON, TXT)
+         =================================================================== -->
+    <div class="modal-overlay" id="export-modal">
+      <div class="full-bottom-sheet">
+        <div class="sheet-header-title">
+          <h3>📄 Exportar Mi Colección</h3>
+          <button class="icon-btn" id="btn-close-export">✕</button>
+        </div>
+        <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:14px;">
+          Elige el formato en el que deseas exportar tus versículos favoritos, resaltados y notas personales:
+        </p>
+        <div class="settings-btn-group">
+          <button class="primary-full-btn" id="btn-export-pdf-collection">📕 Generar Documento PDF (Imprimible)</button>
+          <button class="secondary-full-btn" id="btn-export-txt-collection">📝 Descargar Texto Plano (.txt)</button>
+          <button class="secondary-full-btn" id="btn-export-json-collection">📦 Descargar Archivo de Datos (.json)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-notification" style="position:fixed; bottom:84px; left:50%; transform:translateX(-50%); background:#0F172A; color:#F8FAFC; padding:10px 20px; border-radius:999px; font-size:0.85rem; font-weight:600; box-shadow:0 8px 20px rgba(0,0,0,0.35); z-index:9999; opacity:0; pointer-events:none; transition:opacity 0.25s ease;">
+      Copiado al portapapeles
     </div>
 
   </div>
 
-  <!-- Scripts -->
+  <!-- Catálogos y Datos Extraídos del APK Android -->
+  <script src="./js/data/initial-verses.js"></script>
+  <script src="./js/data/bible-metadata.js"></script>
+  <script src="./js/data/plans-catalog.js"></script>
   <script src="./js/bible-data.js"></script>
   <script src="./js/app.js"></script>
 </body>

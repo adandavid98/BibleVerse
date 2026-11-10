@@ -1,5 +1,5 @@
 /* ==========================================================================
-   BibleVerse Web PWA - Sistema de Diseño Material 3 Sincronizado con Android
+   BibleVerse Web PWA - Sistema de Diseño Material 3 Sincronizado 100% con APK
    ========================================================================== */
 
 :root {
@@ -11,11 +11,13 @@
   --primary-container: #DCE5F2;
   --on-primary: #FFFFFF;
   --secondary-color: #9E6B28;
+  --accent-gold: #B47824;
   --text-primary: #1C222B;
   --text-secondary: #5E6B7E;
   --border-color: #DDD4C5;
   --bottom-nav-bg: #FFFFFF;
   --card-shadow: 0 4px 16px rgba(30, 58, 95, 0.08);
+  --red-letter-color: #B91C1C;
 
   /* Resaltadores oficiales (YouVersion palette de BibleVerse) */
   --hl-yellow: #FACC15;
@@ -27,27 +29,29 @@
   --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-serif: "Merriweather", Georgia, "Times New Roman", serif;
   --reader-font: var(--font-serif);
-  --reader-size: 18px;
-  --reader-line-height: 1.85;
+  --reader-size: 19px;
+  --reader-line-height: 1.8;
 
-  --radius-lg: 24px;
+  --radius-lg: 22px;
   --radius-md: 16px;
   --radius-sm: 10px;
 }
 
 [data-theme="sepia"] {
-  --bg-color: #241D17;
-  --surface-color: #30261E;
-  --surface-variant: #3D3127;
-  --primary-color: #E5B869;
-  --primary-container: #473A2F;
-  --on-primary: #1F1710;
-  --secondary-color: #D49354;
-  --text-primary: #F3E7D7;
-  --text-secondary: #B5A493;
-  --border-color: #473A2F;
-  --bottom-nav-bg: #2B221B;
-  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --bg-color: #F4ECD8;
+  --surface-color: #EAE0C8;
+  --surface-variant: #DFD2B5;
+  --primary-color: #5C3A21;
+  --primary-container: #D8C3A5;
+  --on-primary: #FFFBF2;
+  --secondary-color: #8C5828;
+  --accent-gold: #9A6324;
+  --text-primary: #2C1E14;
+  --text-secondary: #69523E;
+  --border-color: #D2C2A8;
+  --bottom-nav-bg: #EFE5CE;
+  --card-shadow: 0 4px 16px rgba(60, 40, 20, 0.12);
+  --red-letter-color: #991B1B;
 }
 
 [data-theme="dark"] {
@@ -58,11 +62,30 @@
   --primary-container: #1C2A3D;
   --on-primary: #0A1929;
   --secondary-color: #E5B869;
+  --accent-gold: #E5B869;
   --text-primary: #E9EEF5;
   --text-secondary: #8B9BB0;
   --border-color: #283446;
   --bottom-nav-bg: #141B26;
   --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  --red-letter-color: #F87171;
+}
+
+[data-theme="oled"] {
+  --bg-color: #000000;
+  --surface-color: #0D0F12;
+  --surface-variant: #171B21;
+  --primary-color: #93C5FD;
+  --primary-container: #172554;
+  --on-primary: #000000;
+  --secondary-color: #FBBF24;
+  --accent-gold: #FBBF24;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --border-color: #1E293B;
+  --bottom-nav-bg: #050507;
+  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.85);
+  --red-letter-color: #FCA5A5;
 }
 
 * {
@@ -83,7 +106,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Contenedor Responsivo Móvil / PWA */
 .app-container {
   width: 100%;
   max-width: 480px;
@@ -109,42 +131,59 @@ body {
    Top App Bar
    ========================================================================== */
 .top-bar {
-  height: 60px;
+  height: 62px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 14px;
   background-color: var(--bg-color);
   border-bottom: 1px solid var(--border-color);
   z-index: 20;
+  flex-shrink: 0;
 }
 
 .top-bar-title {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--primary-color);
+  cursor: pointer;
 }
 
 .top-bar-title img {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+
+.top-bar-title-texts {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.brand-main {
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--primary-color);
+}
+
+.brand-sub {
+  font-size: 0.67rem;
+  font-weight: 600;
+  color: var(--text-secondary);
 }
 
 .top-bar-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .icon-btn {
   background: transparent;
   border: none;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -159,31 +198,38 @@ body {
   color: var(--primary-color);
 }
 
+.ai-pill-trigger {
+  width: auto;
+  border-radius: 20px;
+  padding: 4px 10px;
+  gap: 4px;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--primary-color);
+}
+
 .badge-ai {
   background: linear-gradient(135deg, #E5B869, #D49354);
   color: #1F1710;
-  font-size: 0.72rem;
-  font-weight: bold;
-  padding: 3px 8px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 10px;
 }
 
 /* ==========================================================================
-   Contenido Principal
+   Main Content
    ========================================================================== */
 .main-content {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 85px;
+  padding-bottom: 92px;
   -webkit-overflow-scrolling: touch;
 }
 
 .tab-pane {
   display: none;
-  padding: 16px;
+  padding: 14px;
   animation: fadeIn 0.2s ease;
 }
 
@@ -192,67 +238,129 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(3px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 /* ==========================================================================
-   Tab 1: Versículos & Devocionales
+   Tab 0: Versículos, Continuar Lectura, Versículo del Día y Banner de Planes
    ========================================================================== */
+.continue-reading-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-gold);
+  border-radius: var(--radius-md);
+  padding: 11px 14px;
+  margin-bottom: 14px;
+}
+
+.continue-reading-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.continue-eyebrow {
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: var(--accent-gold);
+  letter-spacing: 0.6px;
+}
+
+.continue-reading-info strong {
+  font-size: 0.94rem;
+  color: var(--text-primary);
+}
+
+.continue-reading-btn {
+  background-color: var(--primary-color);
+  color: var(--on-primary);
+  border: none;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .verse-of-day-card {
   background: linear-gradient(135deg, var(--surface-color), var(--surface-variant));
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 22px;
+  padding: 18px;
   box-shadow: var(--card-shadow);
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+}
+
+.vod-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.vod-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--accent-gold);
+  letter-spacing: 0.6px;
 }
 
 .verse-tag {
   display: inline-block;
   background-color: var(--primary-color);
   color: var(--on-primary);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: 20px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 12px;
+  letter-spacing: 0.4px;
 }
 
 .verse-quote {
   font-family: var(--font-serif);
-  font-size: 1.18rem;
+  font-size: 1.12rem;
   line-height: 1.6;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .verse-reference {
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 0.92rem;
+  font-weight: 800;
   color: var(--secondary-color);
   text-align: right;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .reflection-box {
   background-color: var(--bg-color);
-  padding: 12px 14px;
+  padding: 11px 13px;
   border-radius: var(--radius-md);
   border-left: 4px solid var(--primary-color);
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.52;
+}
+
+.reflection-title {
+  color: var(--primary-color);
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.82rem;
 }
 
 .card-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
   justify-content: flex-end;
 }
 
@@ -260,43 +368,135 @@ body {
   background: var(--surface-color);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 7px 14px;
+  font-size: 0.77rem;
+  font-weight: 700;
+  padding: 6px 12px;
   border-radius: 20px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.18s;
 }
 
-.action-pill:hover {
+.action-pill:hover, .action-pill.active {
   background-color: var(--primary-color);
   color: var(--on-primary);
+  border-color: var(--primary-color);
+}
+
+.action-pill.danger {
+  color: #EF4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Banner de Planes de Lectura */
+.plans-promo-banner {
+  position: relative;
+  height: 108px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 14px;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+}
+
+.plans-banner-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.plans-banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(15,23,42,0.92) 0%, rgba(15,23,42,0.75) 65%, rgba(15,23,42,0.45) 100%);
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.plans-banner-text {
+  color: #FFFFFF;
+}
+
+.plans-banner-tag {
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: #FBBF24;
+  letter-spacing: 0.6px;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.plans-banner-text h4 {
+  font-size: 1.02rem;
+  font-weight: 800;
+  margin-bottom: 3px;
+}
+
+.plans-banner-text p {
+  font-size: 0.76rem;
+  color: #E2E8F0;
+}
+
+/* Barra de búsqueda interna */
+.inline-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+}
+
+.inline-search-bar input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.88rem;
+  color: var(--text-primary);
+}
+
+.clear-inline-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 2px 6px;
 }
 
 .chips-scroll {
   display: flex;
-  gap: 8px;
+  gap: 7px;
   overflow-x: auto;
-  padding-bottom: 10px;
-  margin-bottom: 16px;
+  padding-bottom: 6px;
+  margin-bottom: 10px;
   scrollbar-width: none;
 }
 .chips-scroll::-webkit-scrollbar { display: none; }
+
+.sub-chips {
+  margin-bottom: 12px;
+}
 
 .chip {
   white-space: nowrap;
   background-color: var(--surface-color);
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
-  font-size: 0.82rem;
-  font-weight: 600;
-  padding: 7px 15px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 6px 13px;
   border-radius: 20px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.18s;
 }
 
 .chip.active {
@@ -305,89 +505,245 @@ body {
   border-color: var(--primary-color);
 }
 
+.feed-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  padding: 0 2px;
+}
+
+.link-reset-btn {
+  background: none;
+  border: none;
+  color: var(--secondary-color);
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 .verse-item-card {
   background-color: var(--surface-color);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 16px;
-  margin-bottom: 12px;
+  padding: 14px 15px;
+  margin-bottom: 11px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.18s, box-shadow 0.18s;
 }
 
 .verse-item-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: var(--card-shadow);
 }
 
+.verse-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 6px;
+}
+
+.verse-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.testament-mini-badge {
+  font-size: 0.66rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background-color: var(--surface-variant);
+  color: var(--text-secondary);
+}
+
 /* ==========================================================================
-   Tab 2: Lector Bíblico 100% Interactivo
+   Floating Action Button (FAB +)
    ========================================================================== */
+.fab-add-verse {
+  position: absolute;
+  right: 18px;
+  bottom: 82px;
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--primary-color), #2B5486);
+  color: #FFFFFF;
+  border: none;
+  box-shadow: 0 8px 22px rgba(30, 58, 95, 0.42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 40;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.fab-add-verse:hover {
+  transform: scale(1.06);
+}
+
+/* ==========================================================================
+   Tab 1: Lector Bíblico (Perícopas, Palabras en Rojo, Audio, Swipe)
+   ========================================================================== */
+.plan-session-bar {
+  background: linear-gradient(135deg, #1E3A5F, #0F172A);
+  color: #FFFFFF;
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.plan-session-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.plan-session-back {
+  background: rgba(255,255,255,0.14);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.plan-session-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #FBBF24;
+  flex: 1;
+  text-align: center;
+}
+
+.plan-session-complete-btn {
+  background: #22C55E;
+  color: #052E16;
+  border: none;
+  border-radius: 12px;
+  padding: 5px 10px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.plan-session-segments {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
 .reader-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: var(--surface-color);
-  padding: 10px 16px;
+  padding: 8px 12px;
   border-radius: var(--radius-md);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   border: 1px solid var(--border-color);
+  gap: 6px;
 }
 
 .book-selector {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  font-size: 1.05rem;
+  gap: 6px;
+  font-weight: 800;
+  font-size: 0.98rem;
   color: var(--primary-color);
+  background: transparent;
+  border: none;
   cursor: pointer;
-  padding: 6px 10px;
+  padding: 6px 8px;
   border-radius: 12px;
-  transition: background-color 0.2s;
 }
+
 .book-selector:hover {
   background-color: var(--surface-variant);
 }
 
-.version-pill {
-  font-size: 0.78rem;
-  font-weight: bold;
-  background-color: var(--surface-variant);
-  color: var(--text-secondary);
-  padding: 6px 12px;
-  border-radius: 14px;
-  cursor: pointer;
+.reader-header-right {
   display: flex;
   align-items: center;
-  gap: 4px;
-  transition: all 0.2s;
+  gap: 6px;
 }
-.version-pill:hover {
+
+.reader-tool-btn {
+  background-color: var(--surface-variant);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.reader-tool-btn.active {
   background-color: var(--primary-color);
   color: var(--on-primary);
+}
+
+.version-pill {
+  font-size: 0.76rem;
+  font-weight: 800;
+  background-color: var(--surface-variant);
+  border: 1px solid var(--border-color);
+  color: var(--primary-color);
+  padding: 6px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .reader-nav-arrows {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
-  padding: 0 4px;
+  margin-bottom: 12px;
+}
+
+.reader-chapter-indicator {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-secondary);
 }
 
 .reader-arrow-btn {
   background: var(--surface-color);
   border: 1px solid var(--border-color);
   color: var(--primary-color);
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.82rem;
+  padding: 6px 12px;
+  border-radius: 18px;
+  font-size: 0.78rem;
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 6px;
   cursor: pointer;
+}
+
+.reader-arrow-btn.primary {
+  background: var(--primary-color);
+  color: var(--on-primary);
+  border-color: var(--primary-color);
 }
 
 .bible-text-container {
@@ -397,45 +753,401 @@ body {
   color: var(--text-primary);
 }
 
+/* Títulos de Sección (Perícopas) */
+.pericope-heading {
+  font-family: var(--font-family);
+  font-size: 0.96em;
+  font-weight: 800;
+  color: var(--secondary-color);
+  margin: 18px 0 8px;
+  padding-left: 8px;
+  border-left: 3px solid var(--secondary-color);
+  line-height: 1.35;
+}
+
 .verse-row {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   padding: 6px 10px;
   border-radius: 10px;
   cursor: pointer;
   transition: background-color 0.15s, border 0.15s;
   display: block;
-  user-select: text;
   border: 1.5px solid transparent;
 }
 
-.verse-row:hover {
-  background-color: rgba(30, 58, 95, 0.04);
-}
-
 .verse-num {
-  font-size: 0.75rem;
+  font-size: 0.74em;
   font-weight: 800;
   color: var(--secondary-color);
   vertical-align: super;
-  margin-right: 8px;
+  margin-right: 6px;
   user-select: none;
 }
 
-/* Borde punteado idéntico al APK al seleccionar */
-.verse-row.selected {
-  border: 1.8px dashed var(--primary-color) !important;
-  background-color: rgba(30, 58, 95, 0.06);
+/* Palabras de Jesús en Rojo */
+.red-letter-text {
+  color: var(--red-letter-color);
 }
 
-/* Resaltados de versículos */
-.verse-row.hl-yellow, .verse-row[data-hl="#FACC15"] { background-color: rgba(250, 204, 21, 0.35); }
-.verse-row.hl-green,  .verse-row[data-hl="#22C55E"] { background-color: rgba(34, 197, 94, 0.3); }
-.verse-row.hl-blue,   .verse-row[data-hl="#38BDF8"] { background-color: rgba(56, 189, 248, 0.3); }
-.verse-row.hl-pink,   .verse-row[data-hl="#EC4899"] { background-color: rgba(236, 72, 153, 0.3); }
-.verse-row.hl-orange, .verse-row[data-hl="#F97316"] { background-color: rgba(249, 115, 22, 0.35); }
+.verse-row.selected {
+  border: 1.8px dashed var(--primary-color) !important;
+  background-color: rgba(30, 58, 95, 0.08);
+}
+
+.verse-row.audio-reading {
+  border-left: 4px solid var(--accent-gold) !important;
+  background-color: rgba(250, 204, 21, 0.22);
+}
+
+.verse-row.transient-target {
+  animation: pulseTarget 2.2s ease;
+}
+
+@keyframes pulseTarget {
+  0%, 40% { background-color: rgba(250, 204, 21, 0.45); }
+  100% { background-color: transparent; }
+}
+
+.verse-row.hl-yellow, .verse-row[data-hl="#FACC15"] { background-color: rgba(250, 204, 21, 0.34); }
+.verse-row.hl-green,  .verse-row[data-hl="#22C55E"] { background-color: rgba(34, 197, 94, 0.28); }
+.verse-row.hl-blue,   .verse-row[data-hl="#38BDF8"] { background-color: rgba(56, 189, 248, 0.28); }
+.verse-row.hl-pink,   .verse-row[data-hl="#EC4899"] { background-color: rgba(236, 72, 153, 0.28); }
+.verse-row.hl-orange, .verse-row[data-hl="#F97316"] { background-color: rgba(249, 115, 22, 0.32); }
+
+.reader-chapter-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color);
+}
 
 /* ==========================================================================
-   VerseActionBar - Bottom Sheet Idéntico a Android (YouVersion Style)
+   Reproductor de Audio del Lector (BibleAudioBottomBar)
+   ========================================================================== */
+.bible-audio-bar {
+  position: absolute;
+  bottom: 70px;
+  left: 10px;
+  right: 10px;
+  background-color: var(--surface-color);
+  border: 1.5px solid var(--border-color);
+  border-radius: 20px;
+  padding: 10px 14px;
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.28);
+  z-index: 85;
+}
+
+.audio-bar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 6px;
+}
+
+.audio-track-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.audio-track-info strong {
+  font-size: 0.85rem;
+  color: var(--primary-color);
+}
+
+.audio-track-info span {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.audio-bar-modes {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.audio-mode-chip {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.audio-mode-chip.active {
+  background: var(--primary-color);
+  color: var(--on-primary);
+  border-color: var(--primary-color);
+}
+
+.audio-bar-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+.audio-ctrl-btn, .audio-speed-btn {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 12px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.audio-play-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: var(--on-primary);
+  border: none;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Buscador Bíblico (SearchTab) y Favoritos (FavoritesAndNotesTab)
+   ========================================================================== */
+.search-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 9px 14px;
+}
+
+.search-input-wrapper input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.version-mini-select, .search-book-dropdown {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--primary-color);
+  border-radius: 18px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  outline: none;
+}
+
+.search-match-hl {
+  background-color: rgba(250, 204, 21, 0.45);
+  font-weight: 800;
+  padding: 0 2px;
+  border-radius: 3px;
+}
+
+.favorites-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.fav-subtabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: var(--surface-color);
+  padding: 4px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+}
+
+.fav-subtab {
+  background: transparent;
+  border: none;
+  padding: 8px 6px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.fav-subtab.active {
+  background: var(--primary-color);
+  color: var(--on-primary);
+}
+
+/* ==========================================================================
+   SettingsTab (Ajustes Completos)
+   ========================================================================== */
+.settings-screen-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.settings-screen-header h2 {
+  font-size: 1.15rem;
+  color: var(--primary-color);
+}
+
+.settings-screen-header p {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+}
+
+.settings-card {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 15px;
+  margin-bottom: 12px;
+}
+
+.settings-card h4 {
+  font-size: 0.94rem;
+  color: var(--primary-color);
+  margin-bottom: 6px;
+}
+
+.settings-sub {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-bottom: 10px;
+}
+
+.settings-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.settings-card-icon {
+  font-size: 1.5rem;
+}
+
+.theme-options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.theme-option-card {
+  background: var(--bg-color);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.theme-option-card.active {
+  border-color: var(--primary-color);
+  background: var(--primary-color);
+  color: var(--on-primary);
+}
+
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.font-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepper-btn {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--primary-color);
+  padding: 5px 12px;
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.ui-switch {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}
+
+.time-input {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.settings-btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.primary-full-btn {
+  width: 100%;
+  background: var(--primary-color);
+  color: var(--on-primary);
+  border: none;
+  border-radius: 14px;
+  padding: 11px 14px;
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.secondary-full-btn {
+  width: 100%;
+  background: var(--bg-color);
+  color: var(--primary-color);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.settings-versions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ==========================================================================
+   VerseActionBar & Bottom Navigation Bar
    ========================================================================== */
 .verse-action-bar {
   position: absolute;
@@ -445,11 +1157,11 @@ body {
   background-color: var(--surface-color);
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
-  padding: 12px 16px 20px;
-  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.3);
+  padding: 12px 14px 20px;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.35);
   border-top: 1px solid var(--border-color);
   transform: translateY(120%);
-  transition: transform 0.28s cubic-bezier(0.1, 0.9, 0.2, 1);
+  transition: transform 0.26s cubic-bezier(0.1, 0.9, 0.2, 1);
   z-index: 100;
 }
 
@@ -470,40 +1182,37 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .selection-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-weight: 700;
-  font-size: 0.92rem;
-  color: var(--text-primary);
+  font-size: 0.88rem;
 }
 
 .palette-swatches {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 
 .color-swatch {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: 2px solid #FFFFFF;
   box-shadow: 0 2px 6px rgba(0,0,0,0.25);
   cursor: pointer;
   transition: transform 0.15s;
 }
-.color-swatch:hover {
-  transform: scale(1.18);
-}
+.color-swatch:hover { transform: scale(1.15); }
 
 .reset-swatch {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: rgba(239, 68, 68, 0.15);
   border: 1px solid rgba(239, 68, 68, 0.4);
@@ -512,21 +1221,20 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .action-bar-divider {
   height: 1px;
   background-color: var(--border-color);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .action-bar-buttons-row {
   display: flex;
-  gap: 14px;
+  gap: 8px;
   overflow-x: auto;
   scrollbar-width: none;
-  padding-bottom: 4px;
 }
 .action-bar-buttons-row::-webkit-scrollbar { display: none; }
 
@@ -535,37 +1243,71 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  background: transparent;
-  border: none;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
   color: var(--text-primary);
-  font-size: 0.76rem;
-  font-weight: 600;
+  font-size: 0.72rem;
+  font-weight: 700;
   cursor: pointer;
-  min-width: 62px;
-  padding: 6px;
+  min-width: 64px;
+  padding: 7px 6px;
   border-radius: 12px;
-  transition: background-color 0.15s;
-}
-.action-pill-btn:hover {
-  background-color: var(--surface-variant);
 }
 
 .action-pill-btn svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   color: var(--primary-color);
 }
 
+.bottom-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 66px;
+  background-color: var(--bottom-nav-bg);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 30;
+  transition: transform 0.25s ease;
+}
+
+.bottom-nav.auto-hidden {
+  transform: translateY(100%);
+}
+
+.nav-item {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: var(--text-secondary);
+  font-size: 0.71rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 5px 12px;
+  border-radius: 16px;
+}
+.nav-item svg { width: 21px; height: 21px; }
+.nav-item.active { color: var(--primary-color); }
+.nav-item.active .nav-pill {
+  background-color: var(--surface-variant);
+  border-radius: 14px;
+  padding: 2px 15px;
+}
+
 /* ==========================================================================
-   Modales & Sheets (Book Selector, Versions, Explain, Compare, Settings, AI)
+   Modales, 3-Step Selector, Planes, Imagen Canvas y Chat IA
    ========================================================================== */
 .modal-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.62);
   display: none;
   justify-content: center;
   align-items: flex-end;
@@ -579,14 +1321,14 @@ body {
 
 .full-bottom-sheet {
   width: 100%;
-  max-height: 88%;
+  max-height: 89%;
   background-color: var(--bg-color);
   border-top-left-radius: 26px;
   border-top-right-radius: 26px;
-  padding: 20px 18px 24px;
+  padding: 18px 16px 22px;
   overflow-y: auto;
-  box-shadow: 0 -6px 30px rgba(0,0,0,0.35);
-  animation: slideUp 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+  box-shadow: 0 -6px 30px rgba(0,0,0,0.4);
+  animation: slideUp 0.22s cubic-bezier(0.1, 0.9, 0.2, 1);
   display: flex;
   flex-direction: column;
 }
@@ -600,109 +1342,278 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
-/* Cuadrícula de Capítulos */
-.chapters-grid {
+.sheet-header-title h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--primary-color);
+}
+
+/* Selector de 3 Pasos (LIBRO | CAPÍTULO | VERSÍCULO) */
+.three-step-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: var(--surface-color);
+  padding: 4px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.step-tab {
+  background: transparent;
+  border: none;
+  padding: 7px 4px;
+  border-radius: 10px;
+  font-size: 0.73rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.step-tab.active {
+  background: var(--primary-color);
+  color: var(--on-primary);
+}
+
+.step-subheader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.chapter-grid, .chapters-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  margin-top: 14px;
+  gap: 8px;
 }
 
 .chapter-square-btn {
   background-color: var(--surface-color);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  height: 52px;
+  height: 46px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 1.05rem;
+  font-weight: 800;
+  font-size: 0.96rem;
   color: var(--primary-color);
   cursor: pointer;
-  transition: all 0.15s;
 }
+
 .chapter-square-btn:hover, .chapter-square-btn.active {
   background-color: var(--primary-color);
   color: var(--on-primary);
-  border-color: var(--primary-color);
 }
 
-/* Versiones Bíblicas */
-.version-card-row {
-  background-color: var(--surface-color);
-  border: 1.5px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 14px 16px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.version-card-row:hover, .version-card-row.selected {
-  border-color: var(--primary-color);
-  background-color: var(--surface-variant);
-}
-
-/* Comparador de Versiones */
-.compare-version-box {
-  background-color: var(--surface-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+/* Modal Detalle de Versículo y Formularios */
+.detail-verse-quote {
+  font-family: var(--font-serif);
+  font-size: 1.08rem;
+  line-height: 1.65;
   padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-color);
+  border-left: 4px solid var(--secondary-color);
   margin-bottom: 12px;
 }
-.compare-version-name {
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--secondary-color);
-  margin-bottom: 6px;
-}
-.compare-version-text {
-  font-family: var(--reader-font);
-  font-size: 0.98rem;
-  line-height: 1.6;
-}
 
-/* Bottom Navigation Bar */
-.bottom-nav {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 68px;
-  background-color: var(--bottom-nav-bg);
-  border-top: 1px solid var(--border-color);
+.detail-highlight-row {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
-  z-index: 30;
+  background: var(--surface-color);
+  padding: 8px 12px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
-.nav-item {
-  background: none;
-  border: none;
+.detail-section-card {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+.detail-section-header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-mini-btn {
+  background: linear-gradient(135deg, #E5B869, #C88A36);
+  color: #1F1710;
+  border: none;
+  border-radius: 14px;
+  padding: 5px 10px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.detail-actions-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.modal-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+
+.modal-input, .modal-textarea {
+  width: 100%;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 12px;
+  padding: 9px 12px;
+  font-size: 0.88rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 8px;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.font-family-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+
+/* Miniaturas de los 12 fondos fotográficos */
+.bg-thumbs-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.bg-thumb-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2.5px solid transparent;
+  flex-shrink: 0;
+  cursor: pointer;
+  padding: 0;
+}
+
+.bg-thumb-btn.active {
+  border-color: var(--accent-gold);
+  transform: scale(1.06);
+}
+
+.bg-thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Tarjetas de Planes de Lectura */
+.plan-catalog-card {
+  display: flex;
+  gap: 12px;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 11px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  align-items: center;
+}
+
+.plan-card-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.plan-progress-bar-wrap {
+  width: 100%;
+  height: 8px;
+  background: var(--surface-color);
+  border-radius: 99px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.plan-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-gold));
+  transition: width 0.3s ease;
+}
+
+/* Chat IA */
+.chat-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+}
+
+.chat-input-row input {
+  flex: 1;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 22px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  outline: none;
+}
+
+.chat-send-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: var(--on-primary);
+  border: none;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.chat-cite-chip {
+  display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--text-secondary);
-  font-size: 0.72rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 6px 12px;
-  border-radius: 18px;
-  transition: all 0.2s;
-}
-.nav-item svg { width: 22px; height: 22px; }
-.nav-item.active { color: var(--primary-color); }
-.nav-item.active .nav-pill {
-  background-color: var(--surface-variant);
+  background: var(--primary-container);
+  color: var(--primary-color);
+  border: 1px solid var(--border-color);
+  padding: 4px 10px;
   border-radius: 14px;
-  padding: 2px 16px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  margin: 3px 4px 0 0;
 }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bibleverse-pwa-v1.8.5';
+const CACHE_NAME = 'bibleverse-pwa-v2.4.0';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -7,8 +7,11 @@ const STATIC_ASSETS = [
   './css/landing.css',
   './css/app.css',
   './js/landing.js',
-  './js/app.js',
+  './js/data/initial-verses.js',
+  './js/data/bible-metadata.js',
+  './js/data/plans-catalog.js',
   './js/bible-data.js',
+  './js/app.js',
   './assets/icons/app-logo.svg',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
@@ -19,7 +22,6 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[ServiceWorker] Pre-caching static assets');
       return cache.addAll(STATIC_ASSETS);
     })
   );
@@ -32,7 +34,6 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
-            console.log('[ServiceWorker] Removing old cache', cache);
             return caches.delete(cache);
           }
         })
@@ -43,24 +44,42 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Ignore non-GET requests or GitHub API dynamic calls
   if (event.request.method !== 'GET') return;
-  if (event.request.url.includes('api.github.com')) {
-    // Network first for live release stats
+
+  const url = new URL(event.request.url);
+
+  // External API calls (GitHub releases, Gemini AI, Bolls) -> Network first
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  // App shell files (.html, .js, .css) -> Network first, fallback to cache so updates always apply immediately
+  if (
+    url.pathname.endsWith('.html') ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css') ||
+    url.pathname === '/'
+  ) {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request))
     );
     return;
   }
 
-  // Cache first for app UI and Bible content
+  // Heavy offline assets (Bible books JSON, drawables, pericopes, cross_references.bin) -> Cache first
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+      if (cachedResponse) return cachedResponse;
       return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+        if (!networkResponse || networkResponse.status !== 200) {
           return networkResponse;
         }
         const responseToCache = networkResponse.clone();
@@ -69,11 +88,6 @@ self.addEventListener('fetch', (event) => {
         });
         return networkResponse;
       });
-    }).catch(() => {
-      // Offline fallback
-      if (event.request.destination === 'document') {
-        return caches.match('./app.html');
-      }
     })
   );
 });
