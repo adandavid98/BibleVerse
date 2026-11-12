@@ -202,13 +202,6 @@
 
         <!-- Contenedor de Versículos del Capítulo (Con Perícopas y Palabras de Jesús en Rojo) -->
         <div class="bible-text-container" id="bible-verses-list"></div>
-
-        <!-- Barra Flotante Inferior de Navegación del Lector (estilo Android) -->
-        <div class="reader-floating-nav">
-          <button class="reader-circle-nav-btn" id="btn-prev-chapter-bottom" title="Capítulo Anterior">‹</button>
-          <button class="reader-floating-pill" id="btn-floating-book-pill" title="Seleccionar Libro y Capítulo">SALMOS 23</button>
-          <button class="reader-circle-nav-btn" id="btn-next-chapter-bottom" title="Siguiente Capítulo">›</button>
-        </div>
       </section>
 
       <!-- ===============================================================
@@ -479,6 +472,13 @@
       </div>
     </div>
 
+    <!-- Barra Flotante Inferior de Navegación del Lector (estilo Android) -->
+    <div class="reader-floating-nav" id="reader-floating-nav">
+      <button type="button" class="reader-circle-nav-btn" id="btn-prev-chapter-bottom" title="Capítulo Anterior">‹</button>
+      <button type="button" class="reader-floating-pill" id="btn-floating-book-pill" title="Seleccionar Libro y Capítulo">SALMOS 23</button>
+      <button type="button" class="reader-circle-nav-btn" id="btn-next-chapter-bottom" title="Siguiente Capítulo">›</button>
+    </div>
+
     <!-- ===================================================================
          BOTTOM NAVIGATION BAR (4 Pestañas Principales)
          =================================================================== -->
@@ -680,7 +680,11 @@
           <div class="form-grid-3">
             <div>
               <label class="modal-label">Libro</label>
-              <select id="add-verse-book" class="modal-input"></select>
+              <input type="hidden" id="add-verse-book" value="19">
+              <button type="button" id="btn-add-verse-pick-book" class="modal-input" style="text-align:left; font-weight:700; display:flex; justify-content:space-between; align-items:center; cursor:pointer; width:100%;">
+                <span id="add-verse-book-label" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Salmos</span>
+                <span>▾</span>
+              </button>
             </div>
             <div>
               <label class="modal-label">Cap.</label>

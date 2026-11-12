@@ -171,6 +171,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (tabId !== "reader") {
       clearVerseSelection();
       mainBottomNav.classList.remove("auto-hidden");
+      document.getElementById("reader-floating-nav")?.classList.remove("visible", "docked-bottom");
+    } else {
+      document.getElementById("reader-floating-nav")?.classList.toggle("visible", state.selectedVerses.size === 0);
     }
 
     if (tabId === "reader") {
@@ -211,8 +214,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentY = mainScrollContainer.scrollTop;
     if (currentY > lastScrollY + 18 && currentY > 80) {
       mainBottomNav.classList.add("auto-hidden");
+      document.getElementById("reader-floating-nav")?.classList.add("docked-bottom");
     } else if (currentY < lastScrollY - 12 || currentY < 40) {
       mainBottomNav.classList.remove("auto-hidden");
+      document.getElementById("reader-floating-nav")?.classList.remove("docked-bottom");
     }
     lastScrollY = currentY;
 
@@ -644,10 +649,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function initAddVerseForm() {
     if (!addBookSel) return;
-    addBookSel.innerHTML = BIBLE_BOOKS.map(b => `<option value="${b.id}">${b.name}</option>`).join("");
     addBookSel.value = String(state.bookId);
+    const lbl = document.getElementById("add-verse-book-label");
+    if (lbl) lbl.textContent = getBookById(state.bookId).name;
     updateAddVerseChapters();
   }
+
+  document.getElementById("btn-add-verse-pick-book")?.addEventListener("click", () => {
+    openUnifiedBookSelector("ADD_VERSE");
+  });
 
   function updateAddVerseChapters() {
     const b = getBookById(addBookSel.value);
@@ -886,9 +896,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("btn-prev-chapter")?.addEventListener("click", () => navigateChapter(-1));
   document.getElementById("btn-next-chapter")?.addEventListener("click", () => navigateChapter(1));
-  document.getElementById("btn-prev-chapter-bottom")?.addEventListener("click", () => navigateChapter(-1));
-  document.getElementById("btn-next-chapter-bottom")?.addEventListener("click", () => navigateChapter(1));
-  document.getElementById("btn-floating-book-pill")?.addEventListener("click", () => bookNameBtn?.click());
+  document.getElementById("btn-prev-chapter-bottom")?.addEventListener("click", e => {
+    e.stopPropagation();
+    navigateChapter(-1);
+  });
+  document.getElementById("btn-next-chapter-bottom")?.addEventListener("click", e => {
+    e.stopPropagation();
+    navigateChapter(1);
+  });
+  document.getElementById("btn-floating-book-pill")?.addEventListener("click", e => {
+    e.stopPropagation();
+    openUnifiedBookSelector("READER");
+  });
 
   // Gestos Swipe Horizontal (Izquierda/Derecha) en el Lector Bíblico
   let touchStartX = 0;
@@ -927,13 +946,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateActionBarVisibility() {
     const count = state.selectedVerses.size;
+    const floatingNav = document.getElementById("reader-floating-nav");
     if (count > 0) {
       document.getElementById("selection-count-text").textContent = `${count} selec.`;
       actionBar.classList.add("visible");
       mainBottomNav?.classList.add("auto-hidden");
+      floatingNav?.classList.remove("visible");
     } else {
       actionBar.classList.remove("visible");
       mainBottomNav?.classList.remove("auto-hidden");
+      floatingNav?.classList.toggle("visible", state.currentTab === "reader");
+      floatingNav?.classList.remove("docked-bottom");
     }
   }
 
@@ -1453,6 +1476,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function openUnifiedBookSelector(mode = "READER") {
     currentPickerMode = mode;
+    if (mode === "READER") {
+      clearVerseSelection();
+    }
     const stepTabs = document.getElementById("book-selector-step-tabs");
     if (stepTabs) stepTabs.style.display = mode === "READER" ? "flex" : "none";
 
@@ -1463,7 +1489,7 @@ document.addEventListener("DOMContentLoaded", () => {
       t.classList.toggle("active", t.dataset.filter === "ALL");
     });
 
-    tempPickerBook = getBookById(state.bookId);
+    tempPickerBook = mode === "ADD_VERSE" ? getBookById(Number(addBookSel?.value || state.bookId)) : getBookById(state.bookId);
     tempPickerChapter = state.chapter;
     showPickerStep(1);
     renderPickerBooksList("");
@@ -1529,6 +1555,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (currentPickerMode === "READER") isCurrent = b.id === state.bookId;
       else if (currentPickerMode === "VERSES_FILTER") isCurrent = b.name === state.versesBookFilter;
       else if (currentPickerMode === "SEARCH_FILTER") isCurrent = b.id === currentSearchBookId;
+      else if (currentPickerMode === "ADD_VERSE") isCurrent = b.id === Number(addBookSel?.value);
 
       const subText = verseCounts
         ? `${b.category} • ${verseCounts[b.name] || 0} versículos`
@@ -1574,6 +1601,12 @@ document.addEventListener("DOMContentLoaded", () => {
           }
           bookSelectorModal.classList.remove("open");
           triggerFullBibleSearch();
+        } else if (currentPickerMode === "ADD_VERSE") {
+          if (addBookSel) addBookSel.value = String(picked.id);
+          const lbl = document.getElementById("add-verse-book-label");
+          if (lbl) lbl.textContent = picked.name;
+          updateAddVerseChapters();
+          bookSelectorModal.classList.remove("open");
         } else {
           tempPickerBook = picked;
           renderPickerChaptersGrid(tempPickerBook);
