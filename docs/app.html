@@ -238,9 +238,7 @@
             <button class="chip active" data-scope="ALL">Toda la Biblia (66)</button>
             <button class="chip" data-scope="OT">Antiguo T. (39)</button>
             <button class="chip" data-scope="NT">Nuevo T. (27)</button>
-            <select id="search-book-select" class="search-book-dropdown">
-              <option value="">Por Libro específico...</option>
-            </select>
+            <button class="chip chip-book-picker" id="btn-search-book-picker">📚 Por Libro...</button>
           </div>
         </div>
 
@@ -310,11 +308,9 @@
         <div class="settings-card">
           <h4>🎨 Tema Visual de la Aplicación</h4>
           <div class="theme-options-grid" id="settings-theme-grid">
-            <button class="theme-option-card active" data-theme="light">☀️ Claro Clásico</button>
-            <button class="theme-option-card" data-theme="sepia-night">☕ Sepia Oscuro</button>
-            <button class="theme-option-card" data-theme="sepia">📜 Sepia Claro</button>
+            <button class="theme-option-card active" data-theme="light">☀️ Claro</button>
+            <button class="theme-option-card" data-theme="sepia-night">☕ Sepia</button>
             <button class="theme-option-card" data-theme="dark">🌙 Oscuro</button>
-            <button class="theme-option-card" data-theme="oled">🖤 Noche OLED</button>
           </div>
 
           <div class="settings-row" style="margin-top:14px;">
@@ -360,17 +356,6 @@
           <h4>📚 Versiones Bíblicas Disponibles (Offline / Online)</h4>
           <p class="settings-sub">5 traducciones completas están integradas localmente sin internet; puedes pre-descargar las demás.</p>
           <div id="settings-versions-list" class="settings-versions-list"></div>
-        </div>
-
-        <!-- 5b. Inteligencia Artificial Gemini -->
-        <div class="settings-card">
-          <h4>✨ Asistente Teológico e IA (Gemini)</h4>
-          <p class="settings-sub">Configura tu clave gratuita de Google AI Studio (opcional si usas el proxy de Vercel).</p>
-          <div style="display:flex; gap:8px; margin-top:8px;">
-            <input type="password" id="settings-gemini-key-input" placeholder="AIzaSy..." style="flex:1; padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); background:var(--bg-color); color:var(--text-primary); font-family:monospace; font-size:0.84rem;" />
-            <button class="offline-action-btn" id="btn-settings-save-gemini-key">Guardar</button>
-          </div>
-          <div id="settings-gemini-key-status" style="font-size:0.76rem; color:var(--accent-gold); margin-top:6px; min-height:16px;"></div>
         </div>
 
         <!-- 6. Información y Descarga APK Android -->
@@ -532,14 +517,17 @@
          (BookChapterSelectorSheet.kt)
          =================================================================== -->
     <div class="modal-overlay" id="book-selector-modal">
-      <div class="full-bottom-sheet">
+      <div class="full-bottom-sheet" style="height:94%; max-height:94%;">
         <div class="sheet-header-title">
-          <h3>Ir al Pasaje Bíblico</h3>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="icon-btn" id="btn-book-selector-back" style="display:none;" title="Volver">←</button>
+            <h3 id="book-selector-title">Seleccionar Libro</h3>
+          </div>
           <button class="icon-btn" id="btn-close-book-selector">✕</button>
         </div>
 
         <!-- Tabs de 3 Pasos (LIBRO | CAPÍTULO | VERSÍCULO) -->
-        <div class="three-step-tabs">
+        <div class="three-step-tabs" id="book-selector-step-tabs">
           <button class="step-tab active" id="step-tab-book">1. LIBRO</button>
           <button class="step-tab" id="step-tab-chapter">2. CAPÍTULO</button>
           <button class="step-tab" id="step-tab-verse">3. VERSÍCULO</button>
@@ -548,15 +536,15 @@
         <!-- Paso 1: Lista de Libros -->
         <div id="selector-step-books">
           <div style="display:flex; gap:8px; margin-bottom:10px;">
-            <button class="chip testament-tab active" data-filter="ALL">Todos (66)</button>
-            <button class="chip testament-tab" data-filter="AT">Antiguo T. (39)</button>
-            <button class="chip testament-tab" data-filter="NT">Nuevo T. (27)</button>
+            <button class="chip testament-tab active" data-filter="ALL">Todo (66)</button>
+            <button class="chip testament-tab" data-filter="AT">A.T. (39)</button>
+            <button class="chip testament-tab" data-filter="NT">N.T. (27)</button>
           </div>
           <div class="inline-search-bar" style="margin-bottom:10px;">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input type="text" id="book-search-input" placeholder="Buscar libro (ej. Génesis, Salmos, Juan)...">
           </div>
-          <div id="selector-books-list" style="max-height:52vh; overflow-y:auto;"></div>
+          <div id="selector-books-list" style="max-height:60vh; overflow-y:auto;"></div>
         </div>
 
         <!-- Paso 2: Cuadrícula de Capítulos -->
@@ -743,22 +731,6 @@
     </div>
 
     <!-- ===================================================================
-         MODAL 5: FILTRAR POR LIBRO EN VERSÍCULOS (BookFilterDialog)
-         =================================================================== -->
-    <div class="modal-overlay" id="book-filter-modal">
-      <div class="full-bottom-sheet">
-        <div class="sheet-header-title">
-          <h3>📚 Filtrar Compilación por Libro</h3>
-          <button class="icon-btn" id="btn-close-book-filter">✕</button>
-        </div>
-        <div class="inline-search-bar" style="margin-bottom:10px;">
-          <input type="text" id="book-filter-search" placeholder="Buscar libro...">
-        </div>
-        <div id="book-filter-list" style="max-height:60vh; overflow-y:auto;"></div>
-      </div>
-    </div>
-
-    <!-- ===================================================================
          MODAL 6: COMPARADOR INTERACTIVO DE VERSIONES (VerseCompareBottomSheet.kt)
          =================================================================== -->
     <div class="modal-overlay" id="compare-modal">
@@ -864,13 +836,12 @@
         </div>
 
         <div style="max-height:72vh; overflow-y:auto; padding-right:4px;">
-          <label class="modal-label">Tema de color</label>
+          <label class="modal-label">Tema de lectura</label>
           <div class="theme-options-grid">
-            <button class="chip theme-btn active" data-theme="light">☀️ Claro</button>
-            <button class="chip theme-btn" data-theme="sepia-night">☕ Sepia Oscuro</button>
-            <button class="chip theme-btn" data-theme="sepia">📜 Sepia Claro</button>
-            <button class="chip theme-btn" data-theme="dark">🌙 Oscuro</button>
-            <button class="chip theme-btn" data-theme="oled">🖤 OLED</button>
+            <button class="chip reader-theme-btn active" data-reader-theme="reader-light">☀️ Claro</button>
+            <button class="chip reader-theme-btn" data-reader-theme="reader-sepia">📜 Sepia</button>
+            <button class="chip reader-theme-btn" data-reader-theme="reader-dark">🌙 Oscuro</button>
+            <button class="chip reader-theme-btn" data-reader-theme="reader-night">🖤 Noche</button>
           </div>
 
           <label class="modal-label" style="margin-top:14px;">Tipografía (6 Familias)</label>
@@ -913,17 +884,6 @@
             <span>Scroll continuo entre capítulos</span>
             <input type="checkbox" id="toggle-continuous-scroll" class="ui-switch">
           </div>
-
-          <div class="action-bar-divider" style="margin:16px 0 12px 0;"></div>
-          <label class="modal-label">✨ Inteligencia Artificial Gemini (Opcional)</label>
-          <p style="font-size:0.8rem; color:var(--text-muted); margin:0 0 8px 0; line-height:1.4;">
-            Si configuraste <code>GEMINI_API_KEY</code> en las Variables de Entorno de Vercel, la IA funciona automáticamente y protegida. También puedes ingresar tu clave gratuita de Google AI Studio aquí:
-          </p>
-          <div style="display:flex; gap:8px;">
-            <input type="password" id="input-custom-gemini-key" placeholder="AIzaSy..." style="flex:1; padding:8px 12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-primary); font-family:monospace; font-size:0.85rem;" />
-            <button class="chip" id="btn-save-gemini-key" style="background:var(--accent-gold); color:#1a1306; font-weight:700; border:none; cursor:pointer;">Guardar</button>
-          </div>
-          <div id="gemini-key-status" style="font-size:0.75rem; color:var(--accent-gold); margin-top:6px; min-height:16px;"></div>
         </div>
       </div>
     </div>

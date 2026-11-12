@@ -25,8 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
     chapter: parseInt(localStorage.getItem("bv_chapter") || "23", 10),
     targetScrollVerse: null,
 
-    // Preferencias de Apariencia y Lector
-    theme: localStorage.getItem("bv_theme") || "light",
+    // Preferencias de Apariencia (3 temas globales) y Lector (4 temas propios)
+    theme: ["light", "sepia-night", "dark"].includes(localStorage.getItem("bv_theme")) ? localStorage.getItem("bv_theme") : "light",
+    readerTheme: ["reader-light", "reader-sepia", "reader-dark", "reader-night"].includes(localStorage.getItem("bv_readerTheme")) ? localStorage.getItem("bv_readerTheme") : "reader-light",
     fontFamily: localStorage.getItem("bv_fontFamily") || "serif",
     fontSize: parseInt(localStorage.getItem("bv_fontSize") || "19", 10),
     lineHeight: parseFloat(localStorage.getItem("bv_lineHeight") || "1.8"),
@@ -369,49 +370,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Modal de Filtrar por Libro en la pestaña Versículos
-  const bookFilterModal = document.getElementById("book-filter-modal");
+  // Botón de Filtrar por Libro en la pestaña Versículos -> usa el Modal Unificado estilo APK
   document.getElementById("btn-open-book-filter-modal")?.addEventListener("click", () => {
-    renderBookFilterModalList("");
-    bookFilterModal.classList.add("open");
+    openUnifiedBookSelector("VERSES_FILTER");
   });
-  document.getElementById("btn-close-book-filter")?.addEventListener("click", () => {
-    bookFilterModal.classList.remove("open");
-  });
-  document.getElementById("book-filter-search")?.addEventListener("input", e => {
-    renderBookFilterModalList(e.target.value);
-  });
-
-  function renderBookFilterModalList(searchStr) {
-    const listEl = document.getElementById("book-filter-list");
-    if (!listEl) return;
-    const counts = {};
-    state.versesCollection.forEach(v => {
-      counts[v.book] = (counts[v.book] || 0) + 1;
-    });
-    const q = stripAccents(searchStr || "").toLowerCase();
-    const booksWithVerses = Object.keys(counts).filter(b => stripAccents(b).toLowerCase().includes(q));
-
-    listEl.innerHTML = booksWithVerses.map(bName => `
-      <div class="version-card-row ${state.versesBookFilter === bName ? "selected" : ""}" data-bname="${bName}">
-        <strong>${bName}</strong>
-        <span class="testament-mini-badge">${counts[bName]} versículos</span>
-      </div>
-    `).join("");
-
-    listEl.querySelectorAll(".version-card-row").forEach(row => {
-      row.addEventListener("click", () => {
-        state.versesBookFilter = row.dataset.bname;
-        state.versesTestamentFilter = "ALL";
-        document.querySelectorAll("#canonical-filter-chips .chip").forEach(c => c.classList.remove("active"));
-        const bookChip = document.getElementById("btn-open-book-filter-modal");
-        bookChip.textContent = `📚 ${state.versesBookFilter} ✕`;
-        bookChip.classList.add("active");
-        bookFilterModal.classList.remove("open");
-        renderPopularVersesFeed();
-      });
-    });
-  }
 
   // Buscador rápido dentro de los 365 versículos
   const versesFilterInput = document.getElementById("verses-filter-input");
@@ -1459,14 +1421,17 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // =========================================================================
-  // 7. SELECTOR DE 3 PASOS: LIBRO -> CAPÍTULO -> VERSÍCULO (BookChapterSelectorSheet.kt)
+  // 7. SELECTOR UNIFICADO DE LIBROS ESTILO APK (BookChapterSelectorSheet.kt)
   // =========================================================================
   const bookSelectorModal = document.getElementById("book-selector-modal");
   let tempPickerBook = getBookById(state.bookId);
   let tempPickerChapter = state.chapter;
   let pickerTestamentFilter = "ALL";
+  let currentPickerMode = "READER"; // "READER" | "VERSES_FILTER" | "SEARCH_FILTER"
+  let currentPickerStep = 1;
 
   function showPickerStep(stepNum) {
+    currentPickerStep = stepNum;
     document.getElementById("selector-step-books").style.display = stepNum === 1 ? "block" : "none";
     document.getElementById("selector-step-chapters").style.display = stepNum === 2 ? "block" : "none";
     document.getElementById("selector-step-verses").style.display = stepNum === 3 ? "block" : "none";
@@ -1474,14 +1439,45 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("step-tab-book").classList.toggle("active", stepNum === 1);
     document.getElementById("step-tab-chapter").classList.toggle("active", stepNum === 2);
     document.getElementById("step-tab-verse").classList.toggle("active", stepNum === 3);
+
+    const backBtn = document.getElementById("btn-book-selector-back");
+    if (backBtn) backBtn.style.display = (currentPickerMode === "READER" && stepNum > 1) ? "inline-flex" : "none";
+
+    const titleEl = document.getElementById("book-selector-title");
+    if (titleEl) {
+      if (stepNum === 1) titleEl.textContent = "Seleccionar Libro";
+      else if (stepNum === 2) titleEl.textContent = `${tempPickerBook.name} — Capítulos`;
+      else titleEl.textContent = `${tempPickerBook.name} ${tempPickerChapter} — Versículos`;
+    }
   }
 
-  document.getElementById("btn-select-book")?.addEventListener("click", () => {
+  function openUnifiedBookSelector(mode = "READER") {
+    currentPickerMode = mode;
+    const stepTabs = document.getElementById("book-selector-step-tabs");
+    if (stepTabs) stepTabs.style.display = mode === "READER" ? "flex" : "none";
+
+    const searchBox = document.getElementById("book-search-input");
+    if (searchBox) searchBox.value = "";
+    pickerTestamentFilter = "ALL";
+    document.querySelectorAll(".testament-tab").forEach(t => {
+      t.classList.toggle("active", t.dataset.filter === "ALL");
+    });
+
     tempPickerBook = getBookById(state.bookId);
     tempPickerChapter = state.chapter;
     showPickerStep(1);
-    renderPickerBooksList();
+    renderPickerBooksList("");
     bookSelectorModal.classList.add("open");
+
+    setTimeout(() => {
+      const activeItem = document.querySelector("#selector-books-list .book-selector-item.selected");
+      if (activeItem) activeItem.scrollIntoView({ block: "center" });
+    }, 60);
+  }
+
+  document.getElementById("btn-select-book")?.addEventListener("click", () => openUnifiedBookSelector("READER"));
+  document.getElementById("btn-book-selector-back")?.addEventListener("click", () => {
+    if (currentPickerStep > 1) showPickerStep(currentPickerStep - 1);
   });
 
   document.getElementById("btn-close-book-selector")?.addEventListener("click", () => bookSelectorModal.classList.remove("open"));
@@ -1508,26 +1504,81 @@ document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById("selector-books-list");
     if (!container) return;
     const q = stripAccents(searchStr).toLowerCase();
+
+    let verseCounts = null;
+    if (currentPickerMode === "VERSES_FILTER") {
+      verseCounts = {};
+      state.versesCollection.forEach(v => {
+        verseCounts[v.book] = (verseCounts[v.book] || 0) + 1;
+      });
+    }
+
     const filtered = BIBLE_BOOKS.filter(b => {
       if (pickerTestamentFilter !== "ALL" && b.testament !== pickerTestamentFilter) return false;
       return stripAccents(b.name).toLowerCase().includes(q) || stripAccents(b.category).toLowerCase().includes(q);
     });
 
-    container.innerHTML = filtered.map(b => `
-      <div class="version-card-row ${b.id === state.bookId ? "selected" : ""}" data-bid="${b.id}">
-        <div>
-          <strong>${b.name}</strong>
-          <div style="font-size:0.74rem; color:var(--text-secondary);">${b.category} • ${b.testamentFull}</div>
-        </div>
-        <span class="testament-mini-badge">${b.chapters} caps.</span>
-      </div>
-    `).join("");
+    let html = "";
+    filtered.forEach((b, idx) => {
+      const prev = idx > 0 ? filtered[idx - 1] : null;
+      if (prev && prev.id <= 39 && b.id > 39) {
+        html += `<div class="book-nt-divider"><span>Nuevo Testamento</span></div>`;
+      }
 
-    container.querySelectorAll(".version-card-row").forEach(row => {
+      let isCurrent = false;
+      if (currentPickerMode === "READER") isCurrent = b.id === state.bookId;
+      else if (currentPickerMode === "VERSES_FILTER") isCurrent = b.name === state.versesBookFilter;
+      else if (currentPickerMode === "SEARCH_FILTER") isCurrent = b.id === currentSearchBookId;
+
+      const subText = verseCounts
+        ? `${b.category} • ${verseCounts[b.name] || 0} versículos`
+        : `${b.category} • ${b.chapters} cap.`;
+
+      html += `
+        <div class="book-selector-item ${isCurrent ? "selected" : ""}" data-bid="${b.id}">
+          <div class="book-selector-left">
+            <div class="book-order-circle">${b.id}</div>
+            <div>
+              <strong style="font-size:0.94rem;">${b.name}</strong>
+              <div style="font-size:0.74rem; color:var(--text-secondary);">${subText}</div>
+            </div>
+          </div>
+          <span style="font-size:1.25rem; color:var(--text-secondary);">›</span>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+
+    container.querySelectorAll(".book-selector-item").forEach(row => {
       row.addEventListener("click", () => {
-        tempPickerBook = getBookById(Number(row.dataset.bid));
-        renderPickerChaptersGrid(tempPickerBook);
-        showPickerStep(2);
+        const picked = getBookById(Number(row.dataset.bid));
+        if (currentPickerMode === "VERSES_FILTER") {
+          state.versesBookFilter = picked.name;
+          state.versesTestamentFilter = "ALL";
+          document.querySelectorAll("#canonical-filter-chips .chip").forEach(c => c.classList.remove("active"));
+          const bookChip = document.getElementById("btn-open-book-filter-modal");
+          if (bookChip) {
+            bookChip.textContent = `📚 ${picked.name} ✕`;
+            bookChip.classList.add("active");
+          }
+          bookSelectorModal.classList.remove("open");
+          renderPopularVersesFeed();
+        } else if (currentPickerMode === "SEARCH_FILTER") {
+          currentSearchBookId = picked.id;
+          currentSearchScope = "BOOK";
+          document.querySelectorAll("#search-scope-chips .chip").forEach(c => c.classList.remove("active"));
+          const searchBookBtn = document.getElementById("btn-search-book-picker");
+          if (searchBookBtn) {
+            searchBookBtn.textContent = `📚 ${picked.name} ✕`;
+            searchBookBtn.classList.add("active");
+          }
+          bookSelectorModal.classList.remove("open");
+          triggerFullBibleSearch();
+        } else {
+          tempPickerBook = picked;
+          renderPickerChaptersGrid(tempPickerBook);
+          showPickerStep(2);
+        }
       });
     });
   }
@@ -1776,6 +1827,11 @@ document.addEventListener("DOMContentLoaded", () => {
       document.documentElement.setAttribute("data-theme", state.theme);
     }
 
+    const readerTab = document.getElementById("tab-reader");
+    if (readerTab) {
+      readerTab.setAttribute("data-reader-theme", state.readerTheme);
+    }
+
     const fontMap = {
       serif: '"Merriweather", Georgia, "Times New Roman", serif',
       sans: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -1794,8 +1850,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (lbl1) lbl1.textContent = `${state.fontSize}px`;
     if (lbl2) lbl2.textContent = `${state.fontSize}px`;
 
-    document.querySelectorAll(".theme-btn, .theme-option-card").forEach(btn => {
+    document.querySelectorAll(".theme-option-card").forEach(btn => {
       btn.classList.toggle("active", btn.dataset.theme === state.theme);
+    });
+    document.querySelectorAll(".reader-theme-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.readerTheme === state.readerTheme);
     });
     document.querySelectorAll(".font-family-btn").forEach(btn => {
       btn.classList.toggle("active", btn.dataset.font === state.fontFamily);
@@ -1812,6 +1871,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (csSwitch) csSwitch.checked = state.continuousScroll;
 
     localStorage.setItem("bv_theme", state.theme);
+    localStorage.setItem("bv_readerTheme", state.readerTheme);
     localStorage.setItem("bv_fontFamily", state.fontFamily);
     localStorage.setItem("bv_fontSize", state.fontSize);
     localStorage.setItem("bv_lineHeight", state.lineHeight);
@@ -1827,9 +1887,16 @@ document.addEventListener("DOMContentLoaded", () => {
     readerSettingsModal.classList.remove("open");
   });
 
-  document.querySelectorAll(".theme-btn, .theme-option-card").forEach(btn => {
+  document.querySelectorAll(".theme-option-card").forEach(btn => {
     btn.addEventListener("click", () => {
       state.theme = btn.dataset.theme;
+      applyReaderVisualPreferences();
+    });
+  });
+
+  document.querySelectorAll(".reader-theme-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.readerTheme = btn.dataset.readerTheme;
       applyReaderVisualPreferences();
     });
   });
@@ -1871,40 +1938,6 @@ document.addEventListener("DOMContentLoaded", () => {
     state.continuousScroll = e.target.checked;
     applyReaderVisualPreferences();
   });
-
-  const inputGeminiKey = document.getElementById("input-custom-gemini-key");
-  const btnSaveGeminiKey = document.getElementById("btn-save-gemini-key");
-  const lblGeminiStatus = document.getElementById("gemini-key-status");
-  const settingsGeminiInput = document.getElementById("settings-gemini-key-input");
-  const btnSettingsSaveGemini = document.getElementById("btn-settings-save-gemini-key");
-  const lblSettingsGeminiStatus = document.getElementById("settings-gemini-key-status");
-
-  function refreshGeminiKeyStatus() {
-    const saved = localStorage.getItem("bibleverse_custom_gemini_key");
-    if (inputGeminiKey) inputGeminiKey.value = saved || "";
-    if (settingsGeminiInput) settingsGeminiInput.value = saved || "";
-    const msg = saved
-      ? "✓ Clave personalizada activa (" + saved.substring(0, 6) + "...)"
-      : "ℹ️ Conectando vía Vercel Serverless / Motor Teológico Local";
-    if (lblGeminiStatus) lblGeminiStatus.textContent = msg;
-    if (lblSettingsGeminiStatus) lblSettingsGeminiStatus.textContent = msg;
-  }
-  refreshGeminiKeyStatus();
-
-  function saveGeminiKeyFromValue(rawVal) {
-    const val = (rawVal || "").trim();
-    if (val) {
-      localStorage.setItem("bibleverse_custom_gemini_key", val);
-      showToast("✨ Clave de Gemini guardada");
-    } else {
-      localStorage.removeItem("bibleverse_custom_gemini_key");
-      showToast("Clave eliminada. Usando Vercel / Motor Local.");
-    }
-    refreshGeminiKeyStatus();
-  }
-
-  btnSaveGeminiKey?.addEventListener("click", () => saveGeminiKeyFromValue(inputGeminiKey?.value));
-  btnSettingsSaveGemini?.addEventListener("click", () => saveGeminiKeyFromValue(settingsGeminiInput?.value));
 
   // =========================================================================
   // 11. MÓDULO 5: PLANES DE LECTURA Y DEVOCIONALES (26 Planes + Personalizados)
@@ -2551,32 +2584,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("search-input");
   const clearSearchBtn = document.getElementById("btn-clear-search-input");
   const searchVersionSel = document.getElementById("search-version-select");
-  const searchBookDropdown = document.getElementById("search-book-select");
+  const searchBookPickerBtn = document.getElementById("btn-search-book-picker");
   let currentSearchScope = "ALL";
+  let currentSearchBookId = null;
   let searchDebounceTimer = null;
 
-  if (searchBookDropdown) {
-    searchBookDropdown.innerHTML = `<option value="">Por Libro específico...</option>` +
-      BIBLE_BOOKS.map(b => `<option value="${b.id}">${b.name}</option>`).join("");
-  }
-
-  document.querySelectorAll("#search-scope-chips .chip").forEach(chip => {
+  document.querySelectorAll("#search-scope-chips .chip[data-scope]").forEach(chip => {
     chip.addEventListener("click", () => {
       currentSearchScope = chip.dataset.scope;
-      searchBookDropdown.value = "";
-      document.querySelectorAll("#search-scope-chips .chip").forEach(c => c.classList.toggle("active", c === chip));
+      currentSearchBookId = null;
+      if (searchBookPickerBtn) {
+        searchBookPickerBtn.textContent = "📚 Por Libro...";
+        searchBookPickerBtn.classList.remove("active");
+      }
+      document.querySelectorAll("#search-scope-chips .chip[data-scope]").forEach(c => c.classList.toggle("active", c === chip));
       triggerFullBibleSearch();
     });
   });
 
-  searchBookDropdown?.addEventListener("change", () => {
-    if (searchBookDropdown.value) {
-      currentSearchScope = "BOOK";
-      document.querySelectorAll("#search-scope-chips .chip").forEach(c => c.classList.remove("active"));
-    } else {
-      currentSearchScope = "ALL";
-    }
-    triggerFullBibleSearch();
+  searchBookPickerBtn?.addEventListener("click", () => {
+    openUnifiedBookSelector("SEARCH_FILTER");
   });
 
   searchVersionSel?.addEventListener("change", triggerFullBibleSearch);
@@ -2624,7 +2651,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const matches = await searchFullBible(q, {
       version: searchVersionSel.value,
       scope: currentSearchScope,
-      bookId: searchBookDropdown.value ? Number(searchBookDropdown.value) : null,
+      bookId: currentSearchBookId,
       limit: 100
     });
 

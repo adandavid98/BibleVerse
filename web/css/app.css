@@ -88,21 +88,37 @@
   --red-letter-color: #F87171;
 }
 
-[data-theme="oled"] {
-  --bg-color: #000000;
-  --surface-color: #0D0F12;
-  --surface-variant: #171B21;
-  --primary-color: #93C5FD;
-  --primary-container: #172554;
-  --on-primary: #000000;
-  --secondary-color: #FBBF24;
-  --accent-gold: #FBBF24;
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --border-color: #1E293B;
-  --bottom-nav-bg: #050507;
-  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.85);
-  --red-letter-color: #FCA5A5;
+/* 4 Temas Independientes del Lector Bíblico (BibleReaderScreen.kt) */
+#tab-reader[data-reader-theme="reader-light"],
+#tab-reader {
+  --reader-bg: #FFFFFF;
+  --reader-text: #1F2937;
+  --reader-secondary: #6B7280;
+  --reader-accent: #2563EB;
+  background-color: var(--reader-bg);
+  color: var(--reader-text);
+  min-height: 100%;
+}
+
+#tab-reader[data-reader-theme="reader-sepia"] {
+  --reader-bg: #FBF0D9;
+  --reader-text: #382813;
+  --reader-secondary: #8D6E48;
+  --reader-accent: #9A3412;
+}
+
+#tab-reader[data-reader-theme="reader-dark"] {
+  --reader-bg: #121417;
+  --reader-text: #F1F5F9;
+  --reader-secondary: #94A3B8;
+  --reader-accent: #38BDF8;
+}
+
+#tab-reader[data-reader-theme="reader-night"] {
+  --reader-bg: #090D16;
+  --reader-text: #E2E8F0;
+  --reader-secondary: #64748B;
+  --reader-accent: #818CF8;
 }
 
 * {
@@ -838,16 +854,16 @@ body {
   font-family: var(--reader-font);
   font-size: var(--reader-size);
   line-height: var(--reader-line-height);
-  color: var(--text-primary);
+  color: var(--reader-text);
 }
 
-/* Títulos de Sección (Perícopas - estilo Android negrita cursiva sin borde izquierdo) */
+/* Títulos de Sección (Perícopas - negrita cursiva con color del tema como en Android) */
 .pericope-heading {
-  font-family: var(--font-family);
-  font-size: 0.96em;
-  font-weight: 800;
+  font-family: var(--reader-font);
+  font-size: 1.08em;
+  font-weight: 700;
   font-style: italic;
-  color: var(--secondary-color);
+  color: var(--reader-text);
   margin: 18px 0 8px;
   padding-left: 0;
   line-height: 1.35;
@@ -895,7 +911,7 @@ body {
 .verse-num {
   font-size: 0.74em;
   font-weight: 800;
-  color: var(--secondary-color);
+  color: var(--reader-secondary);
   vertical-align: super;
   margin-right: 6px;
   user-select: none;
@@ -1955,4 +1971,65 @@ body {
   justify-content: center;
   gap: 8px;
   margin-top: 14px;
+}
+
+/* Selector Unificado de Libros estilo APK (BookChapterSelectorSheet.kt) */
+.book-nt-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 10px;
+}
+.book-nt-divider::before,
+.book-nt-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+}
+.book-nt-divider span {
+  background: var(--primary-container);
+  color: var(--primary-color);
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 12px;
+}
+
+.book-selector-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-color);
+  border: 1.5px solid transparent;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+.book-selector-item.selected {
+  background: var(--primary-container);
+  border-color: var(--primary-color);
+}
+.book-selector-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.book-order-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface-variant);
+  color: var(--text-primary);
+  font-size: 0.76rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.book-selector-item.selected .book-order-circle {
+  background: var(--primary-color);
+  color: var(--on-primary);
 }
