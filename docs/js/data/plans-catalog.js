@@ -6,7 +6,7 @@ window.READING_PLANS_CATALOG = [
     "durationDays": 365,
     "badge": "365 Días • Clásico",
     "accentColorHex": "#1B3A4B",
-    "coverImage": "assets/drawable/plan_cover_traditional.webp",
+    "coverImage": "assets/drawable/plan_cover_classic.webp",
     "category": "PLANES ANUALES Y RECORRIDOS LARGOS (30 - 365 Días)"
   },
   {
@@ -26,7 +26,7 @@ window.READING_PLANS_CATALOG = [
     "durationDays": 365,
     "badge": "365 Historias • Narrativo",
     "accentColorHex": "#2C5E43",
-    "coverImage": "assets/drawable/plan_cover_bible_stories.webp",
+    "coverImage": "assets/drawable/plan_cover_stories.webp",
     "category": "PLANES ANUALES Y RECORRIDOS LARGOS (30 - 365 Días)"
   },
   {
@@ -36,7 +36,7 @@ window.READING_PLANS_CATALOG = [
     "durationDays": 31,
     "badge": "31 Días • Sabiduría",
     "accentColorHex": "#8A5A19",
-    "coverImage": "assets/drawable/plan_cover_proverbs_31.webp",
+    "coverImage": "assets/drawable/plan_cover_proverbs.webp",
     "category": "PLANES ANUALES Y RECORRIDOS LARGOS (30 - 365 Días)"
   },
   {
@@ -46,7 +46,7 @@ window.READING_PLANS_CATALOG = [
     "durationDays": 30,
     "badge": "30 Días • Evangelios",
     "accentColorHex": "#7C2D12",
-    "coverImage": "assets/drawable/plan_cover_jesus_30.webp",
+    "coverImage": "assets/drawable/plan_cover_jesus30.webp",
     "category": "PLANES ANUALES Y RECORRIDOS LARGOS (30 - 365 Días)"
   },
   {
@@ -116,7 +116,7 @@ window.READING_PLANS_CATALOG = [
     "durationDays": 15,
     "badge": "15 Días • Tipología",
     "accentColorHex": "#6B21A8",
-    "coverImage": "assets/drawable/plan_cover_tabernacle_hebrews.webp",
+    "coverImage": "assets/drawable/plan_cover_tabernacle.webp",
     "category": "DOCTRINA Y TEOLOGÍA BÍBLICA (Estudios Profundos)"
   },
   {
@@ -136,7 +136,7 @@ window.READING_PLANS_CATALOG = [
     "durationDays": 5,
     "badge": "5 Días • Discipulado",
     "accentColorHex": "#047857",
-    "coverImage": "assets/drawable/plan_cover_new_life_christ.webp",
+    "coverImage": "assets/drawable/plan_cover_new_life.webp",
     "category": "CRECIMIENTO ESPIRITUAL Y DISCIPULADO (5 - 7 Días)"
   },
   {
@@ -236,7 +236,7 @@ window.READING_PLANS_CATALOG = [
     "durationDays": 5,
     "badge": "5 Días • Sanidad",
     "accentColorHex": "#0D9488",
-    "coverImage": "assets/drawable/plan_cover_power_of_forgiveness.webp",
+    "coverImage": "assets/drawable/plan_cover_forgiveness.webp",
     "category": "FAMILIA, PERDÓN Y VIDA PRÁCTICA (5 - 15 Días)"
   },
   {

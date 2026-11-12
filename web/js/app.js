@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Planes de Lectura: { planId: { startedAt, completedDays: [1, 2...], customMeta?: {...}, customDays?: [...] } }
     userPlans: JSON.parse(localStorage.getItem("bv_user_plans") || "{}"),
-    activePlanModalTab: "CATALOG", // "CATALOG" | "ACTIVE" | "COMPLETED"
+    activePlanModalTab: "ALL", // "ALL" | "ACTIVE" | "CATALOG" | "COMPLETED"
     currentViewingPlanId: null,
     currentViewingDayNum: 1,
     activeReaderPlanSession: null, // { planId, dayNumber, title, passages: [] }
@@ -202,9 +202,10 @@ document.addEventListener("DOMContentLoaded", () => {
     switchTab("verses");
   });
 
-  // Auto-ocultar BottomBar al hacer scroll hacia abajo en el Lector
+  // Auto-ocultar BottomBar al hacer scroll hacia abajo en el Lector + Scroll Continuo
   let lastScrollY = 0;
-  mainScrollContainer?.addEventListener("scroll", () => {
+  let isAppendingContinuous = false;
+  mainScrollContainer?.addEventListener("scroll", async () => {
     if (state.currentTab !== "reader") return;
     const currentY = mainScrollContainer.scrollTop;
     if (currentY > lastScrollY + 18 && currentY > 80) {
@@ -213,6 +214,25 @@ document.addEventListener("DOMContentLoaded", () => {
       mainBottomNav.classList.remove("auto-hidden");
     }
     lastScrollY = currentY;
+
+    if (state.continuousScroll && !isAppendingContinuous) {
+      const distToBottom = mainScrollContainer.scrollHeight - (mainScrollContainer.scrollTop + mainScrollContainer.clientHeight);
+      if (distToBottom < 140 && !(state.bookId === 66 && state.chapter >= 22)) {
+        isAppendingContinuous = true;
+        try {
+          const curBook = getBookById(state.bookId);
+          if (state.chapter < curBook.chapters) {
+            state.chapter++;
+          } else if (state.bookId < 66) {
+            state.bookId++;
+            state.chapter = 1;
+          }
+          await loadReaderChapter(true);
+        } finally {
+          setTimeout(() => { isAppendingContinuous = false; }, 350);
+        }
+      }
+    }
   });
 
   // =========================================================================
@@ -232,11 +252,23 @@ document.addEventListener("DOMContentLoaded", () => {
     switchTab("reader");
   });
 
+  function applyVodBackground(bgNum) {
+    const card = document.getElementById("vod-card");
+    if (!card) return;
+    const padded = String(bgNum).padStart(2, "0");
+    card.style.backgroundImage = `url("./assets/drawable/verse_bg_${padded}.webp")`;
+    localStorage.setItem("bv_vod_bg", String(bgNum));
+  }
+
   function renderVerseOfTheDay() {
     const list = state.versesCollection;
     if (!list.length) return;
     const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
     currentVodVerse = list[dayOfYear % list.length];
+
+    const savedBg = parseInt(localStorage.getItem("bv_vod_bg") || "0", 10);
+    const bgNum = (savedBg >= 1 && savedBg <= 12) ? savedBg : ((dayOfYear % 12) + 1);
+    applyVodBackground(bgNum);
 
     document.getElementById("vod-tag").textContent = currentVodVerse.topic;
     document.getElementById("vod-quote").textContent = `«${currentVodVerse.text}»`;
@@ -248,6 +280,18 @@ document.addEventListener("DOMContentLoaded", () => {
       favBtn.classList.toggle("active", !!currentVodVerse.isFavorite);
     }
   }
+
+  document.getElementById("btn-shuffle-vod-bg")?.addEventListener("click", e => {
+    e.stopPropagation();
+    const current = parseInt(localStorage.getItem("bv_vod_bg") || "1", 10);
+    const next = (current % 12) + 1;
+    applyVodBackground(next);
+  });
+
+  document.getElementById("vod-card")?.addEventListener("click", e => {
+    if (e.target.closest("button")) return;
+    if (currentVodVerse) openVerseDetailDialog(currentVodVerse.id);
+  });
 
   document.getElementById("btn-fav-vod")?.addEventListener("click", () => {
     if (!currentVodVerse) return;
@@ -433,16 +477,16 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Renderizar tarjetas (con soporte de resaltado, nota e indicador de favorito)
-    feed.innerHTML = filtered.slice(0, 120).map(v => {
-      const isAT = (v.testament || "").includes("Antiguo");
+    // Renderizar tarjetas (con soporte de resaltado, nota, versión e indicador de favorito)
+    feed.innerHTML = filtered.map(v => {
       const hlStyle = v.highlightColor ? `border-left: 5px solid ${v.highlightColor}; background-color: ${v.highlightColor}22;` : "";
+      const verBadge = v.version || state.version;
       return `
         <div class="verse-item-card" data-vid="${v.id}" style="${hlStyle}">
           <div class="verse-card-top">
             <div class="verse-card-badges">
               <span class="verse-tag" style="margin:0;">${v.topic}</span>
-              <span class="testament-mini-badge">${isAT ? "A.T." : "N.T."}</span>
+              <span class="testament-mini-badge">${verBadge}</span>
               ${v.notes ? `<span class="testament-mini-badge" style="color:var(--secondary-color);">✏️ Con nota</span>` : ""}
             </div>
             <button class="icon-btn btn-card-fav" data-vid="${v.id}" style="width:30px; height:30px; color:${v.isFavorite ? "#EF4444" : "var(--text-secondary)"};" title="Favorito">
@@ -746,11 +790,42 @@ document.addEventListener("DOMContentLoaded", () => {
   const chapterSubtitleEl = document.getElementById("reader-chapter-subtitle");
   const actionBar = document.getElementById("verse-action-bar");
 
+  function refreshAdjacentHighlightMerging() {
+    const rows = Array.from(versesListEl.querySelectorAll(".verse-row"));
+    rows.forEach((row, idx) => {
+      row.classList.remove("hl-join-prev", "hl-join-next");
+      const hl = row.getAttribute("data-hl");
+      if (!hl) return;
+      const prev = rows[idx - 1];
+      const next = rows[idx + 1];
+      if (prev && prev.previousElementSibling === null || (prev && row.previousElementSibling === prev)) {
+        if (prev.getAttribute("data-hl") === hl) {
+          row.classList.add("hl-join-prev");
+        }
+      }
+      if (next && row.nextElementSibling === next && next.getAttribute("data-hl") === hl) {
+        row.classList.add("hl-join-next");
+      }
+    });
+  }
+
   async function loadReaderChapter(appendContinuous = false) {
     const book = getBookById(state.bookId);
     if (bookNameBtn) bookNameBtn.textContent = `${book.name} ${state.chapter}`;
     if (versionCodeEl) versionCodeEl.textContent = state.version;
     if (chapterSubtitleEl) chapterSubtitleEl.textContent = `${book.name} • Capítulo ${state.chapter} (${book.testamentFull})`;
+
+    const floatingPill = document.getElementById("btn-floating-book-pill");
+    if (floatingPill) floatingPill.textContent = `${book.name.toUpperCase()} ${state.chapter}`;
+
+    const mp3ModeBtn = document.getElementById("btn-audio-mode-mp3");
+    if (mp3ModeBtn && typeof getOfficialChapterAudioUrl === "function") {
+      getOfficialChapterAudioUrl(state.version, state.bookId, state.chapter).then(url => {
+        mp3ModeBtn.style.display = url ? "inline-flex" : "none";
+      }).catch(() => {
+        mp3ModeBtn.style.display = "none";
+      });
+    }
 
     localStorage.setItem("bv_bookId", state.bookId);
     localStorage.setItem("bv_chapter", state.chapter);
@@ -766,7 +841,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = await fetchChapterVerses(state.version, state.bookId, state.chapter);
     state.currentChapterVerses = data.verses;
 
-    const htmlChunk = data.verses.map(v => {
+    const parallelChipHtml = !appendContinuous
+      ? `<button type="button" class="chapter-parallel-chip" id="btn-chapter-parallels">⊕ Pasajes paralelos del capítulo</button>`
+      : "";
+
+    const htmlChunk = parallelChipHtml + data.verses.map(v => {
       const key = `${state.bookId}_${state.chapter}_${v.verse}`;
       const hlObj = state.highlights[key];
       const hlHex = hlObj ? hlObj.color : "";
@@ -790,6 +869,15 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       versesListEl.innerHTML = htmlChunk;
     }
+
+    refreshAdjacentHighlightMerging();
+
+    document.getElementById("btn-chapter-parallels")?.addEventListener("click", () => {
+      state.selectedVerses.clear();
+      state.selectedVerses.add(1);
+      document.getElementById("btn-action-references")?.click();
+      state.selectedVerses.clear();
+    });
 
     versesListEl.querySelectorAll(".verse-row").forEach(row => {
       row.onclick = () => toggleVerseSelection(parseInt(row.dataset.verse, 10), row);
@@ -838,6 +926,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btn-next-chapter")?.addEventListener("click", () => navigateChapter(1));
   document.getElementById("btn-prev-chapter-bottom")?.addEventListener("click", () => navigateChapter(-1));
   document.getElementById("btn-next-chapter-bottom")?.addEventListener("click", () => navigateChapter(1));
+  document.getElementById("btn-floating-book-pill")?.addEventListener("click", () => bookNameBtn?.click());
 
   // Gestos Swipe Horizontal (Izquierda/Derecha) en el Lector Bíblico
   let touchStartX = 0;
@@ -879,8 +968,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (count > 0) {
       document.getElementById("selection-count-text").textContent = `${count} selec.`;
       actionBar.classList.add("visible");
+      mainBottomNav?.classList.add("auto-hidden");
     } else {
       actionBar.classList.remove("visible");
+      mainBottomNav?.classList.remove("auto-hidden");
     }
   }
 
@@ -925,6 +1016,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (row) row.setAttribute("data-hl", hex);
       });
       saveHighlightsState();
+      refreshAdjacentHighlightMerging();
       clearVerseSelection();
       showToast("🎨 Versículo resaltado y guardado en tu colección");
     });
@@ -938,6 +1030,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (row) row.removeAttribute("data-hl");
     });
     saveHighlightsState();
+    refreshAdjacentHighlightMerging();
     clearVerseSelection();
     showToast("Resaltado eliminado");
   });
@@ -1213,10 +1306,10 @@ document.addEventListener("DOMContentLoaded", () => {
         textColor = "#F8FAFC";
         accentColor = "#E5B869";
       } else if (tpl === "parchment") {
-        grad.addColorStop(0, "#3D2E1E");
-        grad.addColorStop(1, "#1F160E");
-        textColor = "#F5E6D3";
-        accentColor = "#E5B869";
+        grad.addColorStop(0, "#FBF0D9");
+        grad.addColorStop(1, "#EFE1C6");
+        textColor = "#3E2723";
+        accentColor = "#8C5828";
       } else {
         grad.addColorStop(0, "#090D16");
         grad.addColorStop(1, "#000000");
@@ -1288,16 +1381,46 @@ document.addEventListener("DOMContentLoaded", () => {
     navigator.clipboard.writeText(`«${currentShareVerseText}» — ${currentShareCitation}`);
     showToast("📋 Cita copiada");
   });
-  document.getElementById("btn-download-share-image")?.addEventListener("click", () => {
+  document.getElementById("btn-download-share-image")?.addEventListener("click", async () => {
     const canvas = document.getElementById("share-canvas");
-    const link = document.createElement("a");
-    link.download = `BibleVerse_${currentShareCitation.replace(/[^a-zA-Z0-9]/g, "_")}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-    showToast("🖼️ Imagen PNG descargada");
+    const fileName = `BibleVerse_${currentShareCitation.replace(/[^a-zA-Z0-9]/g, "_")}.jpg`;
+    canvas.toBlob(async (blob) => {
+      if (blob && navigator.canShare) {
+        const file = new File([blob], fileName, { type: "image/jpeg" });
+        if (navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: currentShareCitation,
+              text: `«${currentShareVerseText}» — ${currentShareCitation}`
+            });
+            return;
+          } catch {
+            // Cancelado o fallback a descarga
+          }
+        }
+      }
+      const link = document.createElement("a");
+      link.download = fileName;
+      link.href = canvas.toDataURL("image/jpeg", 0.94);
+      link.click();
+      showToast("🖼️ Imagen HD descargada");
+    }, "image/jpeg", 0.94);
   });
 
-  // ACCIÓN 5 Y 6: COPIAR Y GUARDAR EN COLECCIÓN
+  // ACCIÓN 5, 6 Y 7: COMPARTIR TEXTO, COPIAR Y GUARDAR EN COLECCIÓN
+  document.getElementById("btn-action-share")?.addEventListener("click", () => {
+    if (state.selectedVerses.size === 0) return;
+    const payload = getSelectedVersesPayload();
+    const shareText = `«${payload.combinedText}» — ${payload.citation} (${state.version})`;
+    clearVerseSelection();
+    if (navigator.share) {
+      navigator.share({ title: `${payload.citation} (${state.version})`, text: shareText }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(shareText);
+      showToast("📋 Texto copiado para compartir");
+    }
+  });
   document.getElementById("btn-action-copy")?.addEventListener("click", () => {
     if (state.selectedVerses.size === 0) return;
     const payload = getSelectedVersesPayload();
@@ -1752,32 +1875,36 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputGeminiKey = document.getElementById("input-custom-gemini-key");
   const btnSaveGeminiKey = document.getElementById("btn-save-gemini-key");
   const lblGeminiStatus = document.getElementById("gemini-key-status");
+  const settingsGeminiInput = document.getElementById("settings-gemini-key-input");
+  const btnSettingsSaveGemini = document.getElementById("btn-settings-save-gemini-key");
+  const lblSettingsGeminiStatus = document.getElementById("settings-gemini-key-status");
 
   function refreshGeminiKeyStatus() {
     const saved = localStorage.getItem("bibleverse_custom_gemini_key");
-    if (inputGeminiKey && saved) {
-      inputGeminiKey.value = saved;
-    }
-    if (lblGeminiStatus) {
-      if (saved) {
-        lblGeminiStatus.textContent = "✓ Clave personalizada activa (" + saved.substring(0, 6) + "...)";
-      } else {
-        lblGeminiStatus.textContent = "ℹ️ Conectando vía Vercel Serverless / Motor Teológico Local";
-      }
-    }
+    if (inputGeminiKey) inputGeminiKey.value = saved || "";
+    if (settingsGeminiInput) settingsGeminiInput.value = saved || "";
+    const msg = saved
+      ? "✓ Clave personalizada activa (" + saved.substring(0, 6) + "...)"
+      : "ℹ️ Conectando vía Vercel Serverless / Motor Teológico Local";
+    if (lblGeminiStatus) lblGeminiStatus.textContent = msg;
+    if (lblSettingsGeminiStatus) lblSettingsGeminiStatus.textContent = msg;
   }
   refreshGeminiKeyStatus();
 
-  btnSaveGeminiKey?.addEventListener("click", () => {
-    const val = inputGeminiKey?.value?.trim() || "";
+  function saveGeminiKeyFromValue(rawVal) {
+    const val = (rawVal || "").trim();
     if (val) {
       localStorage.setItem("bibleverse_custom_gemini_key", val);
-      if (lblGeminiStatus) lblGeminiStatus.textContent = "✓ Clave guardada correctamente.";
+      showToast("✨ Clave de Gemini guardada");
     } else {
       localStorage.removeItem("bibleverse_custom_gemini_key");
-      if (lblGeminiStatus) lblGeminiStatus.textContent = "Clave eliminada. Usando Vercel / Motor Local.";
+      showToast("Clave eliminada. Usando Vercel / Motor Local.");
     }
-  });
+    refreshGeminiKeyStatus();
+  }
+
+  btnSaveGeminiKey?.addEventListener("click", () => saveGeminiKeyFromValue(inputGeminiKey?.value));
+  btnSettingsSaveGemini?.addEventListener("click", () => saveGeminiKeyFromValue(settingsGeminiInput?.value));
 
   // =========================================================================
   // 11. MÓDULO 5: PLANES DE LECTURA Y DEVOCIONALES (26 Planes + Personalizados)
@@ -1903,10 +2030,10 @@ document.addEventListener("DOMContentLoaded", () => {
         return u && (u.completedDays || []).length < p.durationDays;
       });
       if (activeList.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-secondary);">No tienes planes en curso actualmente. Explora el <strong>Catálogo (26)</strong> para iniciar uno.</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-secondary);">No tienes planes en curso actualmente. Explora el <strong>Catálogo</strong> para iniciar uno.</div>`;
         return;
       }
-      container.innerHTML = activeList.map(p => renderPlanCardHTML(p)).join("");
+      container.innerHTML = `<div class="plans-grid-2col">${activeList.map(p => renderPlanCardHTML(p)).join("")}</div>`;
     } else if (state.activePlanModalTab === "COMPLETED") {
       const compList = allPlans.filter(p => {
         const u = state.userPlans[p.id];
@@ -1916,9 +2043,17 @@ document.addEventListener("DOMContentLoaded", () => {
         container.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-secondary);">Aún no has completado ningún plan. ¡Comienza hoy tu recorrido bíblico!</div>`;
         return;
       }
-      container.innerHTML = compList.map(p => renderPlanCardHTML(p)).join("");
+      container.innerHTML = `<div class="plans-grid-2col">${compList.map(p => renderPlanCardHTML(p)).join("")}</div>`;
+    } else if (state.activePlanModalTab === "ALL") {
+      const customBtnHtml = `
+        <button class="primary-full-btn" id="btn-open-create-custom-plan" style="margin-bottom:14px;">
+          ✨ Crear Plan de Estudio Personalizado
+        </button>
+      `;
+      container.innerHTML = customBtnHtml + `<div class="plans-grid-2col">${allPlans.map(p => renderPlanCardHTML(p)).join("")}</div>`;
+      bindCreateCustomPlanOpenButton();
     } else {
-      // CATALOG: Botón Crear Plan Personalizado + 26 planes agrupados por categoría
+      // CATALOG: Botón Crear Plan Personalizado + 26 planes agrupados por categoría en grid 2 columnas
       const categories = [];
       allPlans.forEach(p => {
         if (!categories.includes(p.category)) categories.push(p.category);
@@ -1933,18 +2068,13 @@ document.addEventListener("DOMContentLoaded", () => {
       for (const cat of categories) {
         const catPlans = allPlans.filter(p => p.category === cat);
         html += `<h4 style="font-size:0.78rem; color:var(--secondary-color); margin:12px 0 8px; letter-spacing:0.4px;">${cat}</h4>`;
-        html += catPlans.map(p => renderPlanCardHTML(p)).join("");
+        html += `<div class="plans-grid-2col">${catPlans.map(p => renderPlanCardHTML(p)).join("")}</div>`;
       }
       container.innerHTML = html;
-
-      document.getElementById("btn-open-create-custom-plan")?.addEventListener("click", () => {
-        const sel = document.getElementById("custom-plan-book");
-        if (sel) sel.innerHTML = BIBLE_BOOKS.map(b => `<option value="${b.id}">${b.name} (${b.chapters} caps.)</option>`).join("");
-        showPlansModalView("CUSTOM");
-      });
+      bindCreateCustomPlanOpenButton();
     }
 
-    container.querySelectorAll(".plan-catalog-card").forEach(card => {
+    container.querySelectorAll(".plan-grid-card").forEach(card => {
       card.addEventListener("click", () => openPlanDaysDetail(card.dataset.pid));
     });
   }
@@ -1954,19 +2084,150 @@ document.addEventListener("DOMContentLoaded", () => {
     const doneCount = u ? (u.completedDays || []).length : 0;
     const pct = Math.min(100, Math.round((doneCount / p.durationDays) * 100));
     const statusLabel = u
-      ? (doneCount >= p.durationDays ? "🏆 Completado (100%)" : `🔥 En curso: ${doneCount}/${p.durationDays} días (${pct}%)`)
+      ? (doneCount >= p.durationDays ? "🏆 Completado" : `🔥 ${doneCount}/${p.durationDays}d (${pct}%)`)
       : p.badge;
 
     return `
-      <div class="plan-catalog-card" data-pid="${p.id}">
-        <img src="./${p.coverImage}" alt="${p.title}" class="plan-card-thumb" loading="lazy">
-        <div style="flex:1;">
-          <span class="testament-mini-badge" style="color:var(--secondary-color);">${statusLabel}</span>
-          <h4 style="font-size:0.93rem; color:var(--primary-color); margin:3px 0;">${p.title}</h4>
-          <p style="font-size:0.77rem; color:var(--text-secondary); line-height:1.38;">${p.subtitle}</p>
+      <div class="plan-grid-card" data-pid="${p.id}">
+        <img src="./${p.coverImage}" alt="${p.title}" class="plan-grid-cover" loading="lazy">
+        <div class="plan-grid-body">
+          <span class="testament-mini-badge" style="color:var(--secondary-color); font-size:0.68rem;">${statusLabel}</span>
+          <h4 style="font-size:0.84rem; color:var(--primary-color); line-height:1.25;">${p.title}</h4>
+          <p style="font-size:0.72rem; color:var(--text-secondary); line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${p.subtitle}</p>
+          ${u ? `<div class="offline-progress-track" style="margin-top:auto;"><div class="offline-progress-fill" style="width:${pct}%;"></div></div>` : ""}
         </div>
       </div>
     `;
+  }
+
+  let currentPlanDetailDays = [];
+
+  function renderPlanDaysRows(planId, meta, filterQuery = "") {
+    const container = document.getElementById("plan-days-list-container");
+    const u = state.userPlans[planId];
+    const completed = u ? (u.completedDays || []) : [];
+    const pct = Math.min(100, Math.round((completed.length / meta.durationDays) * 100));
+
+    document.getElementById("plan-detail-progress-text").textContent = `${completed.length} de ${meta.durationDays} días completados (${pct}%)`;
+    document.getElementById("plan-detail-progress-bar").style.width = `${pct}%`;
+
+    const nextPending = currentPlanDetailDays.find(d => !completed.includes(d.dayNumber))?.dayNumber;
+    const q = stripAccents(filterQuery).toLowerCase().trim();
+    const visibleDays = q
+      ? currentPlanDetailDays.filter(d => stripAccents(`${d.title} ${d.passagesSummary}`).toLowerCase().includes(q))
+      : currentPlanDetailDays;
+
+    if (visibleDays.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-secondary);">No se encontraron días que coincidan con "${filterQuery}".</div>`;
+      return;
+    }
+
+    container.innerHTML = visibleDays.map(d => {
+      const isDone = completed.includes(d.dayNumber);
+      const isNext = !isDone && d.dayNumber === nextPending;
+      return `
+        <div class="plan-day-row ${isDone ? "done" : ""}" data-day="${d.dayNumber}">
+          <div style="flex:1; padding-right:8px;">
+            <strong style="color:var(--primary-color); font-size:0.88rem;">
+              ${d.title}
+              ${isNext ? `<span class="plan-day-badge-next">Siguiente</span>` : ""}
+            </strong>
+            <div style="font-size:0.76rem; color:var(--secondary-color); font-weight:700; margin-top:2px;">📖 ${d.passagesSummary}</div>
+          </div>
+          <input type="checkbox" class="plan-day-checkbox" data-day="${d.dayNumber}" ${isDone ? "checked" : ""} style="width:20px; height:20px; accent-color:var(--primary-color); cursor:pointer;">
+        </div>
+      `;
+    }).join("");
+
+    container.querySelectorAll(".plan-day-checkbox").forEach(cb => {
+      cb.addEventListener("click", e => {
+        e.stopPropagation();
+        if (!state.userPlans[planId]) {
+          state.userPlans[planId] = { startedAt: Date.now(), completedDays: [] };
+        }
+        togglePlanDayCompletion(planId, Number(cb.dataset.day));
+        renderPlanDaysRows(planId, meta, document.getElementById("plan-stories-search")?.value || "");
+        renderPlanDetailActionButtons(planId, meta);
+      });
+    });
+
+    const isDirectReaderPlan = planId === "TRADITIONAL" || planId === "CHRONOLOGICAL";
+    container.querySelectorAll(".plan-day-row").forEach(row => {
+      row.addEventListener("click", () => {
+        const dayNum = Number(row.dataset.day);
+        if (!state.userPlans[planId]) {
+          state.userPlans[planId] = { startedAt: Date.now(), completedDays: [] };
+          saveUserPlans();
+        }
+        if (isDirectReaderPlan) {
+          const dayObj = currentPlanDetailDays.find(d => d.dayNumber === dayNum);
+          if (dayObj) {
+            const passages = (dayObj.passages && dayObj.passages.length > 0)
+              ? dayObj.passages
+              : [{ bookId: dayObj.primaryBookId || 1, bookName: getBookById(dayObj.primaryBookId || 1).name, chapter: dayObj.primaryChapter || 1 }];
+            state.activeReaderPlanSession = {
+              planId,
+              dayNumber: dayObj.dayNumber,
+              title: dayObj.title,
+              passages
+            };
+            state.bookId = passages[0].bookId;
+            state.chapter = passages[0].chapter;
+            plansModal.classList.remove("open");
+            switchTab("reader");
+            return;
+          }
+        }
+        openPlanDayReaderModal(planId, dayNum);
+      });
+    });
+  }
+
+  function renderPlanDetailActionButtons(planId, meta) {
+    const actionsRow = document.getElementById("plan-detail-actions-row");
+    if (!actionsRow) return;
+    const isActive = !!state.userPlans[planId];
+    const isCustom = planId.startsWith("CUSTOM_");
+
+    actionsRow.innerHTML = `
+      <button type="button" class="offline-action-btn ${isActive ? "done" : ""}" id="btn-plan-toggle-enroll">
+        ${isActive ? "✓ En Mis Planes (Quitar)" : "▶ Activar Plan"}
+      </button>
+      ${isActive ? `<button type="button" class="offline-action-btn" id="btn-plan-reset">↺ Reiniciar</button>` : ""}
+      ${isCustom ? `<button type="button" class="offline-action-btn danger" id="btn-plan-delete-custom">🗑 Eliminar</button>` : ""}
+    `;
+
+    document.getElementById("btn-plan-toggle-enroll")?.addEventListener("click", () => {
+      if (state.userPlans[planId]) {
+        delete state.userPlans[planId];
+        showToast("Plan quitado de Mis Planes");
+      } else {
+        state.userPlans[planId] = { startedAt: Date.now(), completedDays: [] };
+        showToast(`🔥 Plan "${meta.title}" activado`);
+      }
+      saveUserPlans();
+      renderPlanDetailActionButtons(planId, meta);
+      renderPlanDaysRows(planId, meta, document.getElementById("plan-stories-search")?.value || "");
+    });
+
+    document.getElementById("btn-plan-reset")?.addEventListener("click", () => {
+      if (state.userPlans[planId]) {
+        state.userPlans[planId].completedDays = [];
+        state.userPlans[planId].startedAt = Date.now();
+        saveUserPlans();
+        renderPlanDetailActionButtons(planId, meta);
+        renderPlanDaysRows(planId, meta, document.getElementById("plan-stories-search")?.value || "");
+        showToast("↺ Progreso del plan reiniciado");
+      }
+    });
+
+    document.getElementById("btn-plan-delete-custom")?.addEventListener("click", () => {
+      delete state.userPlans[planId];
+      saveUserPlans();
+      showPlansModalView("MAIN");
+      renderPlansMainTabContent();
+      showToast("🗑 Plan personalizado eliminado");
+    });
   }
 
   async function openPlanDaysDetail(planId) {
@@ -1975,41 +2236,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const meta = allPlans.find(p => p.id === planId);
     if (!meta) return;
 
-    if (!state.userPlans[planId]) {
-      state.userPlans[planId] = { startedAt: Date.now(), completedDays: [] };
-      saveUserPlans();
-    }
-
     showPlansModalView("DAYS");
     document.getElementById("plan-detail-title").textContent = meta.title;
+    renderPlanDetailActionButtons(planId, meta);
+
+    const searchWrap = document.getElementById("plan-stories-search-wrap");
+    const searchField = document.getElementById("plan-stories-search");
+    if (searchField) searchField.value = "";
+
     const container = document.getElementById("plan-days-list-container");
     container.innerHTML = `<div style="text-align:center; padding:24px;">Cargando días del plan...</div>`;
 
-    const days = await ensurePlanDaysLoaded(planId);
-    const completed = state.userPlans[planId].completedDays || [];
-    const pct = Math.min(100, Math.round((completed.length / meta.durationDays) * 100));
+    currentPlanDetailDays = await ensurePlanDaysLoaded(planId);
+    if (searchWrap) {
+      searchWrap.style.display = (planId === "BIBLE_STORIES" || currentPlanDetailDays.length > 60) ? "block" : "none";
+    }
+    if (searchField) {
+      searchField.oninput = () => renderPlanDaysRows(planId, meta, searchField.value);
+    }
 
-    document.getElementById("plan-detail-progress-text").textContent = `${completed.length} de ${meta.durationDays} días completados (${pct}%)`;
-    document.getElementById("plan-detail-progress-bar").style.width = `${pct}%`;
-
-    container.innerHTML = days.map(d => {
-      const isDone = completed.includes(d.dayNumber);
-      return `
-        <div class="version-card-row ${isDone ? "selected" : ""}" data-day="${d.dayNumber}">
-          <div style="padding-right:10px;">
-            <strong style="color:var(--primary-color); font-size:0.9rem;">${d.title}</strong>
-            <div style="font-size:0.78rem; color:var(--secondary-color); font-weight:700; margin-top:2px;">📖 ${d.passagesSummary}</div>
-          </div>
-          <span style="font-size:1.2rem;">${isDone ? "✅" : "⭕"}</span>
-        </div>
-      `;
-    }).join("");
-
-    container.querySelectorAll(".version-card-row").forEach(row => {
-      row.addEventListener("click", () => {
-        openPlanDayReaderModal(planId, Number(row.dataset.day));
-      });
-    });
+    renderPlanDaysRows(planId, meta, "");
   }
 
   document.getElementById("btn-back-to-plans-list")?.addEventListener("click", () => {
@@ -2079,7 +2325,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const idx = arr.indexOf(dayNum);
     if (idx === -1) {
       arr.push(dayNum);
-      showToast(`🎉 ¡Día ${dayNum} marcado como completado!`);
+      const meta = getAllPlansMetadata().find(p => p.id === planId);
+      if (meta && arr.length >= meta.durationDays) {
+        showToast(`🏆 ¡Felicidades! Completaste el plan "${meta.title}"`);
+      } else {
+        showToast(`🎉 ¡Día ${dayNum} marcado como completado!`);
+      }
     } else {
       arr.splice(idx, 1);
     }
@@ -2141,28 +2392,137 @@ document.addEventListener("DOMContentLoaded", () => {
     openPlanDaysDetail(sess.planId);
   });
 
-  // Crear Plan Personalizado (CreateCustomPlanDialog.kt)
+  // Crear Plan Personalizado (CreateCustomPlanDialog.kt - Multi-libro, Presets, Ritmo y Vista Previa)
+  let customPaceMode = "BY_TARGET_DAYS";
+
+  function updateCustomPlanPreview() {
+    const checked = Array.from(document.querySelectorAll("#custom-plan-books-list input:checked"));
+    const totalChapters = checked.reduce((acc, el) => {
+      const b = getBookById(Number(el.value));
+      return acc + (b ? b.chapters : 0);
+    }, 0);
+    const countSpan = document.getElementById("custom-books-count");
+    if (countSpan) countSpan.textContent = String(checked.length);
+
+    const val = Math.max(1, Number(document.getElementById("custom-plan-pace-value")?.value || 7));
+    const daysTotal = customPaceMode === "BY_TARGET_DAYS"
+      ? val
+      : Math.max(1, Math.ceil(totalChapters / val));
+    const endDate = new Date(Date.now() + daysTotal * 86400000);
+    const previewEl = document.getElementById("custom-plan-preview");
+    if (previewEl) {
+      previewEl.textContent = checked.length === 0
+        ? "Selecciona al menos 1 libro para calcular tu plan."
+        : `${totalChapters} capítulos en ${daysTotal} días • Finaliza aprox. el ${endDate.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}`;
+    }
+  }
+
+  function bindCreateCustomPlanOpenButton() {
+    document.getElementById("btn-open-create-custom-plan")?.addEventListener("click", () => {
+      const listEl = document.getElementById("custom-plan-books-list");
+      if (listEl) {
+        listEl.innerHTML = BIBLE_BOOKS.map(b => `
+          <label class="custom-book-check-item">
+            <input type="checkbox" value="${b.id}" ${b.id === 19 ? "checked" : ""}>
+            <span>${b.name} (${b.chapters})</span>
+          </label>
+        `).join("");
+        listEl.querySelectorAll("input").forEach(cb => cb.addEventListener("change", updateCustomPlanPreview));
+      }
+      updateCustomPlanPreview();
+      showPlansModalView("CUSTOM");
+    });
+  }
+
+  document.querySelectorAll("#custom-plan-presets .chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      const presetMap = {
+        gospels: { title: "Los 4 Evangelios", books: [40, 41, 42, 43] },
+        wisdom: { title: "Salmos y Proverbios", books: [19, 20] },
+        paul: { title: "Cartas de Pablo", books: [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57] },
+        pentateuch: { title: "El Pentateuco", books: [1, 2, 3, 4, 5] }
+      };
+      const cfg = presetMap[chip.dataset.preset];
+      if (!cfg) return;
+      const titleInput = document.getElementById("custom-plan-title");
+      if (titleInput && !titleInput.value.trim()) titleInput.value = cfg.title;
+      document.querySelectorAll("#custom-plan-books-list input").forEach(cb => {
+        cb.checked = cfg.books.includes(Number(cb.value));
+      });
+      updateCustomPlanPreview();
+    });
+  });
+
+  document.querySelectorAll("[data-pace]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      customPaceMode = btn.dataset.pace;
+      document.querySelectorAll("[data-pace]").forEach(b => b.classList.toggle("active", b === btn));
+      const unitEl = document.getElementById("custom-plan-pace-unit");
+      const valEl = document.getElementById("custom-plan-pace-value");
+      if (customPaceMode === "BY_TARGET_DAYS") {
+        if (unitEl) unitEl.textContent = "días totales";
+        if (valEl) valEl.value = "14";
+      } else {
+        if (unitEl) unitEl.textContent = "capítulos / día";
+        if (valEl) valEl.value = "3";
+      }
+      updateCustomPlanPreview();
+    });
+  });
+
+  document.getElementById("custom-plan-pace-value")?.addEventListener("input", updateCustomPlanPreview);
+
   document.getElementById("btn-back-from-custom-plan")?.addEventListener("click", () => showPlansModalView("MAIN"));
   document.getElementById("btn-Generate-custom-plan")?.addEventListener("click", () => {
-    const title = document.getElementById("custom-plan-title").value.trim() || "Mi Plan de Estudio Bíblico";
-    const bookId = Number(document.getElementById("custom-plan-book").value || 19);
-    const duration = Number(document.getElementById("custom-plan-duration").value || 7);
-    const book = getBookById(bookId);
+    const selectedIds = Array.from(document.querySelectorAll("#custom-plan-books-list input:checked")).map(cb => Number(cb.value));
+    if (selectedIds.length === 0) {
+      showToast("⚠️ Selecciona al menos un libro");
+      return;
+    }
+
+    const chaptersQueue = [];
+    selectedIds.forEach(bid => {
+      const b = getBookById(bid);
+      if (b) {
+        for (let c = 1; c <= b.chapters; c++) {
+          chaptersQueue.push({ bookId: b.id, bookName: b.name, chapter: c });
+        }
+      }
+    });
+
+    const paceVal = Math.max(1, Number(document.getElementById("custom-plan-pace-value")?.value || 7));
+    const duration = customPaceMode === "BY_TARGET_DAYS"
+      ? paceVal
+      : Math.max(1, Math.ceil(chaptersQueue.length / paceVal));
+
+    const firstBookName = getBookById(selectedIds[0])?.name || "Biblia";
+    const title = document.getElementById("custom-plan-title").value.trim() || `Plan ${firstBookName}${selectedIds.length > 1 ? ` +${selectedIds.length - 1}` : ""}`;
 
     const customId = `CUSTOM_${Date.now()}`;
     const customDays = [];
-    for (let d = 1; d <= duration; d++) {
-      const ch = ((d - 1) % book.chapters) + 1;
+    for (let d = 0; d < duration; d++) {
+      const startIdx = Math.floor((d * chaptersQueue.length) / duration);
+      const endIdx = Math.max(startIdx + 1, Math.floor(((d + 1) * chaptersQueue.length) / duration));
+      const slice = chaptersQueue.slice(startIdx, Math.min(endIdx, chaptersQueue.length));
+      const dayPassages = slice.length > 0 ? slice : [chaptersQueue[d % chaptersQueue.length]];
+      const firstSeg = dayPassages[0];
+      const lastSeg = dayPassages[dayPassages.length - 1];
+      const summary = dayPassages.length === 1
+        ? `${firstSeg.bookName} ${firstSeg.chapter}`
+        : (firstSeg.bookId === lastSeg.bookId
+          ? `${firstSeg.bookName} ${firstSeg.chapter}-${lastSeg.chapter}`
+          : `${firstSeg.bookName} ${firstSeg.chapter} - ${lastSeg.bookName} ${lastSeg.chapter}`);
+
       customDays.push({
-        dayNumber: d,
-        title: `Día ${d}: ${book.name} ${ch}`,
-        passagesSummary: `${book.name} ${ch}`,
-        primaryBookId: book.id,
-        primaryChapter: ch,
-        passages: [{ bookId: book.id, bookName: book.name, chapter: ch }],
-        storyNarrative: getLocalScholarlyExegesis(book.name, ch, "1", ""),
-        spiritualLesson: `Meditación sistemática en ${book.name} capítulo ${ch} dentro de tu plan personalizado "${title}".`,
-        historicalContext: "¿Qué enseñanza de este capítulo puedes aplicar hoy en tu vida y oración?"
+        dayNumber: d + 1,
+        title: `Día ${d + 1}: ${summary}`,
+        passagesSummary: summary,
+        primaryBookId: firstSeg.bookId,
+        primaryChapter: firstSeg.chapter,
+        passages: dayPassages,
+        storyNarrative: getLocalScholarlyExegesis(firstSeg.bookName, firstSeg.chapter, "1", ""),
+        spiritualLesson: `Meditación sistemática en ${summary} dentro de tu plan personalizado "${title}".`,
+        historicalContext: "¿Qué enseñanza de esta lectura puedes aplicar hoy en tu vida y oración?"
       });
     }
 
@@ -2172,10 +2532,10 @@ document.addEventListener("DOMContentLoaded", () => {
       customMeta: {
         id: customId,
         title,
-        subtitle: `Estudio personalizado en ${book.name} (${duration} días)`,
+        subtitle: `${selectedIds.length} libro(s) • ${chaptersQueue.length} capítulos (${duration} días)`,
         durationDays: duration,
         badge: `${duration} Días • Personalizado`,
-        coverImage: "assets/drawable/plan_cover_custom_default.webp",
+        coverImage: "assets/drawable/plan_cover_custom.webp",
         category: "MIS PLANES PERSONALIZADOS"
       },
       customDays
@@ -2239,7 +2599,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const resContainer = document.getElementById("search-results");
     const statusBar = document.getElementById("search-status-bar");
     if (!q) {
-      resContainer.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-secondary);">Escribe una palabra, frase o referencia bíblica (ej. <em>gracia, fe, Salmos 23, Juan 3:16</em>) para buscar en los 66 libros de la Biblia.</div>`;
+      const suggestions = ["Amor", "Fe", "Paz", "Esperanza", "Sabiduría", "Perdón", "Salvación", "Oración"];
+      resContainer.innerHTML = `
+        <div style="text-align:center; padding:28px 16px; color:var(--text-secondary);">
+          <p>Escribe una palabra, frase o referencia bíblica (ej. <em>Salmos 23</em>, <em>Juan 3:16</em>) para buscar en los 66 libros.</p>
+          <div class="search-suggestions-wrap">
+            ${suggestions.map(s => `<button type="button" class="chip search-suggestion-chip" data-q="${s}">${s}</button>`).join("")}
+          </div>
+        </div>
+      `;
+      resContainer.querySelectorAll(".search-suggestion-chip").forEach(btn => {
+        btn.addEventListener("click", () => {
+          searchInput.value = btn.dataset.q;
+          if (clearSearchBtn) clearSearchBtn.style.display = "block";
+          triggerFullBibleSearch();
+        });
+      });
       statusBar.style.display = "none";
       return;
     }
@@ -2312,7 +2687,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getUnifiedCollectionForFavoritesTab() {
     const favs = state.versesCollection.filter(v => v.isFavorite);
-    const notesList = state.versesCollection.filter(v => v.notes && v.notes.trim().length > 0);
+    const notesList = [...state.versesCollection.filter(v => v.notes && v.notes.trim().length > 0)];
 
     // Unificar resaltados de tarjetas + resaltados hechos en el Lector Bíblico
     const hlMap = new Map();
@@ -2322,22 +2697,29 @@ document.addEventListener("DOMContentLoaded", () => {
         reference: v.reference,
         text: v.text,
         color: v.highlightColor,
+        notes: v.notes || "",
         fromCard: true
       });
     });
 
-    Object.values(state.highlights).forEach(h => {
+    Object.entries(state.highlights).forEach(([hlKey, h]) => {
       const ref = `${h.bookName} ${h.chapter}:${h.verse}`;
+      const hlItem = {
+        hlKey,
+        bookId: h.bookId,
+        chapter: h.chapter,
+        verse: h.verse,
+        reference: ref,
+        text: h.text || "",
+        color: h.color,
+        notes: h.note || "",
+        fromReader: true
+      };
       if (!hlMap.has(ref)) {
-        hlMap.set(ref, {
-          bookId: h.bookId,
-          chapter: h.chapter,
-          verse: h.verse,
-          reference: ref,
-          text: h.text || "",
-          color: h.color,
-          fromReader: true
-        });
+        hlMap.set(ref, hlItem);
+      }
+      if (h.note && h.note.trim().length > 0 && !notesList.some(n => n.reference === ref)) {
+        notesList.push(hlItem);
       }
     });
 
@@ -2375,10 +2757,13 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = items.map(it => {
       const borderCol = it.color || it.highlightColor || "var(--primary-color)";
       return `
-        <div class="verse-item-card fav-unified-card" data-vid="${it.id || ""}" data-ref="${it.reference}" style="border-left:5px solid ${borderCol};">
+        <div class="verse-item-card fav-unified-card" data-vid="${it.id || ""}" data-hlkey="${it.hlKey || ""}" data-ref="${it.reference}" style="border-left:5px solid ${borderCol};">
           <div class="verse-card-top">
             <strong style="color:var(--primary-color);">${it.reference}</strong>
-            <button class="action-pill btn-fav-goto-reader" data-ref="${it.reference}">📖 Ir al Lector</button>
+            <div style="display:flex; gap:6px;">
+              ${it.hlKey ? `<button class="action-pill btn-hl-edit-note" data-hlkey="${it.hlKey}">✏️ Nota</button>` : ""}
+              <button class="action-pill btn-fav-goto-reader" data-ref="${it.reference}">📖 Ir al Lector</button>
+            </div>
           </div>
           <p style="font-family:var(--font-serif); font-size:0.95rem; line-height:1.55;">«${it.text}»</p>
           ${it.notes ? `<div class="reflection-box" style="margin-top:8px;"><strong>✏️ Mi Nota:</strong> ${it.notes}</div>` : ""}
@@ -2386,12 +2771,30 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
     }).join("");
 
+    container.querySelectorAll(".btn-hl-edit-note").forEach(btn => {
+      btn.addEventListener("click", e => {
+        e.stopPropagation();
+        const hlKey = btn.dataset.hlkey;
+        const hlObj = state.highlights[hlKey];
+        if (!hlObj) return;
+        const updated = window.prompt(`Nota personal para ${hlObj.bookName} ${hlObj.chapter}:${hlObj.verse}:`, hlObj.note || "");
+        if (updated !== null) {
+          hlObj.note = updated.trim();
+          saveHighlightsState();
+          renderFavoritesAndNotesTab();
+          showToast(hlObj.note ? "✏️ Nota guardada" : "Nota eliminada");
+        }
+      });
+    });
+
     container.querySelectorAll(".fav-unified-card").forEach(card => {
       card.addEventListener("click", e => {
-        if (e.target.closest(".btn-fav-goto-reader")) return;
+        if (e.target.closest(".btn-fav-goto-reader") || e.target.closest(".btn-hl-edit-note")) return;
         const vid = card.dataset.vid;
         if (vid) {
           openVerseDetailDialog(Number(vid));
+        } else if (card.dataset.hlkey) {
+          card.querySelector(".btn-hl-edit-note")?.click();
         } else {
           const parsed = parseBibleReference(card.dataset.ref);
           if (parsed) {
@@ -2571,23 +2974,228 @@ document.addEventListener("DOMContentLoaded", () => {
   // =========================================================================
   // 15. MÓDULO 9: AJUSTES, CLOUD SYNC, VERSIONES OFFLINE Y EXPORTADOR PDF/JSON/TXT
   // =========================================================================
-  function renderSettingsTab() {
+  const OFFLINE_CACHE_NAME = "bibleverse-pwa-v2.5.0";
+  const activeOfflineDownloads = {};
+
+  async function getOfflineBookCacheCount(versionCode) {
+    if (!("caches" in window)) return 0;
+    try {
+      const cache = await caches.open(OFFLINE_CACHE_NAME);
+      const keys = await cache.keys();
+      const prefix = `/assets/bible/books/${versionCode}/`;
+      let count = 0;
+      for (const req of keys) {
+        if (req.url.includes(prefix) && req.url.endsWith(".json")) {
+          count++;
+        }
+      }
+      return Math.min(count, 66);
+    } catch {
+      return 0;
+    }
+  }
+
+  async function downloadVersionOffline(versionCode, { silent = false } = {}) {
+    if (!("caches" in window)) {
+      if (!silent) showToast("⚠️ Tu navegador no soporta almacenamiento offline");
+      return;
+    }
+    if (activeOfflineDownloads[versionCode]) return;
+    activeOfflineDownloads[versionCode] = { current: 0, total: 66 };
+    if (!silent) renderSettingsTab();
+
+    try {
+      const cache = await caches.open(OFFLINE_CACHE_NAME);
+      const urls = [];
+      for (let b = 1; b <= 66; b++) {
+        urls.push(`./assets/bible/books/${versionCode}/${b}.json`);
+      }
+
+      const optionalExtras = [
+        `./assets/bible/pericopes_${versionCode.toLowerCase()}.json`,
+        `./assets/audio/audio_catalog_${versionCode.toLowerCase()}.json`
+      ];
+      for (const extraUrl of optionalExtras) {
+        try {
+          const existing = await cache.match(extraUrl);
+          if (!existing) {
+            const resp = await fetch(extraUrl);
+            if (resp.ok) await cache.put(extraUrl, resp);
+          }
+        } catch {
+          // Opcional
+        }
+      }
+
+      let done = 0;
+      const batchSize = 6;
+      for (let i = 0; i < urls.length; i += batchSize) {
+        const batch = urls.slice(i, i + batchSize);
+        await Promise.all(
+          batch.map(async (url) => {
+            try {
+              const existing = await cache.match(url);
+              if (!existing) {
+                const resp = await fetch(url);
+                if (resp.ok) await cache.put(url, resp);
+              }
+            } catch {
+              // Ignorar error individual de red
+            } finally {
+              done++;
+              activeOfflineDownloads[versionCode] = { current: done, total: 66 };
+              const fill = document.getElementById(`offline-progress-${versionCode}`);
+              const label = document.getElementById(`offline-status-${versionCode}`);
+              if (fill) fill.style.width = `${Math.round((done / 66) * 100)}%`;
+              if (label) label.textContent = `Descargando libros: ${done}/66...`;
+            }
+          })
+        );
+      }
+
+      if (!silent) {
+        showToast(`✅ ${versionCode} lista para leer 100% sin internet`);
+      }
+    } catch {
+      if (!silent) showToast(`⚠️ Error descargando ${versionCode} offline`);
+    } finally {
+      delete activeOfflineDownloads[versionCode];
+      if (state.currentTab === "settings") {
+        renderSettingsTab();
+      }
+    }
+  }
+
+  async function removeVersionOffline(versionCode) {
+    if (!("caches" in window)) return;
+    try {
+      const cache = await caches.open(OFFLINE_CACHE_NAME);
+      const keys = await cache.keys();
+      const prefix = `/assets/bible/books/${versionCode}/`;
+      await Promise.all(
+        keys
+          .filter(req => req.url.includes(prefix))
+          .map(req => cache.delete(req))
+      );
+      showToast(`🗑 Caché offline de ${versionCode} liberada`);
+      renderSettingsTab();
+    } catch {
+      showToast("⚠️ No se pudo limpiar la caché");
+    }
+  }
+
+  async function renderSettingsTab() {
     updatePlansSummariesUI();
     applyReaderVisualPreferences();
 
     const verList = document.getElementById("settings-versions-list");
-    if (verList) {
-      verList.innerHTML = BIBLE_VERSIONS.map(v => `
-        <div class="version-card-row" style="cursor:default;">
-          <div>
-            <strong style="color:var(--primary-color);">${v.name} (${v.code})</strong>
-            <div style="font-size:0.76rem; color:var(--text-secondary);">${v.isOfflineAsset ? "✓ 66 libros integrados localmente (100% Offline)" : "Disponible en línea con caché local"}</div>
+    if (!verList) return;
+
+    const counts = {};
+    await Promise.all(
+      BIBLE_VERSIONS.filter(v => v.isOfflineAsset).map(async v => {
+        counts[v.code] = await getOfflineBookCacheCount(v.code);
+      })
+    );
+
+    verList.innerHTML = BIBLE_VERSIONS.map(v => {
+      if (!v.isOfflineAsset) {
+        return `
+          <div class="offline-version-card">
+            <div class="offline-version-row">
+              <div>
+                <strong style="color:var(--primary-color);">${v.name} (${v.code})</strong>
+                <div style="font-size:0.76rem; color:var(--text-secondary);">Requiere internet • Guarda caché automática de los capítulos que leas</div>
+              </div>
+              <span class="testament-mini-badge">En línea</span>
+            </div>
           </div>
-          <span class="testament-mini-badge" style="color:#16A34A;">✓ Lista</span>
+        `;
+      }
+
+      const downloading = activeOfflineDownloads[v.code];
+      const cachedCount = counts[v.code] || 0;
+      const isComplete = cachedCount >= 66;
+      const pct = downloading ? Math.round((downloading.current / downloading.total) * 100) : Math.round((cachedCount / 66) * 100);
+
+      let statusText = "Disponible para descarga (~4 MB • 66 libros)";
+      if (downloading) {
+        statusText = `Descargando libros: ${downloading.current}/66...`;
+      } else if (isComplete) {
+        statusText = "✓ 66/66 libros guardados en este dispositivo (100% Offline)";
+      } else if (cachedCount > 0) {
+        statusText = `Parcial: ${cachedCount}/66 libros guardados offline`;
+      }
+
+      return `
+        <div class="offline-version-card">
+          <div class="offline-version-row">
+            <div style="min-width:0;">
+              <strong style="color:var(--primary-color);">${v.name} (${v.code})</strong>
+              <div id="offline-status-${v.code}" style="font-size:0.76rem; color:var(--text-secondary);">${statusText}</div>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center;">
+              ${isComplete
+                ? `<button type="button" class="offline-action-btn done" disabled>✓ Offline</button>
+                   <button type="button" class="offline-action-btn danger" data-offline-remove="${v.code}" title="Liberar espacio">🗑</button>`
+                : `<button type="button" class="offline-action-btn" data-offline-dl="${v.code}" ${downloading ? "disabled" : ""}>${downloading ? `${pct}%` : (cachedCount > 0 ? "Completar" : "⬇ Descargar")}</button>`
+              }
+            </div>
+          </div>
+          ${(downloading || (cachedCount > 0 && !isComplete)) ? `
+            <div class="offline-progress-track">
+              <div id="offline-progress-${v.code}" class="offline-progress-fill" style="width:${pct}%;"></div>
+            </div>
+          ` : ""}
         </div>
-      `).join("");
-    }
+      `;
+    }).join("");
+
+    verList.querySelectorAll("[data-offline-dl]").forEach(btn => {
+      btn.addEventListener("click", () => downloadVersionOffline(btn.dataset.offlineDl));
+    });
+    verList.querySelectorAll("[data-offline-remove]").forEach(btn => {
+      btn.addEventListener("click", () => removeVersionOffline(btn.dataset.offlineRemove));
+    });
   }
+
+  // Recordatorio diario persistente y notificación
+  const reminderToggle = document.getElementById("toggle-daily-reminder");
+  const reminderTimeInput = document.getElementById("reminder-time-input");
+  if (reminderToggle) {
+    reminderToggle.checked = localStorage.getItem("bv_dailyReminder") === "true";
+    reminderToggle.addEventListener("change", async () => {
+      localStorage.setItem("bv_dailyReminder", String(reminderToggle.checked));
+      if (reminderToggle.checked && "Notification" in window && Notification.permission === "default") {
+        await Notification.requestPermission();
+      }
+      showToast(reminderToggle.checked ? "🔔 Recordatorio diario activado" : "🔕 Recordatorio diario desactivado");
+    });
+  }
+  if (reminderTimeInput) {
+    reminderTimeInput.value = localStorage.getItem("bv_reminderTime") || "08:00";
+    reminderTimeInput.addEventListener("change", () => {
+      localStorage.setItem("bv_reminderTime", reminderTimeInput.value || "08:00");
+      showToast(`⏰ Hora guardada: ${reminderTimeInput.value}`);
+    });
+  }
+
+  setInterval(() => {
+    if (localStorage.getItem("bv_dailyReminder") !== "true") return;
+    const targetTime = localStorage.getItem("bv_reminderTime") || "08:00";
+    const now = new Date();
+    const hhmm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    const todayKey = now.toISOString().slice(0, 10);
+    if (hhmm === targetTime && localStorage.getItem("bv_lastReminderSent") !== todayKey) {
+      localStorage.setItem("bv_lastReminderSent", todayKey);
+      const body = currentVodVerse ? `«${currentVodVerse.text}» — ${currentVodVerse.reference}` : "«Jehová es mi pastor; nada me faltará.» — Salmos 23:1";
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("BibleVerse • Versículo del Día", { body, icon: "./assets/icons/icon-192.png" });
+      } else {
+        showToast(`🔔 Versículo del Día: ${body}`);
+      }
+    }
+  }, 30000);
 
   // Probar notificación diaria
   document.getElementById("btn-test-notification")?.addEventListener("click", async () => {
@@ -2739,8 +3347,53 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // =========================================================================
-  // INICIALIZACIÓN DE LA APLICACIÓN
+  // INICIALIZACIÓN DE LA APLICACIÓN Y SERVICE WORKER (OFFLINE PWA)
   // =========================================================================
+  function registerServiceWorkerAndOfflinePack() {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js").then(reg => {
+        if (reg.waiting) {
+          reg.waiting.postMessage({ type: "SKIP_WAITING" });
+        }
+        reg.addEventListener("updatefound", () => {
+          const newWorker = reg.installing;
+          if (!newWorker) return;
+          newWorker.addEventListener("statechange", () => {
+            if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+              newWorker.postMessage({ type: "SKIP_WAITING" });
+            }
+          });
+        });
+      }).catch(err => {
+        console.warn("[PWA] Error registrando Service Worker:", err);
+      });
+    }
+
+    // Pre-cachear en segundo plano la versión activa si es offline (por defecto RVR1960)
+    // para que usuarios de iPhone puedan leer sin internet tras su primera apertura.
+    if (navigator.onLine) {
+      const currentVer = BIBLE_VERSIONS.find(v => v.code === state.reader.version && v.isOfflineAsset);
+      const targetCode = currentVer ? currentVer.code : "RVR1960";
+      setTimeout(async () => {
+        const cached = await getOfflineBookCacheCount(targetCode);
+        if (cached < 66) {
+          downloadVersionOffline(targetCode, { silent: true });
+        }
+      }, 1500);
+    }
+  }
+
+  function handleLocationHash() {
+    const hash = window.location.hash;
+    if (hash === "#reader") {
+      switchTab("reader");
+    } else if (hash === "#daily") {
+      switchTab("verses");
+      const vod = document.querySelector(".vod-card");
+      if (vod) vod.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
   initVersesCollection();
   applyReaderVisualPreferences();
   updateContinueReadingBanner();
@@ -2750,4 +3403,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initPhotoBackgroundThumbs();
   updatePlansSummariesUI();
   triggerFullBibleSearch();
+  registerServiceWorkerAndOfflinePack();
+  handleLocationHash();
+  window.addEventListener("hashchange", handleLocationHash);
 });

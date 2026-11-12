@@ -80,7 +80,10 @@
         <article class="verse-of-day-card" id="vod-card">
           <div class="vod-top-row">
             <span class="vod-badge">✨ VERSÍCULO DEL DÍA</span>
-            <span class="verse-tag" id="vod-tag">Fortaleza</span>
+            <div class="vod-top-right">
+              <button type="button" class="vod-bg-shuffle-btn" id="btn-shuffle-vod-bg" title="Cambiar foto de fondo">🎨</button>
+              <span class="verse-tag" id="vod-tag">Fortaleza</span>
+            </div>
           </div>
           <p class="verse-quote" id="vod-quote">"Cargando..."</p>
           <div class="verse-reference" id="vod-ref">-</div>
@@ -200,10 +203,11 @@
         <!-- Contenedor de Versículos del Capítulo (Con Perícopas y Palabras de Jesús en Rojo) -->
         <div class="bible-text-container" id="bible-verses-list"></div>
 
-        <!-- Pie de Capítulo para Navegación Rápida o Scroll Continuo -->
-        <div class="reader-chapter-footer">
-          <button class="reader-arrow-btn" id="btn-prev-chapter-bottom">← Capítulo Anterior</button>
-          <button class="reader-arrow-btn primary" id="btn-next-chapter-bottom">Siguiente Capítulo →</button>
+        <!-- Barra Flotante Inferior de Navegación del Lector (estilo Android) -->
+        <div class="reader-floating-nav">
+          <button class="reader-circle-nav-btn" id="btn-prev-chapter-bottom" title="Capítulo Anterior">‹</button>
+          <button class="reader-floating-pill" id="btn-floating-book-pill" title="Seleccionar Libro y Capítulo">SALMOS 23</button>
+          <button class="reader-circle-nav-btn" id="btn-next-chapter-bottom" title="Siguiente Capítulo">›</button>
         </div>
       </section>
 
@@ -224,6 +228,8 @@
               <option value="NBLA">NBLA</option>
               <option value="DHH">DHH</option>
               <option value="TLA">TLA</option>
+              <option value="NTV">NTV</option>
+              <option value="LBLA">LBLA</option>
             </select>
           </div>
 
@@ -305,7 +311,8 @@
           <h4>🎨 Tema Visual de la Aplicación</h4>
           <div class="theme-options-grid" id="settings-theme-grid">
             <button class="theme-option-card active" data-theme="light">☀️ Claro Clásico</button>
-            <button class="theme-option-card" data-theme="sepia">📜 Sepia Cálido</button>
+            <button class="theme-option-card" data-theme="sepia-night">☕ Sepia Oscuro</button>
+            <button class="theme-option-card" data-theme="sepia">📜 Sepia Claro</button>
             <button class="theme-option-card" data-theme="dark">🌙 Oscuro</button>
             <button class="theme-option-card" data-theme="oled">🖤 Noche OLED</button>
           </div>
@@ -353,6 +360,17 @@
           <h4>📚 Versiones Bíblicas Disponibles (Offline / Online)</h4>
           <p class="settings-sub">5 traducciones completas están integradas localmente sin internet; puedes pre-descargar las demás.</p>
           <div id="settings-versions-list" class="settings-versions-list"></div>
+        </div>
+
+        <!-- 5b. Inteligencia Artificial Gemini -->
+        <div class="settings-card">
+          <h4>✨ Asistente Teológico e IA (Gemini)</h4>
+          <p class="settings-sub">Configura tu clave gratuita de Google AI Studio (opcional si usas el proxy de Vercel).</p>
+          <div style="display:flex; gap:8px; margin-top:8px;">
+            <input type="password" id="settings-gemini-key-input" placeholder="AIzaSy..." style="flex:1; padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); background:var(--bg-color); color:var(--text-primary); font-family:monospace; font-size:0.84rem;" />
+            <button class="offline-action-btn" id="btn-settings-save-gemini-key">Guardar</button>
+          </div>
+          <div id="settings-gemini-key-status" style="font-size:0.76rem; color:var(--accent-gold); margin-top:6px; min-height:16px;"></div>
         </div>
 
         <!-- 6. Información y Descarga APK Android -->
@@ -422,11 +440,17 @@
 
         <div class="palette-swatches">
           <div class="reset-swatch" id="btn-reset-highlight" title="Quitar resaltado">✕</div>
-          <div class="color-swatch" style="background:#FACC15;" data-hex="#FACC15" title="Amarillo"></div>
-          <div class="color-swatch" style="background:#22C55E;" data-hex="#22C55E" title="Verde"></div>
           <div class="color-swatch" style="background:#38BDF8;" data-hex="#38BDF8" title="Azul"></div>
-          <div class="color-swatch" style="background:#EC4899;" data-hex="#EC4899" title="Rosa"></div>
+          <div class="color-swatch" style="background:#22C55E;" data-hex="#22C55E" title="Verde"></div>
+          <div class="color-swatch" style="background:#A855F7;" data-hex="#A855F7" title="Púrpura"></div>
+          <div class="color-swatch" style="background:#EF4444;" data-hex="#EF4444" title="Rojo"></div>
           <div class="color-swatch" style="background:#F97316;" data-hex="#F97316" title="Naranja"></div>
+          <div class="color-swatch" style="background:#FACC15;" data-hex="#FACC15" title="Amarillo"></div>
+          <div class="color-swatch" style="background:#14B8A6;" data-hex="#14B8A6" title="Turquesa"></div>
+          <div class="color-swatch" style="background:#6366F1;" data-hex="#6366F1" title="Índigo"></div>
+          <div class="color-swatch" style="background:#8B5CF6;" data-hex="#8B5CF6" title="Violeta"></div>
+          <div class="color-swatch" style="background:#EC4899;" data-hex="#EC4899" title="Rosa"></div>
+          <div class="color-swatch" style="background:#F59E0B;" data-hex="#F59E0B" title="Ámbar"></div>
         </div>
       </div>
 
@@ -434,32 +458,37 @@
 
       <div class="action-bar-buttons-row">
         <button class="action-pill-btn" id="btn-action-explain">
-          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5z"/></svg>
+          <span class="action-pill-icon"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5z"/></svg></span>
           <span>Explicar</span>
         </button>
 
         <button class="action-pill-btn" id="btn-action-compare">
-          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M9.01 14H2v2h7.01v3L13 15l-3.99-4v3zm5.98-1v-3H22V8h-7.01V5L11 9l3.99 4z"/></svg>
+          <span class="action-pill-icon"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M9.01 14H2v2h7.01v3L13 15l-3.99-4v3zm5.98-1v-3H22V8h-7.01V5L11 9l3.99 4z"/></svg></span>
           <span>Comparar</span>
         </button>
 
         <button class="action-pill-btn" id="btn-action-references">
-          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+          <span class="action-pill-icon"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></span>
           <span>Referencias</span>
         </button>
 
         <button class="action-pill-btn" id="btn-action-image">
-          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+          <span class="action-pill-icon"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></span>
           <span>Imagen</span>
         </button>
 
+        <button class="action-pill-btn" id="btn-action-share">
+          <span class="action-pill-icon"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg></span>
+          <span>Compartir</span>
+        </button>
+
         <button class="action-pill-btn" id="btn-action-copy">
-          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+          <span class="action-pill-icon"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></span>
           <span>Copiar</span>
         </button>
 
         <button class="action-pill-btn" id="btn-action-save">
-          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
+          <span class="action-pill-icon"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg></span>
           <span>Guardar</span>
         </button>
       </div>
@@ -590,11 +619,17 @@
               <span>Resaltar:</span>
               <div class="palette-swatches" id="detail-palette-swatches">
                 <div class="reset-swatch" data-detail-hex="" title="Sin resaltado">✕</div>
-                <div class="color-swatch" style="background:#FACC15;" data-detail-hex="#FACC15"></div>
-                <div class="color-swatch" style="background:#22C55E;" data-detail-hex="#22C55E"></div>
                 <div class="color-swatch" style="background:#38BDF8;" data-detail-hex="#38BDF8"></div>
-                <div class="color-swatch" style="background:#EC4899;" data-detail-hex="#EC4899"></div>
+                <div class="color-swatch" style="background:#22C55E;" data-detail-hex="#22C55E"></div>
+                <div class="color-swatch" style="background:#A855F7;" data-detail-hex="#A855F7"></div>
+                <div class="color-swatch" style="background:#EF4444;" data-detail-hex="#EF4444"></div>
                 <div class="color-swatch" style="background:#F97316;" data-detail-hex="#F97316"></div>
+                <div class="color-swatch" style="background:#FACC15;" data-detail-hex="#FACC15"></div>
+                <div class="color-swatch" style="background:#14B8A6;" data-detail-hex="#14B8A6"></div>
+                <div class="color-swatch" style="background:#6366F1;" data-detail-hex="#6366F1"></div>
+                <div class="color-swatch" style="background:#8B5CF6;" data-detail-hex="#8B5CF6"></div>
+                <div class="color-swatch" style="background:#EC4899;" data-detail-hex="#EC4899"></div>
+                <div class="color-swatch" style="background:#F59E0B;" data-detail-hex="#F59E0B"></div>
               </div>
             </div>
 
@@ -832,7 +867,8 @@
           <label class="modal-label">Tema de color</label>
           <div class="theme-options-grid">
             <button class="chip theme-btn active" data-theme="light">☀️ Claro</button>
-            <button class="chip theme-btn" data-theme="sepia">📜 Sepia</button>
+            <button class="chip theme-btn" data-theme="sepia-night">☕ Sepia Oscuro</button>
+            <button class="chip theme-btn" data-theme="sepia">📜 Sepia Claro</button>
             <button class="chip theme-btn" data-theme="dark">🌙 Oscuro</button>
             <button class="chip theme-btn" data-theme="oled">🖤 OLED</button>
           </div>
@@ -903,12 +939,13 @@
           <button class="icon-btn" id="btn-close-reading-plans">✕</button>
         </div>
 
-        <!-- Vista Principal de Planes (3 Pestañas: Mis Planes | Catálogo | Completados) -->
+        <!-- Vista Principal de Planes (4 Pestañas: Todos | Mis Planes | Catálogo | Historial) -->
         <div id="plans-main-view">
           <div class="fav-subtabs" style="margin-bottom:12px;">
-            <button class="fav-subtab active" data-plantab="CATALOG" id="plantab-btn-catalog">📚 Catálogo (26)</button>
-            <button class="fav-subtab" data-plantab="ACTIVE" id="plantab-btn-active">🔥 Mis Planes (<span id="count-active-plans">0</span>)</button>
-            <button class="fav-subtab" data-plantab="COMPLETED" id="plantab-btn-completed">🏆 Completados (<span id="count-completed-plans">0</span>)</button>
+            <button class="fav-subtab active" data-plantab="ALL" id="plantab-btn-all">Todos</button>
+            <button class="fav-subtab" data-plantab="ACTIVE" id="plantab-btn-active">Mis Planes (<span id="count-active-plans">0</span>)</button>
+            <button class="fav-subtab" data-plantab="CATALOG" id="plantab-btn-catalog">Catálogo</button>
+            <button class="fav-subtab" data-plantab="COMPLETED" id="plantab-btn-completed">Historial (<span id="count-completed-plans">0</span>)</button>
           </div>
 
           <div id="plans-tab-content" style="max-height:68vh; overflow-y:auto; padding-right:4px;"></div>
@@ -925,6 +962,10 @@
           </div>
           <div class="plan-progress-bar-wrap">
             <div class="plan-progress-bar-fill" id="plan-detail-progress-bar" style="width:0%;"></div>
+          </div>
+          <div class="plan-detail-actions-row" id="plan-detail-actions-row"></div>
+          <div id="plan-stories-search-wrap" style="display:none; margin-top:10px;">
+            <input type="text" id="plan-stories-search" class="modal-input" placeholder="🔍 Buscar historia o pasaje..." style="margin-bottom:0;">
           </div>
           <div id="plan-days-list-container" style="margin-top:12px;"></div>
         </div>
@@ -970,19 +1011,35 @@
             <button class="icon-btn" id="btn-back-from-custom-plan">←</button>
             <h4>✨ Crear Plan de Estudio Personalizado</h4>
           </div>
+
+          <label class="modal-label">Presets Rápidos</label>
+          <div class="chips-scroll" id="custom-plan-presets" style="margin-bottom:10px;">
+            <button type="button" class="chip" data-preset="gospels">✝️ Evangelios (4)</button>
+            <button type="button" class="chip" data-preset="wisdom">📜 Salmos y Proverbios</button>
+            <button type="button" class="chip" data-preset="paul">✉️ Cartas de Pablo</button>
+            <button type="button" class="chip" data-preset="pentateuch">📖 Pentateuco (5)</button>
+          </div>
+
           <label class="modal-label">Nombre de tu Plan</label>
-          <input type="text" id="custom-plan-title" class="modal-input" placeholder="Ej. Estudio de los Salmos de David, Fe en Tiempos Difíciles...">
-          <label class="modal-label">Libro o Enfoque Temático</label>
-          <select id="custom-plan-book" class="modal-input"></select>
-          <label class="modal-label">Duración del Plan (Días)</label>
-          <select id="custom-plan-duration" class="modal-input">
-            <option value="5">5 Días</option>
-            <option value="7" selected>7 Días (1 Semana)</option>
-            <option value="14">14 Días (2 Semanas)</option>
-            <option value="21">21 Días</option>
-            <option value="30">30 Días (1 Mes)</option>
-          </select>
-          <button class="primary-full-btn" id="btn-Generate-custom-plan" style="margin-top:14px;">
+          <input type="text" id="custom-plan-title" class="modal-input" placeholder="Ej. Estudio de los Salmos, Evangelios en 30 días...">
+
+          <label class="modal-label">Libros a incluir (<span id="custom-books-count">1</span> selec.)</label>
+          <div id="custom-plan-books-list" class="custom-books-checklist"></div>
+
+          <label class="modal-label">Ritmo del Plan</label>
+          <div style="display:flex; gap:8px; margin-bottom:10px;">
+            <button type="button" class="chip active" id="btn-pace-days" data-pace="BY_TARGET_DAYS" style="flex:1;">📅 Por Días Totales</button>
+            <button type="button" class="chip" id="btn-pace-chapters" data-pace="BY_CHAPTERS_PER_DAY" style="flex:1;">📖 Capítulos por Día</button>
+          </div>
+
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input type="number" id="custom-plan-pace-value" class="modal-input" min="1" max="365" value="7" style="flex:1; margin-bottom:0;">
+            <span id="custom-plan-pace-unit" style="font-size:0.82rem; font-weight:700; color:var(--text-secondary);">días totales</span>
+          </div>
+
+          <div id="custom-plan-preview" style="font-size:0.8rem; color:var(--accent-gold); font-weight:700; margin-top:10px;"></div>
+
+          <button class="primary-full-btn" id="btn-Generate-custom-plan" style="margin-top:12px;">
             ✨ Generar e Iniciar Mi Plan
           </button>
         </div>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bibleverse-pwa-v2.4.0';
+const CACHE_NAME = 'bibleverse-pwa-v2.5.0';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -16,8 +16,21 @@ const STATIC_ASSETS = [
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
   './assets/icons/apple-touch-icon.png',
-  './assets/icons/favicon.png'
+  './assets/icons/favicon.png',
+  './assets/bible/bible_stories_749.json',
+  './assets/bible/cross_references.bin',
+  './assets/bible/pericopes_es.json',
+  './assets/bible/plan_chronological.json',
+  './assets/bible/plan_traditional.json',
+  './assets/bible/plans/plan_bible_stories.json',
+  './assets/bible/plans/thematic_plans.json'
 ];
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -55,6 +68,7 @@ self.addEventListener('fetch', (event) => {
 
   // App shell files (.html, .js, .css) -> Network first, fallback to cache so updates always apply immediately
   if (
+    event.request.mode === 'navigate' ||
     url.pathname.endsWith('.html') ||
     url.pathname.endsWith('.js') ||
     url.pathname.endsWith('.css') ||
@@ -69,7 +83,14 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         })
-        .catch(() => caches.match(event.request))
+        .catch(async () => {
+          const cached = await caches.match(event.request, { ignoreSearch: true });
+          if (cached) return cached;
+          if (event.request.mode === 'navigate') {
+            return (await caches.match('./app.html')) || (await caches.match('./index.html'));
+          }
+          return undefined;
+        })
     );
     return;
   }
