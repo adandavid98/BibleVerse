@@ -477,27 +477,148 @@ async function ensureCrossReferencesLoaded() {
   return _xrefLoadingPromise;
 }
 
+const CHAPTER_PARALLEL_REFERENCES = {
+  "1_1": [
+    { reference: "Juan 1:1-18", bookId: 43, chapter: 1, startVerse: 1, endVerse: 18, note: "Paralelo del Prólogo: La creación por el Verbo eterno." },
+    { reference: "Colosenses 1:15-17", bookId: 51, chapter: 1, startVerse: 15, endVerse: 17, note: "Cristo, imagen del Dios invisible y Creador de todas las cosas." },
+    { reference: "Hebreos 1:1-3", bookId: 58, chapter: 1, startVerse: 1, endVerse: 3, note: "Por quien asimismo hizo el universo." }
+  ],
+  "1_2": [
+    { reference: "1 Corintios 15:45-47", bookId: 46, chapter: 15, startVerse: 45, endVerse: 47, note: "El primer hombre Adán alma viviente; el postrer Adán, espíritu vivificante." },
+    { reference: "Mateo 19:4-6", bookId: 40, chapter: 19, startVerse: 4, endVerse: 6, note: "El Creador al principio, varón y hembra los hizo." }
+  ],
+  "2_20": [
+    { reference: "Deuteronomio 5:1-22", bookId: 5, chapter: 5, startVerse: 1, endVerse: 22, note: "Paralelo canónico: Repetición solemne del Decálogo." },
+    { reference: "Mateo 22:35-40", bookId: 40, chapter: 22, startVerse: 35, endVerse: 40, note: "Los dos grandes mandamientos que resumen toda la ley." }
+  ],
+  "11_8": [
+    { reference: "2 Crónicas 6:1-42", bookId: 14, chapter: 6, startVerse: 1, endVerse: 42, note: "Paralelo histórico: La solemne oración de Salomón dedicando el Santo Templo." }
+  ],
+  "12_18": [
+    { reference: "Isaías 36:1-22", bookId: 23, chapter: 36, startVerse: 1, endVerse: 22, note: "Paralelo profético: Desafío de Senaquerib contra Jerusalén y confianza en Dios." },
+    { reference: "2 Crónicas 32:1-23", bookId: 14, chapter: 32, startVerse: 1, endVerse: 23, note: "Paralelo de Crónicas: Invasión de Senaquerib y liberación divina." }
+  ],
+  "12_19": [
+    { reference: "Isaías 37:1-38", bookId: 23, chapter: 37, startVerse: 1, endVerse: 38, note: "Paralelo profético: La respuesta de Dios a Ezequías a través de Isaías." }
+  ],
+  "12_20": [
+    { reference: "Isaías 38:1-22", bookId: 23, chapter: 38, startVerse: 1, endVerse: 22, note: "Paralelo profético: El cántico de gratitud de Ezequías tras ser sanado." }
+  ],
+  "14_22": [
+    { reference: "2 Reyes 8:25-29", bookId: 12, chapter: 8, startVerse: 25, endVerse: 29, note: "Paralelo histórico: Reinado y caída de Ocozías de Judá." },
+    { reference: "2 Reyes 11:1-3", bookId: 12, chapter: 11, startVerse: 1, endVerse: 3, note: "Paralelo histórico: Rebelión de Atalía y rescate milagroso de Joás." }
+  ],
+  "14_23": [
+    { reference: "2 Reyes 11:4-21", bookId: 12, chapter: 11, startVerse: 4, endVerse: 21, note: "Paralelo histórico: El sacerdote Joiada unge a Joás y derroca a Atalía." }
+  ],
+  "14_24": [
+    { reference: "2 Reyes 12:1-21", bookId: 12, chapter: 12, startVerse: 1, endVerse: 21, note: "Paralelo histórico: Reparación del Templo y apostasía de Joás." }
+  ],
+  "40_3": [
+    { reference: "Marcos 1:1-11", bookId: 41, chapter: 1, startVerse: 1, endVerse: 11, note: "Paralelo sinóptico: Comienzo del evangelio y bautismo de Jesús." },
+    { reference: "Lucas 3:1-22", bookId: 42, chapter: 3, startVerse: 1, endVerse: 22, note: "Paralelo sinóptico: Ministerio y predicación de Juan el Bautista." }
+  ],
+  "40_4": [
+    { reference: "Marcos 1:12-13", bookId: 41, chapter: 1, startVerse: 12, endVerse: 13, note: "Paralelo sinóptico: Jesús tentado en el desierto." },
+    { reference: "Lucas 4:1-13", bookId: 42, chapter: 4, startVerse: 1, endVerse: 13, note: "Paralelo sinóptico: Las tres tentaciones y victoria de Cristo." }
+  ],
+  "40_5": [
+    { reference: "Lucas 6:20-49", bookId: 42, chapter: 6, startVerse: 20, endVerse: 49, note: "Paralelo evangélico: El Sermón de la llanura y las Bienaventuranzas del Reino." }
+  ],
+  "40_6": [
+    { reference: "Lucas 11:1-4", bookId: 42, chapter: 11, startVerse: 1, endVerse: 4, note: "Paralelo evangélico: La oración del Señor enseñada a los discípulos." },
+    { reference: "Lucas 12:22-34", bookId: 42, chapter: 12, startVerse: 22, endVerse: 34, note: "Paralelo evangélico: No os afanéis por vuestra vida." }
+  ],
+  "40_8": [
+    { reference: "Marcos 4:35-41", bookId: 41, chapter: 4, startVerse: 35, endVerse: 41, note: "Paralelo sinóptico: Jesús calma la tempestad en el mar." },
+    { reference: "Lucas 8:22-25", bookId: 42, chapter: 8, startVerse: 22, endVerse: 25, note: "Paralelo de Lucas: ¿Dónde está vuestra fe?" }
+  ],
+  "40_13": [
+    { reference: "Marcos 4:1-34", bookId: 41, chapter: 4, startVerse: 1, endVerse: 34, note: "Paralelo evangélico: Parábolas del Sembrador y de la Semilla." },
+    { reference: "Lucas 8:4-18", bookId: 42, chapter: 8, startVerse: 4, endVerse: 18, note: "Paralelo evangélico: El sembrador y la lámpara bajo el almud." }
+  ],
+  "40_14": [
+    { reference: "Marcos 6:30-44", bookId: 41, chapter: 6, startVerse: 30, endVerse: 44, note: "Paralelo sinóptico: Milagro de los panes y peces." },
+    { reference: "Lucas 9:10-17", bookId: 42, chapter: 9, startVerse: 10, endVerse: 17, note: "Paralelo de Lucas: Comieron todos y se saciaron." },
+    { reference: "Juan 6:1-15", bookId: 43, chapter: 6, startVerse: 1, endVerse: 15, note: "Paralelo de Juan: El Pan de vida y la multiplicación." }
+  ],
+  "40_16": [
+    { reference: "Marcos 8:27-38", bookId: 41, chapter: 8, startVerse: 27, endVerse: 38, note: "Paralelo sinóptico: Tú eres el Cristo; tomar la cruz y seguirle." },
+    { reference: "Lucas 9:18-27", bookId: 42, chapter: 9, startVerse: 18, endVerse: 27, note: "Paralelo de Lucas: La confesión de Pedro y el discipulado." }
+  ],
+  "40_17": [
+    { reference: "Marcos 9:2-13", bookId: 41, chapter: 9, startVerse: 2, endVerse: 13, note: "Paralelo sinóptico: La gloria de Jesús en el monte alto." },
+    { reference: "Lucas 9:28-36", bookId: 42, chapter: 9, startVerse: 28, endVerse: 36, note: "Paralelo de Lucas: Moisés y Elías hablando con Jesús." }
+  ],
+  "40_21": [
+    { reference: "Marcos 11:1-11", bookId: 41, chapter: 11, startVerse: 1, endVerse: 11, note: "Paralelo sinóptico: ¡Bendito el que viene en el nombre del Señor!" },
+    { reference: "Lucas 19:28-40", bookId: 42, chapter: 19, startVerse: 28, endVerse: 40, note: "Paralelo de Lucas: Si éstos callan, las piedras clamarán." },
+    { reference: "Juan 12:12-19", bookId: 43, chapter: 12, startVerse: 12, endVerse: 19, note: "Paralelo de Juan: He aquí tu Rey viene sentado sobre un pollino." }
+  ],
+  "40_24": [
+    { reference: "Marcos 13:1-37", bookId: 41, chapter: 13, startVerse: 1, endVerse: 37, note: "Paralelo sinóptico: Profecía sobre el fin y la venida del Hijo del Hombre." },
+    { reference: "Lucas 21:5-36", bookId: 42, chapter: 21, startVerse: 5, endVerse: 36, note: "Paralelo de Lucas: Velad, pues, en todo tiempo orando." }
+  ],
+  "40_26": [
+    { reference: "Marcos 14:1-72", bookId: 41, chapter: 14, startVerse: 1, endVerse: 72, note: "Paralelo sinóptico: La Santa Cena, agonía en Getsemaní y negación de Pedro." },
+    { reference: "Lucas 22:1-71", bookId: 42, chapter: 22, startVerse: 1, endVerse: 71, note: "Paralelo sinóptico: La Pascua, angustia de Jesús y traición de Judas." },
+    { reference: "Juan 18:1-27", bookId: 43, chapter: 18, startVerse: 1, endVerse: 27, note: "Paralelo de Juan: El huerto y el prendimiento de Jesús." }
+  ],
+  "40_27": [
+    { reference: "Marcos 15:1-47", bookId: 41, chapter: 15, startVerse: 1, endVerse: 47, note: "Paralelo sinóptico: El juicio ante Pilato, Gólgota y sepulcro." },
+    { reference: "Lucas 23:1-56", bookId: 42, chapter: 23, startVerse: 1, endVerse: 56, note: "Paralelo sinóptico: Padre, en tus manos encomiendo mi espíritu." },
+    { reference: "Juan 19:1-42", bookId: 43, chapter: 19, startVerse: 1, endVerse: 42, note: "Paralelo de Juan: Consumado es; el sacrificio redentor." }
+  ],
+  "40_28": [
+    { reference: "Marcos 16:1-20", bookId: 41, chapter: 16, startVerse: 1, endVerse: 20, note: "Paralelo sinóptico: Ha resucitado, no está aquí; id por todo el mundo." },
+    { reference: "Lucas 24:1-53", bookId: 42, chapter: 24, startVerse: 1, endVerse: 53, note: "Paralelo sinóptico: El camino a Emaús y ascensión triunfal." },
+    { reference: "Juan 20:1-31", bookId: 43, chapter: 20, startVerse: 1, endVerse: 31, note: "Paralelo de Juan: Paz a vosotros; bienaventurados los que no vieron." }
+  ],
+  "41_1": [
+    { reference: "Mateo 3:1-17", bookId: 40, chapter: 3, startVerse: 1, endVerse: 17, note: "Paralelo: Ministerio de Juan el Bautista y Bautismo de Jesús." },
+    { reference: "Lucas 3:1-22", bookId: 42, chapter: 3, startVerse: 1, endVerse: 22, note: "Paralelo de Lucas: La voz que clama en el desierto." }
+  ],
+  "42_2": [
+    { reference: "Mateo 1:18-25", bookId: 40, chapter: 1, startVerse: 18, endVerse: 25, note: "Paralelo: El nacimiento virginal de Jesús en cumplimiento de la profecía." },
+    { reference: "Miqueas 5:2", bookId: 33, chapter: 5, startVerse: 2, endVerse: 2, note: "Profecía mesiánica: Belén de Efrata dará origen al Gobernador eterno." }
+  ],
+  "43_1": [
+    { reference: "Génesis 1:1-3", bookId: 1, chapter: 1, startVerse: 1, endVerse: 3, note: "Paralelo de la Creación: En el principio la luz resplandeció sobre las tinieblas." },
+    { reference: "Colosenses 1:15-17", bookId: 51, chapter: 1, startVerse: 15, endVerse: 17, note: "Cristo la imagen del Dios invisible, primogénito de toda creación." }
+  ]
+};
+
+function hasChapterParallelReferences(bookId, chapter) {
+  return Boolean(CHAPTER_PARALLEL_REFERENCES[`${bookId}_${chapter}`]?.length);
+}
+
+function getChapterParallelReferences(bookId, chapter) {
+  return CHAPTER_PARALLEL_REFERENCES[`${bookId}_${chapter}`] || [];
+}
+
 async function getCrossReferences(bookId, chapter, verseNumber) {
   const dv = await ensureCrossReferencesLoaded();
   const exactRefs = [];
   const chapterRefs = [];
 
   if (dv) {
-    const numChapters = dv.getUint16(4, false); // Big-endian USHORT
+    // Header: 4 bytes "XREF" + 2 bytes version + 2 bytes numChapters + 4 bytes numRecords = 12 bytes
+    const numChapters = dv.getUint16(6, false);
+    const recordsOffset = 12 + numChapters * 8;
     let left = 0;
     let right = numChapters - 1;
-    let foundOffset = -1;
+    let foundStartIdx = -1;
     let foundCount = 0;
     const targetKey = ((bookId & 0xFF) << 8) | (chapter & 0xFF);
 
     while (left <= right) {
       const mid = (left + right) >>> 1;
-      const entryPos = 6 + mid * 8;
+      const entryPos = 12 + mid * 8;
       const b = dv.getUint8(entryPos);
       const c = dv.getUint8(entryPos + 1);
       const key = (b << 8) | c;
       if (key === targetKey) {
-        foundOffset = dv.getInt32(entryPos + 2, false);
+        foundStartIdx = dv.getInt32(entryPos + 2, false);
         foundCount = dv.getUint16(entryPos + 6, false);
         break;
       } else if (key < targetKey) {
@@ -507,12 +628,12 @@ async function getCrossReferences(bookId, chapter, verseNumber) {
       }
     }
 
-    if (foundOffset >= 0 && foundCount > 0) {
+    if (foundStartIdx >= 0 && foundCount > 0) {
       const seenExact = new Set();
       const seenChap = new Set();
 
       for (let i = 0; i < foundCount; i++) {
-        const recPos = foundOffset + i * 5;
+        const recPos = recordsOffset + (foundStartIdx + i) * 5;
         const v = dv.getUint8(recPos);
         const tb = dv.getUint8(recPos + 1);
         const tc = dv.getUint8(recPos + 2);

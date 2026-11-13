@@ -15,6 +15,25 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
+  function triggerHaptic(pattern = 12) {
+    try {
+      if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+        navigator.vibrate(pattern);
+      }
+    } catch (_) {}
+  }
+
+  function cleanAiMarkdownToPlainText(text) {
+    return (text || "")
+      .replace(/^#{1,6}\s+/gm, "")
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/__(.*?)__/g, "$1")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/^\s*[-*]\s+/gm, "• ")
+      .replace(/\*{2,}|#{2,}/g, "")
+      .trim();
+  }
+
   // =========================================================================
   // 1. ESTADO PERSISTENTE Y PREFERENCIAS (Sincronizado en localStorage)
   // =========================================================================
@@ -195,7 +214,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.querySelectorAll(".nav-item").forEach(btn => {
-    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+    btn.addEventListener("click", () => {
+      triggerHaptic(10);
+      switchTab(btn.dataset.tab);
+    });
   });
 
   document.getElementById("btn-scroll-top")?.addEventListener("click", () => {
@@ -820,7 +842,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = await fetchChapterVerses(state.version, state.bookId, state.chapter);
     state.currentChapterVerses = data.verses;
 
-    const parallelChipHtml = !appendContinuous
+    const parallelChipHtml = (!appendContinuous && hasChapterParallelReferences(state.bookId, state.chapter))
       ? `<button type="button" class="chapter-parallel-chip" id="btn-chapter-parallels">⊕ Pasajes paralelos del capítulo</button>`
       : "";
 
@@ -852,10 +874,8 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshAdjacentHighlightMerging();
 
     document.getElementById("btn-chapter-parallels")?.addEventListener("click", () => {
-      state.selectedVerses.clear();
-      state.selectedVerses.add(1);
-      document.getElementById("btn-action-references")?.click();
-      state.selectedVerses.clear();
+      triggerHaptic(12);
+      openChapterParallelsModal();
     });
 
     versesListEl.querySelectorAll(".verse-row").forEach(row => {
@@ -882,6 +902,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function navigateChapter(delta) {
+    triggerHaptic(14);
     const book = getBookById(state.bookId);
     if (delta < 0) {
       if (state.chapter > 1) {
@@ -917,6 +938,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   document.getElementById("btn-floating-book-pill")?.addEventListener("click", e => {
     e.stopPropagation();
+    triggerHaptic(10);
     openUnifiedBookSelector("READER");
   });
 
@@ -940,6 +962,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Selección de versículos y VerseActionBar
   function toggleVerseSelection(vNum, rowEl) {
     if (bookSelectorModal?.classList.contains("open")) return;
+    triggerHaptic(10);
     if (state.selectedVerses.has(vNum)) {
       state.selectedVerses.delete(vNum);
       rowEl.classList.remove("selected");
@@ -1058,7 +1081,7 @@ document.addEventListener("DOMContentLoaded", () => {
       payload.combinedText,
       state.version
     );
-    lastExplanationText = `${payload.citation} (${state.version})\n«${payload.combinedText}»\n\n${res.text}`;
+    lastExplanationText = cleanAiMarkdownToPlainText(`${payload.citation} (${state.version})\n«${payload.combinedText}»\n\n${res.text}`);
     if (badgeEl) badgeEl.textContent = `Fuente: ${res.source}`;
 
     contentBox.innerHTML = `
@@ -1066,7 +1089,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <strong>${payload.citation} (${state.version})</strong><br>
         «${payload.combinedText}»
       </div>
-      <div style="white-space:pre-line; line-height:1.68; padding:4px 2px;">${res.text}</div>
+      <div style="line-height:1.68; padding:4px 2px;">${formatChatMarkdownWithCitations(res.text)}</div>
     `;
   });
 
@@ -1162,31 +1185,19 @@ document.addEventListener("DOMContentLoaded", () => {
   // ACCIÓN 3: REFERENCIAS CRUZADAS Y PARALELOS (CrossReferencesBottomSheet.kt)
   const xrefModal = document.getElementById("xref-modal");
 
-  document.getElementById("btn-action-references")?.addEventListener("click", async () => {
-    if (state.selectedVerses.size === 0) return;
-    const payload = getSelectedVersesPayload();
-    const primaryVerse = payload.sorted[0];
-    document.getElementById("xref-subtitle").textContent = `${payload.book.name} ${state.chapter}:${primaryVerse}`;
+  async function renderXrefItemsIntoModal(items, { isParallelMode = false } = {}) {
     const container = document.getElementById("xref-list-container");
-    container.innerHTML = `<div style="text-align:center; padding:24px;">Cargando referencias cruzadas canónicas...</div>`;
-    xrefModal.classList.add("open");
-
-    const { exactRefs, chapterRefs } = await getCrossReferences(state.bookId, state.chapter, primaryVerse);
-    const allRefs = [...exactRefs, ...chapterRefs].slice(0, 16);
-
-    if (allRefs.length === 0) {
-      container.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-secondary);">No hay referencias cruzadas directas registradas para este versículo.</div>`;
+    if (items.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-secondary);">No hay ${isParallelMode ? "pasajes paralelos" : "referencias cruzadas directas"} registradas para este pasaje.</div>`;
       return;
     }
 
-    // Cargar vista previa de texto para cada referencia cruzada
-    const enriched = await Promise.all(allRefs.map(async ref => {
+    const enriched = await Promise.all(items.map(async ref => {
       const chData = await fetchChapterVerses(state.version, ref.bookId, ref.chapter);
       const vObj = chData.verses.find(v => v.verse === ref.startVerse);
       return {
         ...ref,
-        previewText: vObj ? vObj.text : "",
-        isExact: ref.sourceVerse === primaryVerse
+        previewText: vObj ? vObj.text : ""
       };
     }));
 
@@ -1194,8 +1205,9 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="detail-section-card xref-item-card" style="cursor:pointer;" data-bid="${item.bookId}" data-ch="${item.chapter}" data-v="${item.startVerse}">
         <div class="detail-section-header" style="margin-bottom:4px;">
           <strong style="color:var(--primary-color);">🔗 ${item.reference}</strong>
-          <span class="testament-mini-badge">${item.isExact ? "Directa" : `Paralelo (v.${item.sourceVerse})`}</span>
+          <span class="testament-mini-badge">${isParallelMode ? "Paralelo Canónico" : (item.isExact ? "Directa" : `Capítulo (v.${item.sourceVerse})`)}</span>
         </div>
+        ${item.note ? `<p style="font-size:0.8rem; color:var(--accent-gold); margin-bottom:6px; line-height:1.4;">${item.note}</p>` : ""}
         <p style="font-family:var(--font-serif); font-size:0.9rem; color:var(--text-primary); line-height:1.5;">
           «${item.previewText}»
         </p>
@@ -1204,6 +1216,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     container.querySelectorAll(".xref-item-card").forEach(card => {
       card.addEventListener("click", () => {
+        triggerHaptic(10);
         state.bookId = Number(card.dataset.bid);
         state.chapter = Number(card.dataset.ch);
         state.targetScrollVerse = Number(card.dataset.v);
@@ -1212,6 +1225,30 @@ document.addEventListener("DOMContentLoaded", () => {
         loadReaderChapter(false);
       });
     });
+  }
+
+  async function openChapterParallelsModal() {
+    const book = getBookById(state.bookId);
+    const parallels = getChapterParallelReferences(state.bookId, state.chapter);
+    document.getElementById("xref-subtitle").textContent = `Pasajes Paralelos • ${book.name} ${state.chapter}`;
+    document.getElementById("xref-list-container").innerHTML = `<div style="text-align:center; padding:24px;">Cargando pasajes paralelos canónicos...</div>`;
+    xrefModal.classList.add("open");
+    await renderXrefItemsIntoModal(parallels, { isParallelMode: true });
+  }
+
+  document.getElementById("btn-action-references")?.addEventListener("click", async () => {
+    if (state.selectedVerses.size === 0) return;
+    const payload = getSelectedVersesPayload();
+    const primaryVerse = payload.sorted[0];
+    document.getElementById("xref-subtitle").textContent = `${payload.book.name} ${state.chapter}:${primaryVerse}`;
+    document.getElementById("xref-list-container").innerHTML = `<div style="text-align:center; padding:24px;">Cargando referencias cruzadas canónicas...</div>`;
+    xrefModal.classList.add("open");
+
+    const { exactRefs, chapterRefs } = await getCrossReferences(state.bookId, state.chapter, primaryVerse);
+    const markedExact = exactRefs.map(r => ({ ...r, isExact: true }));
+    const markedChap = chapterRefs.map(r => ({ ...r, isExact: false }));
+    const allRefs = [...markedExact, ...markedChap].slice(0, 16);
+    await renderXrefItemsIntoModal(allRefs, { isParallelMode: false });
   });
 
   document.getElementById("btn-close-xref")?.addEventListener("click", () => xrefModal.classList.remove("open"));
@@ -2131,33 +2168,49 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       container.innerHTML = `<div class="plans-grid-2col">${compList.map(p => renderPlanCardHTML(p)).join("")}</div>`;
-    } else if (state.activePlanModalTab === "ALL") {
-      const customBtnHtml = `
-        <button class="primary-full-btn" id="btn-open-create-custom-plan" style="margin-bottom:14px;">
-          ✨ Crear Plan de Estudio Personalizado
-        </button>
-      `;
-      container.innerHTML = customBtnHtml + `<div class="plans-grid-2col">${allPlans.map(p => renderPlanCardHTML(p)).join("")}</div>`;
-      bindCreateCustomPlanOpenButton();
     } else {
-      // CATALOG: Botón Crear Plan Personalizado + 26 planes agrupados por categoría en grid 2 columnas
+      // ALL y CATALOG: Botón Crear Plan Personalizado + Filtros por categoría + Planes divididos por tema/categoría
       const categories = [];
       allPlans.forEach(p => {
         if (!categories.includes(p.category)) categories.push(p.category);
       });
 
+      const activeCatFilter = state.activePlanCategoryFilter || "ALL";
+      const visibleCategories = activeCatFilter === "ALL" ? categories : categories.filter(c => c === activeCatFilter);
+
+      const chipShortLabel = c => {
+        if (c.includes("ANUALES")) return "Anuales y Largos";
+        if (c.includes("DOCTRINA")) return "Doctrina y Teología";
+        if (c.includes("CRECIMIENTO")) return "Crecimiento";
+        if (c.includes("PAZ")) return "Paz y Consuelo";
+        if (c.includes("FAMILIA")) return "Familia y Vida";
+        return c.split("(")[0].trim();
+      };
+
       let html = `
-        <button class="primary-full-btn" id="btn-open-create-custom-plan" style="margin-bottom:14px;">
+        <button class="primary-full-btn" id="btn-open-create-custom-plan" style="margin-bottom:12px;">
           ✨ Crear Plan de Estudio Personalizado a tu Medida
         </button>
+        <div class="topic-chips-row" style="margin-bottom:12px;">
+          <button class="chip ${activeCatFilter === "ALL" ? "active" : ""}" data-plancat="ALL">Todos</button>
+          ${categories.map(c => `<button class="chip ${activeCatFilter === c ? "active" : ""}" data-plancat="${c}">${chipShortLabel(c)}</button>`).join("")}
+        </div>
       `;
 
-      for (const cat of categories) {
+      for (const cat of visibleCategories) {
         const catPlans = allPlans.filter(p => p.category === cat);
+        if (catPlans.length === 0) continue;
         html += `<h4 style="font-size:0.78rem; color:var(--secondary-color); margin:12px 0 8px; letter-spacing:0.4px;">${cat}</h4>`;
         html += `<div class="plans-grid-2col">${catPlans.map(p => renderPlanCardHTML(p)).join("")}</div>`;
       }
       container.innerHTML = html;
+      container.querySelectorAll("[data-plancat]").forEach(chip => {
+        chip.addEventListener("click", () => {
+          triggerHaptic(8);
+          state.activePlanCategoryFilter = chip.dataset.plancat;
+          renderPlansMainTabContent();
+        });
+      });
       bindCreateCustomPlanOpenButton();
     }
 
@@ -2952,7 +3005,7 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.addEventListener("click", () => {
         const m = state.chatMessages[Number(btn.dataset.idx)];
         if (m) {
-          navigator.clipboard.writeText(m.text);
+          navigator.clipboard.writeText(cleanAiMarkdownToPlainText(m.text));
           showToast("📋 Respuesta copiada");
         }
       });
@@ -2963,7 +3016,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const m = state.chatMessages[Number(btn.dataset.idx)];
         if (m && "speechSynthesis" in window) {
           window.speechSynthesis.cancel();
-          const u = new SpeechSynthesisUtterance(m.text.replace(/[*#_]/g, ""));
+          const u = new SpeechSynthesisUtterance(cleanAiMarkdownToPlainText(m.text));
           u.lang = "es-ES";
           window.speechSynthesis.speak(u);
         }
@@ -2976,8 +3029,13 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
+      .replace(/^#{1,6}\s+(.+)$/gm, '<strong style="display:block; margin-top:8px; margin-bottom:2px; color:var(--accent-gold);">$1</strong>')
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/__(.+?)__/g, "<strong>$1</strong>")
       .replace(/\*(.+?)\*/g, "<em>$1</em>")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/^\s*[-*]\s+/gm, "• ")
+      .replace(/\*{2,}|#{2,}/g, "")
       .replace(/\n/g, "<br>");
 
     // Detectar referencias bíblicas y añadir chips clicables al final
@@ -3519,9 +3577,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("popstate", e => {
       isHandlingPopState = true;
+      let handled = false;
       try {
         const openModals = Array.from(document.querySelectorAll(".modal-overlay.open"));
         if (openModals.length > 0) {
+          handled = true;
           // Priorizar el selector unificado de libros si está abierto (z-index 250)
           const topModal = bookSelectorModal?.classList.contains("open")
             ? bookSelectorModal
@@ -3551,10 +3611,13 @@ document.addEventListener("DOMContentLoaded", () => {
             topModal.classList.remove("open");
           }
         } else if (state.currentTab === "reader" && state.selectedVerses.size > 0) {
+          handled = true;
           clearVerseSelection();
         } else if (state.currentTab !== "verses") {
+          handled = true;
           switchTab("verses");
         }
+        if (handled) triggerHaptic(12);
       } finally {
         isHandlingPopState = false;
       }

@@ -1358,6 +1358,9 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
+  display: none;
+  visibility: hidden;
+  pointer-events: none;
   background-color: var(--surface-color);
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
@@ -1370,6 +1373,9 @@ body {
 }
 
 .verse-action-bar.visible {
+  display: block;
+  visibility: visible;
+  pointer-events: auto;
   transform: translateY(0);
 }
 
