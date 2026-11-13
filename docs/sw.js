@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bibleverse-pwa-v2.5.11';
+const CACHE_NAME = 'bibleverse-pwa-v2.5.12';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -46,7 +46,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
+          if (cache !== CACHE_NAME && cache !== 'bibleverse-offline-bibles-v1') {
             return caches.delete(cache);
           }
         })

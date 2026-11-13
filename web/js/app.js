@@ -4020,7 +4020,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Pre-cachear en segundo plano la versión activa si es offline (por defecto RVR1960)
     // para que usuarios de iPhone puedan leer sin internet tras su primera apertura.
     if (navigator.onLine) {
-      const currentVer = BIBLE_VERSIONS.find(v => v.code === state.reader.version && v.isOfflineAsset);
+      const currentVer = BIBLE_VERSIONS.find(v => v.code === state.version && v.isOfflineAsset);
       const targetCode = currentVer ? currentVer.code : "RVR1960";
       setTimeout(async () => {
         const cached = await getOfflineBookCacheCount(targetCode);
