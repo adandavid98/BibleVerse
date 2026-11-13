@@ -208,7 +208,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (tabId === "reader") {
-      loadReaderChapter();
+      const expectedKey = `${state.version}:${state.bookId}:${state.chapter}`;
+      if (lastRenderedReaderKey !== expectedKey || !versesListEl?.children.length || state.targetScrollVerse) {
+        loadReaderChapter();
+      }
     } else if (tabId === "favorites") {
       renderFavoritesAndNotesTab();
     } else if (tabId === "settings") {
@@ -259,7 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     lastScrollY = currentY;
 
-    if (state.continuousScroll && !isAppendingContinuous) {
+    if (state.continuousScroll && !isAppendingContinuous && !state.activeReaderPlanSession) {
       const distToBottom = mainScrollContainer.scrollHeight - (mainScrollContainer.scrollTop + mainScrollContainer.clientHeight);
       if (distToBottom < 140 && !(state.bookId === 66 && state.chapter >= 22)) {
         isAppendingContinuous = true;
@@ -882,6 +885,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  let lastRenderedReaderKey = "";
+
   async function loadReaderChapter(appendContinuous = false) {
     const book = getBookById(state.bookId);
     if (bookNameBtn) bookNameBtn.textContent = `${book.name} ${state.chapter}`;
@@ -906,13 +911,18 @@ document.addEventListener("DOMContentLoaded", () => {
     updateContinueReadingBanner();
     renderPlanSessionHeaderInReader();
 
+    let loadingTimer = null;
     if (!appendContinuous) {
       clearVerseSelection();
-      versesListEl.innerHTML = `<div style="text-align:center; padding:36px; color:var(--text-secondary);">Cargando ${book.name} ${state.chapter} (${state.version})...</div>`;
+      loadingTimer = setTimeout(() => {
+        versesListEl.innerHTML = `<div style="text-align:center; padding:36px; color:var(--text-secondary);">Cargando ${book.name} ${state.chapter} (${state.version})...</div>`;
+      }, 120);
     }
 
     const data = await fetchChapterVerses(state.version, state.bookId, state.chapter);
+    if (loadingTimer) clearTimeout(loadingTimer);
     state.currentChapterVerses = data.verses;
+    lastRenderedReaderKey = `${state.version}:${state.bookId}:${state.chapter}`;
 
     const parallelChipHtml = (!appendContinuous && hasChapterParallelReferences(state.bookId, state.chapter))
       ? `<button type="button" class="chapter-parallel-chip" id="btn-chapter-parallels">⊕ Pasajes paralelos del capítulo</button>`
@@ -975,6 +985,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function navigateChapter(delta) {
     triggerHaptic(14);
+    const sess = state.activeReaderPlanSession;
+    if (sess && Array.isArray(sess.passages) && sess.passages.length > 0) {
+      const curIdx = sess.passages.findIndex(seg => seg.bookId === state.bookId && seg.chapter === state.chapter);
+      const nextIdx = (curIdx === -1 ? 0 : curIdx) + delta;
+      if (nextIdx < 0) {
+        showToast("📖 Estás en el primer capítulo de la lectura de hoy");
+        return;
+      }
+      if (nextIdx >= sess.passages.length) {
+        showToast("📖 Último capítulo del plan de hoy");
+        return;
+      }
+      const nextSeg = sess.passages[nextIdx];
+      state.bookId = nextSeg.bookId;
+      state.chapter = nextSeg.chapter;
+      loadReaderChapter(false);
+      return;
+    }
+
     const book = getBookById(state.bookId);
     if (delta < 0) {
       if (state.chapter > 1) {
@@ -1599,9 +1628,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (stepNum > 1 && prevStep !== stepNum) {
       pushBackNavState();
     }
-    document.getElementById("selector-step-books").style.display = stepNum === 1 ? "block" : "none";
-    document.getElementById("selector-step-chapters").style.display = stepNum === 2 ? "block" : "none";
-    document.getElementById("selector-step-verses").style.display = stepNum === 3 ? "block" : "none";
+    document.getElementById("selector-step-books").style.display = stepNum === 1 ? "flex" : "none";
+    document.getElementById("selector-step-chapters").style.display = stepNum === 2 ? "flex" : "none";
+    document.getElementById("selector-step-verses").style.display = stepNum === 3 ? "flex" : "none";
 
     document.getElementById("step-tab-book")?.classList.toggle("active", stepNum === 1);
     document.getElementById("step-tab-chapter")?.classList.toggle("active", stepNum === 2);
@@ -1619,6 +1648,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function openUnifiedBookSelector(mode = "READER") {
+    if (mode === "READER" && state.activeReaderPlanSession) {
+      showToast("🔒 Modo Plan activo: navega solo entre los capítulos de la lectura de hoy");
+      return;
+    }
     currentPickerMode = mode;
     if (mode === "READER") {
       clearVerseSelection();
@@ -2657,11 +2690,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const bar = document.getElementById("reader-plan-session-bar");
     if (!bar) return;
     const sess = state.activeReaderPlanSession;
+    const openBookBtn = document.getElementById("btn-open-book-selector");
+    const floatingBookBtn = document.getElementById("btn-floating-book-pill");
+    const prevChapBtn = document.getElementById("btn-prev-chapter-bottom");
+    const nextChapBtn = document.getElementById("btn-next-chapter-bottom");
+
     if (!sess) {
       bar.style.display = "none";
+      if (openBookBtn) {
+        openBookBtn.style.opacity = "";
+        openBookBtn.style.pointerEvents = "";
+      }
+      if (floatingBookBtn) {
+        floatingBookBtn.style.opacity = "";
+      }
+      if (prevChapBtn) prevChapBtn.disabled = false;
+      if (nextChapBtn) nextChapBtn.disabled = false;
       return;
     }
     bar.style.display = "block";
+    if (openBookBtn) {
+      openBookBtn.style.opacity = "0.6";
+    }
+    if (floatingBookBtn) {
+      floatingBookBtn.style.opacity = "0.75";
+    }
+    const curIdx = sess.passages.findIndex(seg => seg.bookId === state.bookId && seg.chapter === state.chapter);
+    if (prevChapBtn) prevChapBtn.disabled = curIdx <= 0;
+    if (nextChapBtn) nextChapBtn.disabled = curIdx === -1 || curIdx >= sess.passages.length - 1;
+
     document.getElementById("reader-plan-session-title").textContent = sess.title;
     const segRow = document.getElementById("reader-plan-segments-row");
     segRow.innerHTML = sess.passages.map(seg => {
