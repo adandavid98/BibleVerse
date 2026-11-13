@@ -748,7 +748,73 @@ function getLocalScholarlyExegesis(bookName, chapter = 1, verse = "1", verseText
   return `${part1}\n\n${part2}\n\n${part3}`;
 }
 
-async function generateVerseExegesisWithAI(bookName, chapter, verse, verseText, version = "RVR1960") {
+async function cascadeTextReveal(fullText, onChunk) {
+  const clean = (fullText || "").trim();
+  if (!onChunk || !clean) return clean;
+  const words = clean.split(/(\s+)/);
+  let acc = "";
+  const step = 4; // 4 tokens per frame (~18ms) para cascada fluida e inmediata
+  for (let i = 0; i < words.length; i += step) {
+    acc += words.slice(i, i + step).join("");
+    onChunk(acc);
+    if (i + step < words.length) {
+      await new Promise(r => setTimeout(r, 18));
+    }
+  }
+  return clean;
+}
+
+async function streamGeminiDirect(directKey, contents, generationConfig, onChunk) {
+  if (!directKey) return null;
+  for (const model of GEMINI_MODELS) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${directKey}`;
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents, generationConfig })
+      });
+      if (!resp.ok || !resp.body) continue;
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+      let accumulated = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith("data:")) continue;
+          const jsonStr = trimmed.slice(5).trim();
+          if (!jsonStr || jsonStr === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const partText = parsed?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            if (partText) {
+              accumulated += partText;
+              if (onChunk) onChunk(accumulated);
+            }
+          } catch (_) {}
+        }
+      }
+
+      if (accumulated.trim().length > 20) {
+        return accumulated.trim();
+      }
+    } catch (e) {
+      // Continúa al siguiente modelo o fallback
+    }
+  }
+  return null;
+}
+
+async function generateVerseExegesisWithAI(bookName, chapter, verse, verseText, version = "RVR1960", onChunk = null) {
   const reference = `${bookName} ${chapter}:${verse}`;
   const prompt =
     `Eres un erudito bíblico y teólogo con profundo conocimiento histórico, doctrinal y exegético. ` +
@@ -760,7 +826,23 @@ async function generateVerseExegesisWithAI(bookName, chapter, verse, verseText, 
     `✝️ EXÉGESIS Y SIGNIFICADO TEOLÓGICO (enseñanza doctrinal y cristocéntrica)\n` +
     `🕊️ APLICACIÓN PRÁCTICA HOY (enseñanza devocional para la vida del creyente)`;
 
-  // 1. Intentar endpoint serverless de Vercel (/api/gemini) con GEMINI_API_KEY del servidor
+  // 1. Intentar streaming directo si hay clave integrada o personalizada (respuesta en cascada en tiempo real)
+  const customKey = (typeof localStorage !== "undefined" && localStorage.getItem("bibleverse_custom_gemini_key"))?.trim();
+  const directKey = customKey || (typeof GEMINI_INTEGRATED_KEY !== "undefined" ? GEMINI_INTEGRATED_KEY : "");
+
+  if (directKey) {
+    const streamed = await streamGeminiDirect(
+      directKey,
+      [{ parts: [{ text: prompt }] }],
+      { temperature: 0.35, maxOutputTokens: 700 },
+      onChunk
+    );
+    if (streamed) {
+      return { text: streamed, source: "IA Gemini" };
+    }
+  }
+
+  // 2. Intentar endpoint serverless de Vercel (/api/gemini) con cascada inmediata
   try {
     const vResp = await fetch("/api/gemini", {
       method: "POST",
@@ -773,49 +855,22 @@ async function generateVerseExegesisWithAI(bookName, chapter, verse, verseText, 
     if (vResp.ok) {
       const vJson = await vResp.json();
       if (vJson?.text && vJson.text.trim().length > 30) {
-        return { text: vJson.text.trim(), source: vJson.source || "IA Gemini" };
+        const revealed = await cascadeTextReveal(vJson.text.trim(), onChunk);
+        return { text: revealed, source: vJson.source || "IA Gemini" };
       }
     }
   } catch (e) {
     // Si no está disponible en localhost o no hay serverless, continuar
   }
 
-  // 2. Intentar clave configurada por el usuario en el navegador o clave directa
-  const customKey = (typeof localStorage !== "undefined" && localStorage.getItem("bibleverse_custom_gemini_key"))?.trim();
-  const directKey = customKey || (typeof GEMINI_INTEGRATED_KEY !== "undefined" ? GEMINI_INTEGRATED_KEY : "");
-
-  if (directKey) {
-    for (const model of GEMINI_MODELS) {
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${directKey}`;
-        const resp = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.35, maxOutputTokens: 700 }
-          })
-        });
-        if (resp.ok) {
-          const json = await resp.json();
-          const text = json?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (text && text.trim().length > 40) {
-            return { text: text.trim(), source: "IA Gemini" };
-          }
-        }
-      } catch (e) {
-        // Continúa al siguiente modelo o fallback local
-      }
-    }
-  }
-
+  const localText = await cascadeTextReveal(getLocalScholarlyExegesis(bookName, chapter, verse, verseText), onChunk);
   return {
-    text: getLocalScholarlyExegesis(bookName, chapter, verse, verseText),
+    text: localText,
     source: "Motor Exegético Bíblico"
   };
 }
 
-async function askBibleChatAssistant(chatHistory, userMessage) {
+async function askBibleChatAssistant(chatHistory, userMessage, onChunk = null) {
   const systemPrompt =
     "Eres un Asistente Bíblico y Teológico erudito integrado en la aplicación BibleVerse. " +
     "Responde siempre en español con rigor bíblico, claridad pastoral, respeto interdenominacional y citando pasajes exactos (ej: Juan 3:16, Romanos 8:28, Salmos 23:1, Efesios 2:8-9).";
@@ -833,7 +888,21 @@ async function askBibleChatAssistant(chatHistory, userMessage) {
     parts: [{ text: `${systemPrompt}\n\nConsulta del usuario: ${userMessage}` }]
   });
 
-  // 1. Intentar endpoint serverless de Vercel (/api/gemini)
+  // 1. Intentar streaming directo en cascada en tiempo real
+  const customKey = (typeof localStorage !== "undefined" && localStorage.getItem("bibleverse_custom_gemini_key"))?.trim();
+  const directKey = customKey || (typeof GEMINI_INTEGRATED_KEY !== "undefined" ? GEMINI_INTEGRATED_KEY : "");
+
+  if (directKey) {
+    const streamed = await streamGeminiDirect(
+      directKey,
+      contents,
+      { temperature: 0.4, maxOutputTokens: 900 },
+      onChunk
+    );
+    if (streamed) return streamed;
+  }
+
+  // 2. Intentar endpoint serverless de Vercel (/api/gemini) con cascada inmediata
   try {
     const vResp = await fetch("/api/gemini", {
       method: "POST",
@@ -846,43 +915,14 @@ async function askBibleChatAssistant(chatHistory, userMessage) {
     if (vResp.ok) {
       const vJson = await vResp.json();
       if (vJson?.text && vJson.text.trim().length > 20) {
-        return vJson.text.trim();
+        return await cascadeTextReveal(vJson.text.trim(), onChunk);
       }
     }
   } catch (e) {
-    // Si no está disponible, continuar
+    // Fallback local inteligente si no hay conexión o límite de cuota
   }
 
-  // 2. Intentar clave personalizada o directa
-  const customKey = (typeof localStorage !== "undefined" && localStorage.getItem("bibleverse_custom_gemini_key"))?.trim();
-  const directKey = customKey || (typeof GEMINI_INTEGRATED_KEY !== "undefined" ? GEMINI_INTEGRATED_KEY : "");
-
-  if (directKey) {
-    for (const model of GEMINI_MODELS) {
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${directKey}`;
-        const resp = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents,
-            generationConfig: { temperature: 0.4, maxOutputTokens: 900 }
-          })
-        });
-        if (resp.ok) {
-          const json = await resp.json();
-          const text = json?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (text && text.trim().length > 20) {
-            return text.trim();
-          }
-        }
-      } catch (e) {
-        // Fallback local inteligente si no hay conexión o límite de cuota
-      }
-    }
-  }
-
-  return buildLocalTheologicalChatResponse(userMessage);
+  return await cascadeTextReveal(buildLocalTheologicalChatResponse(userMessage), onChunk);
 }
 
 function buildLocalTheologicalChatResponse(userMessage) {

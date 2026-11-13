@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     readerTheme: ["reader-light", "reader-sepia", "reader-dark", "reader-night"].includes(localStorage.getItem("bv_readerTheme")) ? localStorage.getItem("bv_readerTheme") : "reader-light",
     fontFamily: localStorage.getItem("bv_fontFamily") || "serif",
     fontSize: parseInt(localStorage.getItem("bv_fontSize") || "19", 10),
-    lineHeight: parseFloat(localStorage.getItem("bv_lineHeight") || "1.8"),
+    lineHeight: parseFloat(localStorage.getItem("bv_lineHeight") || "1.52"),
     redLetters: localStorage.getItem("bv_redLetters") !== "false",
     sectionHeadings: localStorage.getItem("bv_sectionHeadings") !== "false",
     continuousScroll: localStorage.getItem("bv_continuousScroll") === "true",
@@ -1119,25 +1119,34 @@ document.addEventListener("DOMContentLoaded", () => {
     const badgeEl = document.getElementById("explain-source-badge");
 
     explainModal.classList.add("open");
-    contentBox.innerHTML = `<div style="padding:24px; text-align:center; color:var(--text-secondary);">✨ Analizando <strong>${payload.citation}</strong> con Inteligencia Artificial y Motor Exegético...</div>`;
+    contentBox.innerHTML = `
+      <div class="detail-verse-quote">
+        <strong>${payload.citation} (${state.version})</strong><br>
+        «${payload.combinedText}»
+      </div>
+      <div id="explain-stream-body" style="line-height:1.62; padding:4px 2px; color:var(--text-secondary);">✨ Analizando ${payload.citation}...</div>
+    `;
+    const streamBodyEl = document.getElementById("explain-stream-body");
 
     const res = await generateVerseExegesisWithAI(
       payload.book.name,
       state.chapter,
       payload.rangeStr,
       payload.combinedText,
-      state.version
+      state.version,
+      partialText => {
+        if (streamBodyEl) {
+          streamBodyEl.style.color = "var(--text-primary)";
+          streamBodyEl.innerHTML = formatChatMarkdownWithCitations(partialText);
+        }
+      }
     );
     lastExplanationText = cleanAiMarkdownToPlainText(`${payload.citation} (${state.version})\n«${payload.combinedText}»\n\n${res.text}`);
     if (badgeEl) badgeEl.textContent = `Fuente: ${res.source}`;
-
-    contentBox.innerHTML = `
-      <div class="detail-verse-quote">
-        <strong>${payload.citation} (${state.version})</strong><br>
-        «${payload.combinedText}»
-      </div>
-      <div style="line-height:1.68; padding:4px 2px;">${formatChatMarkdownWithCitations(res.text)}</div>
-    `;
+    if (streamBodyEl) {
+      streamBodyEl.style.color = "var(--text-primary)";
+      streamBodyEl.innerHTML = formatChatMarkdownWithCitations(res.text);
+    }
   });
 
   document.getElementById("btn-close-explain")?.addEventListener("click", () => explainModal.classList.remove("open"));
@@ -3106,9 +3115,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     aiMessagesEl.innerHTML = state.chatMessages.map((msg, idx) => {
       const formattedHtml = formatChatMarkdownWithCitations(msg.text);
+      const bubbleWidthStyle = msg.isUser ? "max-width:88%;" : "width:100%; max-width:100%;";
       return `
-        <div style="align-self:${msg.isUser ? "flex-end" : "flex-start"}; max-width:88%; background:${msg.isUser ? "var(--primary-color)" : "var(--surface-color)"}; color:${msg.isUser ? "var(--on-primary)" : "var(--text-primary)"}; padding:12px 14px; border-radius:18px; border:1px solid var(--border-color); font-size:0.9rem; line-height:1.58;">
-          <div>${formattedHtml}</div>
+        <div class="chat-msg-bubble" data-msg-idx="${idx}" style="align-self:${msg.isUser ? "flex-end" : "flex-start"}; ${bubbleWidthStyle} background:${msg.isUser ? "var(--primary-color)" : "var(--surface-color)"}; color:${msg.isUser ? "var(--on-primary)" : "var(--text-primary)"}; padding:12px 14px; border-radius:16px; border:1px solid var(--border-color); font-size:0.9rem; line-height:1.58;">
+          <div class="chat-msg-body">${formattedHtml}</div>
           ${!msg.isUser ? `
             <div style="display:flex; gap:8px; margin-top:8px; justify-content:flex-end;">
               <button class="action-pill btn-chat-tts" data-idx="${idx}" style="font-size:0.7rem; padding:3px 8px;">🔊 Escuchar</button>
@@ -3193,11 +3203,19 @@ document.addEventListener("DOMContentLoaded", () => {
     aiInput.value = "";
     renderChatMessages();
 
-    state.chatMessages.push({ isUser: false, text: "⏳ Consultando las Escrituras y exégesis teológica..." });
+    state.chatMessages.push({ isUser: false, text: "⏳ Consultando las Escrituras..." });
     renderChatMessages();
+    const msgIdx = state.chatMessages.length - 1;
 
-    const reply = await askBibleChatAssistant(state.chatMessages.slice(0, -1), clean);
-    state.chatMessages[state.chatMessages.length - 1] = { isUser: false, text: reply };
+    const reply = await askBibleChatAssistant(state.chatMessages.slice(0, -1), clean, partialText => {
+      state.chatMessages[msgIdx] = { isUser: false, text: partialText };
+      const bodyEl = aiMessagesEl?.querySelector(`.chat-msg-bubble[data-msg-idx="${msgIdx}"] .chat-msg-body`);
+      if (bodyEl) {
+        bodyEl.innerHTML = formatChatMarkdownWithCitations(partialText);
+        if (aiMessagesEl) aiMessagesEl.scrollTop = aiMessagesEl.scrollHeight;
+      }
+    });
+    state.chatMessages[msgIdx] = { isUser: false, text: reply };
     localStorage.setItem("bv_chat_history", JSON.stringify(state.chatMessages.slice(-24)));
     renderChatMessages();
   }
