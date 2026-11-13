@@ -149,7 +149,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const mainScrollContainer = document.getElementById("main-scroll-container");
 
   function switchTab(tabId) {
+    const prevTab = state.currentTab;
     state.currentTab = tabId;
+    if (tabId !== "verses" && prevTab !== tabId) {
+      pushBackNavState();
+    }
 
     document.querySelectorAll(".nav-item").forEach(btn => {
       btn.classList.toggle("active", btn.dataset.tab === tabId);
@@ -195,6 +199,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("btn-scroll-top")?.addEventListener("click", () => {
+    if (state.currentTab !== "verses") {
+      switchTab("verses");
+    }
     if (mainScrollContainer) mainScrollContainer.scrollTo({ top: 0, behavior: "smooth" });
   });
 
@@ -894,8 +901,12 @@ document.addEventListener("DOMContentLoaded", () => {
     loadReaderChapter(false);
   }
 
-  document.getElementById("btn-prev-chapter")?.addEventListener("click", () => navigateChapter(-1));
-  document.getElementById("btn-next-chapter")?.addEventListener("click", () => navigateChapter(1));
+  const readerFloatingNavEl = document.getElementById("reader-floating-nav");
+  if (readerFloatingNavEl) {
+    ["touchstart", "touchend", "pointerdown", "click"].forEach(evtName => {
+      readerFloatingNavEl.addEventListener(evtName, e => e.stopPropagation(), { passive: true });
+    });
+  }
   document.getElementById("btn-prev-chapter-bottom")?.addEventListener("click", e => {
     e.stopPropagation();
     navigateChapter(-1);
@@ -928,6 +939,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Selección de versículos y VerseActionBar
   function toggleVerseSelection(vNum, rowEl) {
+    if (bookSelectorModal?.classList.contains("open")) return;
     if (state.selectedVerses.has(vNum)) {
       state.selectedVerses.delete(vNum);
       rowEl.classList.remove("selected");
@@ -948,10 +960,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const count = state.selectedVerses.size;
     const floatingNav = document.getElementById("reader-floating-nav");
     if (count > 0) {
+      const wasVisible = actionBar.classList.contains("visible");
       document.getElementById("selection-count-text").textContent = `${count} selec.`;
       actionBar.classList.add("visible");
       mainBottomNav?.classList.add("auto-hidden");
       floatingNav?.classList.remove("visible");
+      if (!wasVisible) pushBackNavState();
     } else {
       actionBar.classList.remove("visible");
       mainBottomNav?.classList.remove("auto-hidden");
@@ -1454,7 +1468,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentPickerStep = 1;
 
   function showPickerStep(stepNum) {
+    const prevStep = currentPickerStep;
     currentPickerStep = stepNum;
+    if (stepNum > 1 && prevStep !== stepNum) {
+      pushBackNavState();
+    }
     document.getElementById("selector-step-books").style.display = stepNum === 1 ? "block" : "none";
     document.getElementById("selector-step-chapters").style.display = stepNum === 2 ? "block" : "none";
     document.getElementById("selector-step-verses").style.display = stepNum === 3 ? "block" : "none";
@@ -2059,6 +2077,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function showPlansModalView(viewName) {
+    if (viewName !== "MAIN") {
+      pushBackNavState();
+    }
     document.getElementById("plans-main-view").style.display = viewName === "MAIN" ? "block" : "none";
     document.getElementById("plan-days-detail-view").style.display = viewName === "DAYS" ? "block" : "none";
     document.getElementById("plan-day-reader-view").style.display = viewName === "READER" ? "block" : "none";
@@ -3454,6 +3475,98 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // =========================================================================
+  // GESTOS DE NAVEGACIÓN HACIA ATRÁS (ANDROID / IOS PWA HISTORY API)
+  // =========================================================================
+  var isHandlingPopState = false;
+
+  function hasActiveBackLayer() {
+    if (document.querySelector(".modal-overlay.open")) return true;
+    if (state.currentTab === "reader" && state.selectedVerses.size > 0) return true;
+    if (state.currentTab !== "verses") return true;
+    return false;
+  }
+
+  function pushBackNavState() {
+    if (isHandlingPopState) return;
+    try {
+      window.history.pushState({ bvNav: true }, "");
+    } catch (_) {}
+  }
+
+  function setupBackGestureSupport() {
+    try {
+      window.history.replaceState({ bvRoot: true }, "");
+    } catch (_) {}
+
+    // Observar apertura de cualquier modal para registrar un estado en el historial
+    const modalObserver = new MutationObserver(mutations => {
+      mutations.forEach(m => {
+        if (m.type === "attributes" && m.attributeName === "class") {
+          const el = m.target;
+          const wasOpen = (m.oldValue || "").split(/\s+/).includes("open");
+          const isOpen = el.classList.contains("open");
+          if (!wasOpen && isOpen) {
+            pushBackNavState();
+          }
+        }
+      });
+    });
+
+    document.querySelectorAll(".modal-overlay").forEach(overlay => {
+      modalObserver.observe(overlay, { attributes: true, attributeFilter: ["class"], attributeOldValue: true });
+    });
+
+    window.addEventListener("popstate", e => {
+      isHandlingPopState = true;
+      try {
+        const openModals = Array.from(document.querySelectorAll(".modal-overlay.open"));
+        if (openModals.length > 0) {
+          // Priorizar el selector unificado de libros si está abierto (z-index 250)
+          const topModal = bookSelectorModal?.classList.contains("open")
+            ? bookSelectorModal
+            : openModals[openModals.length - 1];
+
+          if (topModal === bookSelectorModal) {
+            if (currentPickerStep > 1) {
+              showPickerStep(currentPickerStep - 1);
+            } else {
+              bookSelectorModal.classList.remove("open");
+            }
+          } else if (topModal === plansModal) {
+            const readerView = document.getElementById("plan-day-reader-view");
+            const daysView = document.getElementById("plan-days-detail-view");
+            const customView = document.getElementById("create-custom-plan-view");
+            if (readerView && readerView.style.display !== "none") {
+              showPlansModalView("DAYS");
+            } else if (
+              (daysView && daysView.style.display !== "none") ||
+              (customView && customView.style.display !== "none")
+            ) {
+              showPlansModalView("MAIN");
+            } else {
+              plansModal.classList.remove("open");
+            }
+          } else {
+            topModal.classList.remove("open");
+          }
+        } else if (state.currentTab === "reader" && state.selectedVerses.size > 0) {
+          clearVerseSelection();
+        } else if (state.currentTab !== "verses") {
+          switchTab("verses");
+        }
+      } finally {
+        isHandlingPopState = false;
+      }
+
+      // Si aún quedan capas activas y se alcanzó el estado raíz, re-empujar estado protector
+      if (hasActiveBackLayer() && e.state && e.state.bvRoot) {
+        pushBackNavState();
+      }
+    });
+  }
+
+  setupBackGestureSupport();
   initVersesCollection();
   applyReaderVisualPreferences();
   updateContinueReadingBanner();
