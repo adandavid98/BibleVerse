@@ -37,7 +37,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -59,10 +63,11 @@ fun VerseCard(
     modifier: Modifier = Modifier
 ) {
     val highlightColor = BibleHighlightColors.getColorFromHex(verse.highlightColor)
+    val baseSurface = MaterialTheme.colorScheme.surface
     val cardBackground by animateColorAsState(
         targetValue = when {
-            highlightColor != null -> highlightColor.copy(alpha = 0.22f)
-            else -> MaterialTheme.colorScheme.surface
+            highlightColor != null -> highlightColor.copy(alpha = 0.14f).compositeOver(baseSurface)
+            else -> baseSurface
         },
         label = "cardBg"
     )
@@ -82,7 +87,21 @@ fun VerseCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp)
+                .drawBehind {
+                    if (highlightColor != null) {
+                        drawRect(
+                            color = highlightColor,
+                            topLeft = Offset.Zero,
+                            size = Size(5.dp.toPx(), size.height)
+                        )
+                    }
+                }
+                .padding(
+                    start = if (highlightColor != null) 20.dp else 18.dp,
+                    top = 18.dp,
+                    end = 18.dp,
+                    bottom = 18.dp
+                )
         ) {
             // Header: Reference & Testament Badge
             Row(
@@ -155,18 +174,7 @@ fun VerseCard(
 
             // Biblical Text in warm serif quote layout
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .then(
-                        if (highlightColor != null) {
-                            Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(highlightColor.copy(alpha = 0.35f))
-                                .padding(horizontal = 10.dp, vertical = 6.dp)
-                        } else {
-                            Modifier
-                        }
-                    )
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = verse.text,

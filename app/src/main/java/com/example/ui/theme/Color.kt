@@ -38,20 +38,22 @@ val DarkTextPrimary = Color(0xFFE9EEF5)
 val DarkTextSecondary = Color(0xFF8B9BB0)
 val DarkBorder = Color(0xFF283446)
 
-// Vivid Bible Highlighter Colors (Synchronized with YouVersion Palette)
+// Vivid Bible Highlighter Colors (Synchronized with YouVersion Palette & PWA)
 object BibleHighlightColors {
-    val Yellow = Color(0xFFFACC15)
-    val Green = Color(0xFF22C55E)
     val Blue = Color(0xFF38BDF8)
-    val Pink = Color(0xFFEC4899)
+    val Green = Color(0xFF22C55E)
+    val Purple = Color(0xFFA855F7)
     val Orange = Color(0xFFF97316)
+    val Yellow = Color(0xFFFACC15)
+    val Pink = Color(0xFFEC4899)
 
     val list = listOf(
-        HighlightOption("Amarillo", "#FACC15", Yellow),
-        HighlightOption("Verde Esmeralda", "#22C55E", Green),
         HighlightOption("Azul Cielo", "#38BDF8", Blue),
-        HighlightOption("Rosa Fucsia", "#EC4899", Pink),
-        HighlightOption("Naranja Cálido", "#F97316", Orange)
+        HighlightOption("Verde Esmeralda", "#22C55E", Green),
+        HighlightOption("Púrpura", "#A855F7", Purple),
+        HighlightOption("Naranja Cálido", "#F97316", Orange),
+        HighlightOption("Amarillo", "#FACC15", Yellow),
+        HighlightOption("Rosa Fucsia", "#EC4899", Pink)
     )
 
     fun getColorFromHex(hex: String): Color? {
