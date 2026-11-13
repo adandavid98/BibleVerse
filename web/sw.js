@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bibleverse-pwa-v2.5.3';
+const CACHE_NAME = 'bibleverse-pwa-v2.5.4';
 const STATIC_ASSETS = [
   './',
   './index.html',

@@ -676,53 +676,86 @@ document.addEventListener("DOMContentLoaded", () => {
   const addNumSel = document.getElementById("add-verse-number");
   const addVerSel = document.getElementById("add-verse-version");
 
+  function updateAddVerseReferenceDisplay() {
+    const b = getBookById(addBookSel?.value || state.bookId);
+    const ch = Number(addChapSel?.value || 1);
+    const vNum = Number(addNumSel?.value || 1);
+    const ver = addVerSel?.value || state.version;
+    const refDisp = document.getElementById("add-verse-ref-display");
+    const refMeta = document.getElementById("add-verse-ref-meta");
+    if (refDisp) refDisp.textContent = `${b.name} ${ch}:${vNum}`;
+    if (refMeta) refMeta.textContent = `${b.testamentFull} • ${b.category} • ${ver}`;
+  }
+
   function initAddVerseForm() {
     if (!addBookSel) return;
     addBookSel.value = String(state.bookId);
-    const lbl = document.getElementById("add-verse-book-label");
-    if (lbl) lbl.textContent = getBookById(state.bookId).name;
-    updateAddVerseChapters();
+    if (addVerSel) addVerSel.value = state.version;
+    updateAddVerseChapters(state.chapter, 1);
   }
 
   document.getElementById("btn-add-verse-pick-book")?.addEventListener("click", () => {
+    triggerHaptic(10);
     openUnifiedBookSelector("ADD_VERSE");
   });
 
-  function updateAddVerseChapters() {
+  function updateAddVerseChapters(presetChapter = 1, presetVerse = 1) {
     const b = getBookById(addBookSel.value);
     addChapSel.innerHTML = Array.from({ length: b.chapters }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join("");
-    updateAddVerseNumbers();
+    addChapSel.value = String(Math.min(Math.max(1, presetChapter), b.chapters));
+    updateAddVerseNumbers(presetVerse);
   }
 
-  function updateAddVerseNumbers() {
+  function updateAddVerseNumbers(presetVerse = 1) {
     const bId = Number(addBookSel.value);
     const ch = Number(addChapSel.value);
     const vCount = getCanonicalVerseCount(bId, ch);
     addNumSel.innerHTML = Array.from({ length: vCount }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join("");
+    addNumSel.value = String(Math.min(Math.max(1, presetVerse), vCount));
+    updateAddVerseReferenceDisplay();
     autofillAddVerseText();
   }
 
   async function autofillAddVerseText() {
-    const bId = Number(addBookSel.value);
+    const b = getBookById(addBookSel.value);
     const ch = Number(addChapSel.value);
     const vNum = Number(addNumSel.value);
     const ver = addVerSel.value;
-    const chData = await fetchChapterVerses(ver, bId, ch);
+    updateAddVerseReferenceDisplay();
+    const chData = await fetchChapterVerses(ver, b.id, ch);
     const found = chData.verses.find(x => x.verse === vNum);
     if (found) {
       document.getElementById("add-verse-text").value = found.text;
+      const ctxBox = document.getElementById("add-verse-context");
+      const badgeEl = document.getElementById("add-verse-context-badge");
+      if (ctxBox) ctxBox.value = getLocalScholarlyExegesis(b.name, ch, vNum, found.text);
+      if (badgeEl) badgeEl.textContent = "Catálogo Local";
     }
   }
 
-  addBookSel?.addEventListener("change", updateAddVerseChapters);
-  addChapSel?.addEventListener("change", updateAddVerseNumbers);
+  addBookSel?.addEventListener("change", () => updateAddVerseChapters());
+  addChapSel?.addEventListener("change", () => updateAddVerseNumbers());
   addNumSel?.addEventListener("change", autofillAddVerseText);
   addVerSel?.addEventListener("change", autofillAddVerseText);
 
+  document.querySelectorAll("#add-verse-topic-chips [data-addtopic]").forEach(chip => {
+    chip.addEventListener("click", () => {
+      triggerHaptic(8);
+      const t = chip.dataset.addtopic;
+      const input = document.getElementById("add-verse-topic");
+      if (input) input.value = t;
+      document.querySelectorAll("#add-verse-topic-chips [data-addtopic]").forEach(c => {
+        c.classList.toggle("active", c === chip);
+      });
+    });
+  });
+
   document.getElementById("btn-fab-add-verse")?.addEventListener("click", () => {
     initAddVerseForm();
-    document.getElementById("add-verse-context").value = "";
     document.getElementById("add-verse-notes").value = "";
+    const topicInput = document.getElementById("add-verse-topic");
+    if (topicInput) topicInput.value = "General";
+    document.querySelectorAll("#add-verse-topic-chips [data-addtopic]").forEach(c => c.classList.remove("active"));
     addVerseModal.classList.add("open");
   });
 
@@ -736,9 +769,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const vNum = Number(addNumSel.value);
     const txt = document.getElementById("add-verse-text").value;
     const ctxBox = document.getElementById("add-verse-context");
+    const badgeEl = document.getElementById("add-verse-context-badge");
     ctxBox.value = "⏳ Generando contexto histórico y teológico con IA...";
     const res = await generateVerseExegesisWithAI(b.name, ch, vNum, txt, addVerSel.value);
-    ctxBox.value = res.text;
+    ctxBox.value = cleanAiMarkdownToPlainText(res.text);
+    if (badgeEl) badgeEl.textContent = res.source.includes("Gemini") ? "✨ IA (Gemini)" : "Catálogo Local";
+  });
+
+  document.getElementById("btn-add-verse-local-context")?.addEventListener("click", () => {
+    triggerHaptic(8);
+    const b = getBookById(addBookSel.value);
+    const ch = Number(addChapSel.value);
+    const vNum = Number(addNumSel.value);
+    const txt = document.getElementById("add-verse-text").value;
+    const ctxBox = document.getElementById("add-verse-context");
+    const badgeEl = document.getElementById("add-verse-context-badge");
+    if (ctxBox) ctxBox.value = getLocalScholarlyExegesis(b.name, ch, vNum, txt);
+    if (badgeEl) badgeEl.textContent = "Catálogo Local";
   });
 
   document.getElementById("btn-submit-add-verse")?.addEventListener("click", () => {
@@ -1519,7 +1566,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("step-tab-verse").classList.toggle("active", stepNum === 3);
 
     const backBtn = document.getElementById("btn-book-selector-back");
-    if (backBtn) backBtn.style.display = (currentPickerMode === "READER" && stepNum > 1) ? "inline-flex" : "none";
+    if (backBtn) backBtn.style.display = ((currentPickerMode === "READER" || currentPickerMode === "ADD_VERSE") && stepNum > 1) ? "inline-flex" : "none";
 
     const titleEl = document.getElementById("book-selector-title");
     if (titleEl) {
@@ -1535,7 +1582,7 @@ document.addEventListener("DOMContentLoaded", () => {
       clearVerseSelection();
     }
     const stepTabs = document.getElementById("book-selector-step-tabs");
-    if (stepTabs) stepTabs.style.display = mode === "READER" ? "flex" : "none";
+    if (stepTabs) stepTabs.style.display = (mode === "READER" || mode === "ADD_VERSE") ? "flex" : "none";
 
     const searchBox = document.getElementById("book-search-input");
     if (searchBox) searchBox.value = "";
@@ -1656,12 +1703,6 @@ document.addEventListener("DOMContentLoaded", () => {
           }
           bookSelectorModal.classList.remove("open");
           triggerFullBibleSearch();
-        } else if (currentPickerMode === "ADD_VERSE") {
-          if (addBookSel) addBookSel.value = String(picked.id);
-          const lbl = document.getElementById("add-verse-book-label");
-          if (lbl) lbl.textContent = picked.name;
-          updateAddVerseChapters();
-          bookSelectorModal.classList.remove("open");
         } else {
           tempPickerBook = picked;
           renderPickerChaptersGrid(tempPickerBook);
@@ -1700,9 +1741,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     grid.querySelectorAll(".chapter-square-btn").forEach(btn => {
       btn.addEventListener("click", () => {
+        const pickedVerse = Number(btn.dataset.v);
+        if (currentPickerMode === "ADD_VERSE") {
+          if (addBookSel) addBookSel.value = String(book.id);
+          updateAddVerseChapters(chapter, pickedVerse);
+          bookSelectorModal.classList.remove("open");
+          return;
+        }
         state.bookId = book.id;
         state.chapter = chapter;
-        state.targetScrollVerse = Number(btn.dataset.v);
+        state.targetScrollVerse = pickedVerse;
         bookSelectorModal.classList.remove("open");
         loadReaderChapter(false);
       });
@@ -1710,6 +1758,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.getElementById("btn-open-chapter-from-verse-step")?.addEventListener("click", () => {
+    if (currentPickerMode === "ADD_VERSE") {
+      if (addBookSel) addBookSel.value = String(tempPickerBook.id);
+      updateAddVerseChapters(tempPickerChapter, 1);
+      bookSelectorModal.classList.remove("open");
+      return;
+    }
     state.bookId = tempPickerBook.id;
     state.chapter = tempPickerChapter;
     state.targetScrollVerse = null;
@@ -2543,74 +2597,153 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 0);
     const countSpan = document.getElementById("custom-books-count");
     if (countSpan) countSpan.textContent = String(checked.length);
+    const chaptersBadge = document.getElementById("custom-chapters-count-badge");
+    if (chaptersBadge) chaptersBadge.textContent = `${totalChapters} capítulos`;
 
-    const val = Math.max(1, Number(document.getElementById("custom-plan-pace-value")?.value || 7));
-    const daysTotal = customPaceMode === "BY_TARGET_DAYS"
-      ? val
-      : Math.max(1, Math.ceil(totalChapters / val));
+    const summaryNamesEl = document.getElementById("custom-books-summary-names");
+    if (summaryNamesEl) {
+      if (checked.length === 0) {
+        summaryNamesEl.textContent = "Ningún libro seleccionado aún. Toca 'Personalizar libros' para elegir o selecciona un preset sugerido arriba.";
+      } else {
+        const names = checked.slice(0, 6).map(el => getBookById(Number(el.value))?.name).filter(Boolean);
+        summaryNamesEl.textContent = names.join(", ") + (checked.length > 6 ? ` y ${checked.length - 6} más...` : "");
+      }
+    }
+
+    const val = Math.max(1, Number(document.getElementById("custom-plan-pace-value")?.value || 30));
+    const daysTotal = totalChapters === 0
+      ? 0
+      : (customPaceMode === "BY_TARGET_DAYS"
+        ? Math.min(val, totalChapters)
+        : Math.max(1, Math.ceil(totalChapters / val)));
+    const avgPerDay = daysTotal > 0 ? (totalChapters / daysTotal).toFixed(1) : "0";
     const endDate = new Date(Date.now() + daysTotal * 86400000);
     const previewEl = document.getElementById("custom-plan-preview");
+    const endDateEl = document.getElementById("custom-plan-end-date");
     if (previewEl) {
       previewEl.textContent = checked.length === 0
-        ? "Selecciona al menos 1 libro para calcular tu plan."
-        : `${totalChapters} capítulos en ${daysTotal} días • Finaliza aprox. el ${endDate.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}`;
+        ? "Selecciona libros para calcular el plan"
+        : `${daysTotal} días en total • ~${avgPerDay} caps/día`;
+    }
+    if (endDateEl) {
+      endDateEl.textContent = checked.length === 0
+        ? "La duración se ajustará según los libros elegidos"
+        : `Fecha estimada de finalización: ${endDate.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}`;
     }
   }
 
+  function renderCustomPaceQuickChips() {
+    const container = document.getElementById("custom-pace-quick-chips");
+    if (!container) return;
+    const currentVal = Number(document.getElementById("custom-plan-pace-value")?.value || 30);
+    const opts = customPaceMode === "BY_TARGET_DAYS" ? [15, 30, 60, 90, 180, 365] : [1, 2, 3, 4, 5];
+    container.innerHTML = opts.map(v => {
+      const label = customPaceMode === "BY_TARGET_DAYS" ? `${v} d` : `${v} cap${v > 1 ? "s" : ""}`;
+      return `<button type="button" class="chip ${currentVal === v ? "active" : ""}" data-paceval="${v}">${label}</button>`;
+    }).join("");
+    container.querySelectorAll("[data-paceval]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        triggerHaptic(8);
+        const valEl = document.getElementById("custom-plan-pace-value");
+        if (valEl) valEl.value = btn.dataset.paceval;
+        renderCustomPaceQuickChips();
+        updateCustomPlanPreview();
+      });
+    });
+  }
+
+  let activeCustomPresetId = null;
+
   function bindCreateCustomPlanOpenButton() {
     document.getElementById("btn-open-create-custom-plan")?.addEventListener("click", () => {
+      activeCustomPresetId = null;
+      const titleInput = document.getElementById("custom-plan-title");
+      if (titleInput) titleInput.value = "";
+      document.querySelectorAll("#custom-plan-presets .chip").forEach(c => c.classList.remove("active"));
       const listEl = document.getElementById("custom-plan-books-list");
       if (listEl) {
+        listEl.style.display = "none";
         listEl.innerHTML = BIBLE_BOOKS.map(b => `
           <label class="custom-book-check-item">
-            <input type="checkbox" value="${b.id}" ${b.id === 19 ? "checked" : ""}>
+            <input type="checkbox" value="${b.id}">
             <span>${b.name} (${b.chapters})</span>
           </label>
         `).join("");
-        listEl.querySelectorAll("input").forEach(cb => cb.addEventListener("change", updateCustomPlanPreview));
+        listEl.querySelectorAll("input").forEach(cb => cb.addEventListener("change", () => {
+          activeCustomPresetId = null;
+          document.querySelectorAll("#custom-plan-presets .chip").forEach(c => c.classList.remove("active"));
+          updateCustomPlanPreview();
+        }));
       }
+      const valEl = document.getElementById("custom-plan-pace-value");
+      if (valEl && customPaceMode === "BY_TARGET_DAYS") valEl.value = "30";
+      renderCustomPaceQuickChips();
       updateCustomPlanPreview();
       showPlansModalView("CUSTOM");
     });
   }
 
+  document.getElementById("btn-toggle-custom-books-list")?.addEventListener("click", () => {
+    triggerHaptic(8);
+    const listEl = document.getElementById("custom-plan-books-list");
+    if (listEl) {
+      listEl.style.display = listEl.style.display === "none" ? "grid" : "none";
+    }
+  });
+
   document.querySelectorAll("#custom-plan-presets .chip").forEach(chip => {
     chip.addEventListener("click", () => {
+      triggerHaptic(10);
       const presetMap = {
         gospels: { title: "Los 4 Evangelios", books: [40, 41, 42, 43] },
         wisdom: { title: "Salmos y Proverbios", books: [19, 20] },
         paul: { title: "Cartas de Pablo", books: [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57] },
         pentateuch: { title: "El Pentateuco", books: [1, 2, 3, 4, 5] }
       };
-      const cfg = presetMap[chip.dataset.preset];
+      const presetId = chip.dataset.preset;
+      const cfg = presetMap[presetId];
       if (!cfg) return;
       const titleInput = document.getElementById("custom-plan-title");
-      if (titleInput && !titleInput.value.trim()) titleInput.value = cfg.title;
-      document.querySelectorAll("#custom-plan-books-list input").forEach(cb => {
-        cb.checked = cfg.books.includes(Number(cb.value));
-      });
+      if (activeCustomPresetId === presetId) {
+        activeCustomPresetId = null;
+        if (titleInput) titleInput.value = "";
+        document.querySelectorAll("#custom-plan-books-list input").forEach(cb => { cb.checked = false; });
+        document.querySelectorAll("#custom-plan-presets .chip").forEach(c => c.classList.remove("active"));
+      } else {
+        activeCustomPresetId = presetId;
+        if (titleInput) titleInput.value = cfg.title;
+        document.querySelectorAll("#custom-plan-books-list input").forEach(cb => {
+          cb.checked = cfg.books.includes(Number(cb.value));
+        });
+        document.querySelectorAll("#custom-plan-presets .chip").forEach(c => c.classList.toggle("active", c === chip));
+      }
       updateCustomPlanPreview();
     });
   });
 
   document.querySelectorAll("[data-pace]").forEach(btn => {
     btn.addEventListener("click", () => {
+      triggerHaptic(8);
       customPaceMode = btn.dataset.pace;
       document.querySelectorAll("[data-pace]").forEach(b => b.classList.toggle("active", b === btn));
       const unitEl = document.getElementById("custom-plan-pace-unit");
       const valEl = document.getElementById("custom-plan-pace-value");
       if (customPaceMode === "BY_TARGET_DAYS") {
         if (unitEl) unitEl.textContent = "días totales";
-        if (valEl) valEl.value = "14";
+        if (valEl) valEl.value = "30";
       } else {
         if (unitEl) unitEl.textContent = "capítulos / día";
-        if (valEl) valEl.value = "3";
+        if (valEl) valEl.value = "2";
       }
+      renderCustomPaceQuickChips();
       updateCustomPlanPreview();
     });
   });
 
-  document.getElementById("custom-plan-pace-value")?.addEventListener("input", updateCustomPlanPreview);
+  document.getElementById("custom-plan-pace-value")?.addEventListener("input", () => {
+    renderCustomPaceQuickChips();
+    updateCustomPlanPreview();
+  });
 
   document.getElementById("btn-back-from-custom-plan")?.addEventListener("click", () => showPlansModalView("MAIN"));
   document.getElementById("btn-Generate-custom-plan")?.addEventListener("click", () => {

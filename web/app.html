@@ -664,60 +664,84 @@
     <div class="modal-overlay" id="add-verse-modal">
       <div class="full-bottom-sheet">
         <div class="sheet-header-title">
-          <h3>➕ Agregar Versículo a la Colección</h3>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:36px; height:36px; border-radius:10px; background:var(--primary-container); color:var(--primary-color); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">📖</div>
+            <div>
+              <h3 style="margin:0;">Añadir Versículo</h3>
+              <span style="font-size:0.75rem; color:var(--text-secondary);">Explora libros y selecciona versículos</span>
+            </div>
+          </div>
           <button class="icon-btn" id="btn-close-add-verse">✕</button>
         </div>
 
         <div style="max-height:74vh; overflow-y:auto; padding-right:4px;">
-          <div class="form-grid-3">
-            <div>
-              <label class="modal-label">Libro</label>
-              <input type="hidden" id="add-verse-book" value="19">
-              <button type="button" id="btn-add-verse-pick-book" class="modal-input" style="text-align:left; font-weight:700; display:flex; justify-content:space-between; align-items:center; cursor:pointer; width:100%;">
-                <span id="add-verse-book-label" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Salmos</span>
-                <span>▾</span>
-              </button>
+          <!-- Tarjeta de Versión de Traducción -->
+          <div class="detail-section-card" style="background:var(--primary-container); border:1px solid var(--border-color); padding:10px 14px; margin-bottom:12px;">
+            <label class="modal-label" style="margin-bottom:4px; font-size:0.72rem;">Versión de Traducción:</label>
+            <select id="add-verse-version" class="modal-input" style="margin-bottom:0; font-weight:700;">
+              <option value="RVR1960">RVR1960 — Reina-Valera 1960</option>
+              <option value="NVI">NVI — Nueva Versión Internacional</option>
+              <option value="NBLA">NBLA — Nueva Biblia de las Américas</option>
+              <option value="DHH">DHH — Dios Habla Hoy</option>
+              <option value="TLA">TLA — Traducción en Lenguaje Actual</option>
+              <option value="NTV">NTV — Nueva Traducción Viviente</option>
+              <option value="LBLA">LBLA — La Biblia de las Américas</option>
+            </select>
+          </div>
+
+          <!-- Tarjeta PASO 1: SELECCIONAR REFERENCIA -->
+          <div class="detail-section-card" style="border:1.5px solid var(--primary-color); background:var(--surface-variant); padding:14px; margin-bottom:12px;">
+            <input type="hidden" id="add-verse-book" value="19">
+            <select id="add-verse-chapter" style="display:none;"></select>
+            <select id="add-verse-number" style="display:none;"></select>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;">
+              <div>
+                <div style="font-size:0.68rem; font-weight:800; color:var(--primary-color); letter-spacing:0.6px;">PASO 1: SELECCIONAR REFERENCIA</div>
+                <div id="add-verse-ref-display" style="font-size:1.28rem; font-weight:800; color:var(--text-primary); margin:2px 0;">Salmos 23:1</div>
+                <div id="add-verse-ref-meta" style="font-size:0.76rem; color:var(--text-secondary);">Antiguo Testamento • Poéticos • RVR1960</div>
+              </div>
+              <div style="width:42px; height:42px; border-radius:12px; background:var(--primary-color); color:var(--on-primary); display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0;">📖</div>
             </div>
-            <div>
-              <label class="modal-label">Cap.</label>
-              <select id="add-verse-chapter" class="modal-input"></select>
+            <button type="button" id="btn-add-verse-pick-book" class="primary-full-btn" style="padding:10px 14px; font-size:0.86rem;">
+              📚 Elegir Libro, Capítulo y Versículo
+            </button>
+          </div>
+
+          <label class="modal-label">Texto del Versículo *</label>
+          <textarea id="add-verse-text" rows="3" class="modal-textarea" placeholder="Escribe o pega el texto bíblico..."></textarea>
+
+          <!-- Panel de Contexto Inteligente (Híbrido: Local + IA) -->
+          <div class="detail-section-card" style="background:var(--primary-container); border:1px solid var(--border-color); padding:12px; margin-top:10px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:0.8rem; font-weight:800; color:var(--primary-color);">✨ Contexto Inteligente</span>
+              <span id="add-verse-context-badge" class="testament-mini-badge">Catálogo Local</span>
             </div>
-            <div>
-              <label class="modal-label">Versículo</label>
-              <select id="add-verse-number" class="modal-input"></select>
+            <div style="display:flex; gap:8px;">
+              <button class="ai-mini-btn" id="btn-add-verse-ai-context" type="button" style="flex:1.3; padding:8px 10px;">✨ Generar con IA</button>
+              <button class="chip" id="btn-add-verse-local-context" type="button" style="flex:1; text-align:center;">📖 Local</button>
             </div>
           </div>
 
-          <div class="form-grid-2" style="margin-top:8px;">
-            <div>
-              <label class="modal-label">Versión Bíblica</label>
-              <select id="add-verse-version" class="modal-input">
-                <option value="RVR1960">RVR 1960</option>
-                <option value="NVI">NVI</option>
-                <option value="NBLA">NBLA</option>
-                <option value="DHH">DHH</option>
-                <option value="TLA">TLA</option>
-                <option value="NTV">NTV</option>
-                <option value="LBLA">LBLA</option>
-              </select>
-            </div>
-            <div>
-              <label class="modal-label">Tema / Categoría</label>
-              <input type="text" id="add-verse-topic" class="modal-input" value="Promesas" placeholder="Ej. Fe, Paz, Esperanza...">
-            </div>
+          <label class="modal-label">Contexto Teológico y Moral *</label>
+          <textarea id="add-verse-context" rows="3" class="modal-textarea" placeholder="Explica el significado teológico, propósito histórico o aplicación moral..."></textarea>
+
+          <label class="modal-label" style="margin-top:10px;">Tema / Categoría:</label>
+          <div class="chips-scroll" id="add-verse-topic-chips" style="margin-bottom:8px;">
+            <button type="button" class="chip" data-addtopic="Fe">Fe</button>
+            <button type="button" class="chip" data-addtopic="Amor">Amor</button>
+            <button type="button" class="chip" data-addtopic="Esperanza">Esperanza</button>
+            <button type="button" class="chip" data-addtopic="Fortaleza">Fortaleza</button>
+            <button type="button" class="chip" data-addtopic="Paz">Paz</button>
+            <button type="button" class="chip" data-addtopic="Salvación">Salvación</button>
+            <button type="button" class="chip" data-addtopic="Sabiduría">Sabiduría</button>
+            <button type="button" class="chip" data-addtopic="Oración">Oración</button>
+            <button type="button" class="chip" data-addtopic="Promesa">Promesa</button>
+            <button type="button" class="chip" data-addtopic="Gracia">Gracia</button>
           </div>
+          <input type="text" id="add-verse-topic" class="modal-input" value="General" placeholder="Otro tema personalizado...">
 
-          <label class="modal-label" style="margin-top:10px;">Texto Bíblico (Autocompletado)</label>
-          <textarea id="add-verse-text" rows="3" class="modal-textarea" placeholder="Selecciona libro, capítulo y versículo..."></textarea>
-
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-            <label class="modal-label" style="margin:0;">Contexto Histórico y Teológico</label>
-            <button class="ai-mini-btn" id="btn-add-verse-ai-context" type="button">✨ Generar con IA</button>
-          </div>
-          <textarea id="add-verse-context" rows="3" class="modal-textarea" placeholder="Pulsa 'Generar con IA' o escribe el contexto del pasaje..."></textarea>
-
-          <label class="modal-label" style="margin-top:10px;">Nota Personal (Opcional)</label>
-          <textarea id="add-verse-notes" rows="2" class="modal-textarea" placeholder="Tu reflexión personal..."></textarea>
+          <label class="modal-label" style="margin-top:10px;">Notas Personales (Opcional)</label>
+          <textarea id="add-verse-notes" rows="2" class="modal-textarea" placeholder="Tus notas o reflexiones devocionales..."></textarea>
 
           <button class="primary-full-btn" id="btn-submit-add-verse" style="margin-top:14px;">
             ✓ Guardar en Mi Colección
@@ -963,40 +987,62 @@
 
         <!-- Vista Crear Plan Personalizado (CreateCustomPlanDialog.kt) -->
         <div id="create-custom-plan-view" style="display:none; max-height:74vh; overflow-y:auto;">
-          <div class="step-subheader">
+          <div class="step-subheader" style="margin-bottom:10px;">
             <button class="icon-btn" id="btn-back-from-custom-plan">←</button>
-            <h4>✨ Crear Plan de Estudio Personalizado</h4>
+            <div>
+              <h4 style="margin:0;">Crear Plan de Lectura</h4>
+              <span style="font-size:0.74rem; color:var(--text-secondary);">A tu propio ritmo y libros seleccionados</span>
+            </div>
           </div>
 
-          <label class="modal-label">Presets Rápidos</label>
-          <div class="chips-scroll" id="custom-plan-presets" style="margin-bottom:10px;">
-            <button type="button" class="chip" data-preset="gospels">✝️ Evangelios (4)</button>
+          <label class="modal-label" style="font-size:0.72rem; letter-spacing:0.8px; color:var(--primary-color);">PRESETS RÁPIDOS SUGERIDOS</label>
+          <div class="chips-scroll" id="custom-plan-presets" style="margin-bottom:14px;">
+            <button type="button" class="chip" data-preset="gospels">✝️ Los 4 Evangelios</button>
             <button type="button" class="chip" data-preset="wisdom">📜 Salmos y Proverbios</button>
             <button type="button" class="chip" data-preset="paul">✉️ Cartas de Pablo</button>
-            <button type="button" class="chip" data-preset="pentateuch">📖 Pentateuco (5)</button>
+            <button type="button" class="chip" data-preset="pentateuch">📖 El Pentateuco</button>
           </div>
 
-          <label class="modal-label">Nombre de tu Plan</label>
-          <input type="text" id="custom-plan-title" class="modal-input" placeholder="Ej. Estudio de los Salmos, Evangelios en 30 días...">
+          <label class="modal-label" style="font-size:0.72rem; letter-spacing:0.8px; color:var(--primary-color);">NOMBRE DEL PLAN</label>
+          <input type="text" id="custom-plan-title" class="modal-input" placeholder="Ej. Mi Plan Personalizado, Evangelios, etc.">
 
-          <label class="modal-label">Libros a incluir (<span id="custom-books-count">1</span> selec.)</label>
-          <div id="custom-plan-books-list" class="custom-books-checklist"></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; margin-bottom:6px;">
+            <label class="modal-label" style="margin:0; font-size:0.72rem; letter-spacing:0.8px; color:var(--primary-color);">LIBROS INCLUIDOS</label>
+            <button type="button" id="btn-toggle-custom-books-list" style="background:none; border:none; color:var(--primary-color); font-size:0.78rem; font-weight:700; cursor:pointer;">✏️ Personalizar libros</button>
+          </div>
+          <div class="detail-section-card" style="padding:12px 14px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <strong style="font-size:0.88rem;"><span id="custom-books-count">0</span> libros seleccionados</strong>
+              <span id="custom-chapters-count-badge" class="testament-mini-badge">0 capítulos</span>
+            </div>
+            <div id="custom-books-summary-names" style="font-size:0.78rem; color:var(--text-secondary); line-height:1.4;">
+              Ningún libro seleccionado aún. Toca 'Personalizar libros' para elegir o selecciona un preset sugerido arriba.
+            </div>
+          </div>
+          <div id="custom-plan-books-list" class="custom-books-checklist" style="display:none; margin-bottom:12px;"></div>
 
-          <label class="modal-label">Ritmo del Plan</label>
+          <label class="modal-label" style="font-size:0.72rem; letter-spacing:0.8px; color:var(--primary-color); margin-top:6px;">RITMO Y DISTRIBUCIÓN</label>
           <div style="display:flex; gap:8px; margin-bottom:10px;">
-            <button type="button" class="chip active" id="btn-pace-days" data-pace="BY_TARGET_DAYS" style="flex:1;">📅 Por Días Totales</button>
-            <button type="button" class="chip" id="btn-pace-chapters" data-pace="BY_CHAPTERS_PER_DAY" style="flex:1;">📖 Capítulos por Día</button>
+            <button type="button" class="chip active" id="btn-pace-days" data-pace="BY_TARGET_DAYS" style="flex:1;">Por días límite</button>
+            <button type="button" class="chip" id="btn-pace-chapters" data-pace="BY_CHAPTERS_PER_DAY" style="flex:1;">Capítulos por día</button>
           </div>
 
+          <div class="chips-scroll" id="custom-pace-quick-chips" style="margin-bottom:8px;"></div>
           <div style="display:flex; gap:8px; align-items:center;">
-            <input type="number" id="custom-plan-pace-value" class="modal-input" min="1" max="365" value="7" style="flex:1; margin-bottom:0;">
+            <input type="number" id="custom-plan-pace-value" class="modal-input" min="1" max="365" value="30" style="flex:1; margin-bottom:0;">
             <span id="custom-plan-pace-unit" style="font-size:0.82rem; font-weight:700; color:var(--text-secondary);">días totales</span>
           </div>
 
-          <div id="custom-plan-preview" style="font-size:0.8rem; color:var(--accent-gold); font-weight:700; margin-top:10px;"></div>
+          <div class="detail-section-card" style="background:var(--primary-container); margin-top:12px; padding:12px 14px; display:flex; align-items:center; gap:12px;">
+            <div style="width:36px; height:36px; border-radius:50%; background:var(--surface-color); color:var(--primary-color); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">⏱️</div>
+            <div>
+              <div id="custom-plan-preview" style="font-size:0.84rem; font-weight:800; color:var(--text-primary);">Selecciona libros para calcular el plan</div>
+              <div id="custom-plan-end-date" style="font-size:0.75rem; color:var(--text-secondary);">La duración se ajustará según los libros elegidos</div>
+            </div>
+          </div>
 
-          <button class="primary-full-btn" id="btn-Generate-custom-plan" style="margin-top:12px;">
-            ✨ Generar e Iniciar Mi Plan
+          <button class="primary-full-btn" id="btn-Generate-custom-plan" style="margin-top:14px;">
+            ✓ Crear y Comenzar Plan
           </button>
         </div>
       </div>
