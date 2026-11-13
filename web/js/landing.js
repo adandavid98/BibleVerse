@@ -86,6 +86,7 @@ function setupPwaInstallPrompt() {
   const iosSteps = document.getElementById('ios-install-steps');
   const androidActionBox = document.getElementById('android-install-action');
   const modalBtnOpen = document.getElementById('btn-open-install-modal');
+  const btnOpenPwa = document.getElementById('btn-open-pwa');
 
   // Interceptar evento en Android / Chrome / Edge
   window.addEventListener('beforeinstallprompt', (e) => {
@@ -112,6 +113,12 @@ function setupPwaInstallPrompt() {
   }
 
   if (modalBtnOpen) modalBtnOpen.addEventListener('click', openInstallModal);
+  if (btnOpenPwa) {
+    btnOpenPwa.addEventListener('click', (e) => {
+      e.preventDefault();
+      openInstallModal();
+    });
+  }
   if (btnClose) btnClose.addEventListener('click', closeInstallModal);
   if (modal) {
     modal.addEventListener('click', (e) => {
