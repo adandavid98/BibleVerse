@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bibleverse-pwa-v2.5.23';
+const CACHE_NAME = 'bibleverse-pwa-v2.5.24';
 const OFFLINE_BIBLE_CACHE = 'bibleverse-offline-bibles-v1';
 const STATIC_ASSETS = [
   './',
@@ -13,6 +13,7 @@ const STATIC_ASSETS = [
   './js/data/bible-metadata.js',
   './js/data/plans-catalog.js',
   './js/bible-data.js',
+  './js/cloud-sync.js',
   './js/app.js',
   './assets/icons/app-logo.svg',
   './assets/icons/icon-192.png',

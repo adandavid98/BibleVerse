@@ -319,13 +319,117 @@
           </button>
         </div>
 
-        <!-- 4. Sincronización y Respaldo en la Nube -->
-        <div class="settings-card">
-          <h4>☁️ Sincronización y Respaldo (Cloud Sync)</h4>
-          <p class="settings-sub">Guarda o restaura tus versículos favoritos, resaltados de colores, notas personales y progreso de planes entre dispositivos.</p>
-          <div class="settings-btn-group">
-            <button class="secondary-full-btn" id="btn-open-cloud-sync">☁️ Abrir Gestor de Sincronización</button>
-            <button class="secondary-full-btn" id="btn-open-export-dialog">📄 Exportar Colección (PDF / JSON / TXT)</button>
+        <!-- 4. Nube y Copia de Seguridad (Idéntica a Android SettingsTab + CloudSyncDialog.kt) -->
+        <div class="settings-section-label">NUBE Y COPIA DE SEGURIDAD</div>
+        <div class="settings-card cloud-sync-card">
+          <div class="cloud-sync-header">
+            <div class="cloud-sync-badge-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+                <path d="M21.5 10.5c-.4-2.8-2.8-5-5.7-5-.8 0-1.6.2-2.3.5C12.3 3.9 10.1 2.5 7.5 2.5 3.9 2.5 1 5.4 1 9c0 .3 0 .7.1 1C.4 10.8 0 11.9 0 13c0 2.5 2 4.5 4.5 4.5h15c2.2 0 4-1.8 4-4 0-1.5-.8-2.8-2-3.5zM9 14.5l-3.5-3.5 1.4-1.4L9 11.7l5.6-5.6 1.4 1.4L9 14.5z" style="display:none"/>
+                <path d="M12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6m0-2C9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96C18.67 6.59 15.64 4 12 4zm-2.5 7.5L8 10l-3 3 3 3 1.5-1.5L8.5 13.5h5V11.5h-5l1-1z"/>
+              </svg>
+            </div>
+            <div>
+              <h4>Nube y Copia de Seguridad</h4>
+              <p class="cloud-sync-subtitle">Tus notas, colores y favoritos seguros</p>
+            </div>
+          </div>
+
+          <div class="cloud-sync-divider"></div>
+
+          <!-- Estado de sincronización (ej. "94 elementos respaldados en la nube.") -->
+          <div id="cloud-sync-status-banner" class="cloud-sync-status-pill" style="display:none;">
+            <span class="cloud-status-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM10 17l-3.5-3.5 1.41-1.41L10 14.17 15.18 9l1.41 1.41L10 17z"/>
+              </svg>
+            </span>
+            <span id="cloud-sync-status-text">Sincronizando...</span>
+          </div>
+
+          <!-- Caja de cuenta Google / Firebase -->
+          <div class="cloud-account-box">
+            <!-- Vista sin sesión -->
+            <div id="cloud-signed-out-view">
+              <div class="cloud-user-row">
+                <div class="cloud-user-avatar-placeholder">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="30" height="30">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                  </svg>
+                </div>
+                <div style="min-width:0; flex:1;">
+                  <div class="cloud-user-name">Sin sesión iniciada</div>
+                  <div class="cloud-user-email">Conecta con tu cuenta de Google para respaldar y sincronizar tus cambios</div>
+                </div>
+              </div>
+
+              <button type="button" class="cloud-btn-google" id="btn-google-signin">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+                  <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.7-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+                  <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.8s.2-2 .4-2.8L1.6 6.4C.6 8.2 0 10 0 12s.6 3.8 1.6 5.6l3.7-2.8z"/>
+                  <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-2.9l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 20.4 7.4 23 12 23z"/>
+                </svg>
+                <span>Iniciar Sesión con Google</span>
+              </button>
+
+              <button type="button" class="cloud-btn-email-toggle" id="btn-toggle-email-signin">
+                ✉️ Iniciar con Correo / Contraseña
+              </button>
+
+              <div id="cloud-email-login-form" class="cloud-email-form" style="display:none;">
+                <input type="email" id="cloud-email-input" class="modal-input" placeholder="Correo electrónico" style="margin-bottom:0;">
+                <input type="password" id="cloud-password-input" class="modal-input" placeholder="Contraseña (mínimo 6 car.)" style="margin-bottom:0;">
+                <button type="button" class="primary-full-btn" id="btn-email-signin-submit" style="margin-top:2px;">
+                  Entrar / Crear Cuenta
+                </button>
+              </div>
+            </div>
+
+            <!-- Vista con sesión iniciada (Exacta a captura de Android) -->
+            <div id="cloud-signed-in-view" style="display:none;">
+              <div class="cloud-user-row">
+                <img id="cloud-user-avatar-img" class="cloud-user-avatar-img" alt="Perfil" style="display:none;" referrerpolicy="no-referrer">
+                <div id="cloud-user-avatar-svg" class="cloud-user-avatar-placeholder">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                  </svg>
+                </div>
+                <div style="min-width:0; flex:1;">
+                  <div class="cloud-user-name" id="cloud-user-name">Usuario Conectado</div>
+                  <div class="cloud-user-email" id="cloud-user-email">correo@gmail.com</div>
+                </div>
+              </div>
+
+              <div class="cloud-sync-actions-grid">
+                <button type="button" class="cloud-btn-upload" id="btn-cloud-upload">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
+                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+                  </svg>
+                  <span>Subir a Nube</span>
+                </button>
+                <button type="button" class="cloud-btn-download" id="btn-cloud-download">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
+                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+                  </svg>
+                  <span>Bajar de Nube</span>
+                </button>
+              </div>
+
+              <div class="cloud-signout-row">
+                <button type="button" class="cloud-btn-signout" id="btn-cloud-signout">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                  </svg>
+                  <span>Cerrar Sesión</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="cloud-secondary-links">
+            <button type="button" class="secondary-full-btn" id="btn-open-cloud-sync">💾 Respaldo Local (.json)</button>
+            <button type="button" class="secondary-full-btn" id="btn-open-export-dialog">📄 Exportar (PDF / TXT)</button>
           </div>
         </div>
 
@@ -1164,11 +1268,17 @@
 
   </div>
 
+  <!-- Firebase SDK (Auth + Firestore) para sincronización con cuenta de Google -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
   <!-- Catálogos y Datos Extraídos del APK Android -->
   <script src="./js/data/initial-verses.js"></script>
   <script src="./js/data/bible-metadata.js"></script>
   <script src="./js/data/plans-catalog.js"></script>
   <script src="./js/bible-data.js"></script>
+  <script src="./js/cloud-sync.js"></script>
   <script src="./js/app.js"></script>
 </body>
 </html>

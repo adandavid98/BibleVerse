@@ -1466,6 +1466,266 @@ body {
   gap: 8px;
 }
 
+/* Nube y Copia de Seguridad (Idéntica a Android SettingsTab + CloudSyncDialog.kt) */
+.settings-section-label {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  color: var(--secondary-color);
+  margin: 14px 2px 8px;
+}
+
+.cloud-sync-card {
+  border-radius: 20px;
+  padding: 18px 16px;
+}
+
+.cloud-sync-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cloud-sync-badge-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cloud-sync-header h4 {
+  margin: 0 0 2px;
+  font-size: 0.96rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.cloud-sync-subtitle {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.cloud-sync-divider {
+  height: 1px;
+  background: var(--border-color);
+  opacity: 0.65;
+  margin: 14px 0;
+}
+
+.cloud-sync-status-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.35;
+  background: var(--primary-container);
+  color: var(--text-primary);
+}
+
+.cloud-sync-status-pill.success .cloud-status-icon {
+  color: var(--primary-color);
+}
+
+.cloud-sync-status-pill.loading {
+  background: rgba(56, 189, 248, 0.14);
+  color: var(--text-primary);
+}
+
+.cloud-sync-status-pill.error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #FCA5A5;
+}
+
+[data-theme="light"] .cloud-sync-status-pill.error,
+[data-theme="sepia"] .cloud-sync-status-pill.error {
+  color: #B91C1C;
+}
+
+.cloud-status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cloud-account-box {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cloud-user-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 12px;
+}
+
+.cloud-user-avatar-placeholder {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cloud-user-avatar-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--primary-color);
+  flex-shrink: 0;
+}
+
+.cloud-user-name {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cloud-user-email {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  word-break: break-word;
+}
+
+.cloud-btn-google {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-color);
+  color: var(--text-primary);
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.cloud-btn-google:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.cloud-btn-email-toggle {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 9px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.cloud-email-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.cloud-sync-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cloud-btn-upload,
+.cloud-btn-download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.cloud-btn-upload {
+  background: var(--primary-color);
+  color: var(--on-primary);
+  border: none;
+}
+
+.cloud-btn-download {
+  background: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--border-color);
+}
+
+.cloud-btn-upload:disabled,
+.cloud-btn-download:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.cloud-signout-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.cloud-btn-signout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #F87171;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+
+[data-theme="light"] .cloud-btn-signout,
+[data-theme="sepia"] .cloud-btn-signout {
+  color: #DC2626;
+}
+
+.cloud-secondary-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.cloud-secondary-links .secondary-full-btn {
+  padding: 8px 10px;
+  font-size: 0.76rem;
+}
+
 /* ==========================================================================
    VerseActionBar & Bottom Navigation Bar
    ========================================================================== */

@@ -130,7 +130,8 @@ document.addEventListener("DOMContentLoaded", () => {
           isHighlighted: !!userMod.isHighlighted,
           highlightColor: userMod.highlightColor || null,
           notes: userMod.notes || "",
-          _edited: !!userMod._edited
+          _edited: !!userMod._edited,
+          updatedAt: userMod.updatedAt || 0
         };
       })
       .concat(customVerses.map(cv => ({ ...cv, text: stripOuterQuotes(cv.text) })));
@@ -156,21 +157,25 @@ document.addEventListener("DOMContentLoaded", () => {
           isHighlighted: v.isHighlighted,
           highlightColor: v.highlightColor,
           notes: v.notes,
-          _edited: v._edited
+          _edited: v._edited,
+          updatedAt: v.updatedAt || Date.now()
         };
       }
     }
     localStorage.setItem("bv_verses_user_state", JSON.stringify(userStateMap));
     localStorage.setItem("bv_custom_verses", JSON.stringify(customList));
+    window.BibleCloudSync?.scheduleAutoSync?.();
   }
 
   function saveHighlightsState() {
     localStorage.setItem("bv_highlights_v2", JSON.stringify(state.highlights));
+    window.BibleCloudSync?.scheduleAutoSync?.();
   }
 
   function saveUserPlans() {
     localStorage.setItem("bv_user_plans", JSON.stringify(state.userPlans));
     updatePlansSummariesUI();
+    window.BibleCloudSync?.scheduleAutoSync?.();
   }
 
   function showToast(msg) {
@@ -370,6 +375,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btn-fav-vod")?.addEventListener("click", () => {
     if (!currentVodVerse) return;
     currentVodVerse.isFavorite = !currentVodVerse.isFavorite;
+    currentVodVerse.updatedAt = Date.now();
     saveVersesUserState();
     renderVerseOfTheDay();
     renderPopularVersesFeed();
@@ -559,6 +565,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const item = state.versesCollection.find(x => x.id === vid);
         if (item) {
           item.isFavorite = !item.isFavorite;
+          item.updatedAt = Date.now();
           saveVersesUserState();
           renderPopularVersesFeed();
           showToast(item.isFavorite ? "❤️ Añadido a Favoritos" : "Quitado de Favoritos");
@@ -606,6 +613,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const hex = sw.dataset.detailHex;
       v.highlightColor = hex || null;
       v.isHighlighted = !!hex;
+      v.updatedAt = Date.now();
       saveVersesUserState();
       openVerseDetailDialog(v.id);
       renderPopularVersesFeed();
@@ -624,6 +632,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const res = await generateVerseExegesisWithAI(parsed.bookName, parsed.chapter, parsed.startVerse, v.text, state.version);
     v.context = res.text;
     v._edited = true;
+    v.updatedAt = Date.now();
     saveVersesUserState();
     ctxEl.textContent = res.text;
     renderPopularVersesFeed();
@@ -635,6 +644,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const v = state.versesCollection.find(x => x.id === currentDetailVerseId);
     if (!v) return;
     v.notes = document.getElementById("detail-verse-notes").value.trim();
+    v.updatedAt = Date.now();
     saveVersesUserState();
     renderPopularVersesFeed();
     if (state.currentTab === "favorites") renderFavoritesAndNotesTab();
@@ -707,6 +717,7 @@ document.addEventListener("DOMContentLoaded", () => {
     v.text = stripOuterQuotes(document.getElementById("edit-verse-text-input").value.trim() || v.text);
     v.context = document.getElementById("edit-verse-context-input").value.trim() || v.context;
     v._edited = true;
+    v.updatedAt = Date.now();
     saveVersesUserState();
     openVerseDetailDialog(v.id);
     renderTopicFilterChips();
@@ -1641,6 +1652,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const existing = state.versesCollection.find(v => v.reference === payload.citation);
     if (existing) {
       existing.isFavorite = true;
+      existing.updatedAt = Date.now();
     } else {
       state.versesCollection.unshift({
         id: Date.now(),
@@ -1656,7 +1668,8 @@ document.addEventListener("DOMContentLoaded", () => {
         isHighlighted: false,
         highlightColor: null,
         notes: "",
-        isCustom: true
+        isCustom: true,
+        updatedAt: Date.now()
       });
     }
     saveVersesUserState();
@@ -3807,6 +3820,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function renderSettingsTab() {
     updatePlansSummariesUI();
     applyReaderVisualPreferences();
+    window.BibleCloudSync?.renderCloudSyncUI?.();
 
     const verList = document.getElementById("settings-versions-list");
     if (!verList) return;
@@ -4231,6 +4245,101 @@ document.addEventListener("DOMContentLoaded", () => {
   renderPopularVersesFeed();
   initPhotoBackgroundThumbs();
   updatePlansSummariesUI();
+  window.BibleCloudSync?.init?.({
+    getVersesCollection: () => state.versesCollection,
+    applyDownloadedData: remoteDocs => {
+      const mapByRef = new Map();
+      state.versesCollection.forEach(v => {
+        if (v.reference) mapByRef.set(v.reference.trim(), v);
+      });
+      let restoredCount = 0;
+      remoteDocs.forEach((doc, idx) => {
+        const refKey = String(doc.reference || "").trim();
+        if (!refKey) return;
+        const existing = mapByRef.get(refKey);
+        const hlHex = doc.highlightColor && String(doc.highlightColor).trim() ? String(doc.highlightColor).trim() : null;
+        const incomingTs = Number(doc.updatedAt) || Date.now();
+        if (existing) {
+          existing.isFavorite = Boolean(doc.isFavorite);
+          existing.notes = String(doc.notes || "");
+          existing.highlightColor = hlHex;
+          existing.isHighlighted = Boolean(hlHex);
+          existing.highlightedPhrases = String(doc.highlightedPhrases || "");
+          if (doc.bibleVersion) existing.bibleVersion = String(doc.bibleVersion);
+          existing.updatedAt = incomingTs;
+          restoredCount++;
+        } else if (doc.isCustom) {
+          const customVerse = {
+            id: Number(doc.id) || (Date.now() + idx),
+            book: String(doc.book || "Personal"),
+            chapterVerse: String(doc.chapterVerse || ""),
+            reference: refKey,
+            testament: String(doc.testament || "Nuevo Testamento"),
+            text: stripOuterQuotes(String(doc.text || "")),
+            context: String(doc.context || ""),
+            topic: String(doc.topic || "Personal"),
+            bibleVersion: String(doc.bibleVersion || "RVR1960"),
+            isFavorite: Boolean(doc.isFavorite),
+            notes: String(doc.notes || ""),
+            highlightColor: hlHex,
+            isHighlighted: Boolean(hlHex),
+            highlightedPhrases: String(doc.highlightedPhrases || ""),
+            isCustom: true,
+            updatedAt: incomingTs
+          };
+          state.versesCollection.unshift(customVerse);
+          mapByRef.set(refKey, customVerse);
+          restoredCount++;
+        }
+      });
+      saveVersesUserState();
+      renderTopicFilterChips();
+      renderPopularVersesFeed();
+      renderVerseOfTheDay();
+      if (state.currentTab === "favorites") renderFavoritesAndNotesTab();
+      return restoredCount;
+    },
+    getExtraBackupData: () => ({
+      highlights: state.highlights,
+      userPlans: state.userPlans,
+      deletedVerseIds: JSON.parse(localStorage.getItem("bv_deleted_verse_ids") || "[]")
+    }),
+    applyExtraBackupData: extra => {
+      if (extra.highlights && typeof extra.highlights === "object") {
+        Object.entries(extra.highlights).forEach(([k, v]) => {
+          const cur = state.highlights[k];
+          if (!cur || (v.updatedAt || 0) >= (cur.updatedAt || 0)) {
+            state.highlights[k] = v;
+          }
+        });
+        saveHighlightsState();
+        if (state.currentTab === "reader") {
+          lastRenderedReaderKey = "";
+          loadReaderChapter(false);
+        }
+      }
+      if (extra.userPlans && typeof extra.userPlans === "object") {
+        Object.entries(extra.userPlans).forEach(([pid, planData]) => {
+          const cur = state.userPlans[pid];
+          if (!cur) {
+            state.userPlans[pid] = planData;
+          } else {
+            const mergedDays = Array.from(new Set([...(cur.completedDays || []), ...(planData.completedDays || [])]));
+            state.userPlans[pid] = { ...cur, ...planData, completedDays: mergedDays };
+          }
+        });
+        saveUserPlans();
+      }
+      if (Array.isArray(extra.deletedVerseIds) && extra.deletedVerseIds.length > 0) {
+        const curDeleted = new Set(JSON.parse(localStorage.getItem("bv_deleted_verse_ids") || "[]"));
+        extra.deletedVerseIds.forEach(id => curDeleted.add(id));
+        localStorage.setItem("bv_deleted_verse_ids", JSON.stringify(Array.from(curDeleted)));
+        initVersesCollection();
+        renderPopularVersesFeed();
+      }
+    },
+    showToast
+  });
   triggerFullBibleSearch();
   registerServiceWorkerAndOfflinePack();
   handleLocationHash();
