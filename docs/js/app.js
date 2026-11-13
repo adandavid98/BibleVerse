@@ -15,6 +15,14 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
+  // Bloquear menús contextuales del navegador al mantener presionado (comportamiento nativo de app)
+  window.addEventListener("contextmenu", e => {
+    const tag = e.target?.tagName;
+    if (tag !== "INPUT" && tag !== "TEXTAREA") {
+      e.preventDefault();
+    }
+  });
+
   function triggerHaptic(pattern = 12) {
     try {
       if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
@@ -211,6 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (mainScrollContainer) mainScrollContainer.scrollTop = 0;
+    syncSystemThemeBars();
   }
 
   document.querySelectorAll(".nav-item").forEach(btn => {
@@ -687,12 +696,27 @@ document.addEventListener("DOMContentLoaded", () => {
     if (refMeta) refMeta.textContent = `${b.testamentFull} • ${b.category} • ${ver}`;
   }
 
+  function updateAddVerseVersionCard(code) {
+    const verCode = code || addVerSel?.value || state.version;
+    if (addVerSel) addVerSel.value = verCode;
+    const vMeta = BIBLE_VERSIONS.find(v => v.code === verCode) || { code: verCode, name: verCode };
+    const badgeEl = document.getElementById("add-verse-version-badge");
+    const nameEl = document.getElementById("add-verse-version-name");
+    if (badgeEl) badgeEl.textContent = vMeta.code;
+    if (nameEl) nameEl.textContent = vMeta.name;
+  }
+
   function initAddVerseForm() {
     if (!addBookSel) return;
     addBookSel.value = String(state.bookId);
-    if (addVerSel) addVerSel.value = state.version;
+    updateAddVerseVersionCard(state.version);
     updateAddVerseChapters(state.chapter, 1);
   }
+
+  document.getElementById("btn-add-verse-pick-version")?.addEventListener("click", () => {
+    triggerHaptic(10);
+    openVersionSelectorModal("ADD_VERSE");
+  });
 
   document.getElementById("btn-add-verse-pick-book")?.addEventListener("click", () => {
     triggerHaptic(10);
@@ -1784,12 +1808,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // 8. SELECTOR DE VERSIONES BÍBLICAS (BibleVersionPickerSheet.kt)
   // =========================================================================
   const versionModal = document.getElementById("version-selector-modal");
+  let currentVersionPickerMode = "READER";
 
-  function renderVersionsPicker() {
+  function openVersionSelectorModal(mode = "READER") {
+    currentVersionPickerMode = mode;
+    renderVersionsPicker(mode);
+    versionModal.classList.add("open");
+  }
+
+  function renderVersionsPicker(mode = "READER") {
     const container = document.getElementById("versions-list-container");
     if (!container) return;
+    const activeCode = mode === "ADD_VERSE" ? (addVerSel?.value || state.version) : state.version;
     container.innerHTML = BIBLE_VERSIONS.map(v => `
-      <div class="version-card-row ${v.code === state.version ? "selected" : ""}" data-code="${v.code}">
+      <div class="version-card-row ${v.code === activeCode ? "selected" : ""}" data-code="${v.code}">
         <div style="padding-right:10px;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
             <strong style="color:var(--primary-color);">${v.name}</strong>
@@ -1804,18 +1836,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     container.querySelectorAll(".version-card-row").forEach(row => {
       row.addEventListener("click", () => {
-        state.version = row.dataset.code;
-        versionModal.classList.remove("open");
-        loadReaderChapter(false);
-        renderVerseOfTheDay();
-        showToast(`📖 Versión cambiada a ${state.version}`);
+        triggerHaptic(10);
+        const pickedCode = row.dataset.code;
+        if (currentVersionPickerMode === "ADD_VERSE") {
+          updateAddVerseVersionCard(pickedCode);
+          versionModal.classList.remove("open");
+          autofillAddVerseText();
+        } else {
+          state.version = pickedCode;
+          versionModal.classList.remove("open");
+          loadReaderChapter(false);
+          renderVerseOfTheDay();
+          showToast(`📖 Versión cambiada a ${state.version}`);
+        }
       });
     });
   }
 
   document.getElementById("btn-open-version-selector")?.addEventListener("click", () => {
-    renderVersionsPicker();
-    versionModal.classList.add("open");
+    openVersionSelectorModal("READER");
   });
   document.getElementById("btn-close-version-selector")?.addEventListener("click", () => versionModal.classList.remove("open"));
 
@@ -1971,12 +2010,35 @@ document.addEventListener("DOMContentLoaded", () => {
   // =========================================================================
   const readerSettingsModal = document.getElementById("settings-modal");
 
+  function syncSystemThemeBars() {
+    const appBgMap = {
+      "light": "#F8F9FA",
+      "sepia-night": "#F4EAD2",
+      "dark": "#0F141C"
+    };
+    const readerBgMap = {
+      "reader-light": "#FFFFFF",
+      "reader-sepia": "#FBF0D9",
+      "reader-dark": "#121417",
+      "reader-night": "#090D16"
+    };
+    const color = state.currentTab === "reader"
+      ? (readerBgMap[state.readerTheme] || "#0F141C")
+      : (appBgMap[state.theme] || "#0F141C");
+
+    const metaTheme = document.getElementById("meta-theme-color") || document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) metaTheme.setAttribute("content", color);
+    document.documentElement.style.backgroundColor = color;
+    document.body.style.backgroundColor = color;
+  }
+
   function applyReaderVisualPreferences() {
     if (state.theme === "light") {
       document.documentElement.removeAttribute("data-theme");
     } else {
       document.documentElement.setAttribute("data-theme", state.theme);
     }
+    syncSystemThemeBars();
 
     const readerTab = document.getElementById("tab-reader");
     if (readerTab) {

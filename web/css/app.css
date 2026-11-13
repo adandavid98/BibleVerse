@@ -131,6 +131,20 @@
   -webkit-touch-callout: none;
 }
 
+html,
+body {
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  background-color: var(--bg-color);
+}
+
+img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
+}
+
 input,
 textarea,
 select,
@@ -140,9 +154,46 @@ select,
   -webkit-touch-callout: default;
 }
 
+button,
+.icon-btn,
+.chip,
+.action-pill,
+.primary-full-btn,
+.nav-item,
+.reader-tool-btn,
+.version-pill,
+.book-selector,
+.reader-circle-nav-btn,
+.reader-floating-pill,
+.verse-card,
+.plan-grid-card,
+.version-card-row,
+.book-selector-item {
+  transition: transform 0.1s ease, filter 0.1s ease, background-color 0.12s ease, opacity 0.12s ease;
+}
+
+button:active,
+.icon-btn:active,
+.chip:active,
+.action-pill:active,
+.primary-full-btn:active,
+.nav-item:active,
+.reader-tool-btn:active,
+.version-pill:active,
+.book-selector:active,
+.reader-circle-nav-btn:active,
+.reader-floating-pill:active,
+.verse-card:active,
+.plan-grid-card:active,
+.version-card-row:active,
+.book-selector-item:active {
+  transform: scale(0.96);
+  filter: brightness(1.16);
+}
+
 body {
   font-family: var(--font-family);
-  background-color: #0B0F17;
+  background-color: var(--bg-color);
   color: var(--text-primary);
   min-height: 100vh;
   min-height: 100dvh;
@@ -150,6 +201,8 @@ body {
   justify-content: center;
   align-items: center;
   overflow-x: hidden;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
 }
 
 .app-container {
@@ -162,6 +215,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  overscroll-behavior: none;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   transition: background-color 0.25s ease, color 0.25s ease;
 }
@@ -270,6 +324,8 @@ body {
 .main-content {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
   padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
   -webkit-overflow-scrolling: touch;
 }
@@ -784,14 +840,18 @@ body {
 }
 
 .reader-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: var(--surface-color);
   padding: 8px 12px;
   border-radius: var(--radius-md);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
   gap: 6px;
 }
 
@@ -1558,7 +1618,8 @@ body {
   backdrop-filter: blur(4px);
 }
 
-#book-selector-modal {
+#book-selector-modal,
+#version-selector-modal {
   z-index: 250;
 }
 

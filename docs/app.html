@@ -7,7 +7,7 @@
 
   <!-- PWA Meta Tags -->
   <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#1E3A5F">
+  <meta name="theme-color" id="meta-theme-color" content="#0F141C">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="BibleVerse">
@@ -675,18 +675,17 @@
         </div>
 
         <div style="max-height:74vh; overflow-y:auto; padding-right:4px;">
-          <!-- Tarjeta de Versión de Traducción -->
-          <div class="detail-section-card" style="background:var(--primary-container); border:1px solid var(--border-color); padding:10px 14px; margin-bottom:12px;">
-            <label class="modal-label" style="margin-bottom:4px; font-size:0.72rem;">Versión de Traducción:</label>
-            <select id="add-verse-version" class="modal-input" style="margin-bottom:0; font-weight:700;">
-              <option value="RVR1960">RVR1960 — Reina-Valera 1960</option>
-              <option value="NVI">NVI — Nueva Versión Internacional</option>
-              <option value="NBLA">NBLA — Nueva Biblia de las Américas</option>
-              <option value="DHH">DHH — Dios Habla Hoy</option>
-              <option value="TLA">TLA — Traducción en Lenguaje Actual</option>
-              <option value="NTV">NTV — Nueva Traducción Viviente</option>
-              <option value="LBLA">LBLA — La Biblia de las Américas</option>
-            </select>
+          <!-- Tarjeta de Versión de Traducción (Mismo modal que Android) -->
+          <input type="hidden" id="add-verse-version" value="RVR1960">
+          <div class="detail-section-card" id="btn-add-verse-pick-version" style="background:var(--primary-container); border:1px solid var(--border-color); padding:10px 14px; margin-bottom:12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:0.72rem; color:var(--text-secondary); margin-bottom:3px;">Versión de Traducción:</div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span id="add-verse-version-badge" style="background:var(--primary-color); color:var(--on-primary); font-size:0.72rem; font-weight:800; padding:2px 7px; border-radius:6px;">RVR1960</span>
+                <strong id="add-verse-version-name" style="font-size:0.88rem; color:var(--text-primary);">Reina-Valera 1960</strong>
+              </div>
+            </div>
+            <span style="font-size:1.1rem; color:var(--text-secondary);">▾</span>
           </div>
 
           <!-- Tarjeta PASO 1: SELECCIONAR REFERENCIA -->
