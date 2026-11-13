@@ -228,6 +228,15 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".nav-item").forEach(btn => {
     btn.addEventListener("click", () => {
       triggerHaptic(10);
+      if (btn.dataset.tab === "reader" && state.activeReaderPlanSession) {
+        state.activeReaderPlanSession = null;
+        if (state.savedNormalReaderPos) {
+          state.bookId = state.savedNormalReaderPos.bookId;
+          state.chapter = state.savedNormalReaderPos.chapter;
+          state.savedNormalReaderPos = null;
+        }
+        lastRenderedReaderKey = "";
+      }
       switchTab(btn.dataset.tab);
     });
   });
@@ -912,8 +921,10 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    localStorage.setItem("bv_bookId", state.bookId);
-    localStorage.setItem("bv_chapter", state.chapter);
+    if (!state.activeReaderPlanSession) {
+      localStorage.setItem("bv_bookId", state.bookId);
+      localStorage.setItem("bv_chapter", state.chapter);
+    }
     localStorage.setItem("bv_version", state.version);
     updateContinueReadingBanner();
     renderPlanSessionHeaderInReader();
@@ -2675,6 +2686,9 @@ document.addEventListener("DOMContentLoaded", () => {
     btnsContainer.querySelectorAll(".btn-open-plan-seg").forEach(btn => {
       btn.addEventListener("click", () => {
         const seg = passages[Number(btn.dataset.idx)];
+        if (!state.activeReaderPlanSession) {
+          state.savedNormalReaderPos = { bookId: state.bookId, chapter: state.chapter };
+        }
         state.activeReaderPlanSession = {
           planId,
           dayNumber: dayObj.dayNumber,
@@ -2781,6 +2795,11 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btn-exit-plan-session")?.addEventListener("click", () => {
     const sess = state.activeReaderPlanSession;
     state.activeReaderPlanSession = null;
+    if (state.savedNormalReaderPos) {
+      state.bookId = state.savedNormalReaderPos.bookId;
+      state.chapter = state.savedNormalReaderPos.chapter;
+      state.savedNormalReaderPos = null;
+    }
     renderPlanSessionHeaderInReader();
     if (sess) {
       plansModal.classList.add("open");
@@ -2793,6 +2812,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!sess) return;
     togglePlanDayCompletion(sess.planId, sess.dayNumber);
     state.activeReaderPlanSession = null;
+    if (state.savedNormalReaderPos) {
+      state.bookId = state.savedNormalReaderPos.bookId;
+      state.chapter = state.savedNormalReaderPos.chapter;
+      state.savedNormalReaderPos = null;
+    }
     renderPlanSessionHeaderInReader();
     plansModal.classList.add("open");
     openPlanDaysDetail(sess.planId);
@@ -3674,7 +3698,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         let done = 0;
-        const batchSize = 6;
+        const batchSize = 12;
         for (let i = 0; i < urls.length; i += batchSize) {
           const batch = urls.slice(i, i + batchSize);
           await Promise.all(
@@ -4033,7 +4057,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await downloadVersionOffline(code, { silent: true });
           }
         }
-      }, 1500);
+      }, 100);
     }
   }
 

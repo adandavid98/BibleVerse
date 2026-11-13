@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bibleverse-pwa-v2.5.15';
+const CACHE_NAME = 'bibleverse-pwa-v2.5.16';
 const OFFLINE_BIBLE_CACHE = 'bibleverse-offline-bibles-v1';
 const STATIC_ASSETS = [
   './',
@@ -22,10 +22,56 @@ const STATIC_ASSETS = [
   './assets/bible/bible_stories_749.json',
   './assets/bible/cross_references.bin',
   './assets/bible/pericopes_es.json',
+  './assets/bible/pericopes_nvi.json',
+  './assets/bible/pericopes_tla.json',
+  './assets/bible/pericopes_dhh.json',
+  './assets/bible/pericopes_nbla.json',
+  './assets/bible/pericopes_ntv.json',
+  './assets/bible/pericopes_lbla.json',
   './assets/bible/plan_chronological.json',
   './assets/bible/plan_traditional.json',
   './assets/bible/plans/plan_bible_stories.json',
-  './assets/bible/plans/thematic_plans.json'
+  './assets/bible/plans/thematic_plans.json',
+  './assets/drawable/plan_cover_affliction_hope.webp',
+  './assets/drawable/plan_cover_armor_of_god.webp',
+  './assets/drawable/plan_cover_calling_purpose.webp',
+  './assets/drawable/plan_cover_chronological.webp',
+  './assets/drawable/plan_cover_classic.webp',
+  './assets/drawable/plan_cover_completed.webp',
+  './assets/drawable/plan_cover_covenants.webp',
+  './assets/drawable/plan_cover_custom.webp',
+  './assets/drawable/plan_cover_enduring_love.webp',
+  './assets/drawable/plan_cover_eschatology.webp',
+  './assets/drawable/plan_cover_eternal_life.webp',
+  './assets/drawable/plan_cover_faith_works.webp',
+  './assets/drawable/plan_cover_forgiveness.webp',
+  './assets/drawable/plan_cover_gods_will.webp',
+  './assets/drawable/plan_cover_god_says_you_are.webp',
+  './assets/drawable/plan_cover_jesus30.webp',
+  './assets/drawable/plan_cover_names_of_god.webp',
+  './assets/drawable/plan_cover_nehemiah.webp',
+  './assets/drawable/plan_cover_new_life.webp',
+  './assets/drawable/plan_cover_peace_anxiety.webp',
+  './assets/drawable/plan_cover_pneumatology.webp',
+  './assets/drawable/plan_cover_proverbs.webp',
+  './assets/drawable/plan_cover_romans.webp',
+  './assets/drawable/plan_cover_soul_rest.webp',
+  './assets/drawable/plan_cover_stewardship.webp',
+  './assets/drawable/plan_cover_stories.webp',
+  './assets/drawable/plan_cover_tabernacle.webp',
+  './assets/drawable/plan_cover_trinity.webp',
+  './assets/drawable/verse_bg_01.webp',
+  './assets/drawable/verse_bg_02.webp',
+  './assets/drawable/verse_bg_03.webp',
+  './assets/drawable/verse_bg_04.webp',
+  './assets/drawable/verse_bg_05.webp',
+  './assets/drawable/verse_bg_06.webp',
+  './assets/drawable/verse_bg_07.webp',
+  './assets/drawable/verse_bg_08.webp',
+  './assets/drawable/verse_bg_09.webp',
+  './assets/drawable/verse_bg_10.webp',
+  './assets/drawable/verse_bg_11.webp',
+  './assets/drawable/verse_bg_12.webp'
 ];
 
 // Elimina la bandera `redirected` de respuestas (Vercel cleanUrls devuelve 308 -> /app)
@@ -47,23 +93,46 @@ self.addEventListener('message', (event) => {
 });
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      await Promise.all(
-        STATIC_ASSETS.map(async (assetUrl) => {
-          try {
-            const resp = await fetch(assetUrl, { cache: 'reload' });
-            if (resp && resp.ok) {
-              const clean = await toCleanResponse(resp);
-              await cache.put(assetUrl, clean);
-            }
-          } catch {
-            // Continuar si un recurso individual falla temporalmente
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await Promise.all(
+      STATIC_ASSETS.map(async (assetUrl) => {
+        try {
+          const resp = await fetch(assetUrl, { cache: 'reload' });
+          if (resp && resp.ok) {
+            const clean = await toCleanResponse(resp);
+            await cache.put(assetUrl, clean);
           }
-        })
-      );
-    })
-  );
+        } catch {
+          // Continuar si un recurso individual falla temporalmente
+        }
+      })
+    );
+    // Pre-cachear los 66 libros de RVR1960 en la instalación del SW para lectura offline inmediata
+    try {
+      const bibleCache = await caches.open(OFFLINE_BIBLE_CACHE);
+      const bookIds = Array.from({ length: 66 }, (_, i) => i + 1);
+      for (let i = 0; i < bookIds.length; i += 12) {
+        const batch = bookIds.slice(i, i + 12);
+        await Promise.all(
+          batch.map(async (b) => {
+            const bookUrl = `./assets/bible/books/RVR1960/${b}.json`;
+            try {
+              const exists = await bibleCache.match(bookUrl);
+              if (!exists) {
+                const resp = await fetch(bookUrl);
+                if (resp && resp.ok) await bibleCache.put(bookUrl, resp);
+              }
+            } catch {
+              // Ignorar fallo individual
+            }
+          })
+        );
+      }
+    } catch {
+      // Ignorar si falla la apertura de caché
+    }
+  })());
   self.skipWaiting();
 });
 
@@ -140,7 +209,7 @@ self.addEventListener('fetch', (event) => {
           cache.put(event.request, responseToCache);
         });
         return networkResponse;
-      });
+      }).catch(() => new Response('', { status: 404 }));
     })
   );
 });

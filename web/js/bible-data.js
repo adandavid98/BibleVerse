@@ -261,8 +261,22 @@ async function loadOfflineBook(version, bookId) {
   if (!_booksCache[assetVersion]) _booksCache[assetVersion] = {};
   if (_booksCache[assetVersion][bookId]) return _booksCache[assetVersion][bookId];
 
+  const bookUrl = `./assets/bible/books/${assetVersion}/${bookId}.json`;
+  if ("caches" in window) {
+    try {
+      const cached = await caches.match(bookUrl);
+      if (cached && cached.ok) {
+        const bookData = await cached.json();
+        _booksCache[assetVersion][bookId] = bookData;
+        return bookData;
+      }
+    } catch {
+      // Continuar con fetch normal
+    }
+  }
+
   try {
-    const resp = await fetch(`./assets/bible/books/${assetVersion}/${bookId}.json`);
+    const resp = await fetch(bookUrl);
     if (resp.ok) {
       const bookData = await resp.json();
       _booksCache[assetVersion][bookId] = bookData;
