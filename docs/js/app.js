@@ -4017,15 +4017,21 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Pre-cachear en segundo plano la versión activa si es offline (por defecto RVR1960)
-    // para que usuarios de iPhone puedan leer sin internet tras su primera apertura.
+    // Pre-cachear en segundo plano todas las versiones integradas (empezando por la activa)
+    // para que funcionen 100% offline en todos los libros (66/66) tras la primera apertura.
     if (navigator.onLine) {
       const currentVer = BIBLE_VERSIONS.find(v => v.code === state.version && v.isOfflineAsset);
       const targetCode = currentVer ? currentVer.code : "RVR1960";
+      const offlineCodes = [
+        targetCode,
+        ...BIBLE_VERSIONS.filter(v => v.isOfflineAsset && v.code !== targetCode).map(v => v.code)
+      ];
       setTimeout(async () => {
-        const cached = await getOfflineBookCacheCount(targetCode);
-        if (cached < 66) {
-          downloadVersionOffline(targetCode, { silent: true });
+        for (const code of offlineCodes) {
+          const cached = await getOfflineBookCacheCount(code);
+          if (cached < 66) {
+            await downloadVersionOffline(code, { silent: true });
+          }
         }
       }, 1500);
     }
