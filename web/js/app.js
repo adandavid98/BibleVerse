@@ -1594,9 +1594,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("selector-step-chapters").style.display = stepNum === 2 ? "block" : "none";
     document.getElementById("selector-step-verses").style.display = stepNum === 3 ? "block" : "none";
 
-    document.getElementById("step-tab-book").classList.toggle("active", stepNum === 1);
-    document.getElementById("step-tab-chapter").classList.toggle("active", stepNum === 2);
-    document.getElementById("step-tab-verse").classList.toggle("active", stepNum === 3);
+    document.getElementById("step-tab-book")?.classList.toggle("active", stepNum === 1);
+    document.getElementById("step-tab-chapter")?.classList.toggle("active", stepNum === 2);
+    document.getElementById("step-tab-verse")?.classList.toggle("active", stepNum === 3);
 
     const backBtn = document.getElementById("btn-book-selector-back");
     if (backBtn) backBtn.style.display = ((currentPickerMode === "READER" || currentPickerMode === "ADD_VERSE") && stepNum > 1) ? "inline-flex" : "none";
@@ -2514,7 +2514,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     currentPlanDetailDays = await ensurePlanDaysLoaded(planId);
     if (searchWrap) {
-      searchWrap.style.display = (planId === "BIBLE_STORIES" || currentPlanDetailDays.length > 60) ? "block" : "none";
+      searchWrap.style.display = planId === "BIBLE_STORIES" ? "block" : "none";
     }
     if (searchField) {
       searchField.oninput = () => renderPlanDaysRows(planId, meta, searchField.value);
@@ -2659,25 +2659,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Crear Plan Personalizado (CreateCustomPlanDialog.kt - Multi-libro, Presets, Ritmo y Vista Previa)
   let customPaceMode = "BY_TARGET_DAYS";
+  const customSelectedBookIds = new Set();
+  let customBooksFilterTestament = "ALL";
+  const customBooksPickerModal = document.getElementById("custom-books-picker-modal");
 
   function updateCustomPlanPreview() {
-    const checked = Array.from(document.querySelectorAll("#custom-plan-books-list input:checked"));
-    const totalChapters = checked.reduce((acc, el) => {
-      const b = getBookById(Number(el.value));
+    const selectedIds = Array.from(customSelectedBookIds).sort((a, b) => a - b);
+    const totalChapters = selectedIds.reduce((acc, bid) => {
+      const b = getBookById(bid);
       return acc + (b ? b.chapters : 0);
     }, 0);
     const countSpan = document.getElementById("custom-books-count");
-    if (countSpan) countSpan.textContent = String(checked.length);
+    if (countSpan) countSpan.textContent = String(selectedIds.length);
     const chaptersBadge = document.getElementById("custom-chapters-count-badge");
     if (chaptersBadge) chaptersBadge.textContent = `${totalChapters} capítulos`;
 
     const summaryNamesEl = document.getElementById("custom-books-summary-names");
     if (summaryNamesEl) {
-      if (checked.length === 0) {
+      if (selectedIds.length === 0) {
         summaryNamesEl.textContent = "Ningún libro seleccionado aún. Toca 'Personalizar libros' para elegir o selecciona un preset sugerido arriba.";
       } else {
-        const names = checked.slice(0, 6).map(el => getBookById(Number(el.value))?.name).filter(Boolean);
-        summaryNamesEl.textContent = names.join(", ") + (checked.length > 6 ? ` y ${checked.length - 6} más...` : "");
+        const names = selectedIds.slice(0, 6).map(bid => getBookById(bid)?.name).filter(Boolean);
+        summaryNamesEl.textContent = names.join(", ") + (selectedIds.length > 6 ? ` y ${selectedIds.length - 6} más...` : "");
       }
     }
 
@@ -2692,15 +2695,56 @@ document.addEventListener("DOMContentLoaded", () => {
     const previewEl = document.getElementById("custom-plan-preview");
     const endDateEl = document.getElementById("custom-plan-end-date");
     if (previewEl) {
-      previewEl.textContent = checked.length === 0
+      previewEl.textContent = selectedIds.length === 0
         ? "Selecciona libros para calcular el plan"
         : `${daysTotal} días en total • ~${avgPerDay} caps/día`;
     }
     if (endDateEl) {
-      endDateEl.textContent = checked.length === 0
+      endDateEl.textContent = selectedIds.length === 0
         ? "La duración se ajustará según los libros elegidos"
         : `Fecha estimada de finalización: ${endDate.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}`;
     }
+  }
+
+  function renderCustomBooksPickerList(searchStr = "") {
+    const listEl = document.getElementById("custom-plan-books-list");
+    const modalCountEl = document.getElementById("custom-modal-books-count");
+    if (modalCountEl) modalCountEl.textContent = `${customSelectedBookIds.size} libros seleccionados`;
+    if (!listEl) return;
+
+    const q = stripAccents(searchStr).toLowerCase();
+    const filtered = BIBLE_BOOKS.filter(b => {
+      if (customBooksFilterTestament !== "ALL" && b.testament !== customBooksFilterTestament) return false;
+      return stripAccents(b.name).toLowerCase().includes(q) || stripAccents(b.category).toLowerCase().includes(q);
+    });
+
+    listEl.innerHTML = filtered.map(b => {
+      const isChecked = customSelectedBookIds.has(b.id);
+      return `
+        <div class="book-selector-item ${isChecked ? "selected" : ""}" data-cbid="${b.id}">
+          <div class="book-selector-left">
+            <div class="book-order-circle">${b.id}</div>
+            <div>
+              <strong style="font-size:0.92rem;">${b.name}</strong>
+              <div style="font-size:0.74rem; color:var(--text-secondary);">${b.category} • ${b.chapters} cap.</div>
+            </div>
+          </div>
+          <span style="font-size:1.1rem; font-weight:800; color:${isChecked ? "var(--primary-color)" : "var(--text-secondary)"};">${isChecked ? "✓" : "+"}</span>
+        </div>
+      `;
+    }).join("");
+
+    listEl.querySelectorAll("[data-cbid]").forEach(row => {
+      row.addEventListener("click", () => {
+        triggerHaptic(8);
+        const bid = Number(row.dataset.cbid);
+        if (customSelectedBookIds.has(bid)) customSelectedBookIds.delete(bid);
+        else customSelectedBookIds.add(bid);
+        activeCustomPresetId = null;
+        document.querySelectorAll("#custom-plan-presets .chip").forEach(c => c.classList.remove("active"));
+        renderCustomBooksPickerList(document.getElementById("custom-books-search-input")?.value || "");
+      });
+    });
   }
 
   function renderCustomPaceQuickChips() {
@@ -2728,24 +2772,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function bindCreateCustomPlanOpenButton() {
     document.getElementById("btn-open-create-custom-plan")?.addEventListener("click", () => {
       activeCustomPresetId = null;
+      customSelectedBookIds.clear();
       const titleInput = document.getElementById("custom-plan-title");
       if (titleInput) titleInput.value = "";
       document.querySelectorAll("#custom-plan-presets .chip").forEach(c => c.classList.remove("active"));
-      const listEl = document.getElementById("custom-plan-books-list");
-      if (listEl) {
-        listEl.style.display = "none";
-        listEl.innerHTML = BIBLE_BOOKS.map(b => `
-          <label class="custom-book-check-item">
-            <input type="checkbox" value="${b.id}">
-            <span>${b.name} (${b.chapters})</span>
-          </label>
-        `).join("");
-        listEl.querySelectorAll("input").forEach(cb => cb.addEventListener("change", () => {
-          activeCustomPresetId = null;
-          document.querySelectorAll("#custom-plan-presets .chip").forEach(c => c.classList.remove("active"));
-          updateCustomPlanPreview();
-        }));
-      }
       const valEl = document.getElementById("custom-plan-pace-value");
       if (valEl && customPaceMode === "BY_TARGET_DAYS") valEl.value = "30";
       renderCustomPaceQuickChips();
@@ -2755,11 +2785,43 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.getElementById("btn-toggle-custom-books-list")?.addEventListener("click", () => {
+    triggerHaptic(10);
+    const searchEl = document.getElementById("custom-books-search-input");
+    if (searchEl) searchEl.value = "";
+    customBooksFilterTestament = "ALL";
+    document.querySelectorAll("[data-cbfilter]").forEach(c => c.classList.toggle("active", c.dataset.cbfilter === "ALL"));
+    renderCustomBooksPickerList("");
+    customBooksPickerModal?.classList.add("open");
+  });
+
+  document.getElementById("custom-books-search-input")?.addEventListener("input", e => {
+    renderCustomBooksPickerList(e.target.value);
+  });
+
+  document.querySelectorAll("[data-cbfilter]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      triggerHaptic(8);
+      customBooksFilterTestament = btn.dataset.cbfilter;
+      document.querySelectorAll("[data-cbfilter]").forEach(b => b.classList.toggle("active", b === btn));
+      renderCustomBooksPickerList(document.getElementById("custom-books-search-input")?.value || "");
+    });
+  });
+
+  document.getElementById("btn-custom-books-clear")?.addEventListener("click", () => {
     triggerHaptic(8);
-    const listEl = document.getElementById("custom-plan-books-list");
-    if (listEl) {
-      listEl.style.display = listEl.style.display === "none" ? "grid" : "none";
-    }
+    customSelectedBookIds.clear();
+    renderCustomBooksPickerList(document.getElementById("custom-books-search-input")?.value || "");
+  });
+
+  document.getElementById("btn-close-custom-books-modal")?.addEventListener("click", () => {
+    customBooksPickerModal?.classList.remove("open");
+    updateCustomPlanPreview();
+  });
+
+  document.getElementById("btn-apply-custom-books")?.addEventListener("click", () => {
+    triggerHaptic(10);
+    customBooksPickerModal?.classList.remove("open");
+    updateCustomPlanPreview();
   });
 
   document.querySelectorAll("#custom-plan-presets .chip").forEach(chip => {
@@ -2775,17 +2837,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const cfg = presetMap[presetId];
       if (!cfg) return;
       const titleInput = document.getElementById("custom-plan-title");
+      customSelectedBookIds.clear();
       if (activeCustomPresetId === presetId) {
         activeCustomPresetId = null;
         if (titleInput) titleInput.value = "";
-        document.querySelectorAll("#custom-plan-books-list input").forEach(cb => { cb.checked = false; });
         document.querySelectorAll("#custom-plan-presets .chip").forEach(c => c.classList.remove("active"));
       } else {
         activeCustomPresetId = presetId;
         if (titleInput) titleInput.value = cfg.title;
-        document.querySelectorAll("#custom-plan-books-list input").forEach(cb => {
-          cb.checked = cfg.books.includes(Number(cb.value));
-        });
+        cfg.books.forEach(bid => customSelectedBookIds.add(bid));
         document.querySelectorAll("#custom-plan-presets .chip").forEach(c => c.classList.toggle("active", c === chip));
       }
       updateCustomPlanPreview();
@@ -2818,7 +2878,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("btn-back-from-custom-plan")?.addEventListener("click", () => showPlansModalView("MAIN"));
   document.getElementById("btn-Generate-custom-plan")?.addEventListener("click", () => {
-    const selectedIds = Array.from(document.querySelectorAll("#custom-plan-books-list input:checked")).map(cb => Number(cb.value));
+    const selectedIds = Array.from(customSelectedBookIds).sort((a, b) => a - b);
     if (selectedIds.length === 0) {
       showToast("⚠️ Selecciona al menos un libro");
       return;

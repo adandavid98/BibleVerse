@@ -86,10 +86,6 @@
           </div>
           <p class="verse-quote" id="vod-quote">"Cargando..."</p>
           <div class="verse-reference" id="vod-ref">-</div>
-          <div class="reflection-box">
-            <strong class="reflection-title">📜 Contexto Histórico y Teológico:</strong>
-            <span id="vod-reflection">-</span>
-          </div>
           <div class="card-actions">
             <button class="action-pill" id="btn-fav-vod" title="Guardar en Favoritos">
               <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -518,14 +514,7 @@
           <button class="icon-btn" id="btn-close-book-selector">✕</button>
         </div>
 
-        <!-- Tabs de 3 Pasos (LIBRO | CAPÍTULO | VERSÍCULO) -->
-        <div class="three-step-tabs" id="book-selector-step-tabs">
-          <button class="step-tab active" id="step-tab-book">1. LIBRO</button>
-          <button class="step-tab" id="step-tab-chapter">2. CAPÍTULO</button>
-          <button class="step-tab" id="step-tab-verse">3. VERSÍCULO</button>
-        </div>
-
-        <!-- Paso 1: Lista de Libros -->
+        <!-- Paso 1: Lista de Libros (Al seleccionar libro avanza a Capítulos y luego Versículos) -->
         <div id="selector-step-books">
           <div style="display:flex; gap:8px; margin-bottom:10px;">
             <button class="chip testament-tab active" data-filter="ALL">Todo (66)</button>
@@ -1018,7 +1007,6 @@
               Ningún libro seleccionado aún. Toca 'Personalizar libros' para elegir o selecciona un preset sugerido arriba.
             </div>
           </div>
-          <div id="custom-plan-books-list" class="custom-books-checklist" style="display:none; margin-bottom:12px;"></div>
 
           <label class="modal-label" style="font-size:0.72rem; letter-spacing:0.8px; color:var(--primary-color); margin-top:6px;">RITMO Y DISTRIBUCIÓN</label>
           <div style="display:flex; gap:8px; margin-bottom:10px;">
@@ -1044,6 +1032,33 @@
             ✓ Crear y Comenzar Plan
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         MODAL: SELECTOR DE LIBROS PARA PLAN PERSONALIZADO (CustomBookPickerModal)
+         =================================================================== -->
+    <div class="modal-overlay" id="custom-books-picker-modal" style="z-index:260;">
+      <div class="full-bottom-sheet">
+        <div class="sheet-header-title">
+          <div>
+            <h3 style="margin:0;">📚 Seleccionar Libros</h3>
+            <span id="custom-modal-books-count" style="font-size:0.76rem; color:var(--text-secondary);">0 libros seleccionados</span>
+          </div>
+          <button class="icon-btn" id="btn-close-custom-books-modal">✕</button>
+        </div>
+
+        <input type="text" id="custom-books-search-input" class="modal-input" placeholder="🔍 Buscar libro (ej. Salmos, Juan)..." style="margin-bottom:8px;">
+        <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
+          <button type="button" class="chip active" data-cbfilter="ALL">Todos (66)</button>
+          <button type="button" class="chip" data-cbfilter="AT">A.T. (39)</button>
+          <button type="button" class="chip" data-cbfilter="NT">N.T. (27)</button>
+          <button type="button" class="chip" id="btn-custom-books-clear" style="margin-left:auto;">Limpiar</button>
+        </div>
+
+        <div id="custom-plan-books-list" style="max-height:50vh; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:12px;"></div>
+
+        <button class="primary-full-btn" id="btn-apply-custom-books">✓ Aplicar Selección</button>
       </div>
     </div>
 
