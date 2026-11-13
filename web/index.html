@@ -16,7 +16,8 @@
   <!-- Estilos -->
   <link rel="stylesheet" href="./css/landing.css">
   <script>
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('landing') && (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true)) {
       window.location.replace('./app.html' + window.location.search + window.location.hash);
     }
   </script>
