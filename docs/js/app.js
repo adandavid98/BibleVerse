@@ -642,11 +642,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const v = state.versesCollection.find(x => x.id === currentDetailVerseId);
     if (!v) return;
     document.getElementById("edit-verse-ref-input").value = v.reference;
+    const editRefDisp = document.getElementById("edit-verse-ref-display");
+    if (editRefDisp) editRefDisp.textContent = v.reference;
     document.getElementById("edit-verse-topic-input").value = v.topic;
     document.getElementById("edit-verse-text-input").value = v.text;
     document.getElementById("edit-verse-context-input").value = v.context;
     document.getElementById("detail-view-mode").style.display = "none";
     document.getElementById("detail-edit-mode").style.display = "block";
+  });
+
+  document.getElementById("btn-edit-verse-pick-book")?.addEventListener("click", () => {
+    triggerHaptic(10);
+    openUnifiedBookSelector("EDIT_VERSE");
   });
 
   document.getElementById("btn-cancel-edit-verse")?.addEventListener("click", () => {
@@ -1637,7 +1644,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("step-tab-verse")?.classList.toggle("active", stepNum === 3);
 
     const backBtn = document.getElementById("btn-book-selector-back");
-    if (backBtn) backBtn.style.display = ((currentPickerMode === "READER" || currentPickerMode === "ADD_VERSE") && stepNum > 1) ? "inline-flex" : "none";
+    if (backBtn) backBtn.style.display = ((currentPickerMode === "READER" || currentPickerMode === "ADD_VERSE" || currentPickerMode === "EDIT_VERSE") && stepNum > 1) ? "inline-flex" : "none";
 
     const titleEl = document.getElementById("book-selector-title");
     if (titleEl) {
@@ -1657,7 +1664,7 @@ document.addEventListener("DOMContentLoaded", () => {
       clearVerseSelection();
     }
     const stepTabs = document.getElementById("book-selector-step-tabs");
-    if (stepTabs) stepTabs.style.display = (mode === "READER" || mode === "ADD_VERSE") ? "flex" : "none";
+    if (stepTabs) stepTabs.style.display = (mode === "READER" || mode === "ADD_VERSE" || mode === "EDIT_VERSE") ? "flex" : "none";
 
     const searchBox = document.getElementById("book-search-input");
     if (searchBox) searchBox.value = "";
@@ -1666,8 +1673,14 @@ document.addEventListener("DOMContentLoaded", () => {
       t.classList.toggle("active", t.dataset.filter === "ALL");
     });
 
-    tempPickerBook = mode === "ADD_VERSE" ? getBookById(Number(addBookSel?.value || state.bookId)) : getBookById(state.bookId);
-    tempPickerChapter = state.chapter;
+    if (mode === "EDIT_VERSE") {
+      const parsedEdit = parseBibleReference(document.getElementById("edit-verse-ref-input")?.value || "");
+      tempPickerBook = getBookById(parsedEdit ? parsedEdit.bookId : state.bookId);
+      tempPickerChapter = parsedEdit ? parsedEdit.chapter : state.chapter;
+    } else {
+      tempPickerBook = mode === "ADD_VERSE" ? getBookById(Number(addBookSel?.value || state.bookId)) : getBookById(state.bookId);
+      tempPickerChapter = state.chapter;
+    }
     showPickerStep(1);
     renderPickerBooksList("");
     bookSelectorModal.classList.add("open");
@@ -1815,12 +1828,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }).join("");
 
     grid.querySelectorAll(".chapter-square-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", async () => {
         const pickedVerse = Number(btn.dataset.v);
         if (currentPickerMode === "ADD_VERSE") {
           if (addBookSel) addBookSel.value = String(book.id);
           updateAddVerseChapters(chapter, pickedVerse);
           bookSelectorModal.classList.remove("open");
+          return;
+        }
+        if (currentPickerMode === "EDIT_VERSE") {
+          const newRef = `${book.name} ${chapter}:${pickedVerse}`;
+          const refInput = document.getElementById("edit-verse-ref-input");
+          const refDisp = document.getElementById("edit-verse-ref-display");
+          if (refInput) refInput.value = newRef;
+          if (refDisp) refDisp.textContent = newRef;
+          bookSelectorModal.classList.remove("open");
+          const chData = await fetchChapterVerses(state.version, book.id, chapter);
+          const found = chData.verses.find(x => x.verse === pickedVerse);
+          if (found) {
+            const txtInput = document.getElementById("edit-verse-text-input");
+            if (txtInput) txtInput.value = found.text;
+          }
           return;
         }
         state.bookId = book.id;
@@ -1832,11 +1860,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  document.getElementById("btn-open-chapter-from-verse-step")?.addEventListener("click", () => {
+  document.getElementById("btn-open-chapter-from-verse-step")?.addEventListener("click", async () => {
     if (currentPickerMode === "ADD_VERSE") {
       if (addBookSel) addBookSel.value = String(tempPickerBook.id);
       updateAddVerseChapters(tempPickerChapter, 1);
       bookSelectorModal.classList.remove("open");
+      return;
+    }
+    if (currentPickerMode === "EDIT_VERSE") {
+      const newRef = `${tempPickerBook.name} ${tempPickerChapter}:1`;
+      const refInput = document.getElementById("edit-verse-ref-input");
+      const refDisp = document.getElementById("edit-verse-ref-display");
+      if (refInput) refInput.value = newRef;
+      if (refDisp) refDisp.textContent = newRef;
+      bookSelectorModal.classList.remove("open");
+      const chData = await fetchChapterVerses(state.version, tempPickerBook.id, tempPickerChapter);
+      const found = chData.verses.find(x => x.verse === 1);
+      if (found) {
+        const txtInput = document.getElementById("edit-verse-text-input");
+        if (txtInput) txtInput.value = found.text;
+      }
       return;
     }
     state.bookId = tempPickerBook.id;

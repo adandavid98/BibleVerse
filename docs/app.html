@@ -628,7 +628,11 @@
           <!-- Modo Edición de Versículo -->
           <div id="detail-edit-mode" style="display:none;">
             <label class="modal-label">Cita / Referencia</label>
-            <input type="text" id="edit-verse-ref-input" class="modal-input">
+            <input type="hidden" id="edit-verse-ref-input">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; background:var(--surface-variant); border:1px solid var(--border-color); border-radius:12px; padding:10px 12px; margin-bottom:10px;">
+              <strong id="edit-verse-ref-display" style="font-size:0.95rem; color:var(--primary-color);">Salmos 23:1</strong>
+              <button type="button" id="btn-edit-verse-pick-book" class="action-pill active">📚 Elegir Libro</button>
+            </div>
             <label class="modal-label">Tema / Categoría</label>
             <input type="text" id="edit-verse-topic-input" class="modal-input">
             <label class="modal-label">Texto del Versículo</label>
