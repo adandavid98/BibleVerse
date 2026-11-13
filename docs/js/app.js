@@ -101,26 +101,39 @@ document.addEventListener("DOMContentLoaded", () => {
     chatMessages: JSON.parse(localStorage.getItem("bv_chat_history") || "[]")
   };
 
+  function stripOuterQuotes(str) {
+    return (str || "").replace(/^[«"“]+|[»"”]+$/g, "").trim();
+  }
+
   // Inicializar colección de 365 versículos fusionando cambios guardados por el usuario
   function initVersesCollection() {
     const base = Array.isArray(window.INITIAL_VERSES_DATA) ? window.INITIAL_VERSES_DATA : [];
     const savedState = JSON.parse(localStorage.getItem("bv_verses_user_state") || "{}");
     const customVerses = JSON.parse(localStorage.getItem("bv_custom_verses") || "[]");
+    const deletedIds = new Set(JSON.parse(localStorage.getItem("bv_deleted_verse_ids") || "[]"));
 
-    state.versesCollection = base.map(item => {
-      const userMod = savedState[item.id] || {};
-      return {
-        ...item,
-        text: userMod.text || item.text,
-        context: userMod.context || item.context,
-        topic: userMod.topic || item.topic,
-        reference: userMod.reference || item.reference,
-        isFavorite: !!userMod.isFavorite,
-        isHighlighted: !!userMod.isHighlighted,
-        highlightColor: userMod.highlightColor || null,
-        notes: userMod.notes || ""
-      };
-    }).concat(customVerses);
+    state.versesCollection = base
+      .filter(item => !deletedIds.has(item.id))
+      .map(item => {
+        const userMod = savedState[item.id] || {};
+        return {
+          ...item,
+          book: userMod.book || item.book,
+          chapterVerse: userMod.chapterVerse || item.chapterVerse,
+          testament: userMod.testament || item.testament,
+          bibleVersion: userMod.bibleVersion || item.bibleVersion || "RVR1960",
+          text: stripOuterQuotes(userMod.text || item.text),
+          context: userMod.context || item.context,
+          topic: userMod.topic || item.topic,
+          reference: userMod.reference || item.reference,
+          isFavorite: !!userMod.isFavorite,
+          isHighlighted: !!userMod.isHighlighted,
+          highlightColor: userMod.highlightColor || null,
+          notes: userMod.notes || "",
+          _edited: !!userMod._edited
+        };
+      })
+      .concat(customVerses.map(cv => ({ ...cv, text: stripOuterQuotes(cv.text) })));
   }
 
   function saveVersesUserState() {
@@ -131,6 +144,10 @@ document.addEventListener("DOMContentLoaded", () => {
         customList.push(v);
       } else if (v.isFavorite || v.isHighlighted || v.notes || v._edited) {
         userStateMap[v.id] = {
+          book: v.book,
+          chapterVerse: v.chapterVerse,
+          testament: v.testament,
+          bibleVersion: v.bibleVersion,
           text: v.text,
           context: v.context,
           topic: v.topic,
@@ -452,7 +469,11 @@ document.addEventListener("DOMContentLoaded", () => {
     state.versesTopicFilter = "Todos";
     state.versesSearchQuery = "";
     if (versesFilterInput) versesFilterInput.value = "";
-    document.getElementById("btn-open-book-filter-modal").textContent = "📚 Por Libro...";
+    const bookFilterBtn = document.getElementById("btn-open-book-filter-modal");
+    if (bookFilterBtn) {
+      bookFilterBtn.textContent = "📚 Por Libro...";
+      bookFilterBtn.classList.remove("active");
+    }
     document.querySelectorAll("#canonical-filter-chips .chip").forEach(c => {
       c.classList.toggle("active", c.dataset.testament === "ALL");
     });
@@ -498,7 +519,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Renderizar tarjetas (con soporte de resaltado, nota, versión e indicador de favorito)
     feed.innerHTML = filtered.map(v => {
       const hlStyle = v.highlightColor ? `border-left: 5px solid ${v.highlightColor}; background-color: ${v.highlightColor}22;` : "";
-      const verBadge = v.version || state.version;
+      const verBadge = v.bibleVersion || v.version || state.version;
       return `
         <div class="verse-item-card" data-vid="${v.id}" style="${hlStyle}">
           <div class="verse-card-top">
@@ -673,9 +694,17 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btn-save-edit-verse")?.addEventListener("click", () => {
     const v = state.versesCollection.find(x => x.id === currentDetailVerseId);
     if (!v) return;
-    v.reference = document.getElementById("edit-verse-ref-input").value.trim() || v.reference;
+    const newRef = document.getElementById("edit-verse-ref-input").value.trim() || v.reference;
+    v.reference = newRef;
+    const parsedRef = parseBibleReference(newRef);
+    if (parsedRef) {
+      const bk = getBookById(parsedRef.bookId);
+      v.book = bk.name;
+      v.testament = bk.testamentFull;
+      v.chapterVerse = `${parsedRef.chapter}:${parsedRef.startVerse}`;
+    }
     v.topic = document.getElementById("edit-verse-topic-input").value.trim() || v.topic;
-    v.text = document.getElementById("edit-verse-text-input").value.trim() || v.text;
+    v.text = stripOuterQuotes(document.getElementById("edit-verse-text-input").value.trim() || v.text);
     v.context = document.getElementById("edit-verse-context-input").value.trim() || v.context;
     v._edited = true;
     saveVersesUserState();
@@ -688,6 +717,14 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btn-detail-delete-verse")?.addEventListener("click", () => {
     const idx = state.versesCollection.findIndex(x => x.id === currentDetailVerseId);
     if (idx === -1) return;
+    const removed = state.versesCollection[idx];
+    if (removed && !removed.isCustom) {
+      const delArr = JSON.parse(localStorage.getItem("bv_deleted_verse_ids") || "[]");
+      if (!delArr.includes(removed.id)) {
+        delArr.push(removed.id);
+        localStorage.setItem("bv_deleted_verse_ids", JSON.stringify(delArr));
+      }
+    }
     state.versesCollection.splice(idx, 1);
     saveVersesUserState();
     verseDetailModal.classList.remove("open");
@@ -1565,18 +1602,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         return;
       }
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: currentShareCitation,
-            text: `«${currentShareVerseText}» — ${currentShareCitation}`
-          });
-        } catch {
-          // Cancelado por el usuario
-        }
-        return;
-      }
-      showToast("⚠️ Tu navegador no soporta compartir imágenes directamente");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      showToast("⬇️ Imagen descargada");
     }, "image/jpeg", 1.0);
   });
 
@@ -2140,8 +2174,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function syncSystemThemeBars() {
     const appBgMap = {
-      "light": "#F8F9FA",
-      "sepia-night": "#F4EAD2",
+      "light": "#FBF9F5",
+      "sepia-night": "#241D17",
       "dark": "#0F141C"
     };
     const readerBgMap = {
@@ -2558,6 +2592,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const passages = (dayObj.passages && dayObj.passages.length > 0)
               ? dayObj.passages
               : [{ bookId: dayObj.primaryBookId || 1, bookName: getBookById(dayObj.primaryBookId || 1).name, chapter: dayObj.primaryChapter || 1 }];
+            if (!state.activeReaderPlanSession) {
+              state.savedNormalReaderPos = { bookId: state.bookId, chapter: state.chapter };
+            }
             state.activeReaderPlanSession = {
               planId,
               dayNumber: dayObj.dayNumber,
@@ -2747,7 +2784,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const bar = document.getElementById("reader-plan-session-bar");
     if (!bar) return;
     const sess = state.activeReaderPlanSession;
-    const openBookBtn = document.getElementById("btn-open-book-selector");
+    const openBookBtn = document.getElementById("btn-select-book");
     const floatingBookBtn = document.getElementById("btn-floating-book-pill");
     const prevChapBtn = document.getElementById("btn-prev-chapter-bottom");
     const nextChapBtn = document.getElementById("btn-next-chapter-bottom");
@@ -2800,10 +2837,14 @@ document.addEventListener("DOMContentLoaded", () => {
       state.chapter = state.savedNormalReaderPos.chapter;
       state.savedNormalReaderPos = null;
     }
-    renderPlanSessionHeaderInReader();
+    loadReaderChapter(false);
     if (sess) {
       plansModal.classList.add("open");
-      openPlanDayReaderModal(sess.planId, sess.dayNumber);
+      if (sess.planId === "TRADITIONAL" || sess.planId === "CHRONOLOGICAL") {
+        openPlanDaysDetail(sess.planId);
+      } else {
+        openPlanDayReaderModal(sess.planId, sess.dayNumber);
+      }
     }
   });
 
@@ -2817,7 +2858,7 @@ document.addEventListener("DOMContentLoaded", () => {
       state.chapter = state.savedNormalReaderPos.chapter;
       state.savedNormalReaderPos = null;
     }
-    renderPlanSessionHeaderInReader();
+    loadReaderChapter(false);
     plansModal.classList.add("open");
     openPlanDaysDetail(sess.planId);
   });
@@ -3494,7 +3535,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderChatMessages();
     const msgIdx = state.chatMessages.length - 1;
 
-    const reply = await askBibleChatAssistant(state.chatMessages.slice(0, -1), clean, partialText => {
+    const reply = await askBibleChatAssistant(state.chatMessages.slice(0, -2), clean, partialText => {
       state.chatMessages[msgIdx] = { isUser: false, text: partialText };
       const bodyEl = aiMessagesEl?.querySelector(`.chat-msg-bubble[data-msg-idx="${msgIdx}"] .chat-msg-body`);
       if (bodyEl) {
@@ -3551,7 +3592,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // =========================================================================
   // 15. MÓDULO 9: AJUSTES, CLOUD SYNC, VERSIONES OFFLINE Y EXPORTADOR PDF/JSON/TXT
   // =========================================================================
-  const OFFLINE_CACHE_NAME = "bibleverse-pwa-v2.5.0";
+  const OFFLINE_CACHE_NAME = "bibleverse-offline-bibles-v1";
   const activeOfflineDownloads = {};
 
   async function getOfflineBookCacheCount(versionCode) {
@@ -3905,7 +3946,8 @@ document.addEventListener("DOMContentLoaded", () => {
       highlights: state.highlights,
       userPlans: state.userPlans,
       versesUserState: JSON.parse(localStorage.getItem("bv_verses_user_state") || "{}"),
-      customVerses: JSON.parse(localStorage.getItem("bv_custom_verses") || "[]")
+      customVerses: JSON.parse(localStorage.getItem("bv_custom_verses") || "[]"),
+      deletedVerseIds: JSON.parse(localStorage.getItem("bv_deleted_verse_ids") || "[]")
     };
   }
 
@@ -3950,6 +3992,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       if (data.customVerses) {
         localStorage.setItem("bv_custom_verses", JSON.stringify(data.customVerses));
+      }
+      if (Array.isArray(data.deletedVerseIds)) {
+        localStorage.setItem("bv_deleted_verse_ids", JSON.stringify(data.deletedVerseIds));
       }
       initVersesCollection();
       renderPopularVersesFeed();

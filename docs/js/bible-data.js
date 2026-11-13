@@ -459,7 +459,14 @@ async function searchFullBible(query, options = {}) {
   const batchSize = 22;
   for (let i = 0; i < bookIds.length; i += batchSize) {
     const batch = bookIds.slice(i, i + batchSize);
-    const loadedBooks = await Promise.all(batch.map(id => loadOfflineBook(version, id)));
+    const loadedBooks = await Promise.all(
+      batch.map(async id => {
+        if (version === "NTV" || version === "LBLA") {
+          return (await loadCachedDownloadedBook(version, id)) || (await loadOfflineBook(version, id));
+        }
+        return loadOfflineBook(version, id);
+      })
+    );
 
     for (let j = 0; j < batch.length; j++) {
       const bId = batch[j];
