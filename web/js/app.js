@@ -317,7 +317,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("vod-tag").textContent = currentVodVerse.topic;
     document.getElementById("vod-quote").textContent = `«${currentVodVerse.text}»`;
     document.getElementById("vod-ref").textContent = `${currentVodVerse.reference} (${state.version})`;
-    document.getElementById("vod-reflection").textContent = currentVodVerse.context;
+    const vodReflEl = document.getElementById("vod-reflection");
+    if (vodReflEl) vodReflEl.textContent = currentVodVerse.context;
 
     const favBtn = document.getElementById("btn-fav-vod");
     if (favBtn) {
@@ -1816,23 +1817,55 @@ document.addEventListener("DOMContentLoaded", () => {
     versionModal.classList.add("open");
   }
 
-  function renderVersionsPicker(mode = "READER") {
+  async function renderVersionsPicker(mode = "READER") {
     const container = document.getElementById("versions-list-container");
     if (!container) return;
     const activeCode = mode === "ADD_VERSE" ? (addVerSel?.value || state.version) : state.version;
-    container.innerHTML = BIBLE_VERSIONS.map(v => `
-      <div class="version-card-row ${v.code === activeCode ? "selected" : ""}" data-code="${v.code}">
-        <div style="padding-right:10px;">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-            <strong style="color:var(--primary-color);">${v.name}</strong>
-            <span class="testament-mini-badge">${v.tag}</span>
-            <span class="testament-mini-badge" style="color:#16A34A;">${v.isOfflineAsset ? "✓ Offline Integrada" : "☁️ Online + Caché"}</span>
+
+    const counts = {};
+    await Promise.all(
+      BIBLE_VERSIONS.filter(v => !v.isOfflineAsset).map(async v => {
+        counts[v.code] = await getOfflineBookCacheCount(v.code);
+      })
+    );
+
+    container.innerHTML = BIBLE_VERSIONS.map(v => {
+      const downloading = activeOfflineDownloads[v.code];
+      const cachedCount = counts[v.code] || 0;
+      const isDownloaded = !v.isOfflineAsset && cachedCount >= 66;
+      let statusBadge = `<span class="testament-mini-badge" style="color:#16A34A;">✓ Offline Integrada</span>`;
+      if (!v.isOfflineAsset) {
+        if (isDownloaded) {
+          statusBadge = `<span class="testament-mini-badge" style="color:#16A34A;">✓ Descargada Offline</span>`;
+        } else if (downloading) {
+          const pct = Math.round((downloading.current / downloading.total) * 100);
+          statusBadge = `<button type="button" class="version-dl-btn" disabled>⏳ ${pct}%</button>`;
+        } else {
+          statusBadge = `<button type="button" class="version-dl-btn" data-dl-ver="${v.code}">⬇ Descargar</button>`;
+        }
+      }
+      return `
+        <div class="version-card-row ${v.code === activeCode ? "selected" : ""}" data-code="${v.code}">
+          <div style="padding-right:8px; min-width:0; flex:1;">
+            <div style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:4px;">
+              <strong style="color:var(--primary-color);">${v.name}</strong>
+              <span class="testament-mini-badge">${v.tag}</span>
+              ${statusBadge}
+            </div>
+            <p style="font-size:0.78rem; color:var(--text-secondary); line-height:1.4;">${v.desc}</p>
           </div>
-          <p style="font-size:0.78rem; color:var(--text-secondary); line-height:1.4;">${v.desc}</p>
+          <strong style="color:var(--secondary-color); flex-shrink:0;">${v.shortName}</strong>
         </div>
-        <strong style="color:var(--secondary-color);">${v.shortName}</strong>
-      </div>
-    `).join("");
+      `;
+    }).join("");
+
+    container.querySelectorAll("[data-dl-ver]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        triggerHaptic(10);
+        downloadVersionOffline(btn.dataset.dlVer);
+      });
+    });
 
     container.querySelectorAll(".version-card-row").forEach(row => {
       row.addEventListener("click", () => {
@@ -3407,6 +3440,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function cleanBollsVerseHtml(html) {
+    return (html || "")
+      .replace(/<p[^>]*align\s*=\s*['"]?center['"]?[^>]*>.*?<\/p>/gis, " ")
+      .replace(/<h[1-6][^>]*>.*?<\/h[1-6]>/gis, " ")
+      .replace(/<br\s*\/?>/gi, " ")
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
   async function downloadVersionOffline(versionCode, { silent = false } = {}) {
     if (!("caches" in window)) {
       if (!silent) showToast("⚠️ Tu navegador no soporta almacenamiento offline");
@@ -3414,55 +3458,134 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (activeOfflineDownloads[versionCode]) return;
     activeOfflineDownloads[versionCode] = { current: 0, total: 66 };
-    if (!silent) renderSettingsTab();
+    if (!silent) {
+      renderSettingsTab();
+      if (versionModal?.classList.contains("open")) renderVersionsPicker(currentVersionPickerMode);
+    }
+
+    const updateDlProgress = (done) => {
+      activeOfflineDownloads[versionCode] = { current: done, total: 66 };
+      const pct = Math.round((done / 66) * 100);
+      const fill = document.getElementById(`offline-progress-${versionCode}`);
+      const label = document.getElementById(`offline-status-${versionCode}`);
+      if (fill) fill.style.width = `${pct}%`;
+      if (label) label.textContent = `Descargando libros: ${done}/66...`;
+      const modalBtn = document.querySelector(`#version-selector-modal .version-dl-btn[disabled]`);
+      if (modalBtn) modalBtn.textContent = `⏳ ${pct}%`;
+    };
 
     try {
       const cache = await caches.open(OFFLINE_CACHE_NAME);
-      const urls = [];
-      for (let b = 1; b <= 66; b++) {
-        urls.push(`./assets/bible/books/${versionCode}/${b}.json`);
-      }
+      const vMeta = BIBLE_VERSIONS.find(v => v.code === versionCode);
 
-      const optionalExtras = [
-        `./assets/bible/pericopes_${versionCode.toLowerCase()}.json`,
-        `./assets/audio/audio_catalog_${versionCode.toLowerCase()}.json`
-      ];
-      for (const extraUrl of optionalExtras) {
+      if (vMeta && !vMeta.isOfflineAsset) {
+        let bulkSaved = false;
         try {
-          const existing = await cache.match(extraUrl);
-          if (!existing) {
-            const resp = await fetch(extraUrl);
-            if (resp.ok) await cache.put(extraUrl, resp);
+          const resp = await fetch(`https://bolls.life/static/translations/${versionCode}.json`);
+          if (resp.ok) {
+            const allRows = await resp.json();
+            if (Array.isArray(allRows) && allRows.length > 1000) {
+              const byBook = {};
+              for (const row of allRows) {
+                const b = Number(row.book);
+                const c = String(row.chapter);
+                const v = String(row.verse);
+                if (!byBook[b]) byBook[b] = {};
+                if (!byBook[b][c]) byBook[b][c] = {};
+                byBook[b][c][v] = cleanBollsVerseHtml(row.text);
+              }
+              for (let b = 1; b <= 66; b++) {
+                const bookObj = byBook[b] || {};
+                const url = `./assets/bible/books/${versionCode}/${b}.json`;
+                await cache.put(url, new Response(JSON.stringify(bookObj), {
+                  headers: { "Content-Type": "application/json" }
+                }));
+                updateDlProgress(b);
+              }
+              bulkSaved = true;
+            }
           }
         } catch {
-          // Opcional
+          // Fallback por libro/capítulo si falla la descarga en bloque
         }
-      }
 
-      let done = 0;
-      const batchSize = 6;
-      for (let i = 0; i < urls.length; i += batchSize) {
-        const batch = urls.slice(i, i + batchSize);
-        await Promise.all(
-          batch.map(async (url) => {
-            try {
-              const existing = await cache.match(url);
-              if (!existing) {
-                const resp = await fetch(url);
-                if (resp.ok) await cache.put(url, resp);
+        if (!bulkSaved) {
+          for (let b = 1; b <= 66; b++) {
+            const url = `./assets/bible/books/${versionCode}/${b}.json`;
+            const existing = await cache.match(url);
+            if (!existing) {
+              const bookMeta = BIBLE_BOOKS.find(bk => bk.id === b);
+              const totalChapters = bookMeta ? bookMeta.chapters : 1;
+              const bookObj = {};
+              for (let c = 1; c <= totalChapters; c++) {
+                try {
+                  const chResp = await fetch(`https://bolls.life/get-chapter/${versionCode}/${b}/${c}/`);
+                  if (chResp.ok) {
+                    const data = await chResp.json();
+                    if (Array.isArray(data)) {
+                      bookObj[String(c)] = {};
+                      data.forEach((item, idx) => {
+                        const vNum = item.verse || (idx + 1);
+                        bookObj[String(c)][String(vNum)] = cleanBollsVerseHtml(item.text);
+                      });
+                    }
+                  }
+                } catch {
+                  // Ignorar error individual de capítulo
+                }
               }
-            } catch {
-              // Ignorar error individual de red
-            } finally {
-              done++;
-              activeOfflineDownloads[versionCode] = { current: done, total: 66 };
-              const fill = document.getElementById(`offline-progress-${versionCode}`);
-              const label = document.getElementById(`offline-status-${versionCode}`);
-              if (fill) fill.style.width = `${Math.round((done / 66) * 100)}%`;
-              if (label) label.textContent = `Descargando libros: ${done}/66...`;
+              if (Object.keys(bookObj).length > 0) {
+                await cache.put(url, new Response(JSON.stringify(bookObj), {
+                  headers: { "Content-Type": "application/json" }
+                }));
+              }
             }
-          })
-        );
+            updateDlProgress(b);
+          }
+        }
+      } else {
+        const urls = [];
+        for (let b = 1; b <= 66; b++) {
+          urls.push(`./assets/bible/books/${versionCode}/${b}.json`);
+        }
+
+        const optionalExtras = [
+          `./assets/bible/pericopes_${versionCode.toLowerCase()}.json`,
+          `./assets/audio/audio_catalog_${versionCode.toLowerCase()}.json`
+        ];
+        for (const extraUrl of optionalExtras) {
+          try {
+            const existing = await cache.match(extraUrl);
+            if (!existing) {
+              const resp = await fetch(extraUrl);
+              if (resp.ok) await cache.put(extraUrl, resp);
+            }
+          } catch {
+            // Opcional
+          }
+        }
+
+        let done = 0;
+        const batchSize = 6;
+        for (let i = 0; i < urls.length; i += batchSize) {
+          const batch = urls.slice(i, i + batchSize);
+          await Promise.all(
+            batch.map(async (url) => {
+              try {
+                const existing = await cache.match(url);
+                if (!existing) {
+                  const resp = await fetch(url);
+                  if (resp.ok) await cache.put(url, resp);
+                }
+              } catch {
+                // Ignorar error individual de red
+              } finally {
+                done++;
+                updateDlProgress(done);
+              }
+            })
+          );
+        }
       }
 
       if (!silent) {
@@ -3474,6 +3597,9 @@ document.addEventListener("DOMContentLoaded", () => {
       delete activeOfflineDownloads[versionCode];
       if (state.currentTab === "settings") {
         renderSettingsTab();
+      }
+      if (versionModal?.classList.contains("open")) {
+        renderVersionsPicker(currentVersionPickerMode);
       }
     }
   }
@@ -3505,26 +3631,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const counts = {};
     await Promise.all(
-      BIBLE_VERSIONS.filter(v => v.isOfflineAsset).map(async v => {
+      BIBLE_VERSIONS.map(async v => {
         counts[v.code] = await getOfflineBookCacheCount(v.code);
       })
     );
 
     verList.innerHTML = BIBLE_VERSIONS.map(v => {
-      if (!v.isOfflineAsset) {
-        return `
-          <div class="offline-version-card">
-            <div class="offline-version-row">
-              <div>
-                <strong style="color:var(--primary-color);">${v.name} (${v.code})</strong>
-                <div style="font-size:0.76rem; color:var(--text-secondary);">Requiere internet • Guarda caché automática de los capítulos que leas</div>
-              </div>
-              <span class="testament-mini-badge">En línea</span>
-            </div>
-          </div>
-        `;
-      }
-
       const downloading = activeOfflineDownloads[v.code];
       const cachedCount = counts[v.code] || 0;
       const isComplete = cachedCount >= 66;

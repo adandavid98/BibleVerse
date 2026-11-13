@@ -274,6 +274,27 @@ async function loadOfflineBook(version, bookId) {
   return null;
 }
 
+async function loadCachedDownloadedBook(version, bookId) {
+  const norm = (version || "").toUpperCase().trim();
+  if (!norm) return null;
+  if (_booksCache[norm] && _booksCache[norm][bookId]) return _booksCache[norm][bookId];
+  if ("caches" in window) {
+    try {
+      const cache = await caches.open("bibleverse-offline-bibles-v1");
+      const match = await cache.match(`./assets/bible/books/${norm}/${bookId}.json`);
+      if (match && match.ok) {
+        const bookData = await match.json();
+        if (!_booksCache[norm]) _booksCache[norm] = {};
+        _booksCache[norm][bookId] = bookData;
+        return bookData;
+      }
+    } catch {
+      // Ignorar error de caché
+    }
+  }
+  return null;
+}
+
 async function fetchChapterVerses(version = "RVR1960", bookId = 19, chapter = 23) {
   const norm = (version || "RVR1960").toUpperCase().trim();
   const pericopes = await loadPericopesForVersion(norm);
@@ -300,8 +321,25 @@ async function fetchChapterVerses(version = "RVR1960", bookId = 19, chapter = 23
     }
   }
 
-  // 2. Para NTV y LBLA: intenta API de Bolls primero, con limpieza de etiquetas y verificación anti-copyright
+  // 2. Para NTV y LBLA: primero verifica si fue descargada offline en Cache API; luego intenta API de Bolls
   if (norm === "NTV" || norm === "LBLA") {
+    const downloadedBook = await loadCachedDownloadedBook(norm, bookId);
+    const chDownloaded = downloadedBook && downloadedBook[String(chapter)];
+    if (chDownloaded) {
+      const verses = Object.keys(chDownloaded)
+        .map(k => parseInt(k, 10))
+        .sort((a, b) => a - b)
+        .map(vNum => {
+          const pKey = `${bookId}_${chapter}_${vNum}`;
+          return {
+            verse: vNum,
+            text: chDownloaded[String(vNum)],
+            sectionHeading: pericopes[pKey] || fallbackPericopes[pKey] || null,
+            isRedLetter: isWordsOfJesus(bookId, chapter, vNum)
+          };
+        });
+      return { bookId, chapter, version: norm, verses };
+    }
     try {
       const resp = await fetch(`https://bolls.life/get-chapter/${norm}/${bookId}/${chapter}/`);
       if (resp.ok) {

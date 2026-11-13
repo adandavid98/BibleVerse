@@ -224,6 +224,18 @@ body {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
+@media (max-width: 480px) {
+  .app-container {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    max-width: none;
+    box-shadow: none;
+  }
+}
+
 @media (min-width: 481px) {
   .app-container {
     height: 94vh;
@@ -520,6 +532,22 @@ body {
   background-color: rgba(239, 68, 68, 0.28);
   border-color: rgba(248, 113, 113, 0.6);
   color: #FECACA;
+}
+
+.verse-of-day-card .card-actions.vod-icon-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.verse-of-day-card .action-pill.icon-only {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  justify-content: center;
+  align-items: center;
 }
 
 .verse-quote {
@@ -1651,6 +1679,66 @@ body {
   animation: slideUp 0.22s cubic-bezier(0.1, 0.9, 0.2, 1);
   display: flex;
   flex-direction: column;
+}
+
+#book-selector-modal .full-bottom-sheet {
+  height: 90%;
+  max-height: 90%;
+  padding: 16px 16px 0;
+  overflow: hidden;
+}
+
+#selector-step-books,
+#selector-step-chapters,
+#selector-step-verses {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#selector-books-list,
+#selector-chapters-grid,
+#selector-verses-grid {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+}
+
+.version-card-row {
+  background-color: var(--surface-variant);
+  border: 1.5px solid var(--border-color);
+  border-radius: 16px;
+  padding: 13px 14px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.version-card-row.selected {
+  border-color: var(--primary-color);
+  background-color: var(--primary-container);
+}
+
+.version-dl-btn {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--primary-color);
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.version-dl-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
 }
 
 @keyframes slideUp {
