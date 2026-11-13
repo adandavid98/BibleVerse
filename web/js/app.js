@@ -3649,22 +3649,28 @@ document.addEventListener("DOMContentLoaded", () => {
               const bookMeta = BIBLE_BOOKS.find(bk => bk.id === b);
               const totalChapters = bookMeta ? bookMeta.chapters : 1;
               const bookObj = {};
-              for (let c = 1; c <= totalChapters; c++) {
-                try {
-                  const chResp = await fetch(`https://bolls.life/get-chapter/${versionCode}/${b}/${c}/`);
-                  if (chResp.ok) {
-                    const data = await chResp.json();
-                    if (Array.isArray(data)) {
-                      bookObj[String(c)] = {};
-                      data.forEach((item, idx) => {
-                        const vNum = item.verse || (idx + 1);
-                        bookObj[String(c)][String(vNum)] = cleanBollsVerseHtml(item.text);
-                      });
+              const chapters = Array.from({ length: totalChapters }, (_, idx) => idx + 1);
+              for (let i = 0; i < chapters.length; i += 15) {
+                const chBatch = chapters.slice(i, i + 15);
+                await Promise.all(
+                  chBatch.map(async (c) => {
+                    try {
+                      const chResp = await fetch(`https://bolls.life/get-chapter/${versionCode}/${b}/${c}/`);
+                      if (chResp.ok) {
+                        const data = await chResp.json();
+                        if (Array.isArray(data)) {
+                          bookObj[String(c)] = {};
+                          data.forEach((item, idx) => {
+                            const vNum = item.verse || (idx + 1);
+                            bookObj[String(c)][String(vNum)] = cleanBollsVerseHtml(item.text);
+                          });
+                        }
+                      }
+                    } catch {
+                      // Ignorar error individual de capítulo
                     }
-                  }
-                } catch {
-                  // Ignorar error individual de capítulo
-                }
+                  })
+                );
               }
               if (Object.keys(bookObj).length > 0) {
                 await cache.put(url, new Response(JSON.stringify(bookObj), {

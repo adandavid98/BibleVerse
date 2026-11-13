@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bibleverse-pwa-v2.5.16';
+const CACHE_NAME = 'bibleverse-pwa-v2.5.17';
 const OFFLINE_BIBLE_CACHE = 'bibleverse-offline-bibles-v1';
 const STATIC_ASSETS = [
   './',
@@ -108,15 +108,20 @@ self.addEventListener('install', (event) => {
         }
       })
     );
-    // Pre-cachear los 66 libros de RVR1960 en la instalación del SW para lectura offline inmediata
+    // Pre-cachear los 66 libros de las 5 versiones integradas en la instalación del SW
     try {
       const bibleCache = await caches.open(OFFLINE_BIBLE_CACHE);
-      const bookIds = Array.from({ length: 66 }, (_, i) => i + 1);
-      for (let i = 0; i < bookIds.length; i += 12) {
-        const batch = bookIds.slice(i, i + 12);
+      const bundledVersions = ['RVR1960', 'NVI', 'TLA', 'DHH', 'NBLA'];
+      const allBookUrls = [];
+      for (const ver of bundledVersions) {
+        for (let b = 1; b <= 66; b++) {
+          allBookUrls.push(`./assets/bible/books/${ver}/${b}.json`);
+        }
+      }
+      for (let i = 0; i < allBookUrls.length; i += 18) {
+        const batch = allBookUrls.slice(i, i + 18);
         await Promise.all(
-          batch.map(async (b) => {
-            const bookUrl = `./assets/bible/books/RVR1960/${b}.json`;
+          batch.map(async (bookUrl) => {
             try {
               const exists = await bibleCache.match(bookUrl);
               if (!exists) {
