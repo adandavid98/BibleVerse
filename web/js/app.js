@@ -1502,27 +1502,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("share-canvas");
     const fileName = `BibleVerse_${currentShareCitation.replace(/[^a-zA-Z0-9]/g, "_")}.jpg`;
     canvas.toBlob(async (blob) => {
-      if (blob && navigator.canShare) {
-        const file = new File([blob], fileName, { type: "image/jpeg" });
-        if (navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-              title: currentShareCitation,
-              text: `«${currentShareVerseText}» — ${currentShareCitation}`
-            });
-            return;
-          } catch {
-            // Cancelado o fallback a descarga
+      if (!blob) return;
+      const file = new File([blob], fileName, { type: "image/jpeg" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: currentShareCitation,
+            text: `«${currentShareVerseText}» — ${currentShareCitation}`
+          });
+        } catch (err) {
+          if (err?.name !== "AbortError") {
+            showToast("⚠️ No se pudo abrir el menú de compartir");
           }
         }
+        return;
       }
-      const link = document.createElement("a");
-      link.download = fileName;
-      link.href = canvas.toDataURL("image/jpeg", 0.94);
-      link.click();
-      showToast("🖼️ Imagen HD descargada");
-    }, "image/jpeg", 0.94);
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: currentShareCitation,
+            text: `«${currentShareVerseText}» — ${currentShareCitation}`
+          });
+        } catch {
+          // Cancelado por el usuario
+        }
+        return;
+      }
+      showToast("⚠️ Tu navegador no soporta compartir imágenes directamente");
+    }, "image/jpeg", 1.0);
   });
 
   // ACCIÓN 5, 6 Y 7: COMPARTIR TEXTO, COPIAR Y GUARDAR EN COLECCIÓN
@@ -1854,7 +1862,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
             <p style="font-size:0.78rem; color:var(--text-secondary); line-height:1.4;">${v.desc}</p>
           </div>
-          <strong style="color:var(--secondary-color); flex-shrink:0;">${v.shortName}</strong>
+          <strong style="color:var(--primary-color); flex-shrink:0;">${v.shortName}</strong>
         </div>
       `;
     }).join("");
@@ -3631,12 +3639,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const counts = {};
     await Promise.all(
-      BIBLE_VERSIONS.map(async v => {
+      BIBLE_VERSIONS.filter(v => !v.isOfflineAsset).map(async v => {
         counts[v.code] = await getOfflineBookCacheCount(v.code);
       })
     );
 
     verList.innerHTML = BIBLE_VERSIONS.map(v => {
+      if (v.isOfflineAsset) {
+        return `
+          <div class="offline-version-card">
+            <div class="offline-version-row">
+              <div style="min-width:0;">
+                <strong style="color:var(--primary-color);">${v.name} (${v.code})</strong>
+                <div style="font-size:0.76rem; color:var(--text-secondary);">✓ Integrada en la App (66/66 libros 100% Offline)</div>
+              </div>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <button type="button" class="offline-action-btn done" disabled>✓ Integrada</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
       const downloading = activeOfflineDownloads[v.code];
       const cachedCount = counts[v.code] || 0;
       const isComplete = cachedCount >= 66;

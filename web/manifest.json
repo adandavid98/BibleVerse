@@ -2,6 +2,7 @@
   "name": "BibleVerse - Santa Biblia y Devocionales",
   "short_name": "BibleVerse",
   "description": "Tu Biblia personal, devocionales y asistente de estudio 100% offline y sin anuncios.",
+  "id": "./app.html",
   "start_url": "./app.html",
   "scope": "./",
   "display": "standalone",

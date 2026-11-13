@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>BibleVerse - Santa Biblia, Devocionales y Asistente IA</title>
 
   <!-- PWA & Favicon -->
@@ -10,10 +10,16 @@
   <link rel="icon" type="image/svg+xml" href="./assets/icons/app-logo.svg">
   <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png">
   <meta name="theme-color" content="#0B0F17">
+  <meta name="color-scheme" content="dark">
   <meta name="description" content="Tu Biblia digital con devocionales diarios, resaltado multicolor, modo anti-fatiga y asistente de estudio teológico. 100% Offline y sin anuncios.">
 
   <!-- Estilos -->
   <link rel="stylesheet" href="./css/landing.css">
+  <script>
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+      window.location.replace('./app.html' + window.location.search + window.location.hash);
+    }
+  </script>
 </head>
 <body>
 
