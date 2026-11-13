@@ -1,8 +1,10 @@
-const CACHE_NAME = 'bibleverse-pwa-v2.5.13';
+const CACHE_NAME = 'bibleverse-pwa-v2.5.14';
+const OFFLINE_BIBLE_CACHE = 'bibleverse-offline-bibles-v1';
 const STATIC_ASSETS = [
   './',
-  './index.html',
+  './app',
   './app.html',
+  './index.html',
   './manifest.json',
   './css/landing.css',
   './css/app.css',
@@ -26,6 +28,18 @@ const STATIC_ASSETS = [
   './assets/bible/plans/thematic_plans.json'
 ];
 
+// Elimina la bandera `redirected` de respuestas (Vercel cleanUrls devuelve 308 -> /app)
+// para evitar que Chrome bloquee respuestas cacheadas en navegación offline.
+async function toCleanResponse(response) {
+  if (!response || !response.redirected) return response;
+  const body = await response.arrayBuffer();
+  return new Response(body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: new Headers(response.headers)
+  });
+}
+
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
@@ -34,8 +48,20 @@ self.addEventListener('message', (event) => {
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await Promise.all(
+        STATIC_ASSETS.map(async (assetUrl) => {
+          try {
+            const resp = await fetch(assetUrl, { cache: 'reload' });
+            if (resp && resp.ok) {
+              const clean = await toCleanResponse(resp);
+              await cache.put(assetUrl, clean);
+            }
+          } catch {
+            // Continuar si un recurso individual falla temporalmente
+          }
+        })
+      );
     })
   );
   self.skipWaiting();
@@ -66,32 +92,38 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // App shell files (.html, .js, .css) -> Network first, fallback to cache so updates always apply immediately
+  // App shell files (.html, .js, .css, /app) -> Network first con fallback limpio a caché
   if (
     event.request.mode === 'navigate' ||
     url.pathname.endsWith('.html') ||
     url.pathname.endsWith('.js') ||
     url.pathname.endsWith('.css') ||
-    url.pathname === '/'
+    url.pathname === '/' ||
+    url.pathname === '/app'
   ) {
-    event.respondWith(
-      fetch(event.request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const clone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          }
-          return networkResponse;
-        })
-        .catch(async () => {
-          const cached = await caches.match(event.request, { ignoreSearch: true });
-          if (cached) return cached;
-          if (event.request.mode === 'navigate') {
-            return (await caches.match('./app.html')) || (await caches.match('./index.html'));
-          }
-          return undefined;
-        })
-    );
+    event.respondWith((async () => {
+      try {
+        const networkResponse = await fetch(event.request);
+        if (networkResponse && networkResponse.ok) {
+          const clean = await toCleanResponse(networkResponse.clone());
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(event.request, clean);
+        }
+        return networkResponse;
+      } catch {
+        const cached = await caches.match(event.request, { ignoreSearch: true });
+        if (cached) return toCleanResponse(cached);
+        if (event.request.mode === 'navigate') {
+          const fallback =
+            (await caches.match('./app')) ||
+            (await caches.match('./app.html')) ||
+            (await caches.match('./')) ||
+            (await caches.match('./index.html'));
+          if (fallback) return toCleanResponse(fallback);
+        }
+        return new Response('Sin conexión', { status: 503, statusText: 'Offline' });
+      }
+    })());
     return;
   }
 
