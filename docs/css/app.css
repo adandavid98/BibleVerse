@@ -2084,6 +2084,81 @@ body {
   transition: width 0.15s ease;
 }
 
+/* Modal Planes de Lectura: Alto completo (90vh) y barra de filtros en 1 sola fila horizontal deslizable */
+#reading-plans-modal .full-bottom-sheet {
+  height: 90vh;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#plans-main-view {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#plans-tab-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  max-height: none;
+}
+
+#plan-days-detail-view,
+#plan-day-reader-view,
+#create-custom-plan-view {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  max-height: none;
+}
+
+#plans-main-view .fav-subtabs,
+.plans-filter-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  flex-shrink: 0;
+}
+
+#plans-main-view .fav-subtabs::-webkit-scrollbar,
+.plans-filter-tabs::-webkit-scrollbar,
+.topic-chips-row::-webkit-scrollbar {
+  display: none;
+}
+
+#plans-main-view .fav-subtab,
+.plans-filter-tabs .fav-subtab {
+  flex: 1 0 auto;
+  white-space: nowrap;
+  padding: 8px 12px;
+}
+
+.topic-chips-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+
+.topic-chips-row .chip {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 /* Grid 2 Columnas para Planes de Lectura (ReadingPlansBottomSheet.kt) */
 .plans-grid-2col {
   display: grid;

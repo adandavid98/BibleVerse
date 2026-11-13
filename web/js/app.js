@@ -2404,7 +2404,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (viewName !== "MAIN") {
       pushBackNavState();
     }
-    document.getElementById("plans-main-view").style.display = viewName === "MAIN" ? "block" : "none";
+    document.getElementById("plans-main-view").style.display = viewName === "MAIN" ? "flex" : "none";
     document.getElementById("plan-days-detail-view").style.display = viewName === "DAYS" ? "block" : "none";
     document.getElementById("plan-day-reader-view").style.display = viewName === "READER" ? "block" : "none";
     document.getElementById("create-custom-plan-view").style.display = viewName === "CUSTOM" ? "block" : "none";
@@ -2426,6 +2426,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => {
       state.activePlanModalTab = btn.dataset.plantab;
       document.querySelectorAll("[data-plantab]").forEach(b => b.classList.toggle("active", b.dataset.plantab === state.activePlanModalTab));
+      btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
       renderPlansMainTabContent();
     });
   });
@@ -2496,6 +2497,8 @@ document.addEventListener("DOMContentLoaded", () => {
           triggerHaptic(8);
           state.activePlanCategoryFilter = chip.dataset.plancat;
           renderPlansMainTabContent();
+          const updatedChip = container.querySelector(`[data-plancat="${CSS.escape(state.activePlanCategoryFilter)}"]`);
+          updatedChip?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
         });
       });
       bindCreateCustomPlanOpenButton();

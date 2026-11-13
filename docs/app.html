@@ -902,7 +902,7 @@
          26 Planes Oficiales + Planes Personalizados + Lector de Día de 3 Pilares
          =================================================================== -->
     <div class="modal-overlay" id="reading-plans-modal">
-      <div class="full-bottom-sheet" style="max-height:90vh;">
+      <div class="full-bottom-sheet" style="height:90vh; max-height:90vh;">
         <div class="sheet-header-title">
           <h3>📅 Planes de Lectura y Estudios</h3>
           <button class="icon-btn" id="btn-close-reading-plans">✕</button>
@@ -910,18 +910,18 @@
 
         <!-- Vista Principal de Planes (4 Pestañas: Todos | Mis Planes | Catálogo | Historial) -->
         <div id="plans-main-view">
-          <div class="fav-subtabs" style="margin-bottom:12px;">
+          <div class="fav-subtabs plans-filter-tabs" style="margin-bottom:12px;">
             <button class="fav-subtab active" data-plantab="ALL" id="plantab-btn-all">Todos</button>
             <button class="fav-subtab" data-plantab="ACTIVE" id="plantab-btn-active">Mis Planes (<span id="count-active-plans">0</span>)</button>
             <button class="fav-subtab" data-plantab="CATALOG" id="plantab-btn-catalog">Catálogo</button>
             <button class="fav-subtab" data-plantab="COMPLETED" id="plantab-btn-completed">Historial (<span id="count-completed-plans">0</span>)</button>
           </div>
 
-          <div id="plans-tab-content" style="max-height:68vh; overflow-y:auto; padding-right:4px;"></div>
+          <div id="plans-tab-content" style="overflow-y:auto; padding-right:4px;"></div>
         </div>
 
         <!-- Vista Detalle de Días de un Plan Seleccionado -->
-        <div id="plan-days-detail-view" style="display:none; max-height:76vh; overflow-y:auto;">
+        <div id="plan-days-detail-view" style="display:none; overflow-y:auto;">
           <div class="step-subheader">
             <button class="icon-btn" id="btn-back-to-plans-list">←</button>
             <div>
@@ -940,7 +940,7 @@
         </div>
 
         <!-- Vista Lector Devocional del Día (3 Pilares + Botones a Pasajes) -->
-        <div id="plan-day-reader-view" style="display:none; max-height:76vh; overflow-y:auto;">
+        <div id="plan-day-reader-view" style="display:none; overflow-y:auto;">
           <div class="step-subheader">
             <button class="icon-btn" id="btn-back-to-plan-days">←</button>
             <div>
@@ -975,7 +975,7 @@
         </div>
 
         <!-- Vista Crear Plan Personalizado (CreateCustomPlanDialog.kt) -->
-        <div id="create-custom-plan-view" style="display:none; max-height:74vh; overflow-y:auto;">
+        <div id="create-custom-plan-view" style="display:none; overflow-y:auto;">
           <div class="step-subheader" style="margin-bottom:10px;">
             <button class="icon-btn" id="btn-back-from-custom-plan">←</button>
             <div>
