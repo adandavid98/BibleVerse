@@ -729,8 +729,7 @@ fun VerseDetailDialog(
                             FlowRow(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalArrangement = Arrangement.spacedBy(2.dp),
-                                itemVerticalAlignment = Alignment.CenterVertically
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
                                 Text(
                                     text = "CONTEXTO TEOLÓGICO",
@@ -738,9 +737,11 @@ fun VerseDetailDialog(
                                         fontWeight = FontWeight.Bold,
                                         letterSpacing = 0.5.sp
                                     ),
-                                    color = MaterialTheme.colorScheme.secondary
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.align(Alignment.CenterVertically)
                                 )
                                 Row(
+                                    modifier = Modifier.align(Alignment.CenterVertically),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(2.dp)
                                 ) {
