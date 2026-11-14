@@ -33,12 +33,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function cleanAiMarkdownToPlainText(text) {
     return (text || "")
-      .replace(/^#{1,6}\s+/gm, "")
-      .replace(/\*\*(.*?)\*\*/g, "$1")
-      .replace(/__(.*?)__/g, "$1")
+      .replace(/\r\n/g, "\n")
+      .replace(/^\s*[-*_]{2,}\s*$/gm, "")
+      .replace(/^\s*#{1,6}\s*/gm, "")
+      .replace(/^\s*>\s?/gm, "")
+      .replace(/\*\*([\s\S]*?)\*\*/g, "$1")
+      .replace(/__([\s\S]*?)__/g, "$1")
+      .replace(/\*([^*\n]+)\*/g, "$1")
       .replace(/`([^`]+)`/g, "$1")
       .replace(/^\s*[-*]\s+/gm, "• ")
-      .replace(/\*{2,}|#{2,}/g, "")
+      .replace(/\*{1,}|#{1,}/g, "")
+      .replace(/\s+--\s+/g, " — ")
+      .replace(/\n{3,}/g, "\n\n")
       .trim();
   }
 
@@ -126,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
           testament: userMod.testament || item.testament,
           bibleVersion: userMod.bibleVersion || item.bibleVersion || "RVR1960",
           text: stripOuterQuotes(userMod.text || item.text),
-          context: userMod.context || item.context,
+          context: cleanAiMarkdownToPlainText(userMod.context || item.context),
           topic: userMod.topic || item.topic,
           reference: userMod.reference || item.reference,
           isFavorite: !!userMod.isFavorite,
@@ -598,7 +604,8 @@ document.addEventListener("DOMContentLoaded", () => {
     quoteEl.style.backgroundColor = v.highlightColor ? `${v.highlightColor}28` : "var(--surface-color)";
     quoteEl.style.borderLeftColor = v.highlightColor || "var(--secondary-color)";
 
-    document.getElementById("detail-verse-context").textContent = v.context || "Pulsa 'Profundizar' para generar la exégesis histórica y teológica de este pasaje.";
+    const cleanContext = cleanAiMarkdownToPlainText(v.context);
+    document.getElementById("detail-verse-context").textContent = cleanContext || "Pulsa 'Profundizar' para generar la exégesis histórica y teológica de este pasaje.";
     document.getElementById("detail-verse-notes").value = v.notes || "";
 
     verseDetailModal.classList.add("open");
@@ -633,11 +640,12 @@ document.addEventListener("DOMContentLoaded", () => {
     ctxEl.textContent = "⏳ Generando análisis exegético, histórico y teológico...";
     const parsed = parseBibleReference(v.reference) || { bookName: v.book, chapter: 1, startVerse: 1 };
     const res = await generateVerseExegesisWithAI(parsed.bookName, parsed.chapter, parsed.startVerse, v.text, state.version);
-    v.context = res.text;
+    const cleanContext = cleanAiMarkdownToPlainText(res.text);
+    v.context = cleanContext;
     v._edited = true;
     v.updatedAt = Date.now();
     saveVersesUserState();
-    ctxEl.textContent = res.text;
+    ctxEl.textContent = cleanContext;
     renderPopularVersesFeed();
     showToast("✨ Contexto enriquecido");
   });
@@ -3514,16 +3522,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function formatChatMarkdownWithCitations(text) {
     let html = (text || "")
+      .replace(/\r\n/g, "\n")
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
-      .replace(/^#{1,6}\s+(.+)$/gm, '<strong style="display:block; margin-top:8px; margin-bottom:2px; color:var(--accent-gold);">$1</strong>')
-      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/__(.+?)__/g, "<strong>$1</strong>")
-      .replace(/\*(.+?)\*/g, "<em>$1</em>")
+      .replace(/^\s*[-*_]{2,}\s*$/gm, "")
+      .replace(/^\s*#{1,6}\s*(.+)$/gm, '<strong style="display:block; margin-top:8px; margin-bottom:2px; color:var(--accent-gold);">$1</strong>')
+      .replace(/\*\*([\s\S]+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/__([\s\S]+?)__/g, "<strong>$1</strong>")
+      .replace(/\*([^*\n]+)\*/g, "<em>$1</em>")
       .replace(/`([^`]+)`/g, "$1")
       .replace(/^\s*[-*]\s+/gm, "• ")
-      .replace(/\*{2,}|#{2,}/g, "")
+      .replace(/\*{1,}|#{1,}/g, "")
+      .replace(/\s+--\s+/g, " — ")
+      .replace(/\n{3,}/g, "\n\n")
       .replace(/\n/g, "<br>");
 
     // Detectar referencias bíblicas y añadir chips clicables al final
