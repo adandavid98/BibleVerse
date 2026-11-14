@@ -202,7 +202,7 @@ fun AddVerseDialog(
         }
         isFetchingVerseText = false
 
-        if (bibleContext.isBlank() || contextSourceBadgeTab0 != "✨ IA (Gemini)") {
+        if (bibleContext.isBlank() || contextSourceBadgeTab0 != "Contexto Enriquecido") {
             bibleContext = BibleContextEngine.getLocalContext(selectedBook.name, selectedChapter, verseInput, bibleText)
             contextSourceBadgeTab0 = "Catálogo Local"
         }
@@ -515,7 +515,7 @@ fun AddVerseDialog(
 
                                     Surface(
                                         shape = RoundedCornerShape(6.dp),
-                                        color = if (contextSourceBadgeTab0.contains("IA")) {
+                                        color = if (contextSourceBadgeTab0 == "Contexto Enriquecido") {
                                             MaterialTheme.colorScheme.primary
                                         } else {
                                             MaterialTheme.colorScheme.secondaryContainer
@@ -524,7 +524,7 @@ fun AddVerseDialog(
                                         Text(
                                             text = contextSourceBadgeTab0,
                                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                            color = if (contextSourceBadgeTab0.contains("IA")) {
+                                            color = if (contextSourceBadgeTab0 == "Contexto Enriquecido") {
                                                 MaterialTheme.colorScheme.onPrimary
                                             } else {
                                                 MaterialTheme.colorScheme.onSecondaryContainer
@@ -551,7 +551,7 @@ fun AddVerseDialog(
                                                     false
                                                 ) { res, isAi ->
                                                     bibleContext = res
-                                                    contextSourceBadgeTab0 = if (isAi) "✨ IA (Gemini)" else "Catálogo Local"
+                                                    contextSourceBadgeTab0 = if (isAi) "Contexto Enriquecido" else "Catálogo Local"
                                                     isGeneratingAiTab0 = false
                                                 }
                                             } else {
@@ -566,7 +566,7 @@ fun AddVerseDialog(
                                                     when (res) {
                                                         is ContextGenerationResult.Success -> {
                                                             bibleContext = res.contextText
-                                                            contextSourceBadgeTab0 = if (res.source == ContextSource.AI_GEMINI) "✨ IA (Gemini)" else "Catálogo Local"
+                                                            contextSourceBadgeTab0 = if (res.source == ContextSource.AI_GEMINI) "Contexto Enriquecido" else "Catálogo Local"
                                                         }
                                                         is ContextGenerationResult.Error -> {
                                                             bibleContext = res.fallbackContext

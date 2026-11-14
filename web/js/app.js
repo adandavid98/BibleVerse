@@ -598,7 +598,7 @@ document.addEventListener("DOMContentLoaded", () => {
     quoteEl.style.backgroundColor = v.highlightColor ? `${v.highlightColor}28` : "var(--surface-color)";
     quoteEl.style.borderLeftColor = v.highlightColor || "var(--secondary-color)";
 
-    document.getElementById("detail-verse-context").textContent = v.context || "Pulsa 'Profundizar con IA' para generar la exégesis histórica y teológica de este pasaje.";
+    document.getElementById("detail-verse-context").textContent = v.context || "Pulsa 'Profundizar' para generar la exégesis histórica y teológica de este pasaje.";
     document.getElementById("detail-verse-notes").value = v.notes || "";
 
     verseDetailModal.classList.add("open");
@@ -625,12 +625,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Botón "Profundizar con IA" dentro de VerseDetailDialog
+  // Botón "Profundizar" dentro de VerseDetailDialog
   document.getElementById("btn-detail-enrich-ai")?.addEventListener("click", async () => {
     const v = state.versesCollection.find(x => x.id === currentDetailVerseId);
     if (!v) return;
     const ctxEl = document.getElementById("detail-verse-context");
-    ctxEl.textContent = "⏳ Generando análisis exegético, histórico y teológico con IA...";
+    ctxEl.textContent = "⏳ Generando análisis exegético, histórico y teológico...";
     const parsed = parseBibleReference(v.reference) || { bookName: v.book, chapter: 1, startVerse: 1 };
     const res = await generateVerseExegesisWithAI(parsed.bookName, parsed.chapter, parsed.startVerse, v.text, state.version);
     v.context = res.text;
@@ -639,7 +639,7 @@ document.addEventListener("DOMContentLoaded", () => {
     saveVersesUserState();
     ctxEl.textContent = res.text;
     renderPopularVersesFeed();
-    showToast(`✨ Contexto enriquecido (${res.source})`);
+    showToast("✨ Contexto enriquecido");
   });
 
   // Guardar nota personal en VerseDetailDialog
@@ -865,10 +865,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const txt = document.getElementById("add-verse-text").value;
     const ctxBox = document.getElementById("add-verse-context");
     const badgeEl = document.getElementById("add-verse-context-badge");
-    ctxBox.value = "⏳ Generando contexto histórico y teológico con IA...";
+    ctxBox.value = "⏳ Generando contexto histórico y teológico...";
     const res = await generateVerseExegesisWithAI(b.name, ch, vNum, txt, addVerSel.value);
     ctxBox.value = cleanAiMarkdownToPlainText(res.text);
-    if (badgeEl) badgeEl.textContent = res.source.includes("Gemini") ? "✨ IA (Gemini)" : "Catálogo Local";
+    if (badgeEl) badgeEl.textContent = res.source.includes("Gemini") ? "Contexto Enriquecido" : "Catálogo Local";
   });
 
   document.getElementById("btn-add-verse-local-context")?.addEventListener("click", () => {
@@ -1239,7 +1239,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (state.selectedVerses.size === 0) return;
     const payload = getSelectedVersesPayload();
     const contentBox = document.getElementById("explain-content");
-    const badgeEl = document.getElementById("explain-source-badge");
 
     explainModal.classList.add("open");
     contentBox.innerHTML = `
@@ -1265,7 +1264,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     );
     lastExplanationText = cleanAiMarkdownToPlainText(`${payload.citation} (${state.version})\n«${payload.combinedText}»\n\n${res.text}`);
-    if (badgeEl) badgeEl.textContent = `Fuente: ${res.source}`;
     if (streamBodyEl) {
       streamBodyEl.style.color = "var(--text-primary)";
       streamBodyEl.innerHTML = formatChatMarkdownWithCitations(res.text);
@@ -3456,7 +3454,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (state.chatMessages.length === 0) {
       state.chatMessages.push({
         isUser: false,
-        text: "¡Gracia y paz! Soy tu **Asistente Bíblico y Teológico IA**. Pregúntame sobre el contexto histórico de cualquier pasaje, doctrinas bíblicas (escatología, gracia, pactos, Espíritu Santo) o toca un tema rápido arriba."
+        text: "¡Gracia y paz! Soy tu **Asistente Bíblico y Teológico**. Pregúntame sobre el contexto histórico de cualquier pasaje, doctrinas bíblicas (escatología, gracia, pactos, Espíritu Santo) o toca un tema rápido arriba."
       });
     }
 

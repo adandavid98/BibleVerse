@@ -447,7 +447,7 @@ fun VerseDetailDialog(
                                     if (editContextSourceBadge != null) {
                                         Surface(
                                             shape = RoundedCornerShape(6.dp),
-                                            color = if (editContextSourceBadge!!.contains("IA")) {
+                                            color = if (editContextSourceBadge == "Contexto Enriquecido") {
                                                 MaterialTheme.colorScheme.primary
                                             } else {
                                                 MaterialTheme.colorScheme.secondaryContainer
@@ -456,7 +456,7 @@ fun VerseDetailDialog(
                                             Text(
                                                 text = editContextSourceBadge!!,
                                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                                color = if (editContextSourceBadge!!.contains("IA")) {
+                                                color = if (editContextSourceBadge == "Contexto Enriquecido") {
                                                     MaterialTheme.colorScheme.onPrimary
                                                 } else {
                                                     MaterialTheme.colorScheme.onSecondaryContainer
@@ -492,7 +492,7 @@ fun VerseDetailDialog(
                                                 when (res) {
                                                     is ContextGenerationResult.Success -> {
                                                         editContext = res.contextText
-                                                        editContextSourceBadge = if (res.source == ContextSource.AI_GEMINI) "✨ IA (Gemini)" else "Catálogo Local"
+                                                        editContextSourceBadge = if (res.source == ContextSource.AI_GEMINI) "Contexto Enriquecido" else "Catálogo Local"
                                                     }
                                                     is ContextGenerationResult.Error -> {
                                                         editContext = res.fallbackContext
@@ -726,10 +726,11 @@ fun VerseDetailDialog(
                         color = MaterialTheme.colorScheme.surface
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Row(
+                            FlowRow(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                                itemVerticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
                                     text = "CONTEXTO TEOLÓGICO",
@@ -737,12 +738,8 @@ fun VerseDetailDialog(
                                         fontWeight = FontWeight.Bold,
                                         letterSpacing = 0.5.sp
                                     ),
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.weight(1f, fill = false)
+                                    color = MaterialTheme.colorScheme.secondary
                                 )
-                                Spacer(modifier = Modifier.width(6.dp))
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(2.dp)
@@ -769,7 +766,7 @@ fun VerseDetailDialog(
                                             TextButton(
                                                 onClick = { onEnrichContextAi() },
                                                 modifier = Modifier.testTag("btn_enrich_verse_ai"),
-                                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
                                                 enabled = true
                                             ) {
                                                 Icon(
@@ -780,7 +777,7 @@ fun VerseDetailDialog(
                                                 )
                                                 Spacer(modifier = Modifier.width(4.dp))
                                                 Text(
-                                                    text = "Profundizar IA",
+                                                    text = "Profundizar",
                                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                                     color = MaterialTheme.colorScheme.primary
                                                 )
@@ -790,7 +787,7 @@ fun VerseDetailDialog(
                                     TextButton(
                                         onClick = { isEditingVerse = true },
                                         modifier = Modifier.testTag("btn_edit_context"),
-                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Filled.Edit,
@@ -810,7 +807,7 @@ fun VerseDetailDialog(
                             Spacer(modifier = Modifier.height(8.dp))
                             if (isEnrichingAi && verse.context.isBlank()) {
                                 Text(
-                                    text = "Escudriñando las Escrituras con IA...",
+                                    text = "Escudriñando las Escrituras...",
                                     style = MaterialTheme.typography.bodyMedium.copy(
                                         fontSize = (15 * fontScale).sp,
                                         lineHeight = (22 * fontScale).sp,

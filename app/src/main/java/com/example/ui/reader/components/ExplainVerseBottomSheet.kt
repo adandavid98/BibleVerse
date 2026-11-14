@@ -271,23 +271,6 @@ fun ExplainVerseBottomSheet(
                                     .verticalScroll(contentScrollState)
                                     .padding(18.dp)
                             ) {
-                                if (source.isNotBlank()) {
-                                    Surface(
-                                        shape = RoundedCornerShape(8.dp),
-                                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
-                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
-                                        modifier = Modifier.padding(bottom = 12.dp)
-                                    ) {
-                                        Text(
-                                            text = "✨ $source",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            fontWeight = FontWeight.Bold,
-                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                                        )
-                                    }
-                                }
-
                                 // Fluid content rendering in cascade without layout jumps
                                 Text(
                                     text = content,
