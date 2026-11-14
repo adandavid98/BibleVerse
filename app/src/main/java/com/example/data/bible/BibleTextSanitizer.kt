@@ -2,6 +2,9 @@ package com.example.data.bible
 
 object BibleTextSanitizer {
 
+    // Line breaks before generic HTML stripping so adjacent words are never glued together
+    private val BR_TAG_REGEX = Regex("(?i)<br\\s*/?>")
+
     // HTML blocks (including <p align='center'> headers and headings)
     private val HTML_BLOCKS_REGEX = Regex("(?is)<p[^>]*>.*?</p>|<h[1-6][^>]*>.*?</h[1-6]>|<[^>]*>")
 
@@ -10,6 +13,14 @@ object BibleTextSanitizer {
 
     // Bullets, list markers, pilcrows, section signs, footnote markers
     private val BULLETS_AND_MARKERS_REGEX = Regex("[•·‣⁃○●¶§†‡*]")
+
+    // Stray RTF/source markers and corrupted title artifacts
+    private val RTF_PAR_REGEX = Regex("(?i)\\|\\s*par\\b")
+    private val TRAILING_PIPE_REGEX = Regex("\\|+\\s*$")
+    private val TRAILING_ITULO_REGEX = Regex("(?i)\\.itulo\\s*$")
+    private val TRAILING_EMBEDDED_PERICOPE_REGEX = Regex(
+        "(?i)\\s*(?:Amonestaciones de la Sabidur[ií]a|Amonestaci[oó]n contra el adulterio|Preceptos y amonestaciones|Elogio de la mujer virtuosa|Un obrero aprobado)\\s*$"
+    )
 
     // Spacing before punctuation: "Dios , dijo" -> "Dios, dijo"
     private val PUNCTUATION_SPACING_REGEX = Regex("\\s+([.,;:!?])")
@@ -41,7 +52,8 @@ object BibleTextSanitizer {
         if (raw.isNullOrBlank()) return ""
 
         var text = raw
-            // 1. Remove HTML tags and headers
+            // 1. Replace <br> with space before generic HTML removal so words never merge
+            .replace(BR_TAG_REGEX, " ")
             .replace(HTML_BLOCKS_REGEX, "")
             // 2. Decode standard HTML entities
             .replace("&nbsp;", " ")
@@ -53,8 +65,11 @@ object BibleTextSanitizer {
             .replace("&apos;", "'")
             // 3. Replace invisible control characters and non-breaking spaces
             .replace(INVISIBLE_CHARS_REGEX, " ")
-            // 4. Remove poetic bullet points, footnote symbols, and pilcrows
+            // 4. Remove poetic bullet points, footnote symbols, pilcrows, and RTF/title artifacts
             .replace(BULLETS_AND_MARKERS_REGEX, "")
+            .replace(RTF_PAR_REGEX, " ")
+            .replace(TRAILING_PIPE_REGEX, "")
+            .replace(TRAILING_ITULO_REGEX, ".")
 
         // 5. Fix spaces before punctuation
         text = text.replace(PUNCTUATION_SPACING_REGEX, "$1")
@@ -80,6 +95,9 @@ object BibleTextSanitizer {
 
         // 11. Strip trailing Hebrew acrostic letter names and musical pause tags erroneously glued to verse end (e.g. "Dálet", "Bet", "Interludio")
         text = text.replace(TRAILING_ACROSTIC_AND_POETIC_REGEX, "").trim()
+
+        // 12. Strip any residual trailing pericope phrases erroneously embedded at verse end
+        text = text.replace(TRAILING_EMBEDDED_PERICOPE_REGEX, "").replace(MULTI_SPACE_REGEX, " ").trim()
 
         return text
     }

@@ -252,6 +252,57 @@ async function getSectionHeading(bookId, chapter, verseNum, version) {
 // =========================================================================
 // MOTOR DE LECTURA BÍBLICA OFFLINE + ONLINE (66 Libros, 7 Versiones)
 // =========================================================================
+const OFFLINE_RVR1960_FIXES = {
+  20: [
+    ["1", "7", "El principio de la sabiduría es el temor de Jehová; Los insensatos desprecian la sabiduría y la enseñanza."],
+    ["6", "19", "El testigo falso que habla mentiras, Y el que siembra discordia entre hermanos."],
+    ["22", "16", "El que oprime al pobre para aumentar sus ganancias, O que da al rico, ciertamente se empobrecerá."],
+    ["31", "9", "Abre tu boca, juzga con justicia, Y defiende la causa del pobre y del menesteroso."]
+  ],
+  24: [
+    ["3", "25", "Yacemos en nuestra confusión, y nuestra afrenta nos cubre; porque pecamos contra Jehová nuestro Dios, nosotros y nuestros padres, desde nuestra juventud y hasta este día, y no hemos escuchado la voz de Jehová nuestro Dios."]
+  ],
+  26: [
+    ["14", "23", "Y os consolarán cuando viereis su camino y sus hechos, y conoceréis que no sin causa hice todo lo que he hecho en ella, dice Jehová el Señor."]
+  ],
+  44: [
+    ["1", "20", "Porque está escrito en el libro de los Salmos: Sea hecha desierta su habitación, Y no haya quien more en ella; y: Tome otro su oficio."],
+    ["7", "43", "Antes bien llevasteis el tabernáculo de Moloc, y la estrella de vuestro dios Renfán, figuras que os hicisteis para adorarlas. Os transportaré, pues, más allá de Babilonia."]
+  ],
+  55: [
+    ["2", "13", "Si fuéremos infieles, él permanece fiel; El no puede negarse a sí mismo."]
+  ],
+  60: [
+    ["2", "6", "Por lo cual también contiene la Escritura: He aquí, pongo en Sion la principal piedra del ángulo, escogida, preciosa; Y el que creyere en él, no será avergonzado."]
+  ]
+};
+
+function sanitizeOfflineBookData(bookData, version, bookId) {
+  if (!bookData || typeof bookData !== "object") return bookData;
+  const norm = (version || "").toUpperCase().trim();
+  const idNum = Number(bookId);
+
+  if (norm === "RVR1960" && OFFLINE_RVR1960_FIXES[idNum]) {
+    for (const [ch, vs, fixed] of OFFLINE_RVR1960_FIXES[idNum]) {
+      if (bookData[ch] && Object.prototype.hasOwnProperty.call(bookData[ch], vs)) {
+        bookData[ch][vs] = fixed;
+      }
+    }
+  }
+
+  for (const ch of Object.keys(bookData)) {
+    const chObj = bookData[ch];
+    if (!chObj || typeof chObj !== "object") continue;
+    for (const vs of Object.keys(chObj)) {
+      const txt = chObj[vs];
+      if (typeof txt === "string" && txt.includes("\u00b6")) {
+        chObj[vs] = txt.replace(/\u00b6/g, "").replace(/ {2,}/g, " ").trim();
+      }
+    }
+  }
+  return bookData;
+}
+
 async function loadOfflineBook(version, bookId) {
   const norm = (version || "RVR1960").toUpperCase().trim();
   const assetVersion = ["RVR1960", "NVI", "NBLA", "DHH", "TLA"].includes(norm)
@@ -266,7 +317,7 @@ async function loadOfflineBook(version, bookId) {
     try {
       const cached = await caches.match(bookUrl);
       if (cached && cached.ok) {
-        const bookData = await cached.json();
+        const bookData = sanitizeOfflineBookData(await cached.json(), assetVersion, bookId);
         _booksCache[assetVersion][bookId] = bookData;
         return bookData;
       }
@@ -278,7 +329,7 @@ async function loadOfflineBook(version, bookId) {
   try {
     const resp = await fetch(bookUrl);
     if (resp.ok) {
-      const bookData = await resp.json();
+      const bookData = sanitizeOfflineBookData(await resp.json(), assetVersion, bookId);
       _booksCache[assetVersion][bookId] = bookData;
       return bookData;
     }

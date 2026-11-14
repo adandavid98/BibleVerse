@@ -102,7 +102,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   function stripOuterQuotes(str) {
-    return (str || "").replace(/^[«"“]+|[»"”]+$/g, "").trim();
+    return (str || "")
+      .replace(/^[«"“]+|[»"”]+$/g, "")
+      .replace(/\s+(?:Amonestaciones de la Sabidur[ií]a|Un obrero aprobado)\s*$/i, "")
+      .trim();
   }
 
   // Inicializar colección de 365 versículos fusionando cambios guardados por el usuario

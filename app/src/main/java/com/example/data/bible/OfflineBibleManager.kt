@@ -20,6 +20,9 @@ object OfflineBibleManager {
     private const val TAG = "OfflineBibleManager"
     private const val ASSET_PATH = "bible/bible_offline.db"
     private const val DB_FILE_NAME = "bible_offline.db"
+    private const val PREFS_NAME = "offline_bible_prefs"
+    private const val KEY_DB_VERSION = "asset_db_version"
+    private const val CURRENT_DB_VERSION = 2
 
     @Volatile
     private var database: SQLiteDatabase? = null
@@ -70,16 +73,19 @@ object OfflineBibleManager {
             if (existing != null && existing.isOpen) return@synchronized true
 
             val targetFile = getDbFile(context)
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val installedDbVersion = prefs.getInt(KEY_DB_VERSION, 1)
+            val needsUpgrade = installedDbVersion < CURRENT_DB_VERSION
 
-            // If file missing or incomplete, copy directly from assets
-            if (!targetFile.exists() || targetFile.length() < 26_000_000L) {
+            // If file missing, incomplete, or asset DB was updated, copy directly from assets
+            if (!targetFile.exists() || targetFile.length() < 26_000_000L || needsUpgrade) {
                 try {
                     val parent = targetFile.parentFile ?: context.filesDir
                     if (!parent.exists()) parent.mkdirs()
                     val tempFile = File(parent, "${DB_FILE_NAME}.tmp")
                     if (tempFile.exists()) tempFile.delete()
 
-                    Log.d(TAG, "Copiando $ASSET_PATH a ${tempFile.absolutePath}...")
+                    Log.d(TAG, "Copiando $ASSET_PATH a ${tempFile.absolutePath} (v$installedDbVersion -> v$CURRENT_DB_VERSION)...")
                     context.assets.open(ASSET_PATH).use { inStream ->
                         FileOutputStream(tempFile).use { outStream ->
                             inStream.copyTo(outStream, bufferSize = 64 * 1024)
@@ -94,6 +100,7 @@ object OfflineBibleManager {
                             tempFile.copyTo(targetFile, overwrite = true)
                             tempFile.delete()
                         }
+                        prefs.edit().putInt(KEY_DB_VERSION, CURRENT_DB_VERSION).apply()
                         Log.d(TAG, "Base de datos offline copiada con éxito (${targetFile.length()} bytes)")
                     } else {
                         Log.e(TAG, "Archivo copiado incompleto (${tempFile.length()} bytes)")

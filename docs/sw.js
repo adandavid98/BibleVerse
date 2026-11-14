@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bibleverse-pwa-v2.5.24';
+const CACHE_NAME = 'bibleverse-pwa-v2.5.25';
 const OFFLINE_BIBLE_CACHE = 'bibleverse-offline-bibles-v1';
 const STATIC_ASSETS = [
   './',
@@ -143,17 +143,35 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME && cache !== 'bibleverse-offline-bibles-v1') {
-            return caches.delete(cache);
+  event.waitUntil((async () => {
+    const cacheNames = await caches.keys();
+    await Promise.all(
+      cacheNames.map((cache) => {
+        if (cache !== CACHE_NAME && cache !== OFFLINE_BIBLE_CACHE) {
+          return caches.delete(cache);
+        }
+      })
+    );
+    try {
+      const bibleCache = await caches.open(OFFLINE_BIBLE_CACHE);
+      const updatedRvrBooks = [20, 24, 26, 44, 55, 60];
+      await Promise.all(
+        updatedRvrBooks.map(async (bookId) => {
+          const bookUrl = `./assets/bible/books/RVR1960/${bookId}.json`;
+          try {
+            const resp = await fetch(bookUrl, { cache: 'reload' });
+            if (resp && resp.ok) {
+              await bibleCache.put(bookUrl, resp);
+            }
+          } catch {
+            // Si está offline al activar, sanitizeOfflineBookData corrige al leer
           }
         })
       );
-    })
-  );
+    } catch {
+      // Ignorar error de caché offline
+    }
+  })());
   self.clients.claim();
 });
 

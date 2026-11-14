@@ -28,7 +28,7 @@ async function fetchLatestGitHubRelease() {
     if (!response.ok) throw new Error('Release no encontrado');
     const data = await response.json();
 
-    const tagName = data.tag_name || 'v2.3.9';
+    const tagName = data.tag_name || 'v2.4.0';
     if (versionBadge) versionBadge.textContent = `${tagName} (En Vivo)`;
 
     // Encontrar archivo APK en los assets
@@ -49,7 +49,7 @@ async function fetchLatestGitHubRelease() {
     }
   } catch (error) {
     console.log('Usando endpoint de descarga permanente de respaldo:', error);
-    if (versionBadge) versionBadge.textContent = 'v2.3.9 (Última versión)';
+    if (versionBadge) versionBadge.textContent = 'v2.4.0 (Última versión)';
     if (apkMeta) apkMeta.textContent = 'Android 7.0+ • APK Oficial';
   }
 }
