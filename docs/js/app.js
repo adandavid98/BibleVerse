@@ -2353,7 +2353,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (planId === "TRADITIONAL" || planId === "CHRONOLOGICAL") {
       const file = planId === "TRADITIONAL" ? "plan_traditional.json" : "plan_chronological.json";
-      const resp = await fetch(`./assets/bible/${file}`);
+      const resp = await fetch(`./assets/bible/${file}?v=2.5.32`);
       if (resp.ok) {
         const raw = await resp.json();
         loadedPlansDataCache[planId] = raw.map(d => ({
@@ -2372,7 +2372,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (planId === "BIBLE_STORIES") {
-      const resp = await fetch("./assets/bible/plans/plan_bible_stories.json");
+      const resp = await fetch("./assets/bible/plans/plan_bible_stories.json?v=2.5.32");
       if (resp.ok) {
         loadedPlansDataCache[planId] = await resp.json();
         return loadedPlansDataCache[planId];
@@ -2381,7 +2381,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Cargar desde thematic_plans.json (los otros 23 planes temáticos y teológicos)
     if (!loadedPlansDataCache._thematicBundle) {
-      const resp = await fetch("./assets/bible/plans/thematic_plans.json");
+      const resp = await fetch("./assets/bible/plans/thematic_plans.json?v=2.5.32");
       if (resp.ok) {
         loadedPlansDataCache._thematicBundle = await resp.json();
       } else {

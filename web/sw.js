@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bibleverse-pwa-v2.5.31';
+const CACHE_NAME = 'bibleverse-pwa-v2.5.32';
 const OFFLINE_BIBLE_CACHE = 'bibleverse-offline-bibles-v1';
 const STATIC_ASSETS = [
   './',
@@ -185,12 +185,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // App shell files (.html, .js, .css, /app) -> Network first con fallback limpio a caché
+  // App shell files (.html, .js, .css, /app) y JSON de planes -> Network first con fallback limpio a caché
   if (
     event.request.mode === 'navigate' ||
     url.pathname.endsWith('.html') ||
     url.pathname.endsWith('.js') ||
     url.pathname.endsWith('.css') ||
+    url.pathname.includes('/assets/bible/plans/') ||
+    url.pathname.endsWith('/plan_traditional.json') ||
+    url.pathname.endsWith('/plan_chronological.json') ||
     url.pathname === '/' ||
     url.pathname === '/app'
   ) {
@@ -200,7 +203,7 @@ self.addEventListener('fetch', (event) => {
         if (networkResponse && networkResponse.ok) {
           const clean = await toCleanResponse(networkResponse.clone());
           const cache = await caches.open(CACHE_NAME);
-          await cache.put(event.request, clean);
+          await cache.put(url.pathname, clean);
         }
         return networkResponse;
       } catch {
