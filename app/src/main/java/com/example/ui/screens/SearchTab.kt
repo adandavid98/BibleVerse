@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,13 +32,11 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -77,6 +74,7 @@ import com.example.data.bible.OfflineBibleDownloadManager
 import com.example.data.bible.OfflineVerseDto
 import com.example.data.local.BibleDatabase
 import com.example.data.preferences.ReaderPreferencesRepository
+import com.example.ui.components.BookFilterBottomSheet
 import com.example.ui.reader.components.BibleVersionSelectorDialog
 import com.example.ui.viewmodel.BibleUiState
 import com.example.ui.viewmodel.BibleViewModel
@@ -468,102 +466,15 @@ fun SearchTab(
         }
     }
 
-    // Book Picker Dialog
+    // Book Picker BottomSheet
     if (isBookPickerOpen) {
-        AlertDialog(
-            onDismissRequest = { isBookPickerOpen = false },
-            title = { Text("Seleccionar Libro para Filtrar", fontWeight = FontWeight.Bold) },
-            text = {
-                var bookSearch by remember { mutableStateOf("") }
-                val filteredBooks = remember(bookSearch) {
-                    if (bookSearch.isBlank()) BibleCatalog.books
-                    else BibleCatalog.books.filter { it.name.contains(bookSearch, ignoreCase = true) }
-                }
-
-                Column(modifier = Modifier.fillMaxWidth().height(350.dp)) {
-                    OutlinedTextField(
-                        value = bookSearch,
-                        onValueChange = { bookSearch = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Buscar libro...") },
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    LazyColumn(modifier = Modifier.weight(1f)) {
-                        item {
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        selectedBook = null
-                                        searchScope = "ALL"
-                                        isBookPickerOpen = false
-                                    }
-                                    .padding(vertical = 10.dp, horizontal = 8.dp)
-                            ) {
-                                Text("Todos los libros (Sin filtro)", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                            }
-                            Divider()
-                        }
-                        itemsIndexed(filteredBooks) { index, book ->
-                            val isFirstNt = index > 0 && filteredBooks[index - 1].order <= 39 && book.order > 39
-                            if (isFirstNt) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Divider(
-                                        modifier = Modifier.weight(1f),
-                                        thickness = 1.dp,
-                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
-                                    )
-                                    Text(
-                                        text = "Nuevo Testamento",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(horizontal = 8.dp)
-                                    )
-                                    Divider(
-                                        modifier = Modifier.weight(1f),
-                                        thickness = 1.dp,
-                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
-                                    )
-                                }
-                            }
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        selectedBook = book
-                                        isBookPickerOpen = false
-                                    }
-                                    .padding(vertical = 8.dp, horizontal = 8.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(book.name, fontWeight = FontWeight.Medium)
-                                    Text(
-                                        if (book.order <= 39) "AT" else "NT",
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontSize = 12.sp
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+        BookFilterBottomSheet(
+            selectedBook = selectedBook,
+            onBookSelected = { book ->
+                selectedBook = book
+                searchScope = if (book != null) "BOOK" else "ALL"
             },
-            confirmButton = {
-                TextButton(onClick = { isBookPickerOpen = false }) {
-                    Text("Cerrar")
-                }
-            }
+            onDismiss = { isBookPickerOpen = false }
         )
     }
 
