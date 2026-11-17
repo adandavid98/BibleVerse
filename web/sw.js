@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bibleverse-pwa-v2.5.27';
+const CACHE_NAME = 'bibleverse-pwa-v2.5.28';
 const OFFLINE_BIBLE_CACHE = 'bibleverse-offline-bibles-v1';
 const STATIC_ASSETS = [
   './',
