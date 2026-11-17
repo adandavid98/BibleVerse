@@ -2718,6 +2718,11 @@ document.addEventListener("DOMContentLoaded", () => {
     renderPlansMainTabContent();
   });
 
+  const THEOLOGY_PLAN_IDS = new Set([
+    "ESCHATOLOGY", "ROMANS", "TRINITY", "FAITH_WORKS",
+    "ETERNAL_LIFE", "PNEUMATOLOGY", "TABERNACLE_HEBREWS", "COVENANTS"
+  ]);
+
   async function openPlanDayReaderModal(planId, dayNumber) {
     state.currentViewingPlanId = planId;
     state.currentViewingDayNum = dayNumber;
@@ -2730,9 +2735,40 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("day-reader-title").textContent = dayObj.title;
     document.getElementById("day-reader-summary").textContent = dayObj.passagesSummary;
 
-    document.getElementById("day-reader-narrative").textContent = dayObj.storyNarrative || "";
-    document.getElementById("day-reader-lesson").textContent = dayObj.spiritualLesson || "";
-    document.getElementById("day-reader-context").textContent = dayObj.historicalContext || "";
+    const isStories = planId === "BIBLE_STORIES";
+    const isTheology = THEOLOGY_PLAN_IDS.has(planId);
+    const narHeading = document.getElementById("day-reader-narrative-heading");
+    const ctxHeading = document.getElementById("day-reader-context-heading");
+    const lesHeading = document.getElementById("day-reader-lesson-heading");
+    if (narHeading) {
+      narHeading.textContent = isStories
+        ? "📖 El Relato Bíblico"
+        : (isTheology ? "📖 Estudio Bíblico y Exégesis" : "📖 Devocional y Estudio");
+    }
+    if (ctxHeading) {
+      ctxHeading.textContent = isStories
+        ? "🏛️ Contexto Histórico y Cultural"
+        : (isTheology ? "🏛️ Contexto Exegético y Análisis" : "💭 Pregunta de Reflexión");
+    }
+    if (lesHeading) {
+      lesHeading.textContent = isStories
+        ? "💡 Enseñanza para Memorizar"
+        : (isTheology ? "✝️ Tesis Doctrinal y Teológica" : "✝️ Clave Doctrinal y Espiritual");
+    }
+
+    const narEl = document.getElementById("day-reader-narrative");
+    const ctxEl = document.getElementById("day-reader-context");
+    const lesEl = document.getElementById("day-reader-lesson");
+    if (narEl) narEl.textContent = dayObj.storyNarrative || "";
+    if (ctxEl) ctxEl.textContent = dayObj.historicalContext || "";
+    if (lesEl) lesEl.textContent = dayObj.spiritualLesson || "";
+
+    const narCard = document.getElementById("day-reader-narrative-card");
+    const ctxCard = document.getElementById("day-reader-context-card");
+    const lesCard = document.getElementById("day-reader-lesson-card");
+    if (narCard) narCard.style.display = dayObj.storyNarrative ? "block" : "none";
+    if (ctxCard) ctxCard.style.display = dayObj.historicalContext ? "block" : "none";
+    if (lesCard) lesCard.style.display = dayObj.spiritualLesson ? "block" : "none";
 
     const passages = dayObj.passages && dayObj.passages.length > 0
       ? dayObj.passages
@@ -2765,6 +2801,42 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     updateDayCompleteModalButton();
+
+    // Cargar texto bíblico completo de los pasajes del día inline (como ReadingPlanDayReaderModal.kt)
+    const inlineEl = document.getElementById("day-reader-verses-inline");
+    if (inlineEl) {
+      inlineEl.innerHTML = `<div style="font-size:0.84rem; color:var(--text-secondary); padding:8px 0;">Cargando pasaje bíblico (${state.version})...</div>`;
+      const reqTag = `${planId}:${dayNumber}:${state.version}`;
+      inlineEl.dataset.reqTag = reqTag;
+      try {
+        const chaptersData = await Promise.all(
+          passages.map(async seg => {
+            const res = await fetchChapterVerses(state.version, seg.bookId, seg.chapter);
+            return { seg, verses: res?.verses || [] };
+          })
+        );
+        if (inlineEl.dataset.reqTag !== reqTag) return;
+        inlineEl.innerHTML = chaptersData.map(({ seg, verses }) => {
+          if (!verses.length) {
+            return `<div style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:10px;">No se pudo cargar ${seg.bookName} ${seg.chapter}.</div>`;
+          }
+          return `
+            <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border-color);">
+              <div style="font-weight:800; color:var(--primary-color); font-size:0.9rem; margin-bottom:6px;">
+                ${seg.bookName} ${seg.chapter} <span style="font-size:0.74rem; color:var(--text-secondary); font-weight:600;">(${state.version})</span>
+              </div>
+              <div style="font-family:var(--reader-font, Georgia, serif); font-size:0.94rem; line-height:1.68; color:var(--text-primary);">
+                ${verses.map(v => `<div style="margin-bottom:5px;"><sup style="color:var(--secondary-color); font-weight:800; margin-right:4px;">${v.verse}</sup>${v.text}</div>`).join("")}
+              </div>
+            </div>
+          `;
+        }).join("");
+      } catch {
+        if (inlineEl.dataset.reqTag === reqTag) {
+          inlineEl.innerHTML = `<div style="font-size:0.82rem; color:var(--text-secondary);">Pulsa el botón superior para abrir el pasaje en el Lector.</div>`;
+        }
+      }
+    }
   }
 
   function updateDayCompleteModalButton() {
