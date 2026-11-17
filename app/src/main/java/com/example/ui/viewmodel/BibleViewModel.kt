@@ -50,6 +50,7 @@ enum class VerseFilter(val label: String) {
 }
 
 data class BibleUiState(
+    val isLoading: Boolean = true,
     val verses: List<VerseEntity> = emptyList(),
     val filteredVerses: List<VerseEntity> = emptyList(),
     val searchQuery: String = "",
@@ -132,6 +133,8 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
     private val _isChatLoading = MutableStateFlow(false)
     val isChatLoading: StateFlow<Boolean> = _isChatLoading.asStateFlow()
 
+    private val _isInitialLoadPending = MutableStateFlow(true)
+
     private lateinit var bibleReaderDao: com.example.data.local.BibleReaderDao
     val offlineDownloadStates = com.example.data.bible.OfflineBibleDownloadManager.downloadStates
 
@@ -158,7 +161,11 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
 
         // Ensure pre-population on first run
         viewModelScope.launch {
-            repository.checkAndSeedInitialData()
+            try {
+                repository.checkAndSeedInitialData()
+            } finally {
+                _isInitialLoadPending.value = false
+            }
         }
 
         // Setup notification channel and alarm schedule
@@ -214,16 +221,18 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         val selectedVerse: VerseEntity?,
         val syncMessage: String?,
         val reminderEnabled: Boolean,
-        val cloudSyncId: String
+        val cloudSyncId: String,
+        val isInitialPending: Boolean
     )
 
     private val _detailAndSync = combine(
         _selectedVerseForDetail,
         _syncStatusMessage,
         _reminderEnabled,
-        _cloudSyncId
-    ) { detail, syncMsg, reminderEn, syncId ->
-        DetailAndSyncState(detail, syncMsg, reminderEn, syncId)
+        _cloudSyncId,
+        _isInitialLoadPending
+    ) { detail, syncMsg, reminderEn, syncId, initialPending ->
+        DetailAndSyncState(detail, syncMsg, reminderEn, syncId, initialPending)
     }
 
     val uiState: StateFlow<BibleUiState> = combine(
@@ -289,6 +298,7 @@ class BibleViewModel(application: Application) : AndroidViewModel(application) {
         } else null
 
         BibleUiState(
+            isLoading = detailSync.isInitialPending && allVerses.isEmpty(),
             verses = allVerses,
             filteredVerses = filtered,
             searchQuery = query,
