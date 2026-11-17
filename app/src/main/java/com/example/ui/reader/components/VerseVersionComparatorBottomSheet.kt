@@ -196,8 +196,8 @@ fun VerseVersionComparatorBottomSheet(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(
-                            start = 20.dp,
-                            end = 20.dp,
+                            start = 10.dp,
+                            end = 10.dp,
                             top = 8.dp,
                             bottom = maxOf(navBarBottomDp, 28.dp) + 8.dp
                         )
@@ -623,7 +623,7 @@ private fun DismissibleVersionCard(
                         .compositeOver(MaterialTheme.colorScheme.surface)
                 )
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 15.dp)) {
                     // Version Header with Badges
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -650,7 +650,7 @@ private fun DismissibleVersionCard(
 
                             Text(
                                 text = ver.name,
-                                style = MaterialTheme.typography.titleSmall,
+                                style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp),
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,
@@ -758,8 +758,10 @@ private fun DismissibleVersionCard(
                         is VersionTextState.Success -> {
                             Text(
                                 text = state.text,
-                                style = MaterialTheme.typography.bodyMedium,
-                                lineHeight = 22.sp,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontSize = 15.sp,
+                                    lineHeight = 23.sp
+                                ),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
