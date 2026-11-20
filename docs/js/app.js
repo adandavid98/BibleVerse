@@ -348,18 +348,29 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderVerseOfTheDay() {
-    const list = state.versesCollection;
-    if (!list.length) return;
-    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-    currentVodVerse = list[dayOfYear % list.length];
+    const baseList = (Array.isArray(window.INITIAL_VERSES_DATA) && window.INITIAL_VERSES_DATA.length)
+      ? window.INITIAL_VERSES_DATA
+      : state.versesCollection;
+    if (!baseList.length) return;
+
+    const now = new Date();
+    const dayOfYear = Math.round(
+      (Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - Date.UTC(now.getFullYear(), 0, 0)) / 86400000
+    );
+    const vodIndex = Math.max(0, dayOfYear - 1) % baseList.length;
+    const baseVod = baseList[vodIndex];
+    currentVodVerse = state.versesCollection.find(v => v.reference === baseVod.reference) || {
+      ...baseVod,
+      text: stripOuterQuotes(baseVod.text)
+    };
 
     const savedBg = parseInt(localStorage.getItem("bv_vod_bg") || "0", 10);
-    const bgNum = (savedBg >= 1 && savedBg <= 12) ? savedBg : ((dayOfYear % 12) + 1);
+    const bgNum = (savedBg >= 1 && savedBg <= 12) ? savedBg : (((dayOfYear + (currentVodVerse.id || 0)) % 12) + 1);
     applyVodBackground(bgNum);
 
     document.getElementById("vod-tag").textContent = currentVodVerse.topic;
     document.getElementById("vod-quote").textContent = `«${currentVodVerse.text}»`;
-    document.getElementById("vod-ref").textContent = `${currentVodVerse.reference} (${state.version})`;
+    document.getElementById("vod-ref").textContent = `${currentVodVerse.reference} (${currentVodVerse.bibleVersion || "RVR1960"})`;
     const vodReflEl = document.getElementById("vod-reflection");
     if (vodReflEl) vodReflEl.textContent = currentVodVerse.context;
 
