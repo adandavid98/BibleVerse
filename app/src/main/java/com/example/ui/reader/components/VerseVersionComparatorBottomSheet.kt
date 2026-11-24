@@ -199,7 +199,7 @@ fun VerseVersionComparatorBottomSheet(
                             start = 10.dp,
                             end = 10.dp,
                             top = 8.dp,
-                            bottom = maxOf(navBarBottomDp, 28.dp) + 8.dp
+                            bottom = maxOf(navBarBottomDp, 32.dp) + 24.dp
                         )
                 ) {
             // Header
@@ -363,7 +363,7 @@ fun VerseVersionComparatorBottomSheet(
                     onClick = { showAddVersionDialog = true },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
+                        .padding(top = 8.dp, bottom = 4.dp),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.primary
