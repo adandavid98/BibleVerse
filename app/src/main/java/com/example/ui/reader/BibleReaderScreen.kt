@@ -60,6 +60,7 @@ import com.example.ui.reader.components.VerseVersionComparatorBottomSheet
 import com.example.ui.reader.components.CrossReferencesBottomSheet
 import com.example.ui.reader.viewmodel.BibleReaderViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -127,7 +128,7 @@ fun BibleReaderScreen(
         }
     }
 
-    // Scroll to specific target verse only once the matching book/chapter is actually loaded in uiState.verses
+    // Scroll to specific target verse only once the matching book/chapter is loaded AND laid out in LazyColumn
     val loadedFirstVerse = uiState.verses.firstOrNull()
     LaunchedEffect(
         uiState.targetScrollVerse,
@@ -146,7 +147,8 @@ fun BibleReaderScreen(
                     it.verseNumber == target
             }
             if (index >= 0) {
-                listState.animateScrollToItem(index)
+                snapshotFlow { listState.layoutInfo.totalItemsCount }.first { it > index }
+                listState.scrollToItem(index)
                 viewModel.clearTargetScrollVerse()
             }
         }

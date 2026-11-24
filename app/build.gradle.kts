@@ -20,11 +20,11 @@ android {
 
     val appVersionName = project.findProperty("versionName") as String?
         ?: System.getenv("APP_VERSION_NAME")
-        ?: "2.4.8"
+        ?: "2.4.9"
 
     val appVersionCode = (project.findProperty("versionCode") as String?)?.toIntOrNull()
         ?: System.getenv("APP_VERSION_CODE")?.toIntOrNull()
-        ?: 177
+        ?: 178
 
     versionCode = appVersionCode
     versionName = appVersionName
