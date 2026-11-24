@@ -229,9 +229,7 @@ data class BibleReferenceTarget(
     fun parseReference(input: String): BibleReferenceTarget? {
         if (input.isBlank()) return null
         val clean = input
-            .replace(Regex("""[\uD83C-\uDBFF\uDC00-\uDFFF]"""), "") // remove emoji surrogate pairs (e.g. 📖)
-            .replace("📖", "")
-            .replace(Regex("""[^\p{L}\p{N}\s:,.–—-]"""), "") // keep letters, numbers, spaces, colons, dots, commas, dashes
+            .replace(Regex("""[^\p{L}\p{N}\s:,.–—\-]"""), "")
             .trim()
 
         // Pattern 1: Book name, chapter, colon/comma/dot, verse (optional end verse)
