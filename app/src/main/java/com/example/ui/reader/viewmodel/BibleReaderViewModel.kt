@@ -73,7 +73,7 @@ class BibleReaderViewModel(
 
                 val targetVersion = prefs.bibleVersion
                 val versionChanged = current.preferences.bibleVersion != targetVersion
-                val needsReload = isInitial || current.verses.isEmpty() || versionChanged
+                val needsReload = isInitial || (current.verses.isEmpty() && !current.isLoading) || versionChanged
 
                 _uiState.update {
                     it.copy(
@@ -319,16 +319,20 @@ class BibleReaderViewModel(
 
     private fun loadChapter(book: BibleBookEntity, chapter: Int, version: String) {
         currentChapterVersesJob?.cancel()
+        val isSameLoadedChapter = _uiState.value.verses.firstOrNull()?.let {
+            it.bookId == book.id && it.chapter == chapter
+        } == true && _uiState.value.preferences.bibleVersion == version
+        _uiState.update {
+            it.copy(
+                isLoading = !isSameLoadedChapter,
+                isLoadingMore = false,
+                currentBook = book,
+                currentChapter = chapter,
+                verses = if (isSameLoadedChapter) it.verses else emptyList(),
+                selectedVerseNumbers = emptySet()
+            )
+        }
         currentChapterVersesJob = viewModelScope.launch {
-            _uiState.update {
-                it.copy(
-                    isLoading = true,
-                    isLoadingMore = false,
-                    currentBook = book,
-                    currentChapter = chapter,
-                    selectedVerseNumbers = emptySet()
-                )
-            }
             getChapterVersesUseCase.ensureLoaded(book.id, chapter, version)
             getChapterVersesUseCase(book.id, chapter, version).collectLatest { versesList ->
                 _uiState.update {

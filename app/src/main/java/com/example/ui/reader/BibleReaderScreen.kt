@@ -127,16 +127,26 @@ fun BibleReaderScreen(
         }
     }
 
-    // Scroll to specific target verse when selected from modal or navigation
-    LaunchedEffect(uiState.targetScrollVerse, uiState.verses.size) {
+    // Scroll to specific target verse only once the matching book/chapter is actually loaded in uiState.verses
+    val loadedFirstVerse = uiState.verses.firstOrNull()
+    LaunchedEffect(
+        uiState.targetScrollVerse,
+        uiState.currentBook?.id,
+        uiState.currentChapter,
+        loadedFirstVerse?.bookId,
+        loadedFirstVerse?.chapter,
+        uiState.verses.size
+    ) {
         val target = uiState.targetScrollVerse
-        if (target != null && uiState.verses.isNotEmpty()) {
+        val currentBookId = uiState.currentBook?.id
+        if (target != null && currentBookId != null && uiState.verses.isNotEmpty()) {
             val index = uiState.verses.indexOfFirst {
-                it.bookId == uiState.currentBook?.id && it.chapter == uiState.currentChapter && it.verseNumber == target
+                it.bookId == currentBookId &&
+                    it.chapter == uiState.currentChapter &&
+                    it.verseNumber == target
             }
-            val scrollIndex = if (index >= 0) index else uiState.verses.indexOfFirst { it.verseNumber == target }
-            if (scrollIndex >= 0) {
-                listState.animateScrollToItem(scrollIndex)
+            if (index >= 0) {
+                listState.animateScrollToItem(index)
                 viewModel.clearTargetScrollVerse()
             }
         }
@@ -158,11 +168,11 @@ fun BibleReaderScreen(
     }
 
     // Dynamically update current visible book & chapter in top bar and selector as user scrolls
-    LaunchedEffect(listState, uiState.preferences.continuousScrollEnabled) {
+    LaunchedEffect(listState, uiState.preferences.continuousScrollEnabled, uiState.isLoading) {
         snapshotFlow {
             listState.layoutInfo.visibleItemsInfo.firstOrNull()?.index
         }.distinctUntilChanged().collect { firstIndex ->
-            if (firstIndex != null && uiState.preferences.continuousScrollEnabled && uiState.activePlanSession == null && firstIndex in uiState.verses.indices) {
+            if (!uiState.isLoading && firstIndex != null && uiState.preferences.continuousScrollEnabled && uiState.activePlanSession == null && firstIndex in uiState.verses.indices) {
                 val visibleVerse = uiState.verses[firstIndex]
                 viewModel.updateVisibleBookAndChapter(visibleVerse.bookId, visibleVerse.chapter)
             }
