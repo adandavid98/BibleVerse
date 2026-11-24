@@ -243,6 +243,13 @@ private fun MinimalistCardPreview(verseText: String, citationText: String) {
                 fontSize = 12.sp,
                 color = Color(0xFF1F2937)
             )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = CardBitmapRenderer.WATERMARK_TEXT,
+                fontSize = 9.sp,
+                textAlign = TextAlign.Center,
+                color = Color(0xFF9CA3AF)
+            )
         }
     }
 }
@@ -295,6 +302,13 @@ private fun SacredGradientCardPreview(verseText: String, citationText: String) {
                 fontSize = 12.sp,
                 color = Color(0xFFFDE68A)
             )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = CardBitmapRenderer.WATERMARK_TEXT,
+                fontSize = 9.sp,
+                textAlign = TextAlign.Center,
+                color = Color(0xFF93C5FD)
+            )
         }
     }
 }
@@ -343,6 +357,14 @@ private fun ParchmentCardPreview(verseText: String, citationText: String) {
                 fontSize = 12.sp,
                 color = Color(0xFF4A2810)
             )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = CardBitmapRenderer.WATERMARK_TEXT,
+                fontFamily = FontFamily.Serif,
+                fontSize = 9.sp,
+                textAlign = TextAlign.Center,
+                color = Color(0xFF7D5836)
+            )
         }
     }
 }
@@ -389,6 +411,13 @@ private fun DeepNightCardPreview(verseText: String, citationText: String) {
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.sp,
                 color = Color(0xFFFDE68A)
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = CardBitmapRenderer.WATERMARK_TEXT,
+                fontSize = 9.sp,
+                textAlign = TextAlign.Center,
+                color = Color(0xFF94A3B8)
             )
         }
     }

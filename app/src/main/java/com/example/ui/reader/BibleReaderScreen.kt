@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,6 +59,7 @@ import com.example.ui.reader.components.ShareTemplateDialog
 import com.example.ui.reader.components.VerseActionBar
 import com.example.ui.reader.components.VerseVersionComparatorBottomSheet
 import com.example.ui.reader.components.CrossReferencesBottomSheet
+import com.example.ui.reader.export.CardBitmapRenderer
 import com.example.ui.reader.viewmodel.BibleReaderViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
@@ -508,6 +510,7 @@ fun BibleReaderScreen(
                         val prevVerse = if (index > 0) uiState.verses[index - 1] else null
                         val nextVerse = if (index < uiState.verses.size - 1) uiState.verses[index + 1] else null
                         val isNewChapter = prevVerse != null && (prevVerse.chapter != verse.chapter || prevVerse.bookId != verse.bookId)
+                        val isLastVerseOfChapter = nextVerse == null || nextVerse.chapter != verse.chapter || nextVerse.bookId != verse.bookId
 
                         val hasHighlight = !verse.highlightColorHex.isNullOrBlank()
                         val isPrevSameHighlight = hasHighlight && prevVerse != null &&
@@ -619,6 +622,13 @@ fun BibleReaderScreen(
                                     viewModel.toggleVerseSelection(verse.verseNumber)
                                 }
                             )
+
+                            if (isLastVerseOfChapter) {
+                                ChapterWatermarkFooter(
+                                    themeSecondary = themeSecondary,
+                                    fontFamily = selectedFontFamily
+                                )
+                            }
                         }
                     }
 
@@ -1378,6 +1388,35 @@ private fun ChapterBreakHeader(
             color = themeSecondary.copy(alpha = 0.25f),
             thickness = 1.dp,
             modifier = Modifier.fillMaxWidth(0.9f)
+        )
+    }
+}
+
+@Composable
+private fun ChapterWatermarkFooter(
+    themeSecondary: Color,
+    fontFamily: FontFamily
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 24.dp, bottom = 14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Divider(
+            color = themeSecondary.copy(alpha = 0.22f),
+            thickness = 0.5.dp,
+            modifier = Modifier.width(56.dp)
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            text = CardBitmapRenderer.WATERMARK_TEXT,
+            fontFamily = fontFamily,
+            fontSize = 11.5.sp,
+            fontWeight = FontWeight.Medium,
+            letterSpacing = 0.4.sp,
+            textAlign = TextAlign.Center,
+            color = themeSecondary.copy(alpha = 0.70f)
         )
     }
 }

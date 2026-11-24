@@ -1022,6 +1022,36 @@ body {
   border: 1.5px solid transparent;
 }
 
+/* Marca de agua sutil al pie de cada capítulo (estilo YouVersion) */
+.chapter-watermark-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 12px 14px;
+  text-align: center;
+  user-select: none;
+  pointer-events: none;
+}
+
+.chapter-watermark-line {
+  display: block;
+  width: 56px;
+  height: 1px;
+  background: var(--reader-secondary);
+  opacity: 0.22;
+}
+
+.chapter-watermark-text {
+  font-family: var(--reader-font);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--reader-secondary);
+  opacity: 0.70;
+}
+
 .verse-row.hl-join-prev {
   border-top-left-radius: 0;
   border-top-right-radius: 0;

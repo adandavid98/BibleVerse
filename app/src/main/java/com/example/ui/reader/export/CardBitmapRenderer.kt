@@ -16,6 +16,8 @@ import java.io.FileOutputStream
 
 object CardBitmapRenderer {
 
+    const val WATERMARK_TEXT = "BibleVerse • Lámpara a mis pies"
+
     fun renderAndShare(
         context: Context,
         verseText: String,
@@ -142,7 +144,7 @@ object CardBitmapRenderer {
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
             textAlign = Paint.Align.CENTER
         }
-        canvas.drawText("BibleVerse", w / 2f, divY + 120f, subPaint)
+        canvas.drawText(WATERMARK_TEXT, w / 2f, divY + 120f, subPaint)
     }
 
     private fun drawSacredGradient(canvas: Canvas, w: Int, h: Int, text: String, citation: String) {
@@ -224,7 +226,7 @@ object CardBitmapRenderer {
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
             textAlign = Paint.Align.CENTER
         }
-        canvas.drawText("Lámpara es a mis pies tu palabra", w / 2f, divY + 120f, footPaint)
+        canvas.drawText(WATERMARK_TEXT, w / 2f, divY + 120f, footPaint)
     }
 
     private fun drawParchment(canvas: Canvas, w: Int, h: Int, text: String, citation: String) {
@@ -312,7 +314,7 @@ object CardBitmapRenderer {
             typeface = Typeface.create(Typeface.SERIF, Typeface.NORMAL)
             textAlign = Paint.Align.CENTER
         }
-        canvas.drawText("El cielo y la tierra pasarán, mas mis palabras no pasarán", w / 2f, divY + 115f, footPaint)
+        canvas.drawText(WATERMARK_TEXT, w / 2f, divY + 115f, footPaint)
     }
 
     private fun calculateOptimalFontSize(
@@ -451,7 +453,7 @@ object CardBitmapRenderer {
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
             textAlign = Paint.Align.CENTER
         }
-        canvas.drawText("BibleVerse • Lámpara a mis pies", w / 2f, divY + 115f, footPaint)
+        canvas.drawText(WATERMARK_TEXT, w / 2f, divY + 115f, footPaint)
     }
 
     private fun saveBitmapToCache(context: Context, bitmap: Bitmap, isJpeg: Boolean = false): Uri? {
@@ -621,7 +623,7 @@ object CardBitmapRenderer {
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
             textAlign = Paint.Align.CENTER
         }
-        canvas.drawText("BibleVerse • Lámpara a mis pies", width / 2f, height - 60f, footPaint)
+        canvas.drawText(WATERMARK_TEXT, width / 2f, height - 60f, footPaint)
 
         return bitmap
     }

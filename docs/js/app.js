@@ -15,6 +15,8 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
+  const BIBLEVERSE_WATERMARK = "BibleVerse • Lámpara a mis pies";
+
   // Bloquear menús contextuales del navegador al mantener presionado (comportamiento nativo de app)
   window.addEventListener("contextmenu", e => {
     const tag = e.target?.tagName;
@@ -1034,11 +1036,18 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
     }).join("");
 
+    const finalChunk = htmlChunk + `
+      <div class="chapter-watermark-footer" aria-label="${BIBLEVERSE_WATERMARK}">
+        <span class="chapter-watermark-line" aria-hidden="true"></span>
+        <span class="chapter-watermark-text">${BIBLEVERSE_WATERMARK}</span>
+      </div>
+    `;
+
     if (appendContinuous) {
       const divider = `<div class="pericope-heading" style="margin-top:28px; font-size:1.1rem;">📖 ${book.name} ${state.chapter}</div>`;
-      versesListEl.insertAdjacentHTML("beforeend", divider + htmlChunk);
+      versesListEl.insertAdjacentHTML("beforeend", divider + finalChunk);
     } else {
-      versesListEl.innerHTML = htmlChunk;
+      versesListEl.innerHTML = finalChunk;
     }
 
     refreshAdjacentHighlightMerging();
@@ -1597,7 +1606,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.fillStyle = textColor;
     ctx.globalAlpha = 0.65;
     ctx.font = "600 24px sans-serif";
-    ctx.fillText("BibleVerse • La Palabra Viva", W / 2, H - 100);
+    ctx.fillText(BIBLEVERSE_WATERMARK, W / 2, H - 100);
     ctx.globalAlpha = 1;
   }
 
