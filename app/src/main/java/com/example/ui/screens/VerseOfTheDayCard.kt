@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,6 +46,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
@@ -71,6 +73,7 @@ fun VerseOfTheDayCard(
     verse: VerseEntity,
     fontScale: Float = 1.0f,
     onClick: () -> Unit,
+    onReferenceClick: (() -> Unit)? = null,
     onFavoriteToggle: () -> Unit,
     onShare: () -> Unit = {},
     onShareWithBackground: ((backgroundDrawableRes: Int) -> Unit)? = null
@@ -226,19 +229,41 @@ fun VerseOfTheDayCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "— ${verse.reference}",
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp,
-                            shadow = Shadow(
-                                color = Color.Black.copy(alpha = 0.8f),
-                                offset = Offset(0f, 2f),
-                                blurRadius = 4f
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = Color.White.copy(alpha = 0.05f),
+                        border = BorderStroke(0.6.dp, Color.White.copy(alpha = 0.09f)),
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .clip(RoundedCornerShape(50))
+                            .then(
+                                if (onReferenceClick != null) {
+                                    Modifier.clickable { onReferenceClick() }
+                                } else {
+                                    Modifier
+                                }
                             )
-                        ),
-                        color = Color.White
-                    )
+                            .testTag("vod_reference_pill")
+                    ) {
+                        Text(
+                            text = "— ${verse.reference}",
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
+                                shadow = Shadow(
+                                    color = Color.Black.copy(alpha = 0.8f),
+                                    offset = Offset(0f, 2f),
+                                    blurRadius = 4f
+                                )
+                            ),
+                            color = Color.White,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
 
                     Surface(
                         shape = RoundedCornerShape(8.dp),

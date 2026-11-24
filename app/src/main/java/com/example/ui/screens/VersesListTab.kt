@@ -79,7 +79,10 @@ fun VersesListTab(
     lastReadVersion: String = "RVR1960",
     listState: LazyListState = rememberLazyListState(),
     onOpenReadingPlans: () -> Unit = {},
-    onNavigateToReader: (bookId: Int, chapter: Int, verse: Int) -> Unit = { _, _, _ -> }
+    onNavigateToReader: (bookId: Int, chapter: Int, verse: Int) -> Unit = { _, _, _ -> },
+    onNavigateToVerseRange: (bookId: Int, chapter: Int, startVerse: Int, endVerse: Int) -> Unit = { b, c, s, _ ->
+        onNavigateToReader(b, c, s)
+    }
 ) {
     val context = LocalContext.current
     var selectedBook by remember { mutableStateOf<BibleBook?>(null) }
@@ -204,6 +207,11 @@ fun VersesListTab(
                     verse = vod,
                     fontScale = uiState.fontSizeScale,
                     onClick = { viewModel.openVerseDetail(vod) },
+                    onReferenceClick = {
+                        BibleCatalog.resolveVerseReference(vod.book, vod.chapterVerse, vod.reference)?.let { target ->
+                            onNavigateToVerseRange(target.bookId, target.chapter, target.startVerse, target.endVerse)
+                        }
+                    },
                     onFavoriteToggle = { viewModel.toggleFavorite(vod) },
                     onShareWithBackground = { bgRes ->
                         com.example.ui.reader.export.CardBitmapRenderer.shareVerseOfTheDayImage(context, vod, bgRes)
@@ -359,6 +367,11 @@ fun VersesListTab(
                 verse = verse,
                 fontScale = uiState.fontSizeScale,
                 onClick = { viewModel.openVerseDetail(verse) },
+                onReferenceClick = {
+                    BibleCatalog.resolveVerseReference(verse.book, verse.chapterVerse, verse.reference)?.let { target ->
+                        onNavigateToVerseRange(target.bookId, target.chapter, target.startVerse, target.endVerse)
+                    }
+                },
                 onFavoriteToggle = { viewModel.toggleFavorite(verse) },
                 onShare = { viewModel.shareVerse(context, verse) },
                 onHighlightClick = { viewModel.openVerseDetail(verse) }

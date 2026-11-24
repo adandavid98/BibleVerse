@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.data.bible.BibleCatalog
 import com.example.ui.components.VerseCard
 import com.example.ui.viewmodel.BibleUiState
 import com.example.ui.viewmodel.BibleViewModel
@@ -40,7 +41,8 @@ import com.example.ui.viewmodel.VerseFilter
 @Composable
 fun FavoritesAndNotesTab(
     viewModel: BibleViewModel,
-    uiState: BibleUiState
+    uiState: BibleUiState,
+    onNavigateToVerseRange: (bookId: Int, chapter: Int, startVerse: Int, endVerse: Int) -> Unit = { _, _, _, _ -> }
 ) {
     val context = LocalContext.current
     val activeFilter = when (uiState.selectedFilter) {
@@ -162,6 +164,11 @@ fun FavoritesAndNotesTab(
                         verse = verse,
                         fontScale = uiState.fontSizeScale,
                         onClick = { viewModel.openVerseDetail(verse) },
+                        onReferenceClick = {
+                            BibleCatalog.resolveVerseReference(verse.book, verse.chapterVerse, verse.reference)?.let { target ->
+                                onNavigateToVerseRange(target.bookId, target.chapter, target.startVerse, target.endVerse)
+                            }
+                        },
                         onFavoriteToggle = { viewModel.toggleFavorite(verse) },
                         onShare = { viewModel.shareVerse(context, verse) },
                         onHighlightClick = { viewModel.openVerseDetail(verse) }

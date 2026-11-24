@@ -306,6 +306,10 @@ fun HomeScreen(
                     onNavigateToReader = { bookId, chapter, verse ->
                         readerViewModel.navigateToVerse(bookId, chapter, verse)
                         selectedTab = 1
+                    },
+                    onNavigateToVerseRange = { bookId, chapter, startVerse, endVerse ->
+                        readerViewModel.navigateToVerse(bookId, chapter, startVerse, endVerse)
+                        selectedTab = 1
                     }
                 )
                 1 -> BibleReaderScreen(
@@ -330,9 +334,20 @@ fun HomeScreen(
                     onNavigateToReader = { bookId, chapter, verse ->
                         readerViewModel.navigateToVerse(bookId, chapter, verse)
                         selectedTab = 1
+                    },
+                    onNavigateToVerseRange = { bookId, chapter, startVerse, endVerse ->
+                        readerViewModel.navigateToVerse(bookId, chapter, startVerse, endVerse)
+                        selectedTab = 1
                     }
                 )
-                3 -> FavoritesAndNotesTab(viewModel, uiState)
+                3 -> FavoritesAndNotesTab(
+                    viewModel = viewModel,
+                    uiState = uiState,
+                    onNavigateToVerseRange = { bookId, chapter, startVerse, endVerse ->
+                        readerViewModel.navigateToVerse(bookId, chapter, startVerse, endVerse)
+                        selectedTab = 1
+                    }
+                )
                 4 -> SettingsTab(
                     viewModel = viewModel,
                     uiState = uiState,

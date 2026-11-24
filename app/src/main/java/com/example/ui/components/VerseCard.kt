@@ -1,6 +1,7 @@
 package com.example.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -57,6 +58,7 @@ fun VerseCard(
     verse: VerseEntity,
     fontScale: Float = 1.0f,
     onClick: () -> Unit,
+    onReferenceClick: (() -> Unit)? = null,
     onFavoriteToggle: () -> Unit,
     onShare: () -> Unit,
     onHighlightClick: () -> Unit,
@@ -113,14 +115,33 @@ fun VerseCard(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(
-                        text = verse.reference,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = (17 * fontScale).sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    Surface(
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                        shape = RoundedCornerShape(50),
+                        border = BorderStroke(0.6.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .then(
+                                if (onReferenceClick != null) {
+                                    Modifier.clickable { onReferenceClick() }
+                                } else {
+                                    Modifier
+                                }
+                            )
+                            .testTag("verse_reference_pill_${verse.id}")
+                    ) {
+                        Text(
+                            text = verse.reference,
+                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = (17 * fontScale).sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                     Spacer(modifier = Modifier.width(8.dp))
                     Surface(
                         color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
@@ -139,7 +160,8 @@ fun VerseCard(
                     Spacer(modifier = Modifier.width(6.dp))
                     Surface(
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.weight(1f, fill = false)
                     ) {
                         Text(
                             text = verse.topic,
@@ -147,7 +169,9 @@ fun VerseCard(
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = FontWeight.SemiBold
                             ),
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }

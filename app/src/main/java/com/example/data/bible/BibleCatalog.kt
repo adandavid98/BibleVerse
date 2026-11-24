@@ -271,4 +271,12 @@ data class BibleReferenceTarget(
 
         return null
     }
+
+    fun resolveVerseReference(
+        book: String,
+        chapterVerse: String,
+        reference: String
+    ): BibleReferenceTarget? {
+        return parseReference(reference) ?: parseReference("$book $chapterVerse")
+    }
 }
