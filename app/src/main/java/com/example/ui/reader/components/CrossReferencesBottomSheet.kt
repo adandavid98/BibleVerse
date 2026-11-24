@@ -273,7 +273,10 @@ fun CrossReferencesBottomSheet(
                                     Spacer(modifier = Modifier.height(10.dp))
                                     Text(
                                         text = fullVerseText,
-                                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontSize = 15.sp,
+                                            lineHeight = 23.sp
+                                        ),
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                 }
