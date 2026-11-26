@@ -194,7 +194,8 @@ object NotificationHelper {
 
     fun getVerseOfTheDay(dayOfYear: Int = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)): com.example.data.model.VerseEntity {
         val list = InitialVersesData.verses
-        val index = (dayOfYear - 1).coerceAtLeast(0) % list.size
+        // Coprime step (53) across 365 canonical verses ensures every day rotates books & topics while covering all 365/365 verses once a year.
+        val index = ((dayOfYear - 1).coerceAtLeast(0) * 53) % list.size
         return list[index]
     }
 }

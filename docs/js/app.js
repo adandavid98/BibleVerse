@@ -359,7 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const dayOfYear = Math.round(
       (Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - Date.UTC(now.getFullYear(), 0, 0)) / 86400000
     );
-    const vodIndex = Math.max(0, dayOfYear - 1) % baseList.length;
+    const vodIndex = (Math.max(0, dayOfYear - 1) * 53) % baseList.length;
     const baseVod = baseList[vodIndex];
     currentVodVerse = state.versesCollection.find(v => v.reference === baseVod.reference) || {
       ...baseVod,

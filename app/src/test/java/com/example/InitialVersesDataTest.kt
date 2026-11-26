@@ -39,11 +39,27 @@ class InitialVersesDataTest {
 
     @Test
     fun testNotificationHelperReturnsUniqueVersePerDay() {
+        val seenOrderIndices = mutableSetOf<Int>()
+        var previousBook: String? = null
+        var previousTopic: String? = null
+
         for (day in 1..365) {
             val verse = NotificationHelper.getVerseOfTheDay(day)
             assertNotNull("Verse of the day must not be null for day $day", verse)
-            assertEquals("Verse order index should correspond to calendar day", day, verse.orderIndex)
+            val expectedOrder = ((day - 1) * 53) % 365 + 1
+            assertEquals("Verse order index should match coprime daily rotation", expectedOrder, verse.orderIndex)
+            assertTrue("Verse should be unique in 365-day cycle at day $day", seenOrderIndices.add(verse.orderIndex))
             assertTrue("Verse text should be valid for day $day", verse.text.isNotBlank())
+            if (previousBook != null) {
+                assertTrue("Consecutive days ($day) should not repeat the same book", verse.book != previousBook)
+            }
+            if (previousTopic != null) {
+                assertTrue("Consecutive days ($day) should not repeat the same topic", verse.topic != previousTopic)
+            }
+            previousBook = verse.book
+            previousTopic = verse.topic
         }
+
+        assertEquals("All 365 days should cover all 365 unique verses", 365, seenOrderIndices.size)
     }
 }
