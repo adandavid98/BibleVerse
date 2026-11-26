@@ -31,8 +31,13 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -1245,14 +1250,12 @@ private fun CompactVerseRow(
         } else null
     }
 
-    // Border is for active selection (transient highlight is borderless)
-    val selectionBorder = when {
-        verse.isSelected -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.85f))
-        else -> null
-    }
+    // Selection dashed frame matching Web PWA (.verse-row.selected)
+    val selectionFrameColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
 
     // Seamless, connected shape for consecutive highlighted verses like YouVersion
     val highlightShape = when {
+        verse.isSelected -> RoundedCornerShape(8.dp)
         isTransientHighlighted -> RoundedCornerShape(6.dp)
         isPrevSameHighlight && isNextSameHighlight -> RoundedCornerShape(0.dp)
         isPrevSameHighlight -> RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
@@ -1261,7 +1264,7 @@ private fun CompactVerseRow(
     }
 
     val rowBg = when {
-        verse.isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+        verse.isSelected -> highlightColor ?: MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
         isTransientHighlighted -> if (isDarkTheme) Color(0xFF9E9E9E).copy(alpha = 0.20f) else Color(0xFF757575).copy(alpha = 0.14f)
         highlightColor != null -> highlightColor
         else -> Color.Transparent
@@ -1275,7 +1278,27 @@ private fun CompactVerseRow(
             .fillMaxWidth()
             .clip(highlightShape)
             .background(rowBg)
-            .then(if (selectionBorder != null) Modifier.border(selectionBorder, highlightShape) else Modifier)
+            .drawWithContent {
+                drawContent()
+                if (verse.isSelected) {
+                    val strokePx = 1.8.dp.toPx()
+                    val inset = strokePx / 2f
+                    val radiusPx = 8.dp.toPx()
+                    drawRoundRect(
+                        color = selectionFrameColor,
+                        topLeft = Offset(inset, inset),
+                        size = Size(size.width - strokePx, size.height - strokePx),
+                        cornerRadius = CornerRadius(radiusPx, radiusPx),
+                        style = Stroke(
+                            width = strokePx,
+                            pathEffect = PathEffect.dashPathEffect(
+                                floatArrayOf(4.dp.toPx(), 3.dp.toPx()),
+                                0f
+                            )
+                        )
+                    )
+                }
+            }
             .clickable { onClick() }
             .padding(
                 horizontal = 6.dp,
