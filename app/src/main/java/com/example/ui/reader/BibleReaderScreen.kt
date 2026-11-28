@@ -1182,6 +1182,7 @@ fun BibleReaderScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Row(
+                                modifier = Modifier.weight(1f),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
@@ -1203,15 +1204,39 @@ fun BibleReaderScreen(
                                         Text("${idx + 1}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = themeSecondary)
                                     }
                                 }
-                                Text(
-                                    text = "${seg.bookName} ${seg.chapter}",
-                                    fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
-                                    color = themeText
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.weight(1f, fill = false)
+                                ) {
+                                    Text(
+                                        text = "${seg.bookName} ${seg.chapter}",
+                                        fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
+                                        color = themeText
+                                    )
+                                    seg.formattedVerseBadge?.let { verseBadge ->
+                                        Surface(
+                                            shape = RoundedCornerShape(999.dp),
+                                            color = if (isCurrent) themeAccent.copy(alpha = 0.14f) else themeSecondary.copy(alpha = 0.14f),
+                                            border = if (isCurrent) BorderStroke(1.dp, themeAccent.copy(alpha = 0.30f)) else null
+                                        ) {
+                                            Text(
+                                                text = verseBadge,
+                                                fontSize = 11.5.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = if (isCurrent) themeAccent else themeSecondary,
+                                                maxLines = 1,
+                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                    }
+                                }
                             }
                             if (isCurrent) {
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Text("Leyendo", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = themeAccent)
                             } else if (isRead) {
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Text("Leído", fontSize = 12.sp, color = Color(0xFF16A34A))
                             }
                         }

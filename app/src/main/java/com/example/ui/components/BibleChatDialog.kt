@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -50,7 +51,10 @@ import com.example.R
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.data.bible.ChatMessage
+import com.example.export.ExportManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,6 +68,7 @@ fun BibleChatDialog(
     onAddSuggestedVerse: ((String) -> Unit)? = null
 ) {
     var inputText by remember { mutableStateOf("") }
+    var isExportingPdf by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
@@ -177,6 +182,56 @@ fun BibleChatDialog(
                     }
 
                     if (chatMessages.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                if (!isExportingPdf && !isLoading) {
+                                    isExportingPdf = true
+                                    scope.launch {
+                                        try {
+                                            val snapshot = chatMessages.toList()
+                                            val pdfFile = withContext(Dispatchers.IO) {
+                                                ExportManager.exportChatToPdf(context, snapshot)
+                                            }
+                                            ExportManager.shareExportedFile(
+                                                context = context,
+                                                file = pdfFile,
+                                                mimeType = "application/pdf",
+                                                subject = "Estudio Teológico - BibleVerse"
+                                            )
+                                        } catch (e: Exception) {
+                                            Toast.makeText(
+                                                context,
+                                                "No se pudo generar el PDF de la conversación",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        } finally {
+                                            isExportingPdf = false
+                                        }
+                                    }
+                                }
+                            },
+                            enabled = !isLoading && !isExportingPdf,
+                            modifier = Modifier.testTag("btn_share_chat_pdf")
+                        ) {
+                            if (isExportingPdf) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Filled.Share,
+                                    contentDescription = "Compartir o descargar conversación en PDF",
+                                    tint = if (!isLoading) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                                    }
+                                )
+                            }
+                        }
+
                         IconButton(
                             onClick = onClearChat,
                             modifier = Modifier.testTag("btn_clear_chat")

@@ -3,8 +3,21 @@ package com.example.data.bible
 data class PlanPassageSegment(
     val bookId: Int,
     val bookName: String,
-    val chapter: Int
-)
+    val chapter: Int,
+    val verseRange: String? = null
+) {
+    val startVerse: Int
+        get() = verseRange
+            ?.let { Regex("\\d+").find(it)?.value?.toIntOrNull() }
+            ?.takeIf { it > 0 }
+            ?: 1
+
+    val formattedVerseBadge: String?
+        get() {
+            val clean = verseRange?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+            return if (clean.contains("-") || clean.contains(",")) "vv. $clean" else "v. $clean"
+        }
+}
 
 data class ReadingPlanDay(
     val dayNumber: Int,
@@ -249,6 +262,85 @@ enum class ReadingPlanType(
 }
 
 object BibleReadingPlanCatalog {
+
+    private fun normalizeBookKey(raw: String): String {
+        val decomposed = java.text.Normalizer.normalize(raw.trim().lowercase(), java.text.Normalizer.Form.NFD)
+        val noAccents = decomposed.replace(Regex("\\p{InCombiningDiacriticalMarks}+"), "")
+        val collapsed = noAccents.replace(Regex("\\s+"), " ").trim()
+        return when (collapsed) {
+            "salmo" -> "salmos"
+            "cantares", "cantar", "cantar de los cantares" -> "cantares"
+            else -> collapsed
+        }
+    }
+
+    /**
+     * Enriches plan chapter segments with their specific verse ranges extracted from passagesSummary
+     * (e.g. "Mateo 24:1-14; Marcos 13:1-13; Lucas 21:5-19" or "Génesis 4:25–5:32").
+     * Segments belonging to full-chapter plans remain with verseRange = null.
+     */
+    fun enrichSegmentsWithVerseRanges(
+        passagesSummary: String,
+        segments: List<PlanPassageSegment>
+    ): List<PlanPassageSegment> {
+        if (passagesSummary.isBlank() || segments.isEmpty() || !passagesSummary.contains(":")) {
+            return segments
+        }
+
+        val crossChapterRegex = Regex("""^(.+?)\s+(\d+)\s*:\s*(\d+)\s*[-–—]\s*(\d+)\s*:\s*(\d+)$""")
+        val singleChapterRegex = Regex("""^(.+?)\s+(\d+)\s*:\s*([\d,\s\-–—]+)$""")
+
+        val matchedRanges = LinkedHashMap<Pair<String, Int>, MutableList<String>>()
+        fun addRange(bookName: String, chapter: Int, rangeText: String) {
+            val key = normalizeBookKey(bookName) to chapter
+            val list = matchedRanges.getOrPut(key) { mutableListOf() }
+            if (rangeText !in list) list.add(rangeText)
+        }
+
+        passagesSummary.split(";").map { it.trim() }.filter { it.isNotEmpty() }.forEach { clause ->
+            val crossMatch = crossChapterRegex.matchEntire(clause)
+            if (crossMatch != null) {
+                val bookPart = crossMatch.groupValues[1]
+                val startCh = crossMatch.groupValues[2].toIntOrNull()
+                val startV = crossMatch.groupValues[3].toIntOrNull()
+                val endCh = crossMatch.groupValues[4].toIntOrNull()
+                val endV = crossMatch.groupValues[5].toIntOrNull()
+                if (startCh != null && startV != null && endCh != null && endV != null) {
+                    addRange(bookPart, startCh, "$startV-fin")
+                    if (endCh != startCh) {
+                        addRange(bookPart, endCh, "1-$endV")
+                    }
+                }
+            } else {
+                val singleMatch = singleChapterRegex.matchEntire(clause)
+                if (singleMatch != null) {
+                    val bookPart = singleMatch.groupValues[1]
+                    val chapterNum = singleMatch.groupValues[2].toIntOrNull()
+                    val cleanSpec = singleMatch.groupValues[3]
+                        .replace(Regex("[–—]"), "-")
+                        .replace(Regex("\\s*-\\s*"), "-")
+                        .replace(Regex("\\s*,\\s*"), ", ")
+                        .trim()
+                        .trimEnd(',', ';', '.')
+                    if (chapterNum != null && cleanSpec.isNotEmpty()) {
+                        addRange(bookPart, chapterNum, cleanSpec)
+                    }
+                }
+            }
+        }
+
+        if (matchedRanges.isEmpty()) return segments
+
+        return segments.map { seg ->
+            if (!seg.verseRange.isNullOrBlank()) {
+                seg
+            } else {
+                val found = matchedRanges[normalizeBookKey(seg.bookName) to seg.chapter]
+                    ?.joinToString(", ")
+                if (found != null) seg.copy(verseRange = found) else seg
+            }
+        }
+    }
 
     /**
      * Plan Clásico Canónico en 365 Días:

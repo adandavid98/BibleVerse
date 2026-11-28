@@ -68,7 +68,7 @@ fun ReadingPlansBottomSheet(
     val launchCatalogDay = { day: ReadingPlanDay, planType: ReadingPlanType ->
         val readSegments = preferences.getDayReadSegments(planType.name, day.dayNumber)
         val lastSeg = preferences.getLastReadSegment(planType.name, day.dayNumber)
-        val segments = day.passages.ifEmpty {
+        val rawSegments = day.passages.ifEmpty {
             listOf(
                 com.example.data.bible.PlanPassageSegment(
                     day.primaryBookId,
@@ -77,6 +77,7 @@ fun ReadingPlansBottomSheet(
                 )
             )
         }
+        val segments = BibleReadingPlanCatalog.enrichSegmentsWithVerseRanges(day.passagesSummary, rawSegments)
         val startIdx = if (lastSeg in segments.indices) lastSeg else (segments.indices.firstOrNull { it !in readSegments } ?: 0)
         val session = com.example.ui.reader.model.ReadingPlanSession(
             planId = planType.name,

@@ -2738,6 +2738,79 @@ document.addEventListener("DOMContentLoaded", () => {
     renderPlansMainTabContent();
   });
 
+  function normalizePlanBookKey(raw) {
+    const clean = (raw || "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ");
+    if (clean === "salmo") return "salmos";
+    if (clean === "cantar" || clean === "cantar de los cantares" || clean === "cantares") return "cantares";
+    return clean;
+  }
+
+  function formatPlanVerseBadge(verseRange) {
+    const clean = (verseRange || "").trim();
+    if (!clean) return "";
+    return (clean.includes("-") || clean.includes(",")) ? `vv. ${clean}` : `v. ${clean}`;
+  }
+
+  function enrichPlanPassagesWithVerseRanges(passagesSummary, passages) {
+    if (!Array.isArray(passages) || passages.length === 0) return [];
+    const summary = (passagesSummary || "").trim();
+    if (!summary || !summary.includes(":")) {
+      return passages.map(seg => ({ ...seg, verseRange: seg.verseRange || null, startVerse: seg.startVerse || 1 }));
+    }
+
+    const crossRegex = /^(.+?)\s+(\d+)\s*:\s*(\d+)\s*[-–—]\s*(\d+)\s*:\s*(\d+)$/;
+    const singleRegex = /^(.+?)\s+(\d+)\s*:\s*([\d,\s\-–—]+)$/;
+    const rangeMap = new Map();
+
+    const addRange = (bookName, chapter, rangeText) => {
+      const key = `${normalizePlanBookKey(bookName)}:${chapter}`;
+      const list = rangeMap.get(key) || [];
+      if (!list.includes(rangeText)) list.push(rangeText);
+      rangeMap.set(key, list);
+    };
+
+    summary.split(";").map(s => s.trim()).filter(Boolean).forEach(clause => {
+      const cross = clause.match(crossRegex);
+      if (cross) {
+        const bookPart = cross[1];
+        const startCh = parseInt(cross[2], 10);
+        const startV = parseInt(cross[3], 10);
+        const endCh = parseInt(cross[4], 10);
+        const endV = parseInt(cross[5], 10);
+        if (!Number.isNaN(startCh) && !Number.isNaN(startV) && !Number.isNaN(endCh) && !Number.isNaN(endV)) {
+          addRange(bookPart, startCh, `${startV}-fin`);
+          if (endCh !== startCh) addRange(bookPart, endCh, `1-${endV}`);
+        }
+        return;
+      }
+      const single = clause.match(singleRegex);
+      if (single) {
+        const bookPart = single[1];
+        const ch = parseInt(single[2], 10);
+        const spec = single[3]
+          .replace(/[–—]/g, "-")
+          .replace(/\s*-\s*/g, "-")
+          .replace(/\s*,\s*/g, ", ")
+          .trim()
+          .replace(/[,;.]$/, "");
+        if (!Number.isNaN(ch) && spec) addRange(bookPart, ch, spec);
+      }
+    });
+
+    return passages.map(seg => {
+      const foundList = rangeMap.get(`${normalizePlanBookKey(seg.bookName)}:${seg.chapter}`);
+      const verseRange = seg.verseRange || (foundList ? foundList.join(", ") : null);
+      const firstNumMatch = verseRange ? verseRange.match(/\d+/) : null;
+      const startVerse = firstNumMatch ? Math.max(1, parseInt(firstNumMatch[0], 10)) : (seg.startVerse || 1);
+      return { ...seg, verseRange, startVerse };
+    });
+  }
+
   const THEOLOGY_PLAN_IDS = new Set([
     "ESCHATOLOGY", "ROMANS", "TRINITY", "FAITH_WORKS",
     "ETERNAL_LIFE", "PNEUMATOLOGY", "TABERNACLE_HEBREWS", "COVENANTS"
@@ -2790,16 +2863,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (ctxCard) ctxCard.style.display = dayObj.historicalContext ? "block" : "none";
     if (lesCard) lesCard.style.display = dayObj.spiritualLesson ? "block" : "none";
 
-    const passages = dayObj.passages && dayObj.passages.length > 0
+    const rawPassages = dayObj.passages && dayObj.passages.length > 0
       ? dayObj.passages
       : [{ bookId: dayObj.primaryBookId || 1, bookName: getBookById(dayObj.primaryBookId || 1).name, chapter: dayObj.primaryChapter || 1 }];
+    const passages = enrichPlanPassagesWithVerseRanges(dayObj.passagesSummary, rawPassages);
 
     const btnsContainer = document.getElementById("day-reader-passage-buttons");
-    btnsContainer.innerHTML = passages.map((seg, idx) => `
+    btnsContainer.innerHTML = passages.map((seg, idx) => {
+      const vBadge = formatPlanVerseBadge(seg.verseRange);
+      return `
       <button class="action-pill active btn-open-plan-seg" data-idx="${idx}">
-        📖 Leer ${seg.bookName} ${seg.chapter} →
+        📖 Leer ${seg.bookName} ${seg.chapter}${vBadge ? ` (${vBadge})` : ""} →
       </button>
-    `).join("");
+    `;
+    }).join("");
 
     btnsContainer.querySelectorAll(".btn-open-plan-seg").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -2815,6 +2892,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         state.bookId = seg.bookId;
         state.chapter = seg.chapter;
+        state.targetScrollVerse = (seg.startVerse && seg.startVerse > 1) ? seg.startVerse : null;
         plansModal.classList.remove("open");
         switchTab("reader");
       });
@@ -2934,13 +3012,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const segRow = document.getElementById("reader-plan-segments-row");
     segRow.innerHTML = sess.passages.map(seg => {
       const isCur = seg.bookId === state.bookId && seg.chapter === state.chapter;
-      return `<button class="chip ${isCur ? "active" : ""}" data-bid="${seg.bookId}" data-ch="${seg.chapter}">${seg.bookName} ${seg.chapter}</button>`;
+      const vBadge = formatPlanVerseBadge(seg.verseRange);
+      const badgeHtml = vBadge ? `<span class="plan-seg-verse-badge">${vBadge}</span>` : "";
+      return `<button class="chip ${isCur ? "active" : ""}" data-bid="${seg.bookId}" data-ch="${seg.chapter}" data-sv="${seg.startVerse || 1}">${seg.bookName} ${seg.chapter}${badgeHtml}</button>`;
     }).join("");
 
     segRow.querySelectorAll(".chip").forEach(chip => {
       chip.addEventListener("click", () => {
         state.bookId = Number(chip.dataset.bid);
         state.chapter = Number(chip.dataset.ch);
+        const sv = Number(chip.dataset.sv || 1);
+        state.targetScrollVerse = sv > 1 ? sv : null;
         loadReaderChapter(false);
       });
     });
@@ -3576,6 +3658,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     aiMessagesEl.scrollTop = aiMessagesEl.scrollHeight;
 
+    const shareChatPdfBtn = document.getElementById("btn-share-ai-chat-pdf");
+    if (shareChatPdfBtn) {
+      const hasUserTurn = state.chatMessages.some(m => m.isUser && (m.text || "").trim().length > 0);
+      const isPendingReply = state.chatMessages.some(m => !m.isUser && (m.text || "").trim().startsWith("⏳"));
+      shareChatPdfBtn.disabled = !hasUserTurn || isPendingReply;
+    }
+
     aiMessagesEl.querySelectorAll(".chat-cite-chip").forEach(chip => {
       chip.addEventListener("click", () => {
         const parsed = parseBibleReference(chip.dataset.cite);
@@ -3677,6 +3766,334 @@ document.addEventListener("DOMContentLoaded", () => {
     window.speechSynthesis?.cancel();
     aiChatModal.classList.remove("open");
   });
+  function escapePdfHtml(str) {
+    return (str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function extractBibleCitationsFromText(text) {
+    const sortedNames = BIBLE_BOOKS.map(b => b.name).sort((a, b) => b.length - a.length);
+    const escapedNames = sortedNames.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+    const refRegex = new RegExp(`\\b((?:${escapedNames})\\s+\\d+(?::\\d+(?:[-–]\\d+)?)?)\\b`, "g");
+    const found = [];
+    const seen = new Set();
+    let m;
+    while ((m = refRegex.exec(text || "")) !== null) {
+      const normalized = m[1].replace(/–/g, "-");
+      if (!seen.has(normalized)) {
+        seen.add(normalized);
+        found.push(normalized);
+      }
+    }
+    return found;
+  }
+
+  function formatAssistantBodyForPdf(rawText) {
+    const lines = (rawText || "").replace(/\r\n/g, "\n").split("\n");
+    const htmlParts = [];
+    let inList = false;
+
+    const closeList = () => {
+      if (inList) {
+        htmlParts.push("</ul>");
+        inList = false;
+      }
+    };
+
+    const inlineClean = str => escapePdfHtml(
+      str
+        .replace(/^\s*#{1,6}\s*/, "")
+        .replace(/\*\*([\s\S]+?)\*\*/g, "$1")
+        .replace(/__([\s\S]+?)__/g, "$1")
+        .replace(/\*([^*\n]+)\*/g, "$1")
+        .replace(/`([^`]+)`/g, "$1")
+        .replace(/\*{1,}|#{1,}/g, "")
+        .replace(/\s+--\s+/g, " — ")
+        .trim()
+    );
+
+    for (const rawLine of lines) {
+      const trimmed = rawLine.trim();
+      if (!trimmed || /^[-*_]{3,}$/.test(trimmed)) {
+        closeList();
+        continue;
+      }
+      const isMdHeading = /^#{1,6}\s+/.test(trimmed);
+      const isBullet = /^[-•*]\s+/.test(trimmed);
+      if (isBullet) {
+        if (!inList) {
+          htmlParts.push('<ul class="pdf-list">');
+          inList = true;
+        }
+        htmlParts.push(`<li>${inlineClean(trimmed.replace(/^[-•*]\s+/, ""))}</li>`);
+        continue;
+      }
+
+      closeList();
+      const cleanedText = inlineClean(trimmed);
+      if (!cleanedText) continue;
+      const isNumberedHeading = cleanedText.length <= 92 && (isMdHeading || /^(\d+\.|[IVX]+\.)\s+/.test(cleanedText));
+      if (isNumberedHeading) {
+        htmlParts.push(`<h4 class="pdf-subheading">${cleanedText}</h4>`);
+      } else {
+        htmlParts.push(`<p class="pdf-paragraph">${cleanedText}</p>`);
+      }
+    }
+
+    closeList();
+    return htmlParts.join("");
+  }
+
+  function exportChatConversationToPdf() {
+    const validMsgs = state.chatMessages.filter(m => (m.text || "").trim().length > 0 && !(m.text || "").trim().startsWith("⏳"));
+    const userMsgs = validMsgs.filter(m => m.isUser);
+    if (userMsgs.length === 0) {
+      showToast("💬 Realiza al menos una consulta para exportar el PDF");
+      return;
+    }
+
+    const win = window.open("", "_blank");
+    if (!win) {
+      showToast("⚠️ Permite las ventanas emergentes para generar el PDF");
+      return;
+    }
+
+    const firstQuestion = cleanAiMarkdownToPlainText(userMsgs[0].text).replace(/\s+/g, " ").trim();
+    const docTopic = firstQuestion.length > 76 ? `${firstQuestion.slice(0, 73)}...` : (firstQuestion || "Estudio y Consulta Teológica");
+    const nowStr = new Date().toLocaleString("es-ES", {
+      day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+    });
+
+    const allCitations = [];
+    const seenAll = new Set();
+    let qCount = 0;
+
+    const turnsHtml = validMsgs.map((msg, idx) => {
+      if (msg.isUser) {
+        qCount++;
+        return `
+          <section class="pdf-turn pdf-user-card">
+            <div class="pdf-role-row">
+              <span class="pdf-role-user">CONSULTA #${qCount}</span>
+            </div>
+            <p class="pdf-user-text">${escapePdfHtml(cleanAiMarkdownToPlainText(msg.text))}</p>
+          </section>
+        `;
+      }
+
+      // Omitir el saludo automático inicial si fue el primer mensaje y no hubo pregunta previa
+      if (idx === 0 && !validMsgs[0].isUser) return "";
+
+      const cites = extractBibleCitationsFromText(msg.text);
+      cites.forEach(c => {
+        if (!seenAll.has(c)) {
+          seenAll.add(c);
+          allCitations.push(c);
+        }
+      });
+
+      const citesHtml = cites.length > 0
+        ? `<div class="pdf-cites-row"><strong>Referencias citadas:</strong> ${cites.map(c => `<span class="pdf-cite-chip">${escapePdfHtml(c)}</span>`).join("")}</div>`
+        : "";
+
+      return `
+        <section class="pdf-turn pdf-assistant-card">
+          <div class="pdf-role-row">
+            <span class="pdf-role-assistant">RESPUESTA TEOLÓGICA</span>
+          </div>
+          ${formatAssistantBodyForPdf(msg.text)}
+          ${citesHtml}
+        </section>
+      `;
+    }).join("");
+
+    const indexHtml = allCitations.length > 0
+      ? `
+        <aside class="pdf-index-box">
+          <div class="pdf-index-title">📖 ÍNDICE DE PASAJES BÍBLICOS CITADOS EN ESTA SESIÓN</div>
+          <div class="pdf-index-list">${allCitations.map(c => escapePdfHtml(c)).join(" &nbsp;•&nbsp; ")}</div>
+        </aside>
+      `
+      : "";
+
+    win.document.write(`
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <title>Estudio Teológico - BibleVerse</title>
+        <style>
+          @page { size: A4; margin: 16mm 15mm 18mm 15mm; }
+          * { box-sizing: border-box; }
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #1E293B;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 12px 6px 28px;
+            line-height: 1.55;
+          }
+          .pdf-header {
+            border-bottom: 2px solid #B4823C;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+          }
+          .pdf-eyebrow {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: #9E6B28;
+            text-transform: uppercase;
+          }
+          .pdf-title {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 20px;
+            color: #1A2F4B;
+            margin: 4px 0 8px;
+            line-height: 1.3;
+          }
+          .pdf-meta {
+            font-size: 11px;
+            color: #64748B;
+          }
+          .pdf-turn {
+            margin-bottom: 16px;
+            page-break-inside: avoid;
+          }
+          .pdf-user-card {
+            background: #F1F5F9;
+            border-left: 4px solid #1A2F4B;
+            border-radius: 6px;
+            padding: 11px 14px;
+          }
+          .pdf-assistant-card {
+            border-left: 3px solid #C8A03C;
+            padding: 4px 0 6px 14px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #E2E8F0;
+            padding-bottom: 14px;
+          }
+          .pdf-role-row {
+            margin-bottom: 5px;
+          }
+          .pdf-role-user {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            color: #1A2F4B;
+          }
+          .pdf-role-assistant {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            color: #9E6B28;
+          }
+          .pdf-user-text {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: #0F172A;
+          }
+          .pdf-subheading {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1A2F4B;
+            margin: 10px 0 4px;
+          }
+          .pdf-paragraph {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 12.5px;
+            color: #212529;
+            margin: 0 0 8px;
+          }
+          .pdf-list {
+            margin: 4px 0 8px 18px;
+            padding: 0;
+            font-size: 12px;
+            color: #334155;
+          }
+          .pdf-list li {
+            margin-bottom: 4px;
+          }
+          .pdf-cites-row {
+            margin-top: 8px;
+            font-size: 11px;
+            color: #475569;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 5px;
+          }
+          .pdf-cite-chip {
+            display: inline-block;
+            background: #EFF6FF;
+            color: #1D4ED8;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 10.5px;
+          }
+          .pdf-index-box {
+            margin-top: 18px;
+            padding: 12px 14px;
+            background: #F8FAFC;
+            border: 1px solid #CBD5E1;
+            border-radius: 6px;
+            page-break-inside: avoid;
+          }
+          .pdf-index-title {
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            color: #1A2F4B;
+            margin-bottom: 6px;
+          }
+          .pdf-index-list {
+            font-size: 11.5px;
+            color: #475569;
+            line-height: 1.6;
+          }
+          .pdf-footer {
+            margin-top: 24px;
+            padding-top: 10px;
+            border-top: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10.5px;
+            color: #94A3B8;
+          }
+          @media print {
+            body { padding: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        <header class="pdf-header">
+          <div class="pdf-eyebrow">BIBLEVERSE • ESTUDIO TEOLÓGICO</div>
+          <h1 class="pdf-title">${escapePdfHtml(docTopic)}</h1>
+          <div class="pdf-meta">Exportado: ${escapePdfHtml(nowStr)} &nbsp;•&nbsp; ${userMsgs.length} consulta(s) &nbsp;•&nbsp; ${validMsgs.length} mensaje(s)</div>
+        </header>
+        <main>${turnsHtml}</main>
+        ${indexHtml}
+        <footer class="pdf-footer">
+          <span>${escapePdfHtml(BIBLEVERSE_WATERMARK)}</span>
+          <span>Documento generado desde BibleVerse</span>
+        </footer>
+        <script>window.onload = () => window.print();<\/script>
+      </body>
+      </html>
+    `);
+    win.document.close();
+  }
+
+  document.getElementById("btn-share-ai-chat-pdf")?.addEventListener("click", () => {
+    triggerHaptic(12);
+    exportChatConversationToPdf();
+  });
+
   document.getElementById("btn-clear-ai-chat")?.addEventListener("click", () => {
     state.chatMessages = [];
     localStorage.removeItem("bv_chat_history");

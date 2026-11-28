@@ -1052,6 +1052,30 @@ body {
   opacity: 0.70;
 }
 
+/* Píldora sutil de versículos dentro de chips de sesión de planes/devocionales */
+.plan-seg-verse-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(148, 163, 184, 0.16);
+  color: inherit;
+  opacity: 0.92;
+}
+
+.chip.active .plan-seg-verse-badge {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  opacity: 1;
+}
+
+#btn-share-ai-chat-pdf:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .verse-row.hl-join-prev {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
